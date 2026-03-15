@@ -1,0 +1,5 @@
+fecha_de_registro,referencia_de_la_oferta,identificador_de_la_oferta,valor_de_la_oferta,entidad_compradora,nit_entidad_compradora,moneda,descripcion_del_procedimiento,referencia_del_proceso,id_del_proceso_de_compra,modalidad,invitacion_directa,nombre_proveedor,nit_del_proveedor,c_digo_entidad,c_digo_proveedor
+2025-01-10T00:00:00.000,OFR-001,OFF-1,1000,MINISTERIO DE PRUEBA,900111000,COP,Compra de equipos,PROC-001,CO1.BDOS.4001,Licitacion Publica,No,CONSORCIO ANDINO,900123456,100,700001
+2025-01-11T00:00:00.000,OFR-002,OFF-2,1050,MINISTERIO DE PRUEBA,900111000,COP,Compra de equipos,PROC-001,CO1.BDOS.4001,Licitacion Publica,No,UNION TEMPORAL PACIFICO,830456789,100,700002
+2025-01-12T00:00:00.000,OFR-003,OFF-3,1100,MINISTERIO DE PRUEBA,900111000,COP,Compra de equipos,PROC-001,CO1.BDOS.4001,Licitacion Publica,No,CONSORCIO ANDINO,900123456,100,700001
+2025-02-03T00:00:00.000,OFR-004,OFF-4,2000,MINISTERIO DE PRUEBA,900111000,COP,Servicio de soporte,PROC-002,CO1.BDOS.4002,Minima Cuantia,Si,CONSORCIO ANDINO,900123456,100,700001

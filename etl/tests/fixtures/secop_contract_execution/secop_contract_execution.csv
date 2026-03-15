@@ -1,0 +1,4 @@
+identificadorcontrato,tipoejecucion,nombreplan,fechadeentregaesperada,porcentajedeavanceesperado,fechadeentregareal,porcentaje_de_avance_real,estado_del_contrato
+CO1.PCCNTR.3001,PORCENTAJE,Plan 1,2025-03-30T00:00:00.000,34.05,2025-03-28T00:00:00.000,3.0,Confirmado
+CO1.PCCNTR.3001,PORCENTAJE,Plan 2,2025-04-30T00:00:00.000,50.00,2025-04-29T00:00:00.000,30.0,Confirmado
+CO1.PCCNTR.3002,PORCENTAJE,Plan 3,2025-05-30T00:00:00.000,100.0,2025-05-30T00:00:00.000,100.0,Confirmado

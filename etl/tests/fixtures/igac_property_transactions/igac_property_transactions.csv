@@ -1,0 +1,4 @@
+pk,matricula,fecha_radica_texto,fecha_apertura_texto,year_radica,orip,divipola,departamento,municipio,tipo_predio_zona,categoria_ruralidad_2024,num_anotacion,dinamica_2024,cod_natujur,nombre_natujur,documento_justificativo,count_a,count_de,predios_nuevos,tiene_valor,tiene_mas_de_un_valor,valor
+05001-001,001-13,2023-01-05 00:00:00,1973-01-11 00:00:00,2023,1,5001,ANTIOQUIA,MEDELLIN,URBANO,Ciudades y aglomeraciones,14,0,125,COMPRAVENTA,Escritura 1,2,1,0,1,0,150000000
+05001-002,001-14,2023-02-08 00:00:00,1973-01-11 00:00:00,2023,1,5001,ANTIOQUIA,MEDELLIN,URBANO,Ciudades y aglomeraciones,15,0,125,COMPRAVENTA,Escritura 2,1,1,0,1,0,200000000
+11001-001,001-15,2023-03-10 00:00:00,1973-01-11 00:00:00,2023,1,11001,BOGOTA D.C.,BOGOTA D.C.,URBANO,Ciudades y aglomeraciones,16,0,313,CONSTITUCION DE FIDEICOMISO CIVIL,Escritura 3,3,2,1,1,0,500000000

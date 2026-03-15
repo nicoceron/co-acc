@@ -1,0 +1,277 @@
+/* Investigative Portal Landing */
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-2xl);
+  position: relative;
+  background: radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.heroContent {
+  max-width: 800px;
+  text-align: center;
+  z-index: 10;
+}
+
+.heroLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: var(--space-xl);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text-primary);
+  margin-bottom: var(--space-lg);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2xl);
+  max-width: 60ch;
+  line-height: 1.6;
+}
+
+.cta {
+  display: inline-flex;
+  padding: var(--space-md) var(--space-xl);
+  background: var(--accent);
+  color: var(--bg-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  border: none;
+  transition: all var(--transition-fast);
+}
+
+.cta:hover {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  box-shadow: 0 0 20px var(--accent-dim);
+}
+
+.disclaimer {
+  margin-top: var(--space-2xl);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.heroRight {
+  display: none; /* Removed for extreme minimalism */
+}
+
+/* === Section Typography === */
+.sectionLabel {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: var(--space-md);
+}
+
+.sectionHeading {
+  font-family: var(--font-display);
+  font-size: var(--font-size-2xl);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2xl);
+}
+
+/* === Features - High Density Grid === */
+.features {
+  padding: var(--space-4xl) var(--space-2xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* === How It Works - Tactical Steps === */
+.howItWorks {
+  padding: var(--space-4xl) var(--space-2xl);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-2xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.step {
+  padding: var(--space-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+}
+
+.stepNumber {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--accent);
+  margin-bottom: var(--space-sm);
+}
+
+.stepTitle {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  text-transform: uppercase;
+  margin-bottom: var(--space-xs);
+}
+
+.stepDesc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* === Trust Strip - Tactical Stats === */
+.trust {
+  display: flex;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+}
+
+.trustItem {
+  flex: 1;
+  padding: var(--space-xl);
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+
+.trustValue {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xl);
+  color: var(--accent);
+}
+
+.trustLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* === Sources - Data Registry === */
+.sources {
+  padding: var(--space-4xl) var(--space-2xl);
+}
+
+.sourcesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sourceCard {
+  background: var(--bg-primary);
+  padding: var(--space-md);
+  transition: background var(--transition-fast);
+}
+
+.sourceCard:hover {
+  background: var(--bg-tertiary);
+}
+
+.sourceName {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.sourceCount {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.sourceDesc {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* === Footer === */
+.footer {
+  padding: var(--space-3xl) var(--space-2xl);
+  background: var(--bg-primary);
+}
+
+.footerInner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footerTop {
+  display: flex;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+
+.footerLink {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.footerBrand {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-primary);
+  letter-spacing: 0.2em;
+}
+
+.footerDisclaimer {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: var(--space-md);
+  max-width: 600px;
+}

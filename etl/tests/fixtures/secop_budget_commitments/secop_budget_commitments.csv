@@ -1,0 +1,4 @@
+identificador_nico,id_contrato,referencia_contrato,balance_compromiso,balance_vigencia_futura,estado_integraci_n,identificador_item,tipo_de_compromiso,c_digo_item,valor_item,estado_integraci_n_item,valor_a_liberar
+COMP-001,CO1.PCCNTR.3001,CT-001,1000,200,INTEGRADO,ITEM-1,PGN,ABC,500,OK,50
+COMP-002,CO1.PCCNTR.3001,CT-001,900,100,REVISADO,ITEM-2,PGN,ABD,700,REVISADO,25
+COMP-003,CO1.PCCNTR.3002,CT-002,300,0,INTEGRADO,ITEM-3,SGR,XYZ,300,OK,0

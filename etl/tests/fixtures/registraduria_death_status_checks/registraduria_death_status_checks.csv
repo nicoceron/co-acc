@@ -1,0 +1,3 @@
+document_id,status,status_detail,checked_at,source_url,is_deceased
+12345678,Cancelada por muerte,Registro con defuncion asociada,2026-03-14,https://www.registraduria.gov.co/Registro-de-defuncion.html,true
+87654321,Vigente,Documento activo,2026-03-14,https://www.registraduria.gov.co/Certificado-de-vigencia.html,false

@@ -1,0 +1,164 @@
+/* === Intelligence / Surveillance Design System === */
+
+:root {
+  /* === Refined Tactical Palette (OKLCH) === */
+  --bg-primary: oklch(14% 0.005 160);   /* Deep, matte charcoal with a hint of forest */
+  --bg-secondary: oklch(16% 0.008 160);
+  --bg-tertiary: oklch(19% 0.01 160);
+  --bg-elevated: oklch(22% 0.012 160);
+  --bg-surface: var(--bg-primary);
+  --bg-overlay: rgba(5, 7, 6, 0.95);
+
+  /* === Text - Refined Phosphor === */
+  --text-primary: oklch(92% 0.005 160);
+  --text-secondary: oklch(75% 0.01 160);
+  --text-muted: oklch(45% 0.015 160);
+
+  /* === Security Accents - Sophisticated Teal-Green === */
+  --accent: oklch(72% 0.11 165);        /* More professional, less neon */
+  --accent-hover: oklch(78% 0.13 165);
+  --accent-dim: oklch(72% 0.11 165 / 10%);
+
+  /* === Semantic Alerts === */
+  --color-success: oklch(70% 0.12 150);
+  --color-warning: oklch(75% 0.15 70);
+  --color-danger: oklch(65% 0.18 25);   /* Corruption / Risk Red - slightly muted */
+  --color-info: oklch(75% 0.1 220);
+
+  /* === Data categorical - Harmonized === */
+  --data-person: oklch(75% 0.1 210);
+  --data-company: oklch(72% 0.12 60);
+  --data-election: oklch(70% 0.12 150);
+  --data-contract: oklch(90% 0.01 160);
+  --data-sanction: oklch(65% 0.18 25);
+  --data-amendment: oklch(75% 0.01 160);
+
+  /* === Borders - Precision === */
+  --border: oklch(20% 0.015 160);
+  --border-subtle: oklch(17% 0.01 160);
+  --border-hover: oklch(25% 0.02 160);
+  --border-active: var(--accent);
+
+  /* === Shadows === */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.8);
+  --shadow-glow: 0 0 15px oklch(72% 0.11 165 / 10%);
+
+  /* === Spacing === */
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* === Typography === */
+  --font-display: "IBM Plex Mono", monospace;
+  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  
+  --font-size-2xs: 0.7rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.85rem;
+  --font-size-md: 0.95rem;
+  --font-size-lg: 1.1rem;
+  --font-size-xl: 1.4rem;
+  --font-size-2xl: 1.8rem;
+  --font-size-3xl: 2.4rem;
+
+  /* === Radius - Precision Square === */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+
+  /* === Transitions === */
+  --transition-fast: 120ms ease-out;
+  --transition-normal: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* === Focus === */
+  --focus-ring: 0 0 0 1px var(--bg-primary), 0 0 0 2px var(--accent);
+
+  /* === Hover === */
+  --bg-hover: oklch(72% 0.11 165 / 4%);
+}
+
+/* Base resets and defaults */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+}
+
+
+code, .mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: #fff;
+}
+
+button {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+input, select, textarea {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+}
+
+input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* === Custom Scrollbar === */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
