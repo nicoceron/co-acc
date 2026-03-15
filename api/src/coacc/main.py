@@ -10,7 +10,6 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from coacc.config import settings
 from coacc.dependencies import close_driver, init_driver
-from coacc.middleware.cpf_masking import CPFMaskingMiddleware
 from coacc.middleware.rate_limit import limiter
 from coacc.middleware.security_headers import SecurityHeadersMiddleware
 from coacc.routers import (
@@ -75,7 +74,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(SecurityHeadersMiddleware, app_env=settings.app_env)
-app.add_middleware(CPFMaskingMiddleware)
 
 app.include_router(meta.router)
 app.include_router(public.router)

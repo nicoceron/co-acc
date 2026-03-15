@@ -6,7 +6,6 @@ from neo4j import AsyncSession
 
 from coacc.constants import PEP_ROLES
 from coacc.dependencies import CurrentUser, get_session
-from coacc.middleware.cpf_masking import mask_formatted_cpf, mask_raw_cpf
 from coacc.models.investigation import (
     Annotation,
     AnnotationCreate,
@@ -306,17 +305,6 @@ async def export_investigation_pdf(
             node = record["e"]
             labels = record["entity_labels"]
             document = str(node.get("cpf", node.get("cnpj", "")))
-
-            # CB-SEC-04: Mask non-PEP CPFs in PDF export (middleware only covers JSON)
-            cpf_val = node.get("cpf")
-            if cpf_val and isinstance(cpf_val, str):
-                role = str(node.get("role", node.get("cargo", ""))).lower()
-                is_pep = any(kw in role for kw in PEP_ROLES)
-                if not is_pep:
-                    if "." in document and "-" in document:
-                        document = mask_formatted_cpf(document)
-                    elif len(document) == 11 and document.isdigit():
-                        document = mask_raw_cpf(document)
 
             entities.append({
                 "name": str(node.get("name", "")),
