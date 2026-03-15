@@ -7,17 +7,17 @@ import "@/i18n";
 vi.mock("@/api/client", () => ({
   listInvestigations: vi.fn(),
   searchEntities: vi.fn(),
-  getSuspiciousPeople: vi.fn(),
-  getSuspiciousCompanies: vi.fn(),
-  getSuspiciousBuyers: vi.fn(),
-  getSuspiciousTerritories: vi.fn(),
+  getPrioritizedPeople: vi.fn(),
+  getPrioritizedCompanies: vi.fn(),
+  getPrioritizedBuyers: vi.fn(),
+  getPrioritizedTerritories: vi.fn(),
 }));
 
 import {
-  getSuspiciousBuyers,
-  getSuspiciousCompanies,
-  getSuspiciousPeople,
-  getSuspiciousTerritories,
+  getPrioritizedBuyers,
+  getPrioritizedCompanies,
+  getPrioritizedPeople,
+  getPrioritizedTerritories,
   listInvestigations,
   searchEntities,
 } from "@/api/client";
@@ -25,10 +25,10 @@ import { Dashboard } from "./Dashboard";
 
 const mockListInvestigations = vi.mocked(listInvestigations);
 const mockSearchEntities = vi.mocked(searchEntities);
-const mockGetSuspiciousPeople = vi.mocked(getSuspiciousPeople);
-const mockGetSuspiciousCompanies = vi.mocked(getSuspiciousCompanies);
-const mockGetSuspiciousBuyers = vi.mocked(getSuspiciousBuyers);
-const mockGetSuspiciousTerritories = vi.mocked(getSuspiciousTerritories);
+const mockGetPrioritizedPeople = vi.mocked(getPrioritizedPeople);
+const mockGetPrioritizedCompanies = vi.mocked(getPrioritizedCompanies);
+const mockGetPrioritizedBuyers = vi.mocked(getPrioritizedBuyers);
+const mockGetPrioritizedTerritories = vi.mocked(getPrioritizedTerritories);
 
 function renderDashboard() {
   return render(
@@ -51,7 +51,7 @@ describe("Dashboard", () => {
       page: 1,
       size: 5,
     });
-    mockGetSuspiciousPeople.mockResolvedValue({
+    mockGetPrioritizedPeople.mockResolvedValue({
       total: 1,
       people: [
         {
@@ -93,7 +93,7 @@ describe("Dashboard", () => {
         },
       ],
     });
-    mockGetSuspiciousCompanies.mockResolvedValue({
+    mockGetPrioritizedCompanies.mockResolvedValue({
       total: 1,
       companies: [
         {
@@ -140,7 +140,7 @@ describe("Dashboard", () => {
         },
       ],
     });
-    mockGetSuspiciousBuyers.mockResolvedValue({
+    mockGetPrioritizedBuyers.mockResolvedValue({
       total: 1,
       buyers: [
         {
@@ -182,7 +182,7 @@ describe("Dashboard", () => {
         },
       ],
     });
-    mockGetSuspiciousTerritories.mockResolvedValue({
+    mockGetPrioritizedTerritories.mockResolvedValue({
       total: 1,
       territories: [
         {

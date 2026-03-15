@@ -14,7 +14,7 @@ class RiskAlertResponse(BaseModel):
     next_step: str | None = None
 
 
-class SuspiciousPersonResponse(BaseModel):
+class PrioritizedPersonResponse(BaseModel):
     entity_id: str
     name: str
     document_id: str | None = None
@@ -38,12 +38,12 @@ class SuspiciousPersonResponse(BaseModel):
     alerts: list[RiskAlertResponse]
 
 
-class SuspiciousPeopleResponse(BaseModel):
-    people: list[SuspiciousPersonResponse]
+class PrioritizedPeopleResponse(BaseModel):
+    people: list[PrioritizedPersonResponse]
     total: int
 
 
-class SuspiciousCompanyResponse(BaseModel):
+class PrioritizedCompanyResponse(BaseModel):
     entity_id: str
     name: str
     document_id: str | None = None
@@ -72,12 +72,12 @@ class SuspiciousCompanyResponse(BaseModel):
     alerts: list[RiskAlertResponse]
 
 
-class SuspiciousCompaniesResponse(BaseModel):
-    companies: list[SuspiciousCompanyResponse]
+class PrioritizedCompaniesResponse(BaseModel):
+    companies: list[PrioritizedCompanyResponse]
     total: int
 
 
-class SuspiciousBuyerResponse(BaseModel):
+class PrioritizedBuyerResponse(BaseModel):
     buyer_id: str
     buyer_name: str
     buyer_document_id: str | None = None
@@ -101,12 +101,12 @@ class SuspiciousBuyerResponse(BaseModel):
     alerts: list[RiskAlertResponse]
 
 
-class SuspiciousBuyersResponse(BaseModel):
-    buyers: list[SuspiciousBuyerResponse]
+class PrioritizedBuyersResponse(BaseModel):
+    buyers: list[PrioritizedBuyerResponse]
     total: int
 
 
-class SuspiciousTerritoryResponse(BaseModel):
+class PrioritizedTerritoryResponse(BaseModel):
     territory_id: str
     territory_name: str
     department: str
@@ -130,6 +130,6 @@ class SuspiciousTerritoryResponse(BaseModel):
     alerts: list[RiskAlertResponse]
 
 
-class SuspiciousTerritoriesResponse(BaseModel):
-    territories: list[SuspiciousTerritoryResponse]
+class PrioritizedTerritoriesResponse(BaseModel):
+    territories: list[PrioritizedTerritoryResponse]
     total: int

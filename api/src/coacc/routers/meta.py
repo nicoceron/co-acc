@@ -11,14 +11,14 @@ from coacc.config import settings
 from coacc.dependencies import get_session
 from coacc.models.dashboard import (
     RiskAlertResponse,
-    SuspiciousBuyerResponse,
-    SuspiciousBuyersResponse,
-    SuspiciousCompaniesResponse,
-    SuspiciousCompanyResponse,
-    SuspiciousPeopleResponse,
-    SuspiciousPersonResponse,
-    SuspiciousTerritoriesResponse,
-    SuspiciousTerritoryResponse,
+    PrioritizedBuyerResponse,
+    PrioritizedBuyersResponse,
+    PrioritizedCompaniesResponse,
+    PrioritizedCompanyResponse,
+    PrioritizedPeopleResponse,
+    PrioritizedPersonResponse,
+    PrioritizedTerritoriesResponse,
+    PrioritizedTerritoryResponse,
 )
 from coacc.services.neo4j_service import execute_query, execute_query_single
 from coacc.services.public_guard import should_hide_person_entities
@@ -28,10 +28,10 @@ router = APIRouter(prefix="/api/v1/meta", tags=["meta"])
 
 _stats_cache: dict[str, Any] | None = None
 _stats_cache_time: float = 0.0
-_watchlist_cache: dict[int, tuple[float, SuspiciousPeopleResponse]] = {}
-_company_watchlist_cache: dict[int, tuple[float, SuspiciousCompaniesResponse]] = {}
-_buyer_watchlist_cache: dict[int, tuple[float, SuspiciousBuyersResponse]] = {}
-_territory_watchlist_cache: dict[int, tuple[float, SuspiciousTerritoriesResponse]] = {}
+_watchlist_cache: dict[int, tuple[float, PrioritizedPeopleResponse]] = {}
+_company_watchlist_cache: dict[int, tuple[float, PrioritizedCompaniesResponse]] = {}
+_buyer_watchlist_cache: dict[int, tuple[float, PrioritizedBuyersResponse]] = {}
+_territory_watchlist_cache: dict[int, tuple[float, PrioritizedTerritoriesResponse]] = {}
 _snapshot_cache: dict[str, tuple[float, list[dict[str, Any]]]] = {}
 _SNAPSHOT_DIR = Path(__file__).resolve().parent.parent / "data" / "watchlists"
 
@@ -926,13 +926,13 @@ async def list_sources(
     return {"sources": sources}
 
 
-@router.get("/watchlist/people", response_model=SuspiciousPeopleResponse)
-async def suspicious_people_watchlist(
+@router.get("/watchlist/people", response_model=PrioritizedPeopleResponse)
+async def prioritized_people_watchlist(
     session: Annotated[AsyncSession, Depends(get_session)],
     limit: int = 12,
-) -> SuspiciousPeopleResponse:
+) -> PrioritizedPeopleResponse:
     if should_hide_person_entities():
-        return SuspiciousPeopleResponse(people=[], total=0)
+        return PrioritizedPeopleResponse(people=[], total=0)
 
     safe_limit = max(1, min(limit, 25))
     cached = _watchlist_cache.get(safe_limit)
@@ -942,13 +942,13 @@ async def suspicious_people_watchlist(
 
     records = await execute_query(
         session,
-        "meta_suspicious_people",
+        "meta_prioritized_people",
         {"limit": safe_limit},
         timeout=20,
     )
-    response = SuspiciousPeopleResponse(
+    response = PrioritizedPeopleResponse(
         people=[
-            SuspiciousPersonResponse(
+            PrioritizedPersonResponse(
                 entity_id=record["entity_id"],
                 name=record["name"],
                 document_id=record.get("document_id"),
@@ -981,11 +981,11 @@ async def suspicious_people_watchlist(
     return response
 
 
-@router.get("/watchlist/companies", response_model=SuspiciousCompaniesResponse)
-async def suspicious_company_watchlist(
+@router.get("/watchlist/companies", response_model=PrioritizedCompaniesResponse)
+async def prioritized_company_watchlist(
     session: Annotated[AsyncSession, Depends(get_session)],
     limit: int = 12,
-) -> SuspiciousCompaniesResponse:
+) -> PrioritizedCompaniesResponse:
     safe_limit = max(1, min(limit, 25))
     cached = _company_watchlist_cache.get(safe_limit)
     now = time.monotonic()
@@ -994,7 +994,7 @@ async def suspicious_company_watchlist(
 
     records = await execute_query(
         session,
-        "meta_suspicious_companies",
+        "meta_prioritized_companies",
         {
             "limit": safe_limit,
             "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
@@ -1002,9 +1002,9 @@ async def suspicious_company_watchlist(
         timeout=20,
     )
     hide_people = should_hide_person_entities()
-    response = SuspiciousCompaniesResponse(
+    response = PrioritizedCompaniesResponse(
         companies=[
-            SuspiciousCompanyResponse(
+            PrioritizedCompanyResponse(
                 entity_id=record["entity_id"],
                 name=record["name"],
                 document_id=record.get("document_id"),
@@ -1040,11 +1040,11 @@ async def suspicious_company_watchlist(
     return response
 
 
-@router.get("/watchlist/buyers", response_model=SuspiciousBuyersResponse)
-async def suspicious_buyer_watchlist(
+@router.get("/watchlist/buyers", response_model=PrioritizedBuyersResponse)
+async def prioritized_buyer_watchlist(
     session: Annotated[AsyncSession, Depends(get_session)],
     limit: int = 12,
-) -> SuspiciousBuyersResponse:
+) -> PrioritizedBuyersResponse:
     safe_limit = max(1, min(limit, 25))
     cached = _buyer_watchlist_cache.get(safe_limit)
     now = time.monotonic()
@@ -1054,9 +1054,9 @@ async def suspicious_buyer_watchlist(
     snapshot_rows = _load_watchlist_snapshot("buyers")
     if snapshot_rows is not None:
         selected = snapshot_rows[:safe_limit]
-        response = SuspiciousBuyersResponse(
+        response = PrioritizedBuyersResponse(
             buyers=[
-                SuspiciousBuyerResponse(
+                PrioritizedBuyerResponse(
                     buyer_id=record["buyer_id"],
                     buyer_name=record["buyer_name"],
                     buyer_document_id=record.get("buyer_document_id"),
@@ -1088,16 +1088,16 @@ async def suspicious_buyer_watchlist(
 
     records = await execute_query(
         session,
-        "meta_suspicious_buyers",
+        "meta_prioritized_buyers",
         {
             "limit": safe_limit,
             "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
         },
         timeout=20,
     )
-    response = SuspiciousBuyersResponse(
+    response = PrioritizedBuyersResponse(
         buyers=[
-            SuspiciousBuyerResponse(
+            PrioritizedBuyerResponse(
                 buyer_id=record["buyer_id"],
                 buyer_name=record["buyer_name"],
                 buyer_document_id=record.get("buyer_document_id"),
@@ -1128,11 +1128,11 @@ async def suspicious_buyer_watchlist(
     return response
 
 
-@router.get("/watchlist/territories", response_model=SuspiciousTerritoriesResponse)
-async def suspicious_territory_watchlist(
+@router.get("/watchlist/territories", response_model=PrioritizedTerritoriesResponse)
+async def prioritized_territory_watchlist(
     session: Annotated[AsyncSession, Depends(get_session)],
     limit: int = 12,
-) -> SuspiciousTerritoriesResponse:
+) -> PrioritizedTerritoriesResponse:
     safe_limit = max(1, min(limit, 25))
     cached = _territory_watchlist_cache.get(safe_limit)
     now = time.monotonic()
@@ -1142,9 +1142,9 @@ async def suspicious_territory_watchlist(
     snapshot_rows = _load_watchlist_snapshot("territories")
     if snapshot_rows is not None:
         selected = snapshot_rows[:safe_limit]
-        response = SuspiciousTerritoriesResponse(
+        response = PrioritizedTerritoriesResponse(
             territories=[
-                SuspiciousTerritoryResponse(
+                PrioritizedTerritoryResponse(
                     territory_id=record["territory_id"],
                     territory_name=record["territory_name"],
                     department=record["department"],
@@ -1176,16 +1176,16 @@ async def suspicious_territory_watchlist(
 
     records = await execute_query(
         session,
-        "meta_suspicious_territories",
+        "meta_prioritized_territories",
         {
             "limit": safe_limit,
             "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
         },
         timeout=20,
     )
-    response = SuspiciousTerritoriesResponse(
+    response = PrioritizedTerritoriesResponse(
         territories=[
-            SuspiciousTerritoryResponse(
+            PrioritizedTerritoryResponse(
                 territory_id=record["territory_id"],
                 territory_name=record["territory_name"],
                 department=record["department"],

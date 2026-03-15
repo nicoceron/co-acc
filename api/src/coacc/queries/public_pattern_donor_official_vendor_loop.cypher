@@ -1,7 +1,7 @@
-MATCH (p:Person)
-WHERE elementId(p) = $person_id
-   OR p.document_id = $person_document_id
-   OR p.cedula = $person_document_id
+MATCH (p)
+WHERE (elementId(p) = $person_id
+       OR p.document_id = $person_document_id
+       OR p.cedula = $person_document_id)
 MATCH (p)-[:RECEBEU_SALARIO]->(o:PublicOffice)
 MATCH (c:Company {document_id: coalesce(p.document_id, p.cedula)})
 MATCH ()-[award:CONTRATOU]->(c)

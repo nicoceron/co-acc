@@ -216,6 +216,18 @@ The local seed remains synthetic and public-safe. It exists only to make the sta
 - [`etl/src/coacc_etl/pipelines/higher_ed_enrollment.py`](etl/src/coacc_etl/pipelines/higher_ed_enrollment.py)
 - [`etl/src/coacc_etl/pipelines/cuentas_claras_income_2019.py`](etl/src/coacc_etl/pipelines/cuentas_claras_income_2019.py)
 
+## Legal & Ethics
+
+This project is governed by strict ethical and legal standards for public data processing:
+
+- [ETHICS.md](ETHICS.md): Ethical guidelines for data-driven investigations.
+- [LGPD.md](LGPD.md): Compliance with data protection principles.
+- [PRIVACY.md](PRIVACY.md): Public-surface privacy rules and redaction policies.
+- [SECURITY.md](SECURITY.md): Security policy and vulnerability reporting.
+- [ABUSE_RESPONSE.md](ABUSE_RESPONSE.md): Procedures for reporting and responding to data abuse.
+- [TERMS.md](TERMS.md): Terms of use for the open-graph infrastructure.
+- [DISCLAIMER.md](DISCLAIMER.md): Legal disclaimers regarding official data sources.
+
 ## License
 
 AGPL-3.0-or-later.

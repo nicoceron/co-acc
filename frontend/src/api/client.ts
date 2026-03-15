@@ -86,7 +86,7 @@ export interface SearchResponse {
   size: number;
 }
 
-export interface SuspiciousPerson {
+export interface PrioritizedPerson {
   entity_id: string;
   name: string;
   document_id?: string | null;
@@ -110,12 +110,12 @@ export interface SuspiciousPerson {
   alerts: RiskAlert[];
 }
 
-export interface SuspiciousPeopleResponse {
-  people: SuspiciousPerson[];
+export interface PrioritizedPeopleResponse {
+  people: PrioritizedPerson[];
   total: number;
 }
 
-export interface SuspiciousCompany {
+export interface PrioritizedCompany {
   entity_id: string;
   name: string;
   document_id?: string | null;
@@ -144,8 +144,8 @@ export interface SuspiciousCompany {
   alerts: RiskAlert[];
 }
 
-export interface SuspiciousCompaniesResponse {
-  companies: SuspiciousCompany[];
+export interface PrioritizedCompaniesResponse {
+  companies: PrioritizedCompany[];
   total: number;
 }
 
@@ -162,7 +162,7 @@ export interface RiskAlert {
   next_step?: string | null;
 }
 
-export interface SuspiciousBuyer {
+export interface PrioritizedBuyer {
   buyer_id: string;
   buyer_name: string;
   buyer_document_id?: string | null;
@@ -186,12 +186,12 @@ export interface SuspiciousBuyer {
   alerts: RiskAlert[];
 }
 
-export interface SuspiciousBuyersResponse {
-  buyers: SuspiciousBuyer[];
+export interface PrioritizedBuyersResponse {
+  buyers: PrioritizedBuyer[];
   total: number;
 }
 
-export interface SuspiciousTerritory {
+export interface PrioritizedTerritory {
   territory_id: string;
   territory_name: string;
   department: string;
@@ -215,8 +215,8 @@ export interface SuspiciousTerritory {
   alerts: RiskAlert[];
 }
 
-export interface SuspiciousTerritoriesResponse {
-  territories: SuspiciousTerritory[];
+export interface PrioritizedTerritoriesResponse {
+  territories: PrioritizedTerritory[];
   total: number;
 }
 
@@ -265,24 +265,24 @@ export function searchEntities(
   return apiFetch<SearchResponse>(`/api/v1/search?${params}`);
 }
 
-export function getSuspiciousPeople(limit = 12): Promise<SuspiciousPeopleResponse> {
+export function getPrioritizedPeople(limit = 12): Promise<PrioritizedPeopleResponse> {
   const params = new URLSearchParams({ limit: String(limit) });
-  return apiFetch<SuspiciousPeopleResponse>(`/api/v1/meta/watchlist/people?${params}`);
+  return apiFetch<PrioritizedPeopleResponse>(`/api/v1/meta/watchlist/people?${params}`);
 }
 
-export function getSuspiciousCompanies(limit = 12): Promise<SuspiciousCompaniesResponse> {
+export function getPrioritizedCompanies(limit = 12): Promise<PrioritizedCompaniesResponse> {
   const params = new URLSearchParams({ limit: String(limit) });
-  return apiFetch<SuspiciousCompaniesResponse>(`/api/v1/meta/watchlist/companies?${params}`);
+  return apiFetch<PrioritizedCompaniesResponse>(`/api/v1/meta/watchlist/companies?${params}`);
 }
 
-export function getSuspiciousBuyers(limit = 12): Promise<SuspiciousBuyersResponse> {
+export function getPrioritizedBuyers(limit = 12): Promise<PrioritizedBuyersResponse> {
   const params = new URLSearchParams({ limit: String(limit) });
-  return apiFetch<SuspiciousBuyersResponse>(`/api/v1/meta/watchlist/buyers?${params}`);
+  return apiFetch<PrioritizedBuyersResponse>(`/api/v1/meta/watchlist/buyers?${params}`);
 }
 
-export function getSuspiciousTerritories(limit = 12): Promise<SuspiciousTerritoriesResponse> {
+export function getPrioritizedTerritories(limit = 12): Promise<PrioritizedTerritoriesResponse> {
   const params = new URLSearchParams({ limit: String(limit) });
-  return apiFetch<SuspiciousTerritoriesResponse>(`/api/v1/meta/watchlist/territories?${params}`);
+  return apiFetch<PrioritizedTerritoriesResponse>(`/api/v1/meta/watchlist/territories?${params}`);
 }
 
 export function getEntity(id: string): Promise<EntityDetail> {

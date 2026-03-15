@@ -4,19 +4,19 @@ import { Link, useNavigate } from "react-router";
 import { AlertTriangle } from "lucide-react";
 
 import {
-  getSuspiciousBuyers,
-  getSuspiciousCompanies,
-  getSuspiciousPeople,
-  getSuspiciousTerritories,
+  getPrioritizedBuyers,
+  getPrioritizedCompanies,
+  getPrioritizedPeople,
+  getPrioritizedTerritories,
   listInvestigations,
   searchEntities,
   type Investigation,
   type RiskAlert,
   type SearchResult,
-  type SuspiciousBuyer,
-  type SuspiciousCompany,
-  type SuspiciousPerson,
-  type SuspiciousTerritory,
+  type PrioritizedBuyer,
+  type PrioritizedCompany,
+  type PrioritizedPerson,
+  type PrioritizedTerritory,
 } from "@/api/client";
 import { Skeleton } from "@/components/common/Skeleton";
 import { useToastStore } from "@/stores/toast";
@@ -62,7 +62,7 @@ function formatPercent(value: number, locale: string): string {
   }).format(value);
 }
 
-function getPersonContext(person: SuspiciousPerson, t: (key: string) => string): string {
+function getPersonContext(person: PrioritizedPerson, t: (key: string) => string): string {
   if (person.alerts[0]?.reason_text) {
     return person.alerts[0].reason_text;
   }
@@ -81,7 +81,7 @@ function getPersonContext(person: SuspiciousPerson, t: (key: string) => string):
   return person.offices[0] || t("dashboard.watchlistFallbackRole");
 }
 
-function getCompanyContext(company: SuspiciousCompany, t: (key: string) => string): string {
+function getCompanyContext(company: PrioritizedCompany, t: (key: string) => string): string {
   if (company.alerts[0]?.reason_text) {
     return company.alerts[0].reason_text;
   }
@@ -98,12 +98,12 @@ function getCompanyContext(company: SuspiciousCompany, t: (key: string) => strin
   return company.official_names[0] || t("dashboard.companyFallbackRole");
 }
 
-function getBuyerContext(buyer: SuspiciousBuyer, t: (key: string) => string): string {
+function getBuyerContext(buyer: PrioritizedBuyer, t: (key: string) => string): string {
   return buyer.alerts[0]?.reason_text ?? t("dashboard.buyerFallbackLead");
 }
 
 function getTerritoryContext(
-  territory: SuspiciousTerritory,
+  territory: PrioritizedTerritory,
   t: (key: string) => string,
 ): string {
   return territory.alerts[0]?.reason_text ?? t("dashboard.territoryFallbackLead");
@@ -173,16 +173,16 @@ export function Dashboard() {
 
   const [recentInvestigations, setRecentInvestigations] = useState<Investigation[]>([]);
   const [loadingInvestigations, setLoadingInvestigations] = useState(true);
-  const [watchlist, setWatchlist] = useState<SuspiciousPerson[]>([]);
+  const [watchlist, setWatchlist] = useState<PrioritizedPerson[]>([]);
   const [loadingWatchlist, setLoadingWatchlist] = useState(true);
   const [watchlistError, setWatchlistError] = useState(false);
-  const [companyWatchlist, setCompanyWatchlist] = useState<SuspiciousCompany[]>([]);
+  const [companyWatchlist, setCompanyWatchlist] = useState<PrioritizedCompany[]>([]);
   const [loadingCompanyWatchlist, setLoadingCompanyWatchlist] = useState(true);
   const [companyWatchlistError, setCompanyWatchlistError] = useState(false);
-  const [buyerWatchlist, setBuyerWatchlist] = useState<SuspiciousBuyer[]>([]);
+  const [buyerWatchlist, setBuyerWatchlist] = useState<PrioritizedBuyer[]>([]);
   const [loadingBuyerWatchlist, setLoadingBuyerWatchlist] = useState(true);
   const [buyerWatchlistError, setBuyerWatchlistError] = useState(false);
-  const [territoryWatchlist, setTerritoryWatchlist] = useState<SuspiciousTerritory[]>([]);
+  const [territoryWatchlist, setTerritoryWatchlist] = useState<PrioritizedTerritory[]>([]);
   const [loadingTerritoryWatchlist, setLoadingTerritoryWatchlist] = useState(true);
   const [territoryWatchlistError, setTerritoryWatchlistError] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -201,7 +201,7 @@ export function Dashboard() {
 
     async function loadWatchlists() {
       try {
-        const peopleResponse = await getSuspiciousPeople(8);
+        const peopleResponse = await getPrioritizedPeople(8);
         if (!cancelled) {
           setWatchlist(peopleResponse.people);
           setWatchlistError(false);
@@ -218,7 +218,7 @@ export function Dashboard() {
       }
 
       try {
-        const companyResponse = await getSuspiciousCompanies(8);
+        const companyResponse = await getPrioritizedCompanies(8);
         if (!cancelled) {
           setCompanyWatchlist(companyResponse.companies);
           setCompanyWatchlistError(false);
@@ -235,7 +235,7 @@ export function Dashboard() {
       }
 
       try {
-        const buyerResponse = await getSuspiciousBuyers(6);
+        const buyerResponse = await getPrioritizedBuyers(6);
         if (!cancelled) {
           setBuyerWatchlist(buyerResponse.buyers);
           setBuyerWatchlistError(false);
@@ -252,7 +252,7 @@ export function Dashboard() {
       }
 
       try {
-        const territoryResponse = await getSuspiciousTerritories(6);
+        const territoryResponse = await getPrioritizedTerritories(6);
         if (!cancelled) {
           setTerritoryWatchlist(territoryResponse.territories);
           setTerritoryWatchlistError(false);
@@ -345,7 +345,7 @@ export function Dashboard() {
         <div className={styles.sectionHeader}>
           <div>
             <p className={styles.sectionEyebrow}>{t("dashboard.watchlistLabel")}</p>
-            <h2 className={styles.sectionTitle}>{t("dashboard.suspiciousPeople")}</h2>
+            <h2 className={styles.sectionTitle}>{t("dashboard.prioritizedPeople")}</h2>
           </div>
           <p className={styles.sectionNote}>{t("dashboard.watchlistNote")}</p>
         </div>
@@ -456,7 +456,7 @@ export function Dashboard() {
         <div className={styles.sectionHeader}>
           <div>
             <p className={styles.sectionEyebrow}>{t("dashboard.watchlistLabel")}</p>
-            <h2 className={styles.sectionTitle}>{t("dashboard.suspiciousCompanies")}</h2>
+            <h2 className={styles.sectionTitle}>{t("dashboard.prioritizedCompanies")}</h2>
           </div>
           <p className={styles.sectionNote}>{t("dashboard.companyWatchlistSubtitle")}</p>
         </div>
@@ -563,7 +563,7 @@ export function Dashboard() {
         <div className={styles.sectionHeader}>
           <div>
             <p className={styles.sectionEyebrow}>{t("dashboard.watchlistLabel")}</p>
-            <h2 className={styles.sectionTitle}>{t("dashboard.suspiciousBuyers")}</h2>
+            <h2 className={styles.sectionTitle}>{t("dashboard.prioritizedBuyers")}</h2>
           </div>
           <p className={styles.sectionNote}>{t("dashboard.buyerWatchlistSubtitle")}</p>
         </div>
@@ -661,7 +661,7 @@ export function Dashboard() {
         <div className={styles.sectionHeader}>
           <div>
             <p className={styles.sectionEyebrow}>{t("dashboard.watchlistLabel")}</p>
-            <h2 className={styles.sectionTitle}>{t("dashboard.suspiciousTerritories")}</h2>
+            <h2 className={styles.sectionTitle}>{t("dashboard.prioritizedTerritories")}</h2>
           </div>
           <p className={styles.sectionNote}>{t("dashboard.territoryWatchlistSubtitle")}</p>
         </div>

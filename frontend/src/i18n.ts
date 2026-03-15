@@ -117,14 +117,14 @@ const resources = {
         watchlistSubtitle:
           "Pessoas e empresas priorizadas por sinais cruzados entre contratos, folha pública, eleições, sanções e divulgações oficiais.",
         watchlistLabel: "lista de prioridade",
-        suspiciousPeople: "Pessoas suspeitas",
+        prioritizedPeople: "Pessoas suspeitas",
         watchlistNote:
           "Sinais de registros públicos cruzados automaticamente. Não constitui acusação.",
         watchlistEmpty: "Nenhuma pessoa multissinal encontrada com a configuração atual.",
         watchlistError: "Falha ao carregar a lista de vigilância.",
         companyWatchlistSubtitle:
           "Empresas priorizadas por sanções, sobreposição com execução de recursos públicos, baixa competição e inconsistências de capacidade ou execução.",
-        suspiciousCompanies: "Empresas suspeitas",
+        prioritizedCompanies: "Empresas suspeitas",
         companyWatchlistEmpty: "Nenhuma empresa multissinal encontrada com a configuração atual.",
         companyWatchlistError: "Falha ao carregar a lista de empresas sinalizadas.",
         companiesFlagged: "empresas sinalizadas",
@@ -554,24 +554,24 @@ const resources = {
         watchlistSubtitle:
           "Cruza contratación, empleo público, campañas, sanciones y declaraciones para priorizar revisión humana. Distingue cruces exactos de inferencias.",
         watchlistLabel: "priorización",
-        suspiciousPeople: "Personas priorizadas",
+        prioritizedPeople: "Personas priorizadas",
         watchlistNote:
           "Señales de registros públicos enlazadas automáticamente. Muestran riesgo, no prueban corrupción.",
         watchlistEmpty: "No se encontraron personas multiseñal con la carga actual.",
         watchlistError: "No fue posible cargar la cola de personas.",
         companyWatchlistSubtitle:
           "Empresas priorizadas por sanciones, descalce de capacidad, brechas de ejecución y cruces con recursos públicos.",
-        suspiciousCompanies: "Empresas priorizadas",
+        prioritizedCompanies: "Empresas priorizadas",
         companyWatchlistEmpty: "No se encontraron empresas multiseñal con la carga actual.",
         companyWatchlistError: "No fue posible cargar la cola de empresas.",
         buyerWatchlistSubtitle:
           "Compradores públicos priorizados por concentración de proveedores, exposición a sancionados y brechas entre compromiso, factura y ejecución.",
-        suspiciousBuyers: "Compradores públicos priorizados",
+        prioritizedBuyers: "Compradores públicos priorizados",
         buyerWatchlistEmpty: "No se encontraron compradores con señales suficientes.",
         buyerWatchlistError: "No fue posible cargar la cola de compradores.",
         territoryWatchlistSubtitle:
           "Territorios priorizados por concentración contractual, proveedores sancionados y señales de incompatibilidad o brechas de ejecución.",
-        suspiciousTerritories: "Territorios priorizados",
+        prioritizedTerritories: "Territorios priorizados",
         territoryWatchlistEmpty: "No se encontraron territorios con señales suficientes.",
         territoryWatchlistError: "No fue posible cargar la cola territorial.",
         peopleFlagged: "personas priorizadas",
@@ -696,7 +696,7 @@ const resources = {
           secopSuppliers: "Registered SECOP suppliers and representative metadata.",
           secopSanctions: "SECOP I and II fines and sanctions tied to suppliers and contracts.",
           sigep: "Active public servants reported through SIGEP.",
-          sensitiveRoles: "SIGEP positions with elevated corruption or budget-control exposure.",
+          sensitiveRoles: "SIGEP positions with elevated integrity or budget-control exposure.",
           assetDisclosures: "Ley 2013 asset and income disclosures.",
           conflictDisclosures: "Ley 2013 conflict-of-interest disclosures.",
           sgrExpenses: "Sistema General de Regalías spending execution.",
@@ -750,24 +750,24 @@ const resources = {
         watchlistSubtitle:
           "People and companies prioritized from contracts, payroll, elections, sanctions, and disclosure overlap.",
         watchlistLabel: "priority queue",
-        suspiciousPeople: "Suspicious people",
+        prioritizedPeople: "Prioritized people",
         watchlistNote:
           "Automatically cross-matched public-record signals. Not an accusation.",
         watchlistEmpty: "No multi-signal people were found with the current data.",
         watchlistError: "Failed to load the watchlist.",
         companyWatchlistSubtitle:
           "Companies prioritized by sanctions, public-funding overlap, low competition, and capacity or execution anomalies.",
-        suspiciousCompanies: "Suspicious companies",
+        prioritizedCompanies: "Prioritized companies",
         companyWatchlistEmpty: "No multi-signal companies were found with the current data.",
         companyWatchlistError: "Failed to load the company watchlist.",
         buyerWatchlistSubtitle:
           "Public buyers prioritized by supplier concentration, sanctioned suppliers, and budget-execution gaps.",
-        suspiciousBuyers: "Suspicious buyers",
+        prioritizedBuyers: "Prioritized buyers",
         buyerWatchlistEmpty: "No high-signal buyers were found with the current data.",
         buyerWatchlistError: "Failed to load the buyer watchlist.",
         territoryWatchlistSubtitle:
           "Territories prioritized by supplier concentration, sanctioned suppliers, and execution discrepancies.",
-        suspiciousTerritories: "Suspicious territories",
+        prioritizedTerritories: "Prioritized territories",
         territoryWatchlistEmpty: "No high-signal territories were found with the current data.",
         territoryWatchlistError: "Failed to load the territory watchlist.",
         companiesFlagged: "companies flagged",

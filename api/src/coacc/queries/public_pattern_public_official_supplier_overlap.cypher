@@ -6,7 +6,7 @@ WHERE elementId(c) = $company_id
    OR c.nit = $company_identifier_formatted
    OR c.cnpj = $company_identifier
    OR c.cnpj = $company_identifier_formatted
-MATCH (p:Person)-[:OFFICER_OF]->(c)
+MATCH (p)-[:OFFICER_OF]->(c)
 WHERE EXISTS { (p)-[:RECEBEU_SALARIO]->(:PublicOffice) }
 OPTIONAL MATCH (p)-[:RECEBEU_SALARIO]->(o:PublicOffice)
 OPTIONAL MATCH (:Company)-[award:CONTRATOU]->(c)

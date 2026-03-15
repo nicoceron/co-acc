@@ -1,7 +1,7 @@
-MATCH (p:Person)
-WHERE elementId(p) = $person_id
-   OR p.document_id = $person_document_id
-   OR p.cedula = $person_document_id
+MATCH (p)
+WHERE (elementId(p) = $person_id
+       OR p.document_id = $person_document_id
+       OR p.cedula = $person_document_id)
 CALL {
   WITH p
   OPTIONAL MATCH (p)-[:RECEBEU_SALARIO]->(o:PublicOffice)

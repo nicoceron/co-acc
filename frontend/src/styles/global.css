@@ -22,7 +22,7 @@
   /* === Semantic Alerts === */
   --color-success: oklch(70% 0.12 150);
   --color-warning: oklch(75% 0.15 70);
-  --color-danger: oklch(65% 0.18 25);   /* Corruption / Risk Red - slightly muted */
+  --color-danger: oklch(65% 0.18 25);   /* Integrity / Risk Red - slightly muted */
   --color-info: oklch(75% 0.1 220);
 
   /* === Data categorical - Harmonized === */
