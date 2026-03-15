@@ -54,11 +54,9 @@ def run_post_load_hooks(
     repo_root = Path(__file__).resolve().parents[3]
     scripts_dir = repo_root / "scripts"
 
+    # CO-ACC Colombia currently handles entity resolution within the pipelines
+    # or via dedicated Colombia-scoped linking scripts (TBD).
     script_names: list[str] = []
-    if source == "cnpj":
-        script_names.extend(["link_partners_probable.cypher", "link_persons.cypher"])
-    elif source in {"tse", "transparencia", "camara", "senado", "senado_cpis", "tse_filiados"}:
-        script_names.append("link_persons.cypher")
 
     if not script_names:
         logger.info("No post-load linking hook configured for source=%s", source)
