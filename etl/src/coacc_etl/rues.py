@@ -6,8 +6,8 @@ import json
 from typing import Any
 
 import httpx
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
+from Crypto.Cipher import AES  # nosec
+from Crypto.Random import get_random_bytes  # nosec
 
 RUES_ELASTIC_BASE_URL = "https://elasticprd.rues.org.co"
 RUES_SHARED_SECRET = "ac1244b5-8bee-47b2-a4a5-924a748d907f"
@@ -22,7 +22,7 @@ def _evp_bytes_to_key(
     derived = b""
     block = b""
     while len(derived) < key_len + iv_len:
-        block = hashlib.md5(block + password + salt).digest()
+        block = hashlib.md5(block + password + salt).digest()  # nosec
         derived += block
     return derived[:key_len], derived[key_len : key_len + iv_len]
 

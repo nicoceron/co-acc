@@ -26,7 +26,7 @@ def _enforce_patterns_enabled() -> None:
 async def run_all_patterns(
     driver: AsyncDriver,
     entity_id: str | None = None,
-    lang: str = "pt",
+    lang: str = "es",
     include_probable: bool = False,
     provider: IntelligenceProvider | None = None,
 ) -> list[PatternResult]:
@@ -43,7 +43,7 @@ async def run_pattern(
     session: AsyncSession,
     pattern_id: str,
     entity_id: str | None = None,
-    lang: str = "pt",
+    lang: str = "es",
     include_probable: bool = False,
     provider: IntelligenceProvider | None = None,
 ) -> list[PatternResult]:
@@ -64,7 +64,7 @@ async def get_patterns_for_entity(
     entity_id: str,
     driver: Annotated[AsyncDriver, Depends(get_driver)],
     provider: Annotated[IntelligenceProvider, Depends(get_intelligence_provider)],
-    lang: Annotated[str, Query()] = "pt",
+    lang: Annotated[str, Query()] = "es",
     include_probable: Annotated[bool, Query()] = False,
 ) -> PatternResponse:
     _enforce_patterns_enabled()
@@ -92,7 +92,7 @@ async def get_specific_pattern(
     pattern_name: str,
     session: Annotated[AsyncSession, Depends(get_session)],
     provider: Annotated[IntelligenceProvider, Depends(get_intelligence_provider)],
-    lang: Annotated[str, Query()] = "pt",
+    lang: Annotated[str, Query()] = "es",
     include_probable: Annotated[bool, Query()] = False,
 ) -> PatternResponse:
     _enforce_patterns_enabled()

@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_user: str = "neo4j"
-    neo4j_password: str = "changeme"
+    neo4j_password: str = "changeme"  # nosec
     neo4j_database: str = "neo4j"
 
     api_host: str = "0.0.0.0"
@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     log_level: str = "info"
     app_env: str = "dev"
 
-    jwt_secret_key: str = "change-me-in-production"
+    jwt_secret_key: str = "change-me-in-production"  # nosec
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 1440
     rate_limit_anon: str = "60/minute"

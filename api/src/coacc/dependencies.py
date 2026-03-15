@@ -17,15 +17,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=F
 
 async def init_driver() -> AsyncDriver:
     global _driver
-    driver_kwargs = {
-        "max_connection_pool_size": 50,
-        "connection_acquisition_timeout": 10,
-    }
+    auth = None
     if settings.neo4j_password.strip():
-        driver_kwargs["auth"] = (settings.neo4j_user, settings.neo4j_password)
+        auth = (settings.neo4j_user, settings.neo4j_password)
+
     _driver = AsyncGraphDatabase.driver(
         settings.neo4j_uri,
-        **driver_kwargs,
+        auth=auth,
+        max_connection_pool_size=50,
+        connection_acquisition_timeout=10,
     )
     await _driver.verify_connectivity()
     return _driver

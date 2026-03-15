@@ -27,8 +27,8 @@ function getNumberLocale(language: string): string {
   if (language.startsWith("es")) {
     return "es-CO";
   }
-  if (language === "pt-BR") {
-    return "pt-BR";
+  if (language === "es-CO") {
+    return "es-CO";
   }
   return "en-US";
 }

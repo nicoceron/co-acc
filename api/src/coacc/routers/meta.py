@@ -10,7 +10,6 @@ from neo4j import AsyncSession
 from coacc.config import settings
 from coacc.dependencies import get_session
 from coacc.models.dashboard import (
-    RiskAlertResponse,
     PrioritizedBuyerResponse,
     PrioritizedBuyersResponse,
     PrioritizedCompaniesResponse,
@@ -19,6 +18,7 @@ from coacc.models.dashboard import (
     PrioritizedPersonResponse,
     PrioritizedTerritoriesResponse,
     PrioritizedTerritoryResponse,
+    RiskAlertResponse,
 )
 from coacc.services.neo4j_service import execute_query, execute_query_single
 from coacc.services.public_guard import should_hide_person_entities
@@ -939,7 +939,7 @@ async def prioritized_people_watchlist(
                 ],
                 donor_vendor_loop_count=record["donor_vendor_loop_count"],
                 offices=list(record.get("offices") or []),
-                alerts=_build_person_alerts(record),
+                alerts=_build_person_alerts(dict(record)),
             )
             for record in records
         ],
@@ -998,7 +998,7 @@ async def prioritized_company_watchlist(
                 commitment_gap_contract_count=record["commitment_gap_contract_count"],
                 commitment_gap_total=record["commitment_gap_total"],
                 official_names=[] if hide_people else list(record.get("official_names") or []),
-                alerts=_build_company_alerts(record),
+                alerts=_build_company_alerts(dict(record)),
             )
             for record in records
         ],
@@ -1045,7 +1045,7 @@ async def prioritized_buyer_watchlist(
                     capacity_mismatch_supplier_count=record["capacity_mismatch_supplier_count"],
                     discrepancy_contract_count=record["discrepancy_contract_count"],
                     discrepancy_value=record["discrepancy_value"],
-                    alerts=_build_buyer_alerts(record),
+                    alerts=_build_buyer_alerts(dict(record)),
                 )
                 for record in selected
             ],
@@ -1086,7 +1086,7 @@ async def prioritized_buyer_watchlist(
                 capacity_mismatch_supplier_count=record["capacity_mismatch_supplier_count"],
                 discrepancy_contract_count=record["discrepancy_contract_count"],
                 discrepancy_value=record["discrepancy_value"],
-                alerts=_build_buyer_alerts(record),
+                alerts=_build_buyer_alerts(dict(record)),
             )
             for record in records
         ],
@@ -1133,7 +1133,7 @@ async def prioritized_territory_watchlist(
                     capacity_mismatch_supplier_count=record["capacity_mismatch_supplier_count"],
                     discrepancy_contract_count=record["discrepancy_contract_count"],
                     discrepancy_value=record["discrepancy_value"],
-                    alerts=_build_territory_alerts(record),
+                    alerts=_build_territory_alerts(dict(record)),
                 )
                 for record in selected
             ],
@@ -1174,7 +1174,7 @@ async def prioritized_territory_watchlist(
                 capacity_mismatch_supplier_count=record["capacity_mismatch_supplier_count"],
                 discrepancy_contract_count=record["discrepancy_contract_count"],
                 discrepancy_value=record["discrepancy_value"],
-                alerts=_build_territory_alerts(record),
+                alerts=_build_territory_alerts(dict(record)),
             )
             for record in records
         ],

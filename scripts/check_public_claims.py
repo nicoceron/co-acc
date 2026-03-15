@@ -20,13 +20,6 @@ REQUIRED_EN_MARKERS = [
     "reference production snapshot",
 ]
 
-REQUIRED_PT_MARKERS = [
-    "O Que Esta Incluido Neste Repositorio Publico",
-    "O Que Nao Esta Incluido Por Padrao",
-    "O Que E Reproduzivel Localmente Hoje",
-    "snapshot de referencia de producao",
-]
-
 
 def parse_bool(value: str) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "y"}
@@ -105,7 +98,6 @@ def main() -> int:
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--registry-path", default="docs/source_registry_co_v1.csv")
     parser.add_argument("--readme", default="README.md")
-    parser.add_argument("--readme-pt", default="docs/pt-BR/README.md")
     parser.add_argument("--data-sources", default="docs/data-sources.md")
     parser.add_argument("--reference-metrics", default="docs/reference_metrics.md")
     args = parser.parse_args()
@@ -114,7 +106,6 @@ def main() -> int:
     makefile_path = root / "Makefile"
     registry_path = root / args.registry_path
     readme_path = root / args.readme
-    readme_pt_path = root / args.readme_pt
     data_sources_path = root / args.data_sources
     reference_metrics_path = root / args.reference_metrics
 
@@ -125,21 +116,15 @@ def main() -> int:
     else:
         targets = parse_make_targets(makefile_path)
         en_commands = parse_make_commands(readme_path.read_text(encoding="utf-8"))
-        pt_commands = parse_make_commands(readme_pt_path.read_text(encoding="utf-8"))
-        missing = sorted((en_commands | pt_commands) - targets)
+        missing = sorted(en_commands - targets)
         if missing:
             errors.append(f"README references undefined Makefile targets: {missing}")
 
     readme_text = readme_path.read_text(encoding="utf-8")
-    readme_pt_text = readme_pt_path.read_text(encoding="utf-8")
 
     for marker in REQUIRED_EN_MARKERS:
         if marker.lower() not in readme_text.lower():
             errors.append(f"README.md missing required marker: {marker}")
-
-    for marker in REQUIRED_PT_MARKERS:
-        if marker.lower() not in readme_pt_text.lower():
-            errors.append(f"docs/pt-BR/README.md missing required marker: {marker}")
 
     registry_counts = compute_registry_counts(registry_path)
     try:

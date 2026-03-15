@@ -13,7 +13,7 @@ body:
     id: entity_reference
     attributes:
       label: Entity reference
-      description: Company ID, CNPJ, or graph element reference.
+      description: Company ID, NIT, or graph element reference.
       placeholder: entity reference
     validations:
       required: true

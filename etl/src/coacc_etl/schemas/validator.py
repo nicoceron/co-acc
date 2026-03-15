@@ -66,7 +66,7 @@ def validate_dataframe_sampled(
     source_name: str,
     sample_size: int = 10_000,
 ) -> pd.DataFrame:
-    """Validate a random sample of a large DataFrame (e.g., CNPJ).
+    """Validate a random sample of a large DataFrame (e.g., SECOP).
 
     For DataFrames larger than sample_size, validates only a random sample
     to keep validation fast on multi-million-row datasets. Always returns

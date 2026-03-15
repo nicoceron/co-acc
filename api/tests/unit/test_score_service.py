@@ -117,7 +117,7 @@ async def test_compute_exposure_person_peer_group() -> None:
         "source_count": 2,
         "financial_volume": 0.0,
         "cnae_principal": None,
-        "role": "deputado",
+        "role": "official",
     }[key]
 
     async def mock_run(cypher: str, params: dict, timeout: float = 15):  # type: ignore[no-untyped-def]
@@ -204,7 +204,7 @@ async def test_compute_exposure_aggregated_same_as_data() -> None:
     session = AsyncMock()
 
     # Simulates aggregated data: higher connection count and multiple sources
-    # from SAME_AS traversal across TSE candidate + CNPJ person + author nodes
+    # from SAME_AS traversal across multiple source nodes
     score_record = MagicMock()
     score_record.__getitem__ = lambda self, key: {
         "entity_id": "4:abc:10",
@@ -213,7 +213,7 @@ async def test_compute_exposure_aggregated_same_as_data() -> None:
         "source_count": 5,
         "financial_volume": 2_500_000.0,
         "cnae_principal": None,
-        "role": "deputado",
+        "role": "official",
     }[key]
 
     async def mock_run(cypher: str, params: dict, timeout: float = 15):  # type: ignore[no-untyped-def]

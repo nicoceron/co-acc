@@ -206,7 +206,7 @@ class PacoSanctionsPipeline(Pipeline):
         if summary_path.exists():
             summary_lookup = ContractSummaryLookup(summary_path)
 
-        def attach_company(document_id: str, name: str, **extra: object) -> None:
+        def attach_company(document_id: str, name: str, **extra: Any) -> None:
             company_map[document_id] = build_company_row(
                 document_id=document_id,
                 name=clean_name(name) or clean_text(name) or document_id,
@@ -270,7 +270,7 @@ class PacoSanctionsPipeline(Pipeline):
             name: str,
             prefer_company: bool,
             document_type: str = "",
-            **extra: object,
+            **extra: Any,
         ) -> None:
             if prefer_company:
                 attach_company(document_id, name, **extra)

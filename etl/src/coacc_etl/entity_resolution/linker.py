@@ -27,8 +27,8 @@ class PersonLinker:
     def train(self, df: pd.DataFrame) -> None:
         """Train the splink model on a Person DataFrame.
 
-        Uses random sampling for u-values, then EM blocking on cpf
-        (TSE-seeded) for m-values.
+        Uses random sampling for u-values, then EM blocking on document_id
+        for m-values.
         """
         settings = get_person_settings()
         self._linker = self._linker_cls(
@@ -38,7 +38,7 @@ class PersonLinker:
         )
         self._linker.training.estimate_u_using_random_sampling(max_pairs=1e6)
         self._linker.training.estimate_parameters_using_expectation_maximisation(
-            "l.cpf = r.cpf"
+            "l.document_id = r.document_id"
         )
 
     def predict(self, df: pd.DataFrame, threshold: float = 0.8) -> pd.DataFrame:

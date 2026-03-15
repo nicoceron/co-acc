@@ -88,12 +88,22 @@ class IgacPropertyTransactionsPipeline(Pipeline):
             "tipo_predio_zona",
             "categoria_ruralidad_2024",
         ):
-            frame[column] = frame.get(column, "").map(clean_text)
+            col_series = frame.get(column)
+            if col_series is not None and hasattr(col_series, "map"):
+                frame[column] = col_series.map(clean_text)
+            else:
+                frame[column] = ""
 
-        frame["valor_num"] = frame.get("valor", "").map(parse_amount).fillna(0.0)
-        frame["count_a_num"] = frame.get("count_a", "").map(parse_integer).fillna(0)
-        frame["count_de_num"] = frame.get("count_de", "").map(parse_integer).fillna(0)
-        frame["predios_nuevos_num"] = frame.get("predios_nuevos", "").map(parse_integer).fillna(0)
+        def _map_col(name: str, func: Any) -> pd.Series:
+            col = frame.get(name)
+            if col is not None and hasattr(col, "map"):
+                return col.map(func)
+            return pd.Series([None] * len(frame))
+
+        frame["valor_num"] = _map_col("valor", parse_amount).fillna(0.0)
+        frame["count_a_num"] = _map_col("count_a", parse_integer).fillna(0)
+        frame["count_de_num"] = _map_col("count_de", parse_integer).fillna(0)
+        frame["predios_nuevos_num"] = _map_col("predios_nuevos", parse_integer).fillna(0)
 
         grouped = (
             frame.groupby(

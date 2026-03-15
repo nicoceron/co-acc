@@ -102,7 +102,8 @@ class SupersocTopCompaniesPipeline(Pipeline):
         equity_current_col = _column_for_year(column_set, "total_patrimonio", current_year)
         equity_previous_col = _column_for_year(column_set, "total_patrimonio", previous_year)
 
-        for row in self._raw.to_dict(orient="records"):
+        raw_records: list[dict[str, Any]] = self._raw.to_dict(orient="records")  # type: ignore[assignment]
+        for row in raw_records:
             document_id = strip_document(clean_text(row.get("nit")))
             name = clean_name(row.get("razon_social"))
             if not document_id or not name:

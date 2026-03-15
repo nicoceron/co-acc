@@ -1,12 +1,12 @@
-# LGPD BASELINE POLICY — World Transparency Graph (WTG)
+# DATA PROTECTION POLICY (LEY 1581 / LGPD) — World Transparency Graph (WTG)
 
-Policy-Version: v1.0.0  
-Effective-Date: 2026-02-28  
+Policy-Version: v1.1.0  
+Effective-Date: 2026-03-15  
 Owner: WTG Governance Team
 
 ## Legal basis posture
 
-WTG is operated with a public-interest and transparency posture for analysis of publicly available records, with strict minimization and access controls.
+WTG is operated with a public-interest and transparency posture for analysis of publicly available records, with strict minimization and access controls. This project adheres to the principles of Colombian **Ley 1581 de 2012** and the Brazilian LGPD where applicable.
 
 This baseline is operational guidance and does not replace formal legal advice.
 
@@ -23,7 +23,7 @@ Default exclusions in public mode:
 
 - Person-level lookup and personal identifier exposure.
 - `Person` and `Partner` entities in public responses.
-- Personal document properties such as CPF and partial document fields.
+- Personal document properties such as Cédula and partial document fields.
 
 ## Data subject rights workflow
 
@@ -49,6 +49,6 @@ Retention follows operational necessity and legal obligations:
 ## Cross-border processing note
 
 WTG may process infrastructure and collaboration workflows across jurisdictions.  
-Brazil-first LGPD posture remains mandatory for datasets and outputs related to Brazil.
+Colombia-first privacy posture remains mandatory for datasets and outputs related to Colombia.
 
 See [PRIVACY.md](PRIVACY.md), [TERMS.md](TERMS.md), and [docs/legal/legal-index.md](docs/legal/legal-index.md).

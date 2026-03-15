@@ -2,11 +2,10 @@
 set -euo pipefail
 
 PROFILE="demo"
-PIPELINES="${PIPELINES:-cnpj,tse,transparencia,sanctions}"
+PIPELINES="${PIPELINES:-secop_integrado,paco_sanctions,sigep_servidores}"
 DOWNLOAD="${DOWNLOAD:-false}"
 NEO4J_URI="${NEO4J_URI:-bolt://localhost:7687}"
 NEO4J_DATABASE="${NEO4J_DATABASE:-neo4j}"
-CNPJ_FILES="${CNPJ_FILES:-1}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -91,16 +90,7 @@ if [[ "$PROFILE" == "full" ]]; then
   (cd etl && uv sync)
 
   if [[ "$DOWNLOAD" == "true" ]]; then
-    echo "Running optional download stage..."
-    if [[ "$PIPELINES" == *"cnpj"* ]]; then
-      (cd etl && uv run coacc-etl download --output-dir ../data/cnpj --files "$CNPJ_FILES" --skip-existing)
-    fi
-    if [[ "$PIPELINES" == *"comprasnet"* ]]; then
-      python3 scripts/download_comprasnet.py 2024
-    fi
-    if [[ "$PIPELINES" == *"datasus"* ]]; then
-      python3 scripts/download_datasus.py
-    fi
+    echo "Running optional download stage (not implemented for all sources in this helper)..."
   fi
 
   echo "Running ETL pipelines: $PIPELINES"

@@ -4,6 +4,7 @@ import ast
 import hashlib
 import re
 import unicodedata
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 
@@ -186,22 +187,31 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
     return normalized
 
 
-def read_csv_normalized(path: str, **kwargs: object) -> pd.DataFrame:
-    return normalize_dataframe_columns(pd.read_csv(path, **kwargs))
+def read_csv_normalized(path: str, **kwargs: Any) -> pd.DataFrame:
+    df = pd.read_csv(path, **kwargs)
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected DataFrame, got {type(df)}")
+    return normalize_dataframe_columns(df)
 
 
 def read_csv_normalized_with_fallback(
     path: str,
     *,
     encodings: tuple[str, ...] = ("utf-8-sig", "utf-8", "cp1252", "latin-1"),
-    **kwargs: object,
+    **kwargs: Any,
 ) -> pd.DataFrame:
     last_error: UnicodeDecodeError | None = None
     for encoding in encodings:
         try:
-            return normalize_dataframe_columns(pd.read_csv(path, encoding=encoding, **kwargs))
+            df = pd.read_csv(path, encoding=encoding, **kwargs)
+            if not isinstance(df, pd.DataFrame):
+                continue
+            return normalize_dataframe_columns(df)
         except UnicodeDecodeError as exc:
             last_error = exc
     if last_error is not None:
         raise last_error
-    return normalize_dataframe_columns(pd.read_csv(path, **kwargs))
+    df = pd.read_csv(path, **kwargs)
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected DataFrame, got {type(df)}")
+    return normalize_dataframe_columns(df)

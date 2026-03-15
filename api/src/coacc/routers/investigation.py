@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse, Response
 from neo4j import AsyncSession
 
-from coacc.constants import PEP_ROLES
 from coacc.dependencies import CurrentUser, get_session
 from coacc.models.investigation import (
     Annotation,

@@ -23,9 +23,7 @@ COMMUNITY_COMPANY_PATTERN_IDS = (
     "amendment_beneficiary_contracts",
     "split_contracts_below_threshold",
     "contract_concentration",
-    "embargoed_receiving",
     "debtor_contracts",
-    "srp_multi_org_hitchhiking",
     "inexigibility_recurrence",
     "public_official_supplier_overlap",
     "low_competition_bidding",
@@ -60,9 +58,7 @@ COMMUNITY_COMPANY_PATTERN_QUERIES: dict[str, str] = {
     "amendment_beneficiary_contracts": "public_pattern_amendment_beneficiary_contracts",
     "split_contracts_below_threshold": "public_pattern_split_contracts_below_threshold",
     "contract_concentration": "public_pattern_contract_concentration",
-    "embargoed_receiving": "public_pattern_embargoed_receiving",
     "debtor_contracts": "public_pattern_debtor_contracts",
-    "srp_multi_org_hitchhiking": "public_pattern_srp_multi_org_hitchhiking",
     "inexigibility_recurrence": "public_pattern_inexigibility_recurrence",
     "public_official_supplier_overlap": "public_pattern_public_official_supplier_overlap",
     "low_competition_bidding": "public_pattern_low_competition_bidding",
@@ -84,7 +80,8 @@ COMMUNITY_PATTERN_QUERIES = {
 
 _DOCUMENT_PATTERN = re.compile(r"^\d{5,14}$")
 _PUBLIC_PATTERN_BLOCKLIST = (
-    "cpf",
+    "cedula",
+    "nit",
     "doc_",
     "person",
     "partner",
@@ -124,7 +121,7 @@ class IntelligenceProvider(Protocol):
         self,
         driver: AsyncDriver,
         entity_id: str | None = None,
-        lang: str = "pt",
+        lang: str = "es",
         include_probable: bool = False,
     ) -> list[PatternResult]:
         ...
@@ -134,7 +131,7 @@ class IntelligenceProvider(Protocol):
         session: AsyncSession,
         pattern_id: str,
         entity_id: str | None = None,
-        lang: str = "pt",
+        lang: str = "es",
         include_probable: bool = False,
     ) -> list[PatternResult]:
         ...
@@ -163,9 +160,9 @@ def _build_pattern_meta(pattern_ids: tuple[str, ...]) -> list[dict[str, str]]:
         meta = PATTERN_METADATA.get(pid, {})
         rows.append({
             "id": pid,
-            "name_pt": meta.get("name_pt", pid),
+            "name_es": meta.get("name_es", pid),
             "name_en": meta.get("name_en", pid),
-            "description_pt": meta.get("desc_pt", ""),
+            "description_es": meta.get("desc_es", ""),
             "description_en": meta.get("desc_en", ""),
         })
     return rows
@@ -209,7 +206,7 @@ def _sanitize_public_pattern_data(record: Any) -> dict[str, Any]:
     data: dict[str, Any] = {}
     keys = record.keys() if hasattr(record, "keys") else record
     for key in keys:
-        if key in {"pattern_id", "summary_pt", "summary_en"}:
+        if key in {"pattern_id", "summary_es", "summary_en"}:
             continue
         lower_key = str(key).lower()
         if any(token in lower_key for token in _PUBLIC_PATTERN_BLOCKLIST):
@@ -232,7 +229,7 @@ class CommunityIntelligenceProvider:
         self,
         driver: AsyncDriver,
         entity_id: str | None = None,
-        lang: str = "pt",
+        lang: str = "es",
         include_probable: bool = False,
     ) -> list[PatternResult]:
         if not entity_id:
@@ -251,7 +248,7 @@ class CommunityIntelligenceProvider:
         session: AsyncSession,
         pattern_id: str,
         entity_id: str | None = None,
-        lang: str = "pt",
+        lang: str = "es",
         include_probable: bool = False,
     ) -> list[PatternResult]:
         del include_probable  # community tier does not expose probable identity paths
@@ -379,7 +376,7 @@ class CommunityIntelligenceProvider:
         by_element = await self._resolve_public_entity_record(session, entity_id)
         if by_element is not None and "Company" in by_element["entity_labels"]:
             node = by_element["e"]
-            for key in ("document_id", "nit", "cnpj"):
+            for key in ("document_id", "nit"):
                 identifier = str(node.get(key, "")).strip()
                 digits = re.sub(r"[.\-/]", "", identifier)
                 if _DOCUMENT_PATTERN.match(digits):
@@ -395,7 +392,11 @@ class CommunityIntelligenceProvider:
         session: AsyncSession,
         entity_id: str,
     ) -> tuple[str, str] | None:
-        record = await self._resolve_public_entity_record(session, entity_id)
+        record = await execute_query_single(
+            session,
+            "entity_by_element_id",
+            {"element_id": entity_id},
+        )
         if record is not None and "Person" in record["entity_labels"]:
             node = record["e"]
             for key in ("document_id", "cedula"):
@@ -469,7 +470,7 @@ class FullIntelligenceProvider:
         self,
         driver: AsyncDriver,
         entity_id: str | None = None,
-        lang: str = "pt",
+        lang: str = "es",
         include_probable: bool = False,
     ) -> list[PatternResult]:
         run_all_patterns = _load_pattern_runner("run_all_patterns")
@@ -488,7 +489,7 @@ class FullIntelligenceProvider:
         session: AsyncSession,
         pattern_id: str,
         entity_id: str | None = None,
-        lang: str = "pt",
+        lang: str = "es",
         include_probable: bool = False,
     ) -> list[PatternResult]:
         run_pattern = _load_pattern_runner("run_pattern")

@@ -15,5 +15,5 @@ def entity_type_for_label(label: str | None) -> str:
 
     words = re.findall(r"[A-Z]+(?=[A-Z][a-z]|$)|[A-Z]?[a-z]+|[0-9]+", label)
     if not words:
-        return label.lower()
-    return words[0].lower() + "".join(word.capitalize() for word in words[1:])
+        return str(label.lower())
+    return str(words[0].lower() + "".join(word.capitalize() for word in words[1:]))

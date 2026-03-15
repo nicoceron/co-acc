@@ -1,441 +1,192 @@
 {
-  "contract_version": "2026-03-01",
+  "contract_version": "2026-03-15",
   "full_historical_default": true,
-  "expected_implemented_count": 45,
+  "expected_implemented_count": 30,
   "core_sources": [
-    "camara",
-    "cnpj",
-    "comprasnet",
-    "sanctions",
-    "senado",
-    "transparencia",
-    "tse"
+    "secop_integrado",
+    "secop_ii_contracts",
+    "paco_sanctions",
+    "sigep_public_servants"
   ],
   "sources": [
     {
-      "pipeline_id": "bcb",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/bcb/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "bndes",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/bndes/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "caged",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/caged/*"
-      ],
-      "blocking_reason_if_any": "Aggregate-only implementation",
-      "core": false
-    },
-    {
-      "pipeline_id": "camara",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/camara/*"
-      ],
-      "blocking_reason_if_any": "-",
+      "pipeline_id": "secop_integrado",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_integrado/*"],
       "core": true
     },
     {
-      "pipeline_id": "camara_inquiries",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/camara_inquiries/*"
-      ],
-      "blocking_reason_if_any": "Sessions still low",
-      "core": false
-    },
-    {
-      "pipeline_id": "ceaf",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/ceaf/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "cepim",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/cepim/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "cnpj",
-      "acquisition_mode": "script_download",
-      "required_inputs": [
-        "data/cnpj/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": true,
-      "download_commands": [
-        "cd /workspace/etl && coacc-etl download --output-dir ../data/cnpj --files 10 --skip-existing"
-      ]
-    },
-    {
-      "pipeline_id": "comprasnet",
-      "acquisition_mode": "script_download",
-      "required_inputs": [
-        "data/comprasnet/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": true,
-      "download_commands": [
-        "python3 /workspace/scripts/download_comprasnet.py 2019 2020 2021 2022 2023 2024 2025 2026"
-      ]
-    },
-    {
-      "pipeline_id": "cpgf",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/cpgf/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "cvm",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/cvm/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "cvm_funds",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/cvm_funds/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "datajud",
-      "acquisition_mode": "blocked_external",
-      "required_inputs": [
-        "data/datajud/*"
-      ],
-      "blocking_reason_if_any": "Credentials not fully operational in prod",
-      "core": false
-    },
-    {
-      "pipeline_id": "datasus",
-      "acquisition_mode": "script_download",
-      "required_inputs": [
-        "data/datasus/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false,
-      "download_commands": [
-        "python3 /workspace/scripts/download_datasus.py"
-      ]
-    },
-    {
-      "pipeline_id": "dou",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/dou/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false,
-      "credential_env": [
-        "GOOGLE_APPLICATION_CREDENTIALS"
-      ]
-    },
-    {
-      "pipeline_id": "eu_sanctions",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/eu_sanctions/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "holdings",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/holdings/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "ibama",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/ibama/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "icij",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/icij/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "inep",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/inep/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "leniency",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/leniency/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "mides",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/mides/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false,
-      "credential_env": [
-        "GOOGLE_APPLICATION_CREDENTIALS"
-      ]
-    },
-    {
-      "pipeline_id": "ofac",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/ofac/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "opensanctions",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/opensanctions/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "pep_cgu",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/pep_cgu/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "pgfn",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/pgfn/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "pncp",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/pncp/*"
-      ],
-      "blocking_reason_if_any": "Freshness SLA pending",
-      "core": false
-    },
-    {
-      "pipeline_id": "querido_diario",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/querido_diario/*"
-      ],
-      "blocking_reason_if_any": "Text availability gap",
-      "core": false
-    },
-    {
-      "pipeline_id": "rais",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/rais/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false,
-      "credential_env": [
-        "GOOGLE_APPLICATION_CREDENTIALS"
-      ]
-    },
-    {
-      "pipeline_id": "renuncias",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/renuncias/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "sanctions",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/sanctions/*"
-      ],
-      "blocking_reason_if_any": "-",
+      "pipeline_id": "secop_ii_contracts",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_ii_contracts/*"],
       "core": true
     },
     {
-      "pipeline_id": "senado",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/senado/*"
-      ],
-      "blocking_reason_if_any": "-",
+      "pipeline_id": "paco_sanctions",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/paco_sanctions/*"],
       "core": true
     },
     {
-      "pipeline_id": "senado_cpis",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/senado_cpis/*"
-      ],
-      "blocking_reason_if_any": "Needs richer sessions and requirements",
-      "core": false
-    },
-    {
-      "pipeline_id": "siconfi",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/siconfi/*"
-      ],
-      "blocking_reason_if_any": "No CNPJ direct links",
-      "core": false
-    },
-    {
-      "pipeline_id": "siop",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/siop/*"
-      ],
-      "blocking_reason_if_any": "Author linkage limited",
-      "core": false
-    },
-    {
-      "pipeline_id": "stf",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/stf/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false,
-      "credential_env": [
-        "GOOGLE_APPLICATION_CREDENTIALS"
-      ]
-    },
-    {
-      "pipeline_id": "tcu",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/tcu/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "transferegov",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/transferegov/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": false
-    },
-    {
-      "pipeline_id": "transparencia",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/transparencia/*"
-      ],
-      "blocking_reason_if_any": "-",
+      "pipeline_id": "sigep_public_servants",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/sigep_public_servants/*"],
       "core": true
     },
     {
-      "pipeline_id": "tse",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/tse/*"
-      ],
-      "blocking_reason_if_any": "-",
-      "core": true
-    },
-    {
-      "pipeline_id": "tse_bens",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/tse_bens/*"
-      ],
-      "blocking_reason_if_any": "-",
+      "pipeline_id": "sigep_sensitive_positions",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/sigep_sensitive_positions/*"],
       "core": false
     },
     {
-      "pipeline_id": "tse_filiados",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/tse_filiados/*"
-      ],
-      "blocking_reason_if_any": "-",
+      "pipeline_id": "asset_disclosures",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/asset_disclosures/*"],
       "core": false
     },
     {
-      "pipeline_id": "un_sanctions",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/un_sanctions/*"
-      ],
-      "blocking_reason_if_any": "-",
+      "pipeline_id": "conflict_disclosures",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/conflict_disclosures/*"],
       "core": false
     },
     {
-      "pipeline_id": "viagens",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/viagens/*"
-      ],
-      "blocking_reason_if_any": "-",
+      "pipeline_id": "sgr_projects",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/sgr_projects/*"],
       "core": false
     },
     {
-      "pipeline_id": "world_bank",
-      "acquisition_mode": "file_manifest",
-      "required_inputs": [
-        "data/world_bank/*"
-      ],
-      "blocking_reason_if_any": "-",
+      "pipeline_id": "sgr_expense_execution",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/sgr_expense_execution/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "health_providers",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/health_providers/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "higher_ed_enrollment",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/higher_ed_enrollment/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "cuentas_claras_income_2019",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/cuentas_claras_income_2019/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "mapa_inversiones_projects",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/mapa_inversiones_projects/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "rues_chambers",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/rues_chambers/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "igac_property_transactions",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/igac_property_transactions/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_sanctions",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_sanctions/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_ii_processes",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_ii_processes/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_offers",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_offers/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_budget_commitments",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_budget_commitments/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_cdp_requests",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_cdp_requests/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_invoices",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_invoices/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_contract_execution",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_contract_execution/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_execution_locations",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_execution_locations/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_contract_additions",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_contract_additions/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_contract_modifications",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_contract_modifications/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_suppliers",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_suppliers/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "pte_sector_commitments",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/pte_sector_commitments/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "pte_top_contracts",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/pte_top_contracts/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "supersoc_top_companies",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/supersoc_top_companies/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "registraduria_death_status_checks",
+      "acquisition_mode": "manual_import",
+      "required_inputs": ["data/registraduria_death_status_checks/*.csv"],
       "core": false
     }
   ]

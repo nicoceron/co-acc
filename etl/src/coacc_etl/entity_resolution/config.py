@@ -8,7 +8,7 @@ def get_person_settings() -> dict[str, Any]:
 
     Fields compared:
     - name: jaro-winkler similarity at multiple thresholds
-    - cpf: exact match
+    - document_id: exact match
     - birth_date: exact match
     """
     try:
@@ -24,11 +24,11 @@ def get_person_settings() -> dict[str, Any]:
         link_type="dedupe_only",
         comparisons=[
             cl.JaroWinklerAtThresholds("name", score_threshold_or_thresholds=[0.9, 0.8]),
-            cl.ExactMatch("cpf"),
+            cl.ExactMatch("document_id"),
             cl.ExactMatch("birth_date"),
         ],
         blocking_rules_to_generate_predictions=[
-            "l.cpf = r.cpf",
+            "l.document_id = r.document_id",
             "l.name = r.name",
         ],
         retain_matching_columns=True,

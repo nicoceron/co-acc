@@ -9,7 +9,6 @@ from pathlib import Path
 FORBIDDEN_PATH_GLOBS = (
     "api/src/coacc/services/pattern_service.py",
     "api/src/coacc/queries/pattern_*.cypher",
-    "scripts/auto_finalize_pncp_backfill.sh",
     "docs/shadow_rollout_runbook.md",
     "docs/ingestion_priority_runbook.md",
     "docs/ops/storage_operations.md",

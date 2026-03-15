@@ -1,8 +1,8 @@
-# Contributing to BR/ACC Open Graph
+# Contributing to CO-ACC Open Graph
 
-Language: **English** | [Português (Brasil)](docs/pt-BR/CONTRIBUTING.md)
+Language: **English**
 
-Thanks for helping improve BR/ACC Open Graph.
+Thanks for helping improve CO-ACC Open Graph.
 
 ## Ground Rules
 
