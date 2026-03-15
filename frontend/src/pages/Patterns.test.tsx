@@ -19,16 +19,16 @@ const mockGetEntityPatterns = vi.mocked(getEntityPatterns);
 const samplePatterns = [
   {
     id: "p1",
-    name_pt: "Padrão A",
+    name_es: "Patrón A",
     name_en: "Pattern A",
-    description_pt: "Descrição A",
+    description_es: "Descripción A",
     description_en: "Description A",
   },
   {
     id: "p2",
-    name_pt: "Padrão B",
+    name_es: "Patrón B",
     name_en: "Pattern B",
-    description_pt: "Descrição B",
+    description_es: "Descripción B",
     description_en: "Description B",
   },
 ];

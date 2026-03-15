@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import "@/i18n";
+import i18n from "@/i18n";
 
 vi.mock("@/api/client", () => ({
   listInvestigations: vi.fn(),
@@ -227,32 +227,37 @@ describe("Dashboard", () => {
   });
 
   it("renders the expanded Spanish risk radar", async () => {
-    renderDashboard();
+    await i18n.changeLanguage("es-CO");
+    try {
+      renderDashboard();
 
-    await waitFor(() => {
-      expect(screen.getAllByText(/Personas priorizadas/i).length).toBeGreaterThan(0);
-      expect(screen.getByText("Adriana Maria Mejia Aguado")).toBeInTheDocument();
-      expect(screen.getByText("31862756")).toBeInTheDocument();
-      expect(
-        screen.getAllByText(/circuito donante-funcionario-proveedor/i).length,
-      ).toBeGreaterThan(0);
+      await waitFor(() => {
+        expect(screen.getAllByText(/Personas priorizadas/i).length).toBeGreaterThan(0);
+        expect(screen.getByText("Adriana Maria Mejia Aguado")).toBeInTheDocument();
+        expect(screen.getByText("31862756")).toBeInTheDocument();
+        expect(
+          screen.getAllByText(/circuito donante-funcionario-proveedor/i).length,
+        ).toBeGreaterThan(0);
 
-      expect(screen.getAllByText(/Empresas priorizadas/i).length).toBeGreaterThan(0);
-      expect(screen.getByText("Consorcio Andino")).toBeInTheDocument();
-      expect(
-        screen.getAllByText(/escala financiera reportada/i).length,
-      ).toBeGreaterThan(0);
+        expect(screen.getAllByText(/Empresas priorizadas/i).length).toBeGreaterThan(0);
+        expect(screen.getByText("Consorcio Andino")).toBeInTheDocument();
+        expect(
+          screen.getAllByText(/escala financiera reportada/i).length,
+        ).toBeGreaterThan(0);
 
-      expect(
-        screen.getAllByText(/Compradores públicos priorizados/i).length,
-      ).toBeGreaterThan(0);
-      expect(screen.getByText("Alcaldía de Prueba")).toBeInTheDocument();
-      expect(screen.getAllByText(/62.0%/i).length).toBeGreaterThan(0);
+        expect(
+          screen.getAllByText(/Compradores públicos priorizados/i).length,
+        ).toBeGreaterThan(0);
+        expect(screen.getByText("Alcaldía de Prueba")).toBeInTheDocument();
+        expect(screen.getAllByText(/62.0%/i).length).toBeGreaterThan(0);
 
-      expect(screen.getAllByText(/Territorios priorizados/i).length).toBeGreaterThan(0);
-      expect(screen.getByText("Bogota, Cundinamarca")).toBeInTheDocument();
-      expect(screen.getAllByText(/Fuentes: SECOP \/ SECOP II/i).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/Aún no probado/i).length).toBeGreaterThan(0);
-    });
+        expect(screen.getAllByText(/Territorios priorizados/i).length).toBeGreaterThan(0);
+        expect(screen.getByText("Bogota, Cundinamarca")).toBeInTheDocument();
+        expect(screen.getAllByText(/Fuentes: SECOP \/ SECOP II/i).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(/Aún no probado/i).length).toBeGreaterThan(0);
+      });
+    } finally {
+      await i18n.changeLanguage("en");
+    }
   });
 });

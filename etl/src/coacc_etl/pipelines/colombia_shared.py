@@ -4,7 +4,7 @@ import ast
 import hashlib
 import re
 import unicodedata
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pandas as pd
 

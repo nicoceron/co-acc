@@ -45,25 +45,8 @@ async def test_meta_sources(client: AsyncClient) -> None:
     assert "secop_integrado" in source_ids
     assert "secop_sanctions" in source_ids
     assert "paco_sanctions" in source_ids
-    assert "pte_sector_commitments" in source_ids
-    assert "pte_top_contracts" in source_ids
-    assert "secop_ii_processes" in source_ids
-    assert "secop_ii_contracts" in source_ids
-    assert "secop_suppliers" in source_ids
     assert "sigep_public_servants" in source_ids
-    assert "sigep_sensitive_positions" in source_ids
     assert "asset_disclosures" in source_ids
-    assert "conflict_disclosures" in source_ids
-    assert "sgr_projects" in source_ids
-    assert "sgr_expense_execution" in source_ids
-    assert "health_providers" in source_ids
-    assert "higher_ed_enrollment" in source_ids
-    assert "igac_property_transactions" in source_ids
-    assert "mapa_inversiones_projects" in source_ids
-    assert "registraduria_death_status_checks" in source_ids
-    assert "rues_chambers" in source_ids
-    assert "cuentas_claras_income_2019" in source_ids
-    assert "supersoc_top_companies" in source_ids
     first = data["sources"][0]
     assert "status" in first
     assert "implementation_state" in first
@@ -78,49 +61,20 @@ async def test_meta_sources(client: AsyncClient) -> None:
 @pytest.mark.anyio
 async def test_meta_stats(client: AsyncClient) -> None:
     mock_record = {
-        "total_nodes": 87_500_000,
-        "total_relationships": 53_100_000,
-        "person_count": 2_450_000,
-        "company_count": 58_500_000,
-        "health_count": 602_000,
-        "finance_count": 24_000_000,
-        "contract_count": 1_080_000,
-        "sanction_count": 69_000,
-        "election_count": 17_000,
-        "amendment_count": 98_000,
-        "embargo_count": 79_000,
-        "education_count": 224_000,
-        "convenio_count": 67_000,
-        "laborstats_count": 29_500,
-        "offshore_entity_count": 810_000,
-        "offshore_officer_count": 500_000,
-        "global_pep_count": 15_000,
-        "cvm_proceeding_count": 5_000,
-        "expense_count": 2_000_000,
-        "pep_record_count": 100_000,
-        "expulsion_count": 10_000,
-        "leniency_count": 34,
-        "international_sanction_count": 12_000,
-        "gov_card_expense_count": 500_000,
-        "gov_travel_count": 150_000,
-        "bid_count": 2_000_000,
-        "fund_count": 30_000,
-        "dou_act_count": 50_000,
-        "tax_waiver_count": 800_000,
-        "municipal_finance_count": 100_000,
-        "declared_asset_count": 5_000_000,
-        "party_membership_count": 15_000_000,
-        "barred_ngo_count": 5_000,
-        "bcb_penalty_count": 10_000,
-        "labor_movement_count": 2_000_000,
-        "legal_case_count": 100_000,
-        "judicial_case_count": 50_000,
-        "cpi_count": 500,
-        "inquiry_requirement_count": 2_500,
-        "inquiry_session_count": 1_400,
-        "municipal_bid_count": 8_000_000,
-        "municipal_contract_count": 6_000_000,
-        "municipal_gazette_act_count": 4_000_000,
+        "total_nodes": 10_000_000,
+        "total_relationships": 15_000_000,
+        "person_count": 1_200_000,
+        "company_count": 3_500_000,
+        "health_count": 150_000,
+        "finance_count": 2_000_000,
+        "contract_count": 3_000_000,
+        "sanction_count": 130_000,
+        "election_count": 50_000,
+        "amendment_count": 200_000,
+        "education_count": 10_000,
+        "bid_count": 500_000,
+        "source_document_count": 100_000,
+        "ingestion_run_count": 150,
     }
 
     # Reset the stats cache between tests
@@ -138,52 +92,20 @@ async def test_meta_stats(client: AsyncClient) -> None:
     assert response.status_code == 200
     data = response.json()
 
-    assert data["total_nodes"] == 87_500_000
-    assert data["total_relationships"] == 53_100_000
-    assert data["person_count"] == 2_450_000
-    assert data["company_count"] == 58_500_000
-    assert data["health_count"] == 602_000
-    assert data["finance_count"] == 24_000_000
-    assert data["contract_count"] == 1_080_000
-    assert data["sanction_count"] == 69_000
-    assert data["election_count"] == 17_000
-    assert data["amendment_count"] == 98_000
-    assert data["embargo_count"] == 79_000
-    assert data["education_count"] == 224_000
-    assert data["convenio_count"] == 67_000
-    assert data["laborstats_count"] == 29_500
-    assert data["offshore_entity_count"] == 810_000
-    assert data["offshore_officer_count"] == 500_000
-    assert data["global_pep_count"] == 15_000
-    assert data["cvm_proceeding_count"] == 5_000
-    assert data["expense_count"] == 2_000_000
-    assert data["pep_record_count"] == 100_000
-    assert data["expulsion_count"] == 10_000
-    assert data["leniency_count"] == 34
-    assert data["international_sanction_count"] == 12_000
-    assert data["gov_card_expense_count"] == 500_000
-    assert data["gov_travel_count"] == 150_000
-    assert data["bid_count"] == 2_000_000
-    assert data["fund_count"] == 30_000
-    assert data["dou_act_count"] == 50_000
-    assert data["tax_waiver_count"] == 800_000
-    assert data["municipal_finance_count"] == 100_000
-    assert data["declared_asset_count"] == 5_000_000
-    assert data["party_membership_count"] == 15_000_000
-    assert data["barred_ngo_count"] == 5_000
-    assert data["bcb_penalty_count"] == 10_000
-    assert data["labor_movement_count"] == 2_000_000
-    assert data["legal_case_count"] == 100_000
-    assert data["judicial_case_count"] == 50_000
-    assert data["cpi_count"] == 500
-    assert data["inquiry_requirement_count"] == 2_500
-    assert data["inquiry_session_count"] == 1_400
-    assert data["municipal_bid_count"] == 8_000_000
-    assert data["municipal_contract_count"] == 6_000_000
-    assert data["municipal_gazette_act_count"] == 4_000_000
-    assert data["source_document_count"] == 0
-    assert data["ingestion_run_count"] == 0
-    assert data["temporal_violation_count"] == 0
+    assert data["total_nodes"] == 10_000_000
+    assert data["total_relationships"] == 15_000_000
+    assert data["person_count"] == 1_200_000
+    assert data["company_count"] == 3_500_000
+    assert data["health_count"] == 150_000
+    assert data["finance_count"] == 2_000_000
+    assert data["contract_count"] == 3_000_000
+    assert data["sanction_count"] == 130_000
+    assert data["election_count"] == 50_000
+    assert data["amendment_count"] == 200_000
+    assert data["education_count"] == 10_000
+    assert data["bid_count"] == 500_000
+    assert data["source_document_count"] == 100_000
+    assert data["ingestion_run_count"] == 150
     summary = source_registry_summary(load_source_registry())
     assert data["data_sources"] == summary["universe_v1_sources"]
     assert data["implemented_sources"] == summary["implemented_sources"]

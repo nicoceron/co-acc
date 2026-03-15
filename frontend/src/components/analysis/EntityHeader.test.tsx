@@ -88,7 +88,7 @@ describe("EntityHeader", () => {
         onAddToInvestigation={onAdd}
       />,
     );
-    fireEvent.click(screen.getByText("Add entity"));
+    fireEvent.click(screen.getByText("Add to investigation"));
     expect(onAdd).toHaveBeenCalledOnce();
   });
 

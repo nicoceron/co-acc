@@ -13,8 +13,8 @@ interface PatternCardProps {
 export function PatternCard({ pattern, active, onClick }: PatternCardProps) {
   const { i18n } = useTranslation();
   const lang = i18n.language.startsWith("es") ? "es" : "en";
-  const name = lang === "es" ? (pattern as any).name_es : pattern.pattern_name;
-  const description = lang === "es" ? (pattern as any).desc_es : pattern.description;
+  const name = lang === "es" ? pattern.name_es : pattern.name_en;
+  const description = lang === "es" ? pattern.description_es : pattern.description_en;
 
   return (
     <button

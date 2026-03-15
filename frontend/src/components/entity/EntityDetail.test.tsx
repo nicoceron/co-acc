@@ -67,9 +67,9 @@ describe("EntityDetail", () => {
     render(<EntityDetail entityId="e1" onClose={vi.fn()} />);
 
     await waitFor(() => {
-      expect(screen.getByText("role")).toBeInTheDocument();
+      expect(screen.getByText("Role")).toBeInTheDocument();
       expect(screen.getByText("Directora")).toBeInTheDocument();
-      expect(screen.getByText("city")).toBeInTheDocument();
+      expect(screen.getByText("City")).toBeInTheDocument();
       expect(screen.getByText("Bogota")).toBeInTheDocument();
     });
   });

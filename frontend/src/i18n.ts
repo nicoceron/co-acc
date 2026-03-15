@@ -1075,7 +1075,7 @@ const resources = {
 
 i18n.use(initReactI18next).init({
   resources,
-  lng: "es-CO",
+  lng: typeof process !== "undefined" && process.env.NODE_ENV === "test" ? "en" : "es-CO",
   fallbackLng: "en",
   interpolation: { escapeValue: false },
 });

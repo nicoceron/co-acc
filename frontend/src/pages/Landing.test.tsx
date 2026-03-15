@@ -38,21 +38,21 @@ describe("Landing", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetStats.mockResolvedValue({
-      total_nodes: 87_000_000,
-      total_relationships: 53_000_000,
-      person_count: 2_450_000,
-      company_count: 58_500_000,
-      health_count: 602_000,
-      finance_count: 24_000_000,
-      contract_count: 1_080_000,
-      sanction_count: 69_000,
-      election_count: 17_000,
-      amendment_count: 98_000,
-      embargo_count: 79_000,
-      education_count: 224_000,
-      convenio_count: 67_000,
-      laborstats_count: 29_500,
-      data_sources: 17,
+      total_nodes: 10_000_000,
+      total_relationships: 15_000_000,
+      person_count: 1_200_000,
+      company_count: 3_500_000,
+      health_count: 150_000,
+      finance_count: 2_000_000,
+      contract_count: 3_000_000,
+      sanction_count: 130_000,
+      election_count: 50_000,
+      amendment_count: 200_000,
+      education_count: 10_000,
+      bid_count: 500_000,
+      source_document_count: 100_000,
+      ingestion_run_count: 150,
+      data_sources: 30,
     });
   });
 
@@ -63,7 +63,7 @@ describe("Landing", () => {
     // Hero heading should be rendered
     expect(screen.getByText("Trace Colombia's public contracts")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText("58.5M")).toBeInTheDocument();
+      expect(screen.getByText("3.5M")).toBeInTheDocument();
     });
   });
 
@@ -75,7 +75,7 @@ describe("Landing", () => {
     expect(screen.getByText("Explore the graph")).toBeInTheDocument();
     expect(screen.getByText("CO-ACC \u00B7 Colombia")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText("58.5M")).toBeInTheDocument();
+      expect(screen.getByText("3.5M")).toBeInTheDocument();
     });
   });
 

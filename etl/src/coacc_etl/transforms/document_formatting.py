@@ -35,11 +35,11 @@ def classify_document(doc: str | None) -> str:
     digits = strip_document(doc)
     if not digits:
         return "invalid"
-    
+
     length = len(digits)
     if 5 <= length <= 10:
-        # NIT and Cédula overlap in length. 
+        # NIT and Cédula overlap in length.
         # In this project we often treat them generically as document_id.
         return "valid_id"
-    
+
     return "invalid"

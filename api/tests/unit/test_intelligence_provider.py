@@ -49,10 +49,10 @@ def test_keeps_full_when_modules_are_available(
         settings.product_tier = original_tier
 
 
-def test_community_provider_exposes_exactly_17_patterns() -> None:
+def test_community_provider_exposes_exactly_15_patterns() -> None:
     provider = provider_module.CommunityIntelligenceProvider()
     pattern_ids = [row["id"] for row in provider.list_patterns()]
-    assert len(pattern_ids) == 17
+    assert len(pattern_ids) == 15
     assert set(pattern_ids) == set(provider_module.COMMUNITY_PATTERN_IDS)
 
 
@@ -106,7 +106,8 @@ async def test_community_provider_enforces_public_evidence_fields() -> None:
             new_callable=AsyncMock,
             return_value={
                 "entity_labels": ["Company"],
-                "e": {"cnpj": "11.111.111/0001-11"},
+                "e": {"nit": "900123456"},
+
             },
         ),
         patch(
@@ -115,7 +116,7 @@ async def test_community_provider_enforces_public_evidence_fields() -> None:
             return_value=[
                 {
                     "pattern_id": "debtor_contracts",
-                    "cnpj": "11.111.111/0001-11",
+                    "nit": "900123456",
                     "company_name": "Empresa Teste",
                     "amount_total": 1000.0,
                     "window_start": "2024-01-01",

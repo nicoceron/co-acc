@@ -295,9 +295,9 @@ export function getEntityByElementId(elementId: string): Promise<EntityDetail> {
 
 export interface PatternInfo {
   id: string;
-  name_pt: string;
+  name_es: string;
   name_en: string;
-  description_pt: string;
+  description_es: string;
   description_en: string;
 }
 
@@ -327,7 +327,7 @@ export function listPatterns(): Promise<PatternListResponse> {
 
 export function getEntityPatterns(
   entityId: string,
-  lang = "pt",
+  lang = "es",
 ): Promise<PatternResponse> {
   const params = new URLSearchParams({ lang });
   return apiFetch<PatternResponse>(
@@ -558,10 +558,10 @@ export interface StatsResponse {
   sanction_count: number;
   election_count: number;
   amendment_count: number;
-  embargo_count: number;
   education_count: number;
-  convenio_count: number;
-  laborstats_count: number;
+  bid_count: number;
+  source_document_count: number;
+  ingestion_run_count: number;
   data_sources: number;
 }
 
@@ -629,7 +629,7 @@ export function getHealthStatus(): Promise<HealthResponse> {
 
 export function exportInvestigationPDF(
   investigationId: string,
-  lang = "pt",
+  lang = "es",
 ): Promise<Blob> {
   const params = new URLSearchParams({ lang });
   return apiFetchBlob(

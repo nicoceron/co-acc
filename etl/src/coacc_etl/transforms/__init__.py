@@ -2,11 +2,8 @@ from coacc_etl.transforms.date_formatting import parse_date
 from coacc_etl.transforms.deduplication import deduplicate_rows
 from coacc_etl.transforms.document_formatting import (
     classify_document,
-    format_cnpj,
-    format_cpf,
+    format_nit,
     strip_document,
-    validate_cnpj,
-    validate_cpf,
 )
 from coacc_etl.transforms.name_normalization import normalize_name
 from coacc_etl.transforms.value_sanitization import (
@@ -19,11 +16,8 @@ __all__ = [
     "cap_contract_value",
     "classify_document",
     "deduplicate_rows",
-    "format_cnpj",
-    "format_cpf",
+    "format_nit",
     "normalize_name",
     "parse_date",
     "strip_document",
-    "validate_cnpj",
-    "validate_cpf",
 ]

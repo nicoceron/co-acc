@@ -5,30 +5,30 @@ import { PatternCard } from "./PatternCard";
 import "../../i18n";
 
 const mockPattern = {
-  id: "self_dealing_amendment",
-  name_pt: "Emenda autodirecionada",
-  name_en: "Self-dealing amendment",
-  description_pt: "Parlamentar autor de emenda com empresa familiar",
-  description_en: "Legislator authored amendment where family company won",
+  id: "sanctioned_supplier_record",
+  name_es: "Proveedor con historial de sanción",
+  name_en: "Supplier with sanction history",
+  description_es: "Proveedor con sanciones registradas en fuentes públicas",
+  description_en: "Supplier with sanctions recorded in public sources",
 };
 
 describe("PatternCard", () => {
   it("renders pattern name and description in English", () => {
     render(<PatternCard pattern={mockPattern} />);
-    expect(screen.getByText("Self-dealing amendment")).toBeDefined();
-    expect(screen.getByText("Legislator authored amendment where family company won")).toBeDefined();
+    expect(screen.getByText("Supplier with sanction history")).toBeDefined();
+    expect(screen.getByText("Supplier with sanctions recorded in public sources")).toBeDefined();
   });
 
   it("renders pattern id", () => {
     render(<PatternCard pattern={mockPattern} />);
-    expect(screen.getByText("self_dealing_amendment")).toBeDefined();
+    expect(screen.getByText("sanctioned_supplier_record")).toBeDefined();
   });
 
   it("calls onClick with pattern id", () => {
     const onClick = vi.fn();
     render(<PatternCard pattern={mockPattern} onClick={onClick} />);
     fireEvent.click(screen.getByRole("button"));
-    expect(onClick).toHaveBeenCalledWith("self_dealing_amendment");
+    expect(onClick).toHaveBeenCalledWith("sanctioned_supplier_record");
   });
 
   it("applies active class when active", () => {
