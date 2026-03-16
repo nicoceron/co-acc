@@ -4,7 +4,7 @@ set -u
 fail=0
 
 echo "[python-quality] installing dependencies"
-uv sync --extra dev || fail=1
+uv sync --frozen --extra dev || fail=1
 
 echo "[python-quality] lint"
 uv run ruff check src/ tests/ || fail=1
