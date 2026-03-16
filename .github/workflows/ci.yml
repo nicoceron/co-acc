@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: [api, etl]
-    if: github.ref == 'refs/heads/main' && vars.ENABLE_INTEGRATION_TESTS == 'true'
+    if: github.ref == 'refs/heads/main'
     services:
       neo4j:
         image: neo4j:5-community
