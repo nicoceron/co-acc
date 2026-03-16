@@ -12,6 +12,14 @@ This fork adapts the `World-Open-Graph/br-acc` stack to a Colombia-only scope. I
 - **ETL Pipelines:** 30+ curated pipelines for SECOP, SIGEP, SGR, and other official sources.
 - **Source Registry:** Auditable tracking of Colombia's public source universe in [`docs/source_registry_co_v1.csv`](docs/source_registry_co_v1.csv).
 
+## Modifications from Original
+
+This project was modified from the original `World-Open-Graph/br-acc` (March 2026):
+- **Localization:** All Brazilian entities (CPF/CNPJ) and terminology were replaced with Colombian identifiers (Cédula/NIT).
+- **Pipelines:** 40+ Brazilian data pipelines were removed and replaced with 30+ Colombian-specific pipelines (SECOP, SIGEP, SGR).
+- **UI:** The interface was translated into Spanish (es-CO) and adapted for Colombian public procurement transparency goals.
+- **Rules:** Automated risk patterns were tuned for Colombian thresholds and legal frameworks.
+
 ## What Is Not Included By Default
 
 - **Production Graph:** This repo does **not** include a preloaded production graph or a reference production snapshot.

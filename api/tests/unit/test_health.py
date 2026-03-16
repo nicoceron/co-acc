@@ -118,7 +118,7 @@ async def test_meta_stats(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
-async def test_meta_suspicious_people_watchlist(client: AsyncClient) -> None:
+async def test_meta_prioritized_people_watchlist(client: AsyncClient) -> None:
     import coacc.routers.meta as meta_module
 
     meta_module._watchlist_cache = {}
@@ -171,7 +171,7 @@ async def test_meta_suspicious_people_watchlist(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
-async def test_meta_suspicious_company_watchlist(client: AsyncClient) -> None:
+async def test_meta_prioritized_company_watchlist(client: AsyncClient) -> None:
     import coacc.routers.meta as meta_module
 
     meta_module._company_watchlist_cache = {}
@@ -228,7 +228,7 @@ async def test_meta_suspicious_company_watchlist(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
-async def test_meta_suspicious_buyer_watchlist(client: AsyncClient) -> None:
+async def test_meta_prioritized_buyer_watchlist(client: AsyncClient) -> None:
     import coacc.routers.meta as meta_module
 
     meta_module._buyer_watchlist_cache = {}
@@ -274,7 +274,7 @@ async def test_meta_suspicious_buyer_watchlist(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
-async def test_meta_suspicious_territory_watchlist(client: AsyncClient) -> None:
+async def test_meta_prioritized_territory_watchlist(client: AsyncClient) -> None:
     import coacc.routers.meta as meta_module
 
     meta_module._territory_watchlist_cache = {}

@@ -23,7 +23,6 @@ INVESTIGATION_CYPHER_FILES = [
     "tag_create",
     "tag_list",
     "tag_delete",
-    "tag_add_to_entity",
 ]
 
 

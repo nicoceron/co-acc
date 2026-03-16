@@ -54,6 +54,15 @@ export function StatusBar({ nodeCount, edgeCount }: StatusBarProps) {
         )}
       </div>
       <div className={styles.right}>
+        <a
+          href="https://github.com/nicoceron/co-acc"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.sourceLink}
+        >
+          Source Code
+        </a>
+        <span className={styles.divider}>|</span>
         <span>
           {t("statusBar.lastRefresh")}{" "}
           {new Date().toLocaleTimeString()}
