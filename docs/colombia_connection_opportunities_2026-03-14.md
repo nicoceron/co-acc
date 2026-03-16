@@ -27,16 +27,16 @@ This report compiles the Colombia data that is currently live in the repo and ma
 ### Main live relationship families
 
 - `CONTRATOU`: `6,876,732`
-- `DECLAROU_FINANCA`: `329,799`
-- `DECLAROU_BEM`: `328,799`
-- `DOOU`: `182,356`
-- `FORNECEU`: `166,669`
+- `DECLARO_FINANZAS`: `329,799`
+- `DECLARO_BIEN`: `328,799`
+- `DONO_A`: `182,356`
+- `SUMINISTRO`: `166,669`
 - `ADJUDICOU_A`: `149,820`
 - `CANDIDATO_EM`: `121,321`
 - `ADMINISTRA`: `98,305`
-- `OPERA_UNIDADE`: `76,395`
+- `OPERA_UNIDAD`: `76,395`
 - `SANCIONADA`: `55,592`
-- `RECEBEU_SALARIO`: `24,737`
+- `RECIBIO_SALARIO`: `24,737`
 
 ## Loaded Sources That Actually Matter For Detection
 
@@ -96,10 +96,10 @@ This same-ID person/company bridge is the single strongest current join in the C
 ### Risk joins
 
 - `Company -[:SANCIONADA]-> Sanction`
-- `Person -[:DECLAROU_FINANCA]-> Finance(type='CONFLICT_DISCLOSURE')`
-- `Person -[:DECLAROU_BEM]-> DeclaredAsset`
-- `Company -[:DECLAROU_FINANCA]-> Finance(type='SUPERSOC_TOP_COMPANY')`
-- `Company -[:OPERA_UNIDADE]-> Health`
+- `Person -[:DECLARO_FINANZAS]-> Finance(type='CONFLICT_DISCLOSURE')`
+- `Person -[:DECLARO_BIEN]-> DeclaredAsset`
+- `Company -[:DECLARO_FINANZAS]-> Finance(type='SUPERSOC_TOP_COMPANY')`
+- `Company -[:OPERA_UNIDAD]-> Health`
 
 ## Corruption Functionality Already Real
 
@@ -328,7 +328,7 @@ This is the Colombia version of a patrimony-incompatibility detector, and it is 
 
 Join:
 
-`Person -[:RECEBEU_SALARIO {sensitive_position:true}]-> PublicOffice`
+`Person -[:RECIBIO_SALARIO {sensitive_position:true}]-> PublicOffice`
 `Person.document_id == Company.document_id`
 `Company <- CONTRATOU`
 
@@ -377,9 +377,9 @@ Healthcare is one of the easiest sectors for capture to hide inside service comp
 Join:
 
 `Company <- CONTRATOU`
-`Company -> FORNECEU (SGR expense execution)`
+`Company -> SUMINISTRO (SGR expense execution)`
 `Company -> ADMINISTRA -> Convenio`
-`Company -> OPERA_UNIDADE`
+`Company -> OPERA_UNIDAD`
 
 Detector:
 
@@ -464,7 +464,7 @@ The repo now has code paths for:
 
 But these auxiliary SECOP layers are not yet materially visible in the live graph. In the current Neo4j data:
 
-- `FORNECEU_LICITACAO` is not present
+- `SUMINISTRO_LICITACAO` is not present
 - invoice/commitment execution properties are not materially visible on `CONTRATOU`
 
 Meaning:

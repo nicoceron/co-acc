@@ -335,7 +335,7 @@ class SecopOffersPipeline(Pipeline):
             UNWIND $rows AS row
             MATCH (buyer:Company {document_id: row.source_key})
             MATCH (bid:Bid {bid_id: row.target_key})
-            MERGE (buyer)-[r:LICITOU]->(bid)
+            MERGE (buyer)-[r:LICITO]->(bid)
             SET r.source = row.source,
                 r.country = row.country,
                 r.buyer_document_id = row.buyer_document_id,
@@ -351,7 +351,7 @@ class SecopOffersPipeline(Pipeline):
             UNWIND $rows AS row
             MATCH (supplier:Company {document_id: row.source_key})
             MATCH (bid:Bid {bid_id: row.target_key})
-            MERGE (supplier)-[r:FORNECEU_LICITACAO]->(bid)
+            MERGE (supplier)-[r:SUMINISTRO_LICITACAO]->(bid)
             WITH r, row,
                  coalesce(r.offer_count, 0) AS prev_count,
                  coalesce(r.offer_value_total, 0.0) AS prev_total,

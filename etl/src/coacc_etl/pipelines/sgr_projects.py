@@ -69,7 +69,7 @@ class SgrProjectsPipeline(Pipeline):
                 company_map[executor_code] = {
                     "document_id": executor_code,
                     "name": executor_name,
-                    "razao_social": executor_name,
+                    "razon_social": executor_name,
                     "department": clean_text(row.get("departamento")),
                     "source": "sgr_projects",
                     "country": "CO",

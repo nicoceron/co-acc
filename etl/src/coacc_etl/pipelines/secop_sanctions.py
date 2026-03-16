@@ -146,7 +146,7 @@ class SecopSanctionsPipeline(Pipeline):
                     "document_id": contractor_document,
                     "nit": contractor_document,
                     "name": contractor_name or contractor_document,
-                    "razao_social": contractor_name or contractor_document,
+                    "razon_social": contractor_name or contractor_document,
                     "source": "secop_sanctions",
                     "country": "CO",
                 }
@@ -190,7 +190,7 @@ class SecopSanctionsPipeline(Pipeline):
                     "document_id": supplier_code,
                     "nit": supplier_code,
                     "name": supplier_name or supplier_code,
-                    "razao_social": supplier_name or supplier_code,
+                    "razon_social": supplier_name or supplier_code,
                     "source": "secop_sanctions",
                     "country": "CO",
                 }
@@ -265,7 +265,7 @@ class SecopSanctionsPipeline(Pipeline):
             )
         if self.company_contract_rels:
             loaded += loader.load_relationships(
-                rel_type="VENCEU",
+                rel_type="GANO",
                 rows=self.company_contract_rels,
                 source_label="Company",
                 source_key="document_id",

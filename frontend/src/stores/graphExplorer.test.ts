@@ -38,47 +38,47 @@ const INITIAL_ENTITY_TYPES = [
 
 const INITIAL_REL_TYPES = [
   "SOCIO_DE",
-  "DOOU",
+  "DONO_A",
   "CANDIDATO_EM",
-  "VENCEU",
+  "GANO",
   "CONTRATOU",
   "ADJUDICOU_A",
   "AUTOR_EMENDA",
   "SANCIONADA",
-  "OPERA_UNIDADE",
+  "OPERA_UNIDAD",
   "DEVE",
   "RECEBEU_EMPRESTIMO",
   "EMBARGADA",
-  "MANTEDORA_DE",
-  "BENEFICIOU",
-  "GEROU_CONVENIO",
+  "MANTIENE_A",
+  "BENEFICIO",
+  "GENERO_CONVENIO",
   "SAME_AS",
   "PEP_REGISTRADA",
   "EXPULSO",
-  "FIRMOU_LENIENCIA",
+  "FIRMO_TRANSPARENCIA",
   "HOLDING_DE",
-  "GASTOU_CARTAO",
-  "VIAJOU",
-  "LICITOU",
+  "GASTO_CARTAO",
+  "VIAJO",
+  "LICITO",
   "ADMINISTRA",
-  "GERE",
-  "PUBLICOU",
-  "MENCIONOU",
-  "RECEBEU_RENUNCIA",
-  "DECLAROU_FINANCA",
-  "FORNECEU_LICITACAO",
-  "DECLAROU_BEM",
-  "RECEBEU_SALARIO",
+  "GESTIONA",
+  "PUBLICO",
+  "MENCIONO",
+  "RECIBIO_EXENCION",
+  "DECLARO_FINANZAS",
+  "SUMINISTRO_LICITACAO",
+  "DECLARO_BIEN",
+  "RECIBIO_SALARIO",
   "REFERENTE_A",
-  "FILIADO_A",
-  "IMPEDIDA",
+  "AAFILIADO_A",
+  "INHABILITADA",
   "BCB_PENALIZADA",
-  "MOVIMENTOU",
-  "EMPREGADO_EM",
+  "MOVILIZO",
+  "EMPLEADO_EN",
   "RELATOR_DE",
   "SANCIONADA_INTERNACIONALMENTE",
   "UN_SANCTIONED",
-  "PARTICIPOU_CPI",
+  "PARTICIPO_INVESTIGACION",
 ];
 
 describe("useGraphExplorerStore", () => {
@@ -126,17 +126,17 @@ describe("useGraphExplorerStore", () => {
   });
 
   it("toggleRelType removes an existing relationship type", () => {
-    useGraphExplorerStore.getState().toggleRelType("DOOU");
+    useGraphExplorerStore.getState().toggleRelType("DONO_A");
     const rels = useGraphExplorerStore.getState().enabledRelTypes;
-    expect(rels.has("DOOU")).toBe(false);
+    expect(rels.has("DONO_A")).toBe(false);
     expect(rels.size).toBe(INITIAL_REL_TYPES.length - 1);
   });
 
   it("toggleRelType adds a new relationship type", () => {
-    useGraphExplorerStore.getState().toggleRelType("DOOU");
-    useGraphExplorerStore.getState().toggleRelType("DOOU");
+    useGraphExplorerStore.getState().toggleRelType("DONO_A");
+    useGraphExplorerStore.getState().toggleRelType("DONO_A");
     const rels = useGraphExplorerStore.getState().enabledRelTypes;
-    expect(rels.has("DOOU")).toBe(true);
+    expect(rels.has("DONO_A")).toBe(true);
     expect(rels.size).toBe(INITIAL_REL_TYPES.length);
   });
 
@@ -202,7 +202,7 @@ describe("useGraphExplorerStore", () => {
     const store = useGraphExplorerStore.getState();
     store.setDepth(5);
     store.toggleType("person");
-    store.toggleRelType("DOOU");
+    store.toggleRelType("DONO_A");
     store.selectNode("node-1");
     store.hideNode("h1");
     store.setLayoutMode("hierarchy");

@@ -278,7 +278,7 @@ class ConflictDisclosuresPipeline(Pipeline):
                 "UNWIND $rows AS row "
                 "MATCH (p:Person {document_id: row.source_key}) "
                 "MATCH (f:Finance {finance_id: row.target_key}) "
-                "MERGE (p)-[r:DECLAROU_FINANCA]->(f) "
+                "MERGE (p)-[r:DECLARO_FINANZAS]->(f) "
                 "SET r.source = row.source"
             )
             loaded += loader.run_query(query, self.disclosure_rels)
@@ -297,7 +297,7 @@ class ConflictDisclosuresPipeline(Pipeline):
                 "UNWIND $rows AS row "
                 "MATCH (f:Finance {finance_id: row.source_key}) "
                 "CALL (row) { "
-                "  MATCH (c:Company {razao_social: row.target_name}) "
+                "  MATCH (c:Company {razon_social: row.target_name}) "
                 "  WITH collect(c) AS matches "
                 "  WHERE size(matches) = 1 "
                 "  RETURN matches[0] AS company "

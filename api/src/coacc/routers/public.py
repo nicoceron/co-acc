@@ -176,7 +176,7 @@ async def public_graph_for_company(
         nodes.append(
             GraphNode(
                 id=node_id,
-                label=str(clean_props.get("razao_social", clean_props.get("name", node_id))),
+                label=str(clean_props.get("razon_social", clean_props.get("name", node_id))),
                 type=entity_type_for_label(labels[0] if labels else None),
                 document_id=str(
                     clean_props.get(

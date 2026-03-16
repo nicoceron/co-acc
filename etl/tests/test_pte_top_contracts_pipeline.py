@@ -37,5 +37,5 @@ def test_load_creates_administra_beneficiou_and_referente_a_relationships() -> N
     session_mock = pipeline.driver.session.return_value.__enter__.return_value
     run_calls = session_mock.run.call_args_list
     assert any("MERGE (a)-[r:ADMINISTRA]->(b)" in str(call) for call in run_calls)
-    assert any("MERGE (a)-[r:BENEFICIOU]->(b)" in str(call) for call in run_calls)
+    assert any("MERGE (a)-[r:BENEFICIO]->(b)" in str(call) for call in run_calls)
     assert any("MERGE (contract)-[r:REFERENTE_A]->(sector)" in str(call) for call in run_calls)

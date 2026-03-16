@@ -56,7 +56,7 @@ def build_company_row(
     row: dict[str, Any] = {
         "document_id": document_id,
         "name": name,
-        "razao_social": name,
+        "razon_social": name,
         "source": source,
         "country": country,
     }

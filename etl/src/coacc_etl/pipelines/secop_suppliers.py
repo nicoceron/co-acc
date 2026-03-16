@@ -76,7 +76,7 @@ class SecopSuppliersPipeline(Pipeline):
                 "document_id": supplier_document,
                 "nit": supplier_document,
                 "name": supplier_name,
-                "razao_social": supplier_name,
+                "razon_social": supplier_name,
                 "supplier_code": clean_text(row.get("codigo")),
                 "company_type": clean_text(row.get("tipo_empresa")),
                 "is_active": parse_flag(row.get("esta_activa")),

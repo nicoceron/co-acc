@@ -503,7 +503,7 @@ class PacoSanctionsPipeline(Pipeline):
             )
         if self.company_contract_rels:
             loaded += loader.load_relationships(
-                rel_type="VENCEU",
+                rel_type="GANO",
                 rows=self.company_contract_rels,
                 source_label="Company",
                 source_key="document_id",

@@ -62,7 +62,7 @@ WHERE size(debt_ids) > 0
   AND size(evidence_refs) > 0
 RETURN 'debtor_contracts' AS pattern_id,
        coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
-       c.razao_social AS company_name,
+       c.razon_social AS company_name,
        toFloat(size(debt_ids) + size(contract_ids)) AS risk_signal,
        amount_total AS amount_total,
        window_start AS window_start,

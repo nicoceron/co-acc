@@ -2,11 +2,11 @@ MATCH (p)
 WHERE (elementId(p) = $person_id
        OR p.document_id = $person_document_id
        OR p.cedula = $person_document_id)
-MATCH (p)-[:RECEBEU_SALARIO]->(o:PublicOffice)
+MATCH (p)-[:RECIBIO_SALARIO]->(o:PublicOffice)
 MATCH (c:Company {document_id: coalesce(p.document_id, p.cedula)})
 MATCH ()-[award:CONTRATOU]->(c)
-OPTIONAL MATCH (p)-[d:DOOU]->(:Election)
-OPTIONAL MATCH (p)-[:DECLAROU_FINANCA]->(f:Finance {type: 'CONFLICT_DISCLOSURE'})
+OPTIONAL MATCH (p)-[d:DONO_A]->(:Election)
+OPTIONAL MATCH (p)-[:DECLARO_FINANZAS]->(f:Finance {type: 'CONFLICT_DISCLOSURE'})
 WITH p,
      collect(DISTINCT coalesce(o.role, o.cargo, o.name, o.org))[0..5] AS office_names,
      count(DISTINCT award.summary_id) AS supplier_contract_count,
@@ -41,7 +41,7 @@ WITH p,
 WHERE supplier_contract_count >= 1
   AND donation_count >= 1
 RETURN 'donor_official_vendor_loop' AS pattern_id,
-       coalesce(p.name, p.nome, p.full_name, p.document_id) AS subject_name,
+       coalesce(p.name, p.nombre, p.full_name, p.document_id) AS subject_name,
        p.document_id AS document_id,
        toFloat(
          supplier_contract_count

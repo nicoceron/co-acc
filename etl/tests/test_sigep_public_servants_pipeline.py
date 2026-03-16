@@ -43,4 +43,4 @@ def test_load_creates_salary_relationships() -> None:
         "MERGE (n:PublicOffice {office_id: row.office_id})" in str(call)
         for call in run_calls
     )
-    assert any("MERGE (p)-[r:RECEBEU_SALARIO]->(o)" in str(call) for call in run_calls)
+    assert any("MERGE (p)-[r:RECIBIO_SALARIO]->(o)" in str(call) for call in run_calls)

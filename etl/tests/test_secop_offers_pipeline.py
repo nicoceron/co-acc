@@ -46,8 +46,8 @@ def test_load_creates_bid_and_participation_relationships() -> None:
     session_mock = pipeline.driver.session.return_value.__enter__.return_value
     run_calls = session_mock.run.call_args_list
     assert any("MERGE (b:Bid {bid_id: row.bid_id})" in str(call) for call in run_calls)
-    assert any("MERGE (buyer)-[r:LICITOU]->(bid)" in str(call) for call in run_calls)
+    assert any("MERGE (buyer)-[r:LICITO]->(bid)" in str(call) for call in run_calls)
     assert any(
-        "MERGE (supplier)-[r:FORNECEU_LICITACAO]->(bid)" in str(call)
+        "MERGE (supplier)-[r:SUMINISTRO_LICITACAO]->(bid)" in str(call)
         for call in run_calls
     )

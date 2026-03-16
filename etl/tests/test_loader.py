@@ -16,8 +16,8 @@ class TestNeo4jBatchLoader:
     def test_load_nodes(self) -> None:
         loader, session = self._make_loader()
         rows = [
-            {"cnpj": "111", "razao_social": "Company A", "uf": "SP"},
-            {"cnpj": "222", "razao_social": "Company B", "uf": "RJ"},
+            {"cnpj": "111", "razon_social": "Company A", "uf": "SP"},
+            {"cnpj": "222", "razon_social": "Company B", "uf": "RJ"},
         ]
         count = loader.load_nodes("Company", rows, "cnpj")
         assert count == 2
@@ -39,7 +39,7 @@ class TestNeo4jBatchLoader:
             {"source_key": "111", "target_key": "AAA", "value": 1000},
         ]
         count = loader.load_relationships(
-            "VENCEU", rows,
+            "GANO", rows,
             "Company", "cnpj",
             "Contract", "contract_id",
             properties=["value"],
@@ -48,7 +48,7 @@ class TestNeo4jBatchLoader:
         session.run.assert_called_once()
         query = session.run.call_args[0][0]
         assert "MERGE" in query
-        assert "VENCEU" in query
+        assert "GANO" in query
 
     def test_batching(self) -> None:
         loader, session = self._make_loader(batch_size=2)

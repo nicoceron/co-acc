@@ -32,4 +32,4 @@ def test_load_creates_operates_unit_relationships() -> None:
     session_mock = pipeline.driver.session.return_value.__enter__.return_value
     run_calls = session_mock.run.call_args_list
     assert any("MERGE (n:Health {cnes_code: row.cnes_code})" in str(call) for call in run_calls)
-    assert any("MERGE (a)-[r:OPERA_UNIDADE]->(b)" in str(call) for call in run_calls)
+    assert any("MERGE (a)-[r:OPERA_UNIDAD]->(b)" in str(call) for call in run_calls)

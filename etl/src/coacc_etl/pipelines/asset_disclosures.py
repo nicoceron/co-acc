@@ -141,7 +141,7 @@ class AssetDisclosuresPipeline(Pipeline):
                 "UNWIND $rows AS row "
                 "MATCH (p:Person {document_id: row.source_key}) "
                 "MATCH (a:DeclaredAsset {asset_id: row.target_key}) "
-                "MERGE (p)-[r:DECLAROU_BEM]->(a) "
+                "MERGE (p)-[r:DECLARO_BIEN]->(a) "
                 "SET r.source = row.source"
             )
             loaded += loader.run_query(query, self.asset_rels)

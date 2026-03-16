@@ -65,7 +65,7 @@ WITH CASE
      supplier_discrepancy_contract_count,
      supplier_discrepancy_value,
      supplier_has_sanction,
-     coalesce(c.razao_social, c.name, c.document_id, c.nit, c.cnpj) AS supplier_name,
+     coalesce(c.razon_social, c.name, c.document_id, c.nit, c.cnpj) AS supplier_name,
      coalesce(c.document_id, c.nit, c.cnpj) AS supplier_document_id
 ORDER BY buyer_id ASC,
          supplier_value DESC,

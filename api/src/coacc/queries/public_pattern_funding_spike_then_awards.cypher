@@ -9,7 +9,7 @@ WHERE (
     OR c.cnpj = $company_identifier_formatted
   )
   AND coalesce(c.document_id, c.nit, c.cnpj, '') <> '0'
-MATCH (c)-[:FORNECEU]->(f:Finance {type: 'SGR_EXPENSE_EXECUTION'})
+MATCH (c)-[:SUMINISTRO]->(f:Finance {type: 'SGR_EXPENSE_EXECUTION'})
 CALL {
   WITH c
   MATCH ()-[award:CONTRATOU]->(c)
@@ -29,7 +29,7 @@ WHERE contract_count >= toInteger($pattern_min_contract_count)
   AND funding_event_count >= 2
 RETURN 'funding_spike_then_awards' AS pattern_id,
        coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
-       coalesce(c.razao_social, c.name) AS company_name,
+       coalesce(c.razon_social, c.name) AS company_name,
        toFloat(contract_count + funding_event_count) AS risk_signal,
        toInteger(contract_count) AS contract_count,
        amount_total AS amount_total,

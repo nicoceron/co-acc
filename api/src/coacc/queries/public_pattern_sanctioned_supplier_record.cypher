@@ -31,7 +31,7 @@ WITH c,
      [x IN sanction_refs WHERE x IS NOT NULL AND x <> ""] AS evidence_refs
 RETURN 'sanctioned_supplier_record' AS pattern_id,
        coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
-       coalesce(c.razao_social, c.name) AS company_name,
+       coalesce(c.razon_social, c.name) AS company_name,
        toFloat((sanction_count * 2) + CASE WHEN contract_count > 0 THEN 1 ELSE 0 END) AS risk_signal,
        amount_total AS amount_total,
        toInteger(contract_count) AS contract_count,

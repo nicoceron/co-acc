@@ -231,7 +231,7 @@ class PteTopContractsPipeline(Pipeline):
             )
         if self.beneficiary_relations:
             loaded += loader.load_relationships(
-                rel_type="BENEFICIOU",
+                rel_type="BENEFICIO",
                 rows=self.beneficiary_relations,
                 source_label="Company",
                 source_key="document_id",

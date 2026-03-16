@@ -9,7 +9,7 @@ WHERE elementId(center) = $company_id
 CALL apoc.path.expandConfig(
   center,
   {
-    relationshipFilter: "SOCIO_DE|VENCEU|CONTRATOU|ADJUDICOU_A|SANCIONADA|DEVE|RECEBEU_EMPRESTIMO|BENEFICIOU|GEROU_CONVENIO|MUNICIPAL_VENCEU|MUNICIPAL_LICITOU|LICITOU|FORNECEU_LICITACAO|REFERENTE_A|ADMINISTRA",
+    relationshipFilter: "SOCIO_DE|GANO|CONTRATOU|ADJUDICOU_A|SANCIONADA|DEVE|RECEBEU_EMPRESTIMO|BENEFICIO|GENERO_CONVENIO|MUNICIPAL_GANO|MUNICIPAL_LICITO|LICITO|SUMINISTRO_LICITACAO|REFERENTE_A|ADMINISTRA",
     labelFilter: "+Company|+Contract|+Sanction|+Finance|+Amendment|+Convenio|+Bid|+MunicipalContract|+MunicipalBid|-Person|-Partner|-User|-Investigation|-Annotation|-Tag",
     maxLevel: toInteger($depth),
     bfs: true,

@@ -21,14 +21,14 @@ CALL {
          0.0 AS commitment_gap_total
   UNION ALL
   MATCH (p:Person)-[:OFFICER_OF]->(c:Company)
-  WHERE EXISTS { MATCH (p)-[:RECEBEU_SALARIO]->(:PublicOffice) }
-  OPTIONAL MATCH (p)-[:RECEBEU_SALARIO]->(o:PublicOffice)
+  WHERE EXISTS { MATCH (p)-[:RECIBIO_SALARIO]->(:PublicOffice) }
+  OPTIONAL MATCH (p)-[:RECIBIO_SALARIO]->(o:PublicOffice)
   RETURN elementId(c) AS company_id,
          c AS company,
          0 AS sanction_count,
          count(DISTINCT p) AS official_officer_count,
          count(DISTINCT o) AS official_role_count,
-         collect(DISTINCT coalesce(p.name, p.nome, p.document_id))[0..3] AS official_names,
+         collect(DISTINCT coalesce(p.name, p.nombre, p.document_id))[0..3] AS official_names,
          0 AS low_competition_bid_count,
          0.0 AS low_competition_bid_value,
          0 AS direct_invitation_bid_count,
@@ -43,7 +43,7 @@ CALL {
          0 AS commitment_gap_contract_count,
          0.0 AS commitment_gap_total
   UNION ALL
-  MATCH (c:Company)-[offer:FORNECEU_LICITACAO]->(b:Bid)
+  MATCH (c:Company)-[offer:SUMINISTRO_LICITACAO]->(b:Bid)
   WHERE coalesce(b.offer_count, 0) <= 2
      OR coalesce(b.direct_invitation, false) = true
   RETURN elementId(c) AS company_id,
@@ -119,7 +119,7 @@ CALL {
            0.0
          ) AS commitment_gap_total
   UNION ALL
-  MATCH (c:Company)-[:FORNECEU]->(f:Finance {type: 'SGR_EXPENSE_EXECUTION'})
+  MATCH (c:Company)-[:SUMINISTRO]->(f:Finance {type: 'SGR_EXPENSE_EXECUTION'})
   WHERE coalesce(c.document_id, c.nit, c.cnpj, '') <> '0'
     AND EXISTS { MATCH ()-[:CONTRATOU]->(c) }
   RETURN elementId(c) AS company_id,
@@ -142,7 +142,7 @@ CALL {
          0 AS commitment_gap_contract_count,
          0.0 AS commitment_gap_total
   UNION ALL
-  MATCH (c:Company)-[:DECLAROU_FINANCA]->(f:Finance {type: 'SUPERSOC_TOP_COMPANY'})
+  MATCH (c:Company)-[:DECLARO_FINANZAS]->(f:Finance {type: 'SUPERSOC_TOP_COMPANY'})
   CALL {
     WITH c
     MATCH ()-[award:CONTRATOU]->(c)
@@ -279,7 +279,7 @@ WITH c,
        END
      ) AS suspicion_score
 RETURN elementId(c) AS entity_id,
-       coalesce(c.razao_social, c.name, c.document_id, c.nit) AS name,
+       coalesce(c.razon_social, c.name, c.document_id, c.nit) AS name,
        coalesce(c.document_id, c.nit, c.cnpj) AS document_id,
        toInteger(suspicion_score) AS suspicion_score,
        toInteger(signal_types) AS signal_types,

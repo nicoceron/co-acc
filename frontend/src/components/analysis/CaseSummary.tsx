@@ -23,7 +23,7 @@ function getEntityName(entity: EntityDetail): string {
   const rawName =
     entity.properties.name ??
     entity.properties.nome ??
-    entity.properties.razao_social ??
+    entity.properties.razon_social ??
     entity.id;
   return typeof rawName === "string" ? rawName : String(rawName);
 }
@@ -65,7 +65,7 @@ function CaseSummaryInner({ entity, graphData, exposure, loading }: CaseSummaryP
       },
       {
         label: t("analysis.signalDonationLinks"),
-        value: graphMetrics.edgeCounts.get("DOOU") ?? 0,
+        value: graphMetrics.edgeCounts.get("DONO_A") ?? 0,
       },
       {
         label: t("analysis.signalPublicOffices"),
@@ -73,7 +73,7 @@ function CaseSummaryInner({ entity, graphData, exposure, loading }: CaseSummaryP
       },
       {
         label: t("analysis.signalPayrollLinks"),
-        value: graphMetrics.edgeCounts.get("RECEBEU_SALARIO") ?? 0,
+        value: graphMetrics.edgeCounts.get("RECIBIO_SALARIO") ?? 0,
       },
       {
         label: t("analysis.signalAssetDisclosures"),
@@ -103,7 +103,7 @@ function CaseSummaryInner({ entity, graphData, exposure, loading }: CaseSummaryP
   const explanation = useMemo(() => {
     const fragments: string[] = [];
 
-    if ((graphMetrics.edgeCounts.get("DOOU") ?? 0) > 0) {
+    if ((graphMetrics.edgeCounts.get("DONO_A") ?? 0) > 0) {
       fragments.push(t("analysis.summaryCampaignMoney"));
     }
     if ((graphMetrics.nodeCounts.get("publicOffice") ?? 0) > 0) {

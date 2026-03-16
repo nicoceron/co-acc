@@ -16,6 +16,7 @@ dependencies = [
     "pypdf>=6.7.5",
     "defusedxml>=0.7.0",
     "pandera>=0.21.0",
+    "python-dotenv>=1.2.2",
 ]
 
 [project.optional-dependencies]

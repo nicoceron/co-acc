@@ -51,8 +51,8 @@ CREATE CONSTRAINT ingestion_run_id_unique IF NOT EXISTS
 CREATE INDEX person_name IF NOT EXISTS
   FOR (p:Person) ON (p.name);
 
-CREATE INDEX company_razao_social IF NOT EXISTS
-  FOR (c:Company) ON (c.razao_social);
+CREATE INDEX company_razon_social IF NOT EXISTS
+  FOR (c:Company) ON (c.razon_social);
 
 CREATE INDEX company_document_id IF NOT EXISTS
   FOR (c:Company) ON (c.document_id);
@@ -125,7 +125,7 @@ CREATE INDEX ingestion_run_started_at IF NOT EXISTS
 // ── Fulltext Search Index ───────────────────────────────
 CREATE FULLTEXT INDEX entity_search IF NOT EXISTS
   FOR (n:Person|Company|Contract|Bid|Sanction|Election|Amendment|Finance|DeclaredAsset|Health|Education|PublicOffice|SourceDocument)
-  ON EACH [n.name, n.razao_social, n.document_id, n.nit, n.cedula, n.numero_documento, n.cnes_code, n.object, n.contracting_org, n.infraction, n.org, n.function, n.subject, n.text, n.topic, n.url, n.reference, n.bid_id, n.asset_id, n.office_id, n.finance_id, n.election_id];
+  ON EACH [n.name, n.razon_social, n.document_id, n.nit, n.cedula, n.numero_documento, n.cnes_code, n.object, n.contracting_org, n.infraction, n.org, n.function, n.subject, n.text, n.topic, n.url, n.reference, n.bid_id, n.asset_id, n.office_id, n.finance_id, n.election_id];
 
 // ── User Constraints ────────────────────────────────────
 CREATE CONSTRAINT user_email_unique IF NOT EXISTS

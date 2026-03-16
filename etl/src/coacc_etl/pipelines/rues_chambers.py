@@ -68,7 +68,7 @@ class RuesChambersPipeline(Pipeline):
                     "document_id": document_id,
                     "nit": nit or None,
                     "name": chamber_name or document_id,
-                    "razao_social": chamber_name or document_id,
+                    "razon_social": chamber_name or document_id,
                     "camera_code": camera_code,
                     "company_type": "CHAMBER_OF_COMMERCE",
                     "municipality": municipality,

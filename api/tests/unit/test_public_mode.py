@@ -91,7 +91,7 @@ async def test_search_hides_person_nodes_in_public_mode(
             "document_id": "12345678900",
         },
         {
-            "node": {"razao_social": "Empresa Teste", "nit": "900123456"},
+            "node": {"razon_social": "Empresa Teste", "nit": "900123456"},
             "node_labels": ["Company"],
             "node_id": "c1",
             "score": 2.9,
@@ -150,7 +150,7 @@ async def test_public_patterns_company_endpoint_when_enabled(client: AsyncClient
             "coacc.routers.public.execute_query_single",
             new_callable=AsyncMock,
             return_value={
-                "c": {"nit": "900123456", "razao_social": "Empresa Teste"},
+                "c": {"nit": "900123456", "razon_social": "Empresa Teste"},
                 "entity_labels": ["Company"],
                 "entity_id": "c1",
             },
@@ -198,7 +198,7 @@ async def test_public_graph_company_filters_person_nodes(client: AsyncClient) ->
             "coacc.routers.public.execute_query_single",
             new_callable=AsyncMock,
             return_value={
-                "c": {"nit": "900123456", "razao_social": "Empresa Teste"},
+                "c": {"nit": "900123456", "razon_social": "Empresa Teste"},
                 "entity_labels": ["Company"],
                 "entity_id": "c1",
             },
@@ -212,7 +212,7 @@ async def test_public_graph_company_filters_person_nodes(client: AsyncClient) ->
                         _FakeNode(
                             "c1",
                             ["Company"],
-                            razao_social="Empresa Teste",
+                            razon_social="Empresa Teste",
                             nit="900123456",
                         ),
                         _FakeNode("p1", ["Person"], name="Persona Teste", cedula="12345678900"),

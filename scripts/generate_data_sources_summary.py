@@ -17,23 +17,23 @@ IMPLEMENTED_END_MARKER = "<!-- IMPLEMENTED_SOURCES_END -->"
 
 IMPLEMENTED_SOURCE_MODELS: dict[str, tuple[str, str]] = {
     "asset_disclosures": (
-        "`Person`, `DeclaredAsset`, `DECLAROU_BEM`",
+        "`Person`, `DeclaredAsset`, `DECLARO_BIEN`",
         "Ley 2013 asset disclosure summaries for public servants and contractors.",
     ),
     "conflict_disclosures": (
-        "`Person`, `Finance`, `DECLAROU_FINANCA`",
+        "`Person`, `Finance`, `DECLARO_FINANZAS`",
         "Ley 2013 conflict-of-interest disclosures normalized as finance records.",
     ),
     "cuentas_claras_income_2019": (
-        "`Person`, `Company`, `Election`, `CANDIDATO_EM`, `DOOU`",
+        "`Person`, `Company`, `Election`, `CANDIDATO_EM`, `DONO_A`",
         "Campaign income disclosures for the 2019 territorial election cycle.",
     ),
     "health_providers": (
-        "`Company`, `Health`, `OPERA_UNIDADE`",
+        "`Company`, `Health`, `OPERA_UNIDAD`",
         "REPS provider organizations and their health-service sites.",
     ),
     "higher_ed_enrollment": (
-        "`Company`, `Education`, `MANTEDORA_DE`",
+        "`Company`, `Education`, `MANTIENE_A`",
         "MEN enrollment aggregates by institution, program, year, and semester.",
     ),
     "igac_property_transactions": (
@@ -53,7 +53,7 @@ IMPLEMENTED_SOURCE_MODELS: dict[str, tuple[str, str]] = {
         "Current-year PGN sector commitment aggregates exported from PTE.",
     ),
     "pte_top_contracts": (
-        "`Company`, `Finance`, `ADMINISTRA`, `BENEFICIOU`, `REFERENTE_A`",
+        "`Company`, `Finance`, `ADMINISTRA`, `BENEFICIO`, `REFERENTE_A`",
         "Top current-year PGN contracts and beneficiaries exported from PTE.",
     ),
     "registraduria_death_status_checks": (
@@ -73,7 +73,7 @@ IMPLEMENTED_SOURCE_MODELS: dict[str, tuple[str, str]] = {
         "CDP request balances, funding-source totals, and SIIF validation metadata merged into contracts.",
     ),
     "sgr_expense_execution": (
-        "`Company`, `Finance`, `FORNECEU`",
+        "`Company`, `Finance`, `SUMINISTRO`",
         "SGR expense execution rows linked to registered third parties.",
     ),
     "sgr_projects": (
@@ -101,7 +101,7 @@ IMPLEMENTED_SOURCE_MODELS: dict[str, tuple[str, str]] = {
         "Invoice totals, delivery dates, and payment expectations merged into contracts.",
     ),
     "secop_ii_contracts": (
-        "`Company`, `Person`, `Contract`, `VENCEU`, `OFFICER_OF`, `REFERENTE_A`",
+        "`Company`, `Person`, `Contract`, `GANO`, `OFFICER_OF`, `REFERENTE_A`",
         "Electronic SECOP II contracts linked back to procurement portfolio records.",
     ),
     "secop_ii_processes": (
@@ -109,11 +109,11 @@ IMPLEMENTED_SOURCE_MODELS: dict[str, tuple[str, str]] = {
         "SECOP II procurement procedures normalized into buyer-to-awarded-supplier summaries.",
     ),
     "secop_offers": (
-        "`Company`, `Bid`, `LICITOU`, `FORNECEU_LICITACAO`",
+        "`Company`, `Bid`, `LICITO`, `SUMINISTRO_LICITACAO`",
         "Offer-level bidder participation and submitted values for SECOP II processes.",
     ),
     "secop_integrado": (
-        "`Company`, `Contract`, `VENCEU`",
+        "`Company`, `Contract`, `GANO`",
         "Integrated SECOP I/II contract awards using contractor document identifiers.",
     ),
     "secop_sanctions": (
@@ -125,15 +125,15 @@ IMPLEMENTED_SOURCE_MODELS: dict[str, tuple[str, str]] = {
         "Supplier registry and legal representative metadata from SECOP II.",
     ),
     "sigep_public_servants": (
-        "`Person`, `PublicOffice`, `RECEBEU_SALARIO`",
+        "`Person`, `PublicOffice`, `RECIBIO_SALARIO`",
         "Current SIGEP public-servant positions with office and salary metadata.",
     ),
     "sigep_sensitive_positions": (
-        "`Person`, `PublicOffice`, `RECEBEU_SALARIO`",
+        "`Person`, `PublicOffice`, `RECIBIO_SALARIO`",
         "SIGEP sensitive-position subset with integrity-risk flags on offices and relationships.",
     ),
     "supersoc_top_companies": (
-        "`Company`, `Finance`, `DECLAROU_FINANCA`",
+        "`Company`, `Finance`, `DECLARO_FINANZAS`",
         "Supersociedades top-company filings with revenue, assets, liabilities, and profit metrics.",
     ),
 }

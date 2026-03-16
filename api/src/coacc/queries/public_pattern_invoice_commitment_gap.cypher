@@ -31,7 +31,7 @@ WHERE contract_count >= toInteger($pattern_min_contract_count)
   OR amount_total >= toFloat($pattern_min_contract_value)
 RETURN 'invoice_commitment_gap' AS pattern_id,
        coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
-       coalesce(c.razao_social, c.name) AS company_name,
+       coalesce(c.razon_social, c.name) AS company_name,
        toFloat(contract_count + size(evidence_refs)) AS risk_signal,
        amount_total AS amount_total,
        amount_gap_total AS amount_gap_total,

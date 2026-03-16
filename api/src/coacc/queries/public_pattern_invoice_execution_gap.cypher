@@ -26,7 +26,7 @@ WITH c,
 WHERE contract_count >= toInteger($pattern_min_contract_count)
 RETURN 'invoice_execution_gap' AS pattern_id,
        coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
-       coalesce(c.razao_social, c.name) AS company_name,
+       coalesce(c.razon_social, c.name) AS company_name,
        toFloat(contract_count + size(evidence_refs)) AS risk_signal,
        amount_total AS amount_total,
        toInteger(contract_count) AS contract_count,

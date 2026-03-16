@@ -283,7 +283,7 @@ without employer payroll and payment records, the product can flag public-record
 The frontend display layer was cleaned up so the user-facing analysis pages stop leaking Portuguese or raw graph-internal labels for:
 
 - source IDs such as `secop_ii_contracts`
-- schema keys such as `razao_social`
+- schema keys such as `razon_social`
 - raw edge labels where relationship translations already exist
 
 This does not rename the stored graph schema. It only normalizes what the user sees.

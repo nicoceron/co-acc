@@ -22,7 +22,7 @@ CREATE (c1:Company {
   document_id: '901234567',
   nit: '901234567',
   name: 'CONSORCIO ANDINO SAS',
-  razao_social: 'CONSORCIO ANDINO SAS',
+  razon_social: 'CONSORCIO ANDINO SAS',
   sector: 'infrastructure',
   city: 'Bogota D.C.',
   country: 'CO',
@@ -33,7 +33,7 @@ CREATE (c2:Company {
   document_id: '800765432',
   nit: '800765432',
   name: 'SALUD ABIERTA SAS',
-  razao_social: 'SALUD ABIERTA SAS',
+  razon_social: 'SALUD ABIERTA SAS',
   sector: 'health',
   city: 'Medellin',
   country: 'CO',
@@ -44,7 +44,7 @@ CREATE (c3:Company {
   document_id: '900123456',
   nit: '900123456',
   name: 'CONSORCIO VIAL DEL NORTE',
-  razao_social: 'CONSORCIO VIAL DEL NORTE',
+  razon_social: 'CONSORCIO VIAL DEL NORTE',
   sector: 'transport',
   city: 'Bogota D.C.',
   country: 'CO',
@@ -114,9 +114,9 @@ CREATE (f1:Finance {
 
 CREATE (p1)-[:SOCIO_DE]->(c1);
 CREATE (p2)-[:SOCIO_DE]->(c2);
-CREATE (c1)-[:VENCEU {source: 'secop_integrado'}]->(k1);
-CREATE (c2)-[:VENCEU {source: 'secop_integrado'}]->(k2);
-CREATE (c3)-[:VENCEU {source: 'secop_integrado'}]->(k3);
+CREATE (c1)-[:GANO {source: 'secop_integrado'}]->(k1);
+CREATE (c2)-[:GANO {source: 'secop_integrado'}]->(k2);
+CREATE (c3)-[:GANO {source: 'secop_integrado'}]->(k3);
 CREATE (c1)-[:SANCIONADA {source: 'secop_sanctions'}]->(s1);
 CREATE (c3)-[:SANCIONADA {source: 'secop_sanctions'}]->(s2);
 CREATE (c1)-[:DEVE {source: 'synthetic'}]->(f1);

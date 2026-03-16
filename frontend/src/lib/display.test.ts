@@ -13,7 +13,7 @@ describe("display helpers", () => {
   });
 
   it("formats known schema keys into readable labels", () => {
-    expect(formatPropertyLabel("razao_social")).toBe("Legal name");
+    expect(formatPropertyLabel("razon_social")).toBe("Legal name");
     expect(formatPropertyLabel("buyer_document_id")).toBe("Buyer document ID");
     expect(formatPropertyLabel("execution_ratio")).toBe("Execution ratio");
     expect(formatPropertyLabel("operating_revenue_current")).toBe("Operating revenue (current year)");

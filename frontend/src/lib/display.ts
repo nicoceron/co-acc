@@ -92,7 +92,7 @@ const PROPERTY_LABELS: Record<string, string> = {
   project_type: "Project type",
   public_experience_months: "Public-sector experience (months)",
   privacy_policy_url: "Privacy policy URL",
-  razao_social: "Legal name",
+  razon_social: "Legal name",
   requested_value: "Requested value",
   rurality_category: "Rurality category",
   sanction_count: "Sanction count",

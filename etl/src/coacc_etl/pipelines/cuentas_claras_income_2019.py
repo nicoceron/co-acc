@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class CuentasClarasIncome2019Pipeline(Pipeline):
-    """Load 2019 campaign income into Election nodes and DOOU/CANDIDATO_EM relationships."""
+    """Load 2019 campaign income into Election nodes and DONO_A/CANDIDATO_EM relationships."""
 
     name = "cuentas_claras_income_2019"
     source_id = "cuentas_claras_income_2019"
@@ -103,7 +103,7 @@ class CuentasClarasIncome2019Pipeline(Pipeline):
                     "document_id": donor_id,
                     "nit": donor_id,
                     "name": donor_name or donor_id,
-                    "razao_social": donor_name or donor_id,
+                    "razon_social": donor_name or donor_id,
                     "source": "cuentas_claras_income_2019",
                     "country": "CO",
                 }
@@ -176,7 +176,7 @@ class CuentasClarasIncome2019Pipeline(Pipeline):
                 "WITH row, coalesce(p, c) AS donor "
                 "WHERE donor IS NOT NULL "
                 "MATCH (e:Election {election_id: row.target_key}) "
-                "MERGE (donor)-[r:DOOU {receipt: row.receipt}]->(e) "
+                "MERGE (donor)-[r:DONO_A {receipt: row.receipt}]->(e) "
                 "SET r.source = row.source, "
                 "    r.value = row.value, "
                 "    r.date = row.date, "

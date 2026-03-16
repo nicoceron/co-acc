@@ -32,4 +32,4 @@ def test_load_creates_forneceu_relationships() -> None:
     session_mock = pipeline.driver.session.return_value.__enter__.return_value
     run_calls = session_mock.run.call_args_list
     assert any("MERGE (n:Finance {finance_id: row.finance_id})" in str(call) for call in run_calls)
-    assert any("MERGE (a)-[r:FORNECEU]->(b)" in str(call) for call in run_calls)
+    assert any("MERGE (a)-[r:SUMINISTRO]->(b)" in str(call) for call in run_calls)

@@ -43,4 +43,4 @@ def test_load_creates_declared_asset_relationships() -> None:
         "MERGE (n:DeclaredAsset {asset_id: row.asset_id})" in str(call)
         for call in run_calls
     )
-    assert any("MERGE (p)-[r:DECLAROU_BEM]->(a)" in str(call) for call in run_calls)
+    assert any("MERGE (p)-[r:DECLARO_BIEN]->(a)" in str(call) for call in run_calls)

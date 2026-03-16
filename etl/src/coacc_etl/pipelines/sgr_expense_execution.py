@@ -83,7 +83,7 @@ class SgrExpenseExecutionPipeline(Pipeline):
                 "document_id": third_party_id,
                 "nit": third_party_id,
                 "name": third_party_name,
-                "razao_social": third_party_name,
+                "razon_social": third_party_name,
                 "source": "sgr_expense_execution",
                 "country": "CO",
             }
@@ -128,7 +128,7 @@ class SgrExpenseExecutionPipeline(Pipeline):
             loaded += loader.load_nodes("Finance", self.finances, key_field="finance_id")
         if self.rels:
             loaded += loader.load_relationships(
-                rel_type="FORNECEU",
+                rel_type="SUMINISTRO",
                 rows=self.rels,
                 source_label="Company",
                 source_key="document_id",

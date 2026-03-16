@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/graph", tags=["graph"])
 
 _GRAPH_PROPS = {
-    "name", "razao_social", "document_id", "nit", "cedula", "numero_documento",
+    "name", "razon_social", "document_id", "nit", "cedula", "numero_documento",
     "cnpj", "cpf", "value", "date",
     "type", "uf", "cargo", "partido", "org", "role_name", "office_id", "bid_id", "asset_id",
     "finance_id", "modality", "publication_date", "start_date", "reference",
@@ -61,7 +61,7 @@ def _extract_label(node: Any, labels: list[str]) -> str:
     props = dict(node)
     entity_type = entity_type_for_label(labels[0] if labels else None)
     if entity_type == "company":
-        return str(props.get("razao_social", props.get("name", props.get("nome_fantasia", ""))))
+        return str(props.get("razon_social", props.get("name", props.get("nome_fantasia", ""))))
     if entity_type == "finance":
         if props.get("name"):
             return str(props["name"])

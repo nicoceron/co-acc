@@ -12,6 +12,16 @@ from typing import Any
 
 import click
 import httpx
+from dotenv import load_dotenv
+
+# Search for .env starting from script parent up to project root
+env_path = Path(__file__).resolve().parents[2] / ".env"
+click.echo(f"Debug: Loading .env from {env_path}")
+load_dotenv(env_path, override=True)
+
+for k, v in os.environ.items():
+    if k.startswith("SOCRATA_"):
+        click.echo(f"Debug Env: {k}={v}")
 
 
 def _dataset_url(domain: str, dataset_id: str) -> str:
@@ -62,24 +72,36 @@ def _download_via_paged_json(
     output_path: Path,
     batch_size: int,
     workers: int,
+    limit: int | None = None,
+    where: str | None = None,
 ) -> int:
     tmp_path = _tmp_output_path(output_path)
     fieldnames: list[str] = []
 
-    count_response = client.get(_dataset_url(domain, dataset_id), params={"$select": "count(*)"})
+    params = {"$select": "count(*)"}
+    if where:
+        params["$where"] = where
+
+    count_response = client.get(_dataset_url(domain, dataset_id), params=params)
     count_response.raise_for_status()
     count_payload = count_response.json()
     if not isinstance(count_payload, list) or not count_payload:
         raise click.ClickException("Unexpected Socrata payload: count query returned no rows")
     total_available = int(count_payload[0]["count"])
 
+    if limit is not None:
+        total_available = min(total_available, limit)
+
     def fetch_page(offset: int) -> list[dict[str, Any]]:
         last_error: Exception | None = None
         for attempt in range(6):
             try:
+                page_params = {"$limit": batch_size, "$offset": offset}
+                if where:
+                    page_params["$where"] = where
                 response = client.get(
                     _dataset_url(domain, dataset_id),
-                    params={"$limit": batch_size, "$offset": offset},
+                    params=page_params,
                 )
                 response.raise_for_status()
                 rows = response.json()
@@ -168,6 +190,8 @@ def _download_via_paged_json(
 @click.option("--batch-size", default=50_000, show_default=True, type=int)
 @click.option("--paged-json-workers", default=1, show_default=True, type=int)
 @click.option("--timeout", default=60, show_default=True, type=int)
+@click.option("--limit", type=int, default=None, help="Limit rows processed")
+@click.option("--where", type=str, default=None, help="SoQL WHERE clause")
 @click.option(
     "--mode",
     type=click.Choice(["auto", "export", "paged-json"]),
@@ -182,6 +206,8 @@ def main(
     batch_size: int,
     paged_json_workers: int,
     timeout: int,
+    limit: int | None,
+    where: str | None,
     mode: str,
 ) -> None:
     """Download a Socrata dataset and write it to CSV."""
@@ -190,10 +216,22 @@ def main(
 
     headers: dict[str, str] = {}
     app_token = os.getenv("SOCRATA_APP_TOKEN", "").strip()
-    if app_token:
+    key_id = os.getenv("SOCRATA_KEY_ID", "").strip()
+    key_secret = os.getenv("SOCRATA_KEY_SECRET", "").strip()
+
+    # Socrata often rejects requests that send both Basic Auth and an App Token 
+    # if the App Token is the same as the Key ID. 
+    if app_token and app_token != key_id:
         headers["X-App-Token"] = app_token
 
-    with httpx.Client(timeout=timeout, follow_redirects=True, headers=headers) as client:
+    click.echo(f"Debug: Using Key ID: {key_id}")
+    click.echo(f"Debug: Using App Token header: {headers.get('X-App-Token')}")
+
+    auth = None
+    if key_id and key_secret:
+        auth = (key_id, key_secret)
+
+    with httpx.Client(timeout=timeout, follow_redirects=True, headers=headers, auth=auth) as client:
         if mode in {"auto", "export"}:
             try:
                 total_bytes = _download_via_export(
@@ -232,6 +270,8 @@ def main(
             output_path=output_path,
             batch_size=batch_size,
             workers=paged_json_workers,
+            limit=limit,
+            where=where,
         )
         click.echo(f"Wrote {total_rows:,} rows to {output_path} via paged JSON")
 

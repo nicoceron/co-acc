@@ -33,4 +33,4 @@ def test_load_creates_education_relationships() -> None:
     session_mock = pipeline.driver.session.return_value.__enter__.return_value
     run_calls = session_mock.run.call_args_list
     assert any("MERGE (n:Education {school_id: row.school_id})" in str(call) for call in run_calls)
-    assert any("MERGE (a)-[r:MANTEDORA_DE]->(b)" in str(call) for call in run_calls)
+    assert any("MERGE (a)-[r:MANTIENE_A]->(b)" in str(call) for call in run_calls)

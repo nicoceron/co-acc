@@ -4,13 +4,13 @@ WHERE (elementId(p) = $person_id
        OR p.cedula = $person_document_id)
 CALL {
   WITH p
-  OPTIONAL MATCH (p)-[:RECEBEU_SALARIO]->(o:PublicOffice)
+  OPTIONAL MATCH (p)-[:RECIBIO_SALARIO]->(o:PublicOffice)
   RETURN count(DISTINCT o) AS office_count,
          collect(DISTINCT coalesce(o.role, o.cargo, o.name, o.org))[0..5] AS office_names
 }
 CALL {
   WITH p
-  OPTIONAL MATCH (p)-[:DECLAROU_FINANCA]->(f:Finance {type: 'CONFLICT_DISCLOSURE'})
+  OPTIONAL MATCH (p)-[:DECLARO_FINANZAS]->(f:Finance {type: 'CONFLICT_DISCLOSURE'})
   RETURN count(DISTINCT f) AS conflict_disclosure_count,
          sum(
            CASE
@@ -32,7 +32,7 @@ CALL {
 }
 CALL {
   WITH p
-  OPTIONAL MATCH (p)-[:DECLAROU_BEM]->(a:DeclaredAsset)
+  OPTIONAL MATCH (p)-[:DECLARO_BIEN]->(a:DeclaredAsset)
   RETURN max(
            CASE
              WHEN coalesce(a.has_board_roles, false)
@@ -129,7 +129,7 @@ WITH p,
          END
      ) AS evidence_refs
 RETURN 'disclosure_risk_stack' AS pattern_id,
-       coalesce(p.name, p.nome, p.full_name, p.document_id) AS subject_name,
+       coalesce(p.name, p.nombre, p.full_name, p.document_id) AS subject_name,
        p.document_id AS document_id,
        toFloat(
          supplier_contract_count

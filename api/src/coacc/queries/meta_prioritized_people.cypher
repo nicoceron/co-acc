@@ -1,34 +1,36 @@
-MATCH (p:Person)-[:RECEBEU_SALARIO]->(o:PublicOffice)
+MATCH (p:Person)
+WHERE exists(p.document_id) OR exists(p.cedula)
 WITH p,
-     count(DISTINCT o) AS office_count,
-     collect(DISTINCT coalesce(o.role, o.cargo, o.name, o.org))[0..2] AS offices,
      coalesce(p.document_id, p.cedula, '') AS person_document_id
-WHERE person_document_id <> ''
-MATCH (c:Company {document_id: person_document_id})
-MATCH ()-[award:CONTRATOU]->(c)
-WITH p,
-     office_count,
-     offices,
-     count(DISTINCT award.summary_id) AS supplier_contract_count,
-     coalesce(sum(coalesce(award.total_value, 0.0)), 0.0) AS supplier_contract_value
-ORDER BY supplier_contract_value DESC,
-         supplier_contract_count DESC,
-         coalesce(p.name, p.nome, p.full_name, p.document_id) ASC
-LIMIT 120
+
+// Signal 1: Public Offices (SIGEP)
 CALL {
   WITH p
-  OPTIONAL MATCH (p)-[d:DOOU]->(e:Election)
-  RETURN count(DISTINCT e) AS donation_count,
-         coalesce(sum(coalesce(d.value, 0.0)), 0.0) AS donation_value
+  OPTIONAL MATCH (p)-[:RECIBIO_SALARIO]->(o:PublicOffice)
+  RETURN count(DISTINCT o) AS office_count,
+         collect(DISTINCT coalesce(o.role, o.cargo, o.name, o.org))[0..2] AS offices
 }
+
+// Signal 2: Supplier Contracts (SECOP)
 CALL {
-  WITH p
-  OPTIONAL MATCH (p)-[:CANDIDATO_EM]->(e:Election)
-  RETURN count(DISTINCT e) AS candidacy_count
+  WITH p, person_document_id
+  OPTIONAL MATCH (c:Company {document_id: person_document_id})
+  OPTIONAL MATCH ()-[award:CONTRATOU]->(c)
+  RETURN count(DISTINCT award.summary_id) AS supplier_contract_count,
+         coalesce(sum(coalesce(award.total_value, 0.0)), 0.0) AS supplier_contract_value
 }
+
+// Signal 3: Sanctions (PACO/SECOP)
 CALL {
   WITH p
-  OPTIONAL MATCH (p)-[:DECLAROU_BEM]->(a:DeclaredAsset)
+  OPTIONAL MATCH (p)-[:SANCIONADA]->(s:Sanction)
+  RETURN count(DISTINCT s) AS sanction_count
+}
+
+// Signal 4: Asset Disclosures (Ley 2013)
+CALL {
+  WITH p
+  OPTIONAL MATCH (p)-[:DECLAROU]->(a:DeclaredAsset)
   RETURN count(DISTINCT a) AS asset_count,
          coalesce(sum(coalesce(a.value, 0.0)), 0.0) AS asset_value,
          count(
@@ -41,15 +43,11 @@ CALL {
            END
          ) AS corporate_activity_disclosure_count
 }
+
+// Signal 5: Conflict Disclosures
 CALL {
   WITH p
-  OPTIONAL MATCH (p)-[:DECLAROU_FINANCA]->(f:Finance)
-  RETURN count(DISTINCT f) AS finance_count,
-         coalesce(sum(coalesce(f.value, 0.0)), 0.0) AS finance_value
-}
-CALL {
-  WITH p
-  OPTIONAL MATCH (p)-[:DECLAROU_FINANCA]->(f:Finance {type: 'CONFLICT_DISCLOSURE'})
+  OPTIONAL MATCH (p)-[:DECLAROU]->(f:Finance {type: 'CONFLICT_DISCLOSURE'})
   RETURN count(DISTINCT f) AS conflict_disclosure_count,
          sum(
            coalesce(f.company_document_mention_count, 0)
@@ -57,26 +55,33 @@ CALL {
            + coalesce(f.process_reference_count, 0)
          ) AS disclosure_reference_count
 }
+
 WITH p,
      offices,
      office_count,
      supplier_contract_count,
      supplier_contract_value,
-     coalesce(donation_count, 0) AS donation_count,
-     coalesce(donation_value, 0.0) AS donation_value,
-     coalesce(candidacy_count, 0) AS candidacy_count,
-     coalesce(asset_count, 0) AS asset_count,
-     coalesce(asset_value, 0.0) AS asset_value,
-     coalesce(finance_count, 0) AS finance_count,
-     coalesce(finance_value, 0.0) AS finance_value,
-     coalesce(conflict_disclosure_count, 0) AS conflict_disclosure_count,
-     coalesce(disclosure_reference_count, 0) AS disclosure_reference_count,
-     coalesce(corporate_activity_disclosure_count, 0) AS corporate_activity_disclosure_count,
-     CASE
-       WHEN coalesce(donation_count, 0) > 0
-       THEN supplier_contract_count
-       ELSE 0
-     END AS donor_vendor_loop_count
+     sanction_count,
+     asset_count,
+     asset_value,
+     conflict_disclosure_count,
+     disclosure_reference_count,
+     corporate_activity_disclosure_count,
+     0 AS donation_count,
+     0.0 AS donation_value,
+     0 AS candidacy_count,
+     0 AS donor_vendor_loop_count
+
+// Filter: Only return people with at least 2 distinct signals (multi-signal)
+WHERE (
+  CASE WHEN office_count > 0 THEN 1 ELSE 0 END +
+  CASE WHEN supplier_contract_count > 0 THEN 1 ELSE 0 END +
+  CASE WHEN sanction_count > 0 THEN 1 ELSE 0 END +
+  CASE WHEN asset_count > 0 THEN 1 ELSE 0 END +
+  CASE WHEN conflict_disclosure_count > 0 THEN 1 ELSE 0 END +
+  CASE WHEN corporate_activity_disclosure_count > 0 THEN 1 ELSE 0 END
+) >= 2
+
 WITH p,
      offices,
      office_count,
@@ -85,8 +90,6 @@ WITH p,
      candidacy_count,
      asset_count,
      asset_value,
-     finance_count,
-     finance_value,
      supplier_contract_count,
      supplier_contract_value,
      conflict_disclosure_count,
@@ -94,50 +97,45 @@ WITH p,
      corporate_activity_disclosure_count,
      donor_vendor_loop_count,
      (
-       2 +
-       CASE WHEN donation_count > 0 THEN 1 ELSE 0 END +
-       CASE WHEN candidacy_count > 0 THEN 1 ELSE 0 END +
+       CASE WHEN office_count > 0 THEN 1 ELSE 0 END +
+       CASE WHEN supplier_contract_count > 0 THEN 1 ELSE 0 END +
+       CASE WHEN sanction_count > 0 THEN 1 ELSE 0 END +
+       CASE WHEN asset_count > 0 THEN 1 ELSE 0 END +
        CASE WHEN conflict_disclosure_count > 0 THEN 1 ELSE 0 END +
        CASE WHEN disclosure_reference_count > 0 THEN 1 ELSE 0 END +
        CASE WHEN corporate_activity_disclosure_count > 0 THEN 1 ELSE 0 END
      ) AS signal_types,
      (
-       5 +
        CASE
-         WHEN supplier_contract_count >= 10 THEN 4
-         WHEN supplier_contract_count >= 3 THEN 3
-         ELSE 2
-       END +
-       CASE
-         WHEN supplier_contract_value >= 10000000000 THEN 3
-         WHEN supplier_contract_value >= 1000000000 THEN 2
-         WHEN supplier_contract_value >= 100000000 THEN 1
+         WHEN sanction_count > 0 THEN 40
          ELSE 0
        END +
        CASE
-         WHEN donation_count > 0 THEN 3
+         WHEN office_count > 0 THEN 20
          ELSE 0
        END +
        CASE
-         WHEN candidacy_count > 0 THEN 2
+         WHEN supplier_contract_count >= 5 THEN 30
+         WHEN supplier_contract_count >= 1 THEN 15
          ELSE 0
        END +
        CASE
-         WHEN conflict_disclosure_count > 0 THEN 3
+         WHEN asset_count >= 10 THEN 20
+         WHEN asset_count >= 1 THEN 10
          ELSE 0
        END +
        CASE
-         WHEN disclosure_reference_count >= 3 THEN 3
-         WHEN disclosure_reference_count >= 1 THEN 2
+         WHEN conflict_disclosure_count > 0 THEN 25
          ELSE 0
        END +
        CASE
-         WHEN corporate_activity_disclosure_count > 0 THEN 2
+         WHEN corporate_activity_disclosure_count > 0 THEN 20
          ELSE 0
        END
      ) AS suspicion_score
+
 RETURN elementId(p) AS entity_id,
-       coalesce(p.name, p.nome, p.full_name, p.document_id) AS name,
+       coalesce(p.name, p.nombre, p.full_name, p.document_id) AS name,
        p.document_id AS document_id,
        toInteger(suspicion_score) AS suspicion_score,
        toInteger(signal_types) AS signal_types,
@@ -147,8 +145,8 @@ RETURN elementId(p) AS entity_id,
        toInteger(candidacy_count) AS candidacy_count,
        toInteger(asset_count) AS asset_count,
        toFloat(asset_value) AS asset_value,
-       toInteger(finance_count) AS finance_count,
-       toFloat(finance_value) AS finance_value,
+       toInteger(0) AS finance_count,
+       toFloat(0.0) AS finance_value,
        toInteger(supplier_contract_count) AS supplier_contract_count,
        toFloat(supplier_contract_value) AS supplier_contract_value,
        toInteger(conflict_disclosure_count) AS conflict_disclosure_count,
@@ -157,9 +155,7 @@ RETURN elementId(p) AS entity_id,
        toInteger(donor_vendor_loop_count) AS donor_vendor_loop_count,
        offices AS offices
 ORDER BY suspicion_score DESC,
-         donor_vendor_loop_count DESC,
          disclosure_reference_count DESC,
          supplier_contract_value DESC,
-         donation_value DESC,
          name ASC
 LIMIT toInteger($limit)

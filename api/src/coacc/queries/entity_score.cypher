@@ -46,7 +46,7 @@ WITH e, lbls, equivs,
      ) AS source_list
 // Contract volume across all equivalents
 UNWIND equivs AS eq2
-OPTIONAL MATCH (eq2)-[:VENCEU]->(c:Contract)
+OPTIONAL MATCH (eq2)-[:GANO]->(c:Contract)
 WITH e, lbls, equivs, connection_count, source_list,
      COALESCE(sum(c.value), 0) AS contract_node_volume
 UNWIND equivs AS eq2r
@@ -55,7 +55,7 @@ WITH e, lbls, equivs, connection_count, source_list,
      contract_node_volume + COALESCE(sum(award.total_value), 0) AS contract_volume
 // Donation volume across all equivalents
 UNWIND equivs AS eq3
-OPTIONAL MATCH (eq3)-[:DOOU]->(d)
+OPTIONAL MATCH (eq3)-[:DONO_A]->(d)
 WITH e, lbls, equivs, connection_count, source_list, contract_volume,
      COALESCE(sum(d.valor), 0) AS donation_volume
 // Debt/loan volume across all equivalents

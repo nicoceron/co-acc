@@ -188,7 +188,7 @@ class SupersocTopCompaniesPipeline(Pipeline):
             loaded += loader.load_nodes("Finance", self.finances, key_field="finance_id")
         if self.rels:
             loaded += loader.load_relationships(
-                rel_type="DECLAROU_FINANCA",
+                rel_type="DECLARO_FINANZAS",
                 rows=self.rels,
                 source_label="Company",
                 source_key="document_id",

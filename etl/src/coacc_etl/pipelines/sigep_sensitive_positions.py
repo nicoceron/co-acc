@@ -154,7 +154,7 @@ class SigepSensitivePositionsPipeline(Pipeline):
                 "UNWIND $rows AS row "
                 "MATCH (p:Person {document_id: row.source_key}) "
                 "MATCH (o:PublicOffice {office_id: row.target_key}) "
-                "MERGE (p)-[r:RECEBEU_SALARIO]->(o) "
+                "MERGE (p)-[r:RECIBIO_SALARIO]->(o) "
                 "SET r.source = row.source, "
                 "    r.salary = row.salary, "
                 "    r.start_date = row.start_date, "

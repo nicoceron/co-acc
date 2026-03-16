@@ -86,7 +86,7 @@ export function EntityDetail({ entityId, onClose }: EntityDetailProps) {
             {t(`entity.${entity.type}`, entity.type)}
           </div>
           <h3 className={styles.name}>
-            {String(entity.properties.name ?? entity.properties.razao_social ?? entity.properties.nome ?? "N/A")}
+            {String(entity.properties.name ?? entity.properties.razon_social ?? entity.properties.nome ?? "N/A")}
           </h3>
 
           {documentValue && (
@@ -97,7 +97,7 @@ export function EntityDetail({ entityId, onClose }: EntityDetailProps) {
 
           <div className={styles.properties}>
             {Object.entries(entity.properties).filter(
-              ([key]) => !["name", "razao_social", "nome", ...DOCUMENT_KEYS].includes(key),
+              ([key]) => !["name", "razon_social", "nome", ...DOCUMENT_KEYS].includes(key),
             ).map(([key, value]) => (
               <div key={key} className={styles.property}>
                 <span className={styles.propKey}>{formatPropertyLabel(key)}</span>

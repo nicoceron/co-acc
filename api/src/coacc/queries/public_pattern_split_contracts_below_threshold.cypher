@@ -11,7 +11,7 @@ WHERE award.average_value IS NOT NULL
   AND award.average_value <= toFloat($pattern_split_threshold_value)
   AND coalesce(award.contract_count, 0) >= toInteger($pattern_split_min_count)
 WITH c,
-     coalesce(award.buyer_name, buyer.razao_social, buyer.name) AS contracting_org,
+     coalesce(award.buyer_name, buyer.razon_social, buyer.name) AS contracting_org,
      collect(coalesce(award.evidence_refs, [award.summary_id])) AS id_groups,
      sum(coalesce(award.total_value, 0.0)) AS amount_total,
      min(coalesce(award.first_date, award.last_date)) AS window_start,
@@ -26,7 +26,7 @@ WITH c,
 WHERE size(evidence_refs) > 0
 RETURN 'split_contracts_below_threshold' AS pattern_id,
        coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
-       c.razao_social AS company_name,
+       c.razon_social AS company_name,
        toFloat(grouped_occurrences + size(evidence_refs)) AS risk_signal,
        amount_total AS amount_total,
        window_start AS window_start,

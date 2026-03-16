@@ -58,10 +58,10 @@ def test_load_creates_finance_disclosure_relationships() -> None:
         "MERGE (n:Contract {contract_id: row.contract_id})" in str(call)
         for call in run_calls
     )
-    assert any("MERGE (p)-[r:DECLAROU_FINANCA]->(f)" in str(call) for call in run_calls)
+    assert any("MERGE (p)-[r:DECLARO_FINANZAS]->(f)" in str(call) for call in run_calls)
     assert any("MATCH (a:Finance {finance_id: row.source_key})" in str(call) for call in run_calls)
     assert any(
-        "MATCH (c:Company {razao_social: row.target_name})" in str(call)
+        "MATCH (c:Company {razon_social: row.target_name})" in str(call)
         for call in run_calls
     )
     assert any(

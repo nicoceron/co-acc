@@ -76,7 +76,7 @@ class HigherEdEnrollmentPipeline(Pipeline):
             company_map[institution_code] = {
                 "document_id": institution_code,
                 "name": institution_name or institution_code,
-                "razao_social": institution_name or institution_code,
+                "razon_social": institution_name or institution_code,
                 "department": clean_text(row.get("departamento_de_domicilio_de_la_ies")),
                 "municipality": clean_text(row.get("municipio_dedomicilio_de_la_ies")),
                 "source": "higher_ed_enrollment",
@@ -124,7 +124,7 @@ class HigherEdEnrollmentPipeline(Pipeline):
             loaded += loader.load_nodes("Education", self.education_nodes, key_field="school_id")
         if self.rels:
             loaded += loader.load_relationships(
-                rel_type="MANTEDORA_DE",
+                rel_type="MANTIENE_A",
                 rows=self.rels,
                 source_label="Company",
                 source_key="document_id",

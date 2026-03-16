@@ -169,7 +169,7 @@ export function EntityAnalysis() {
     if (entity && exposure) {
       const rawName =
         entity.properties.nome ??
-        entity.properties.razao_social ??
+        entity.properties.razon_social ??
         entity.properties.name ??
         entity.id;
       const name = typeof rawName === "string" ? rawName : String(rawName);

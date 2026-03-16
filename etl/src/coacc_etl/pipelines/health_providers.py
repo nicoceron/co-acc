@@ -64,7 +64,7 @@ class HealthProvidersPipeline(Pipeline):
                 "document_id": provider_document,
                 "nit": provider_document,
                 "name": provider_name,
-                "razao_social": provider_name,
+                "razon_social": provider_name,
                 "nature": clean_text(row.get("naturalezajuridica")),
                 "provider_class": clean_text(row.get("claseprestador")),
                 "department": clean_text(row.get("departamentoprestadordesc")),
@@ -112,7 +112,7 @@ class HealthProvidersPipeline(Pipeline):
             loaded += loader.load_nodes("Health", self.health_sites, key_field="cnes_code")
         if self.rels:
             loaded += loader.load_relationships(
-                rel_type="OPERA_UNIDADE",
+                rel_type="OPERA_UNIDAD",
                 rows=self.rels,
                 source_label="Company",
                 source_key="document_id",

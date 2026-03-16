@@ -36,4 +36,4 @@ def test_load_creates_declared_finance_relationships() -> None:
     session_mock = pipeline.driver.session.return_value.__enter__.return_value
     run_calls = session_mock.run.call_args_list
     assert any("MERGE (n:Finance {finance_id: row.finance_id})" in str(call) for call in run_calls)
-    assert any("MERGE (a)-[r:DECLAROU_FINANCA]->(b)" in str(call) for call in run_calls)
+    assert any("MERGE (a)-[r:DECLARO_FINANZAS]->(b)" in str(call) for call in run_calls)

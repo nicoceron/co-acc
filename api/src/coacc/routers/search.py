@@ -32,7 +32,7 @@ def _extract_name(node: Any, labels: list[str]) -> str:
     props = dict(node)
     entity_type = entity_type_for_label(labels[0] if labels else None)
     if entity_type == "company":
-        return str(props.get("razao_social", props.get("name", props.get("nome_fantasia", ""))))
+        return str(props.get("razon_social", props.get("name", props.get("nome_fantasia", ""))))
     if entity_type in ("contract", "amendment", "convenio"):
         return str(props.get("object", props.get("function", props.get("name", ""))))
     if entity_type == "embargo":

@@ -7,11 +7,11 @@ WHERE elementId(c) = $company_id
    OR c.cnpj = $company_identifier
    OR c.cnpj = $company_identifier_formatted
 MATCH (p)-[:OFFICER_OF]->(c)
-WHERE EXISTS { (p)-[:RECEBEU_SALARIO]->(:PublicOffice) }
-OPTIONAL MATCH (p)-[:RECEBEU_SALARIO]->(o:PublicOffice)
+WHERE EXISTS { (p)-[:RECIBIO_SALARIO]->(:PublicOffice) }
+OPTIONAL MATCH (p)-[:RECIBIO_SALARIO]->(o:PublicOffice)
 OPTIONAL MATCH (:Company)-[award:CONTRATOU]->(c)
 WITH c,
-     collect(DISTINCT coalesce(p.name, p.nome, p.document_id))[0..5] AS official_names,
+     collect(DISTINCT coalesce(p.name, p.nombre, p.document_id))[0..5] AS official_names,
      count(DISTINCT p) AS official_officer_count,
      count(DISTINCT o) AS official_role_count,
      collect(DISTINCT award.summary_id) AS summary_ids,
@@ -31,7 +31,7 @@ WITH c,
 WHERE contract_count >= 1
 RETURN 'public_official_supplier_overlap' AS pattern_id,
        coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
-       coalesce(c.razao_social, c.name) AS company_name,
+       coalesce(c.razon_social, c.name) AS company_name,
        toFloat(official_officer_count + official_role_count + contract_count) AS risk_signal,
        amount_total AS amount_total,
        toInteger(contract_count) AS contract_count,

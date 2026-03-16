@@ -3,7 +3,7 @@ include .env
 export $(shell sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' .env)
 endif
 
-.PHONY: dev stop api etl frontend seed lint type-check test test-api test-etl test-frontend check \
+.PHONY: dev stop api etl frontend demo clean-data seed lint type-check test test-api test-etl test-frontend check \
 	sync-colombia-registry generate-pipeline-status generate-source-summary \
 	download-secop-integrado download-secop-sanciones download-secop-proveedores \
 	download-secop-procesos download-secop-ofertas download-secop-contratos \
@@ -24,18 +24,48 @@ endif
 	etl-sgr-gastos etl-cuentas-claras-2019 etl-paco-sanciones etl-pte-compromisos-sector \
 	etl-pte-contratos-grandes etl-mapa-proyectos etl-rues-camaras \
 	etl-registraduria-checks etl-supersoc-1000 \
-	etl-igac-transacciones etl-all etl-hot-data etl-full-data
+	etl-igac-transacciones etl-all
 
 setup-env:
 	bash scripts/init_env.sh
 
-# Hot Data: High-signal, recent (2024-2026) data for quick analysis on limited hardware.
-etl-hot-data: etl-paco-sanciones etl-sigep-cargos-sensibles etl-secop-sanciones etl-ley2013-activos etl-ley2013-conflictos
-	@echo "Hot data load complete. Focus: Sanctions, Sensitive Positions, and Disclosures."
+# Demo Bogotá: Targeted Real Data from Bogotá D.C.
+# This ensures overlaps between Politicians and Contracts by geography.
+demo-bogota:
+	docker compose down -v --remove-orphans
+	docker compose up -d --build
+	@echo "Waiting for Neo4j..."
+	@until docker exec coacc-neo4j cypher-shell -u neo4j -p "$${NEO4J_PASSWORD:-}" "RETURN 1" >/dev/null 2>&1; do sleep 2; done
+	@echo "Downloading targeted Bogotá data..."
+	# SIGEP: Politicians in Bogota
+	cd etl && uv run python scripts/download_socrata_dataset.py --dataset-id v78p-8v8k --output ../data/sigep_public_servants/sigep_public_servants.csv --where "departamento_entidad='Bogotá D.C.'" --limit 20000 --mode paged-json
+	# SECOP II: Contracts in Bogota
+	cd etl && uv run python scripts/download_socrata_dataset.py --dataset-id jbjy-vk9h --output ../data/secop_ii_contracts/secop_ii_contracts.csv --where "departamento='Bogotá D.C.'" --limit 20000 --mode paged-json
+	# MapaInversiones: Projects in Bogota
+	cd etl && uv run python scripts/download_mapa_inversiones_report.py --report project-basics --output ../data/mapa_inversiones_projects/mapa_inversiones_projects.csv
+	# PACO: Sanctions (not filterable by city easily, download all)
+	cd etl && uv run python scripts/download_paco_dataset.py --output-dir ../data/paco_sanctions
+	@echo "Ingesting data..."
+	cd etl && uv run coacc-etl run --source sigep_public_servants --neo4j-password "$${NEO4J_PASSWORD:-}" --data-dir ../data
+	cd etl && uv run coacc-etl run --source secop_ii_contracts --neo4j-password "$${NEO4J_PASSWORD:-}" --data-dir ../data
+	cd etl && uv run coacc-etl run --source paco_sanctions --neo4j-password "$${NEO4J_PASSWORD:-}" --data-dir ../data
+	cd etl && uv run coacc-etl run --source mapa_inversiones_projects --neo4j-password "$${NEO4J_PASSWORD:-}" --data-dir ../data
+	@echo "Demo Bogotá ready. Visit http://localhost:3000"
 
-# Full Data: Complete historical sync (requires 200GB+ disk and 32GB+ RAM).
-etl-full-data: etl-all
-	@echo "Full historical data load complete."
+# Demo: Targeted data for spotting "Elefantes Blancos" and Nepotism.
+# This uses curated fixtures to guarantee overlap and AI flags.
+# RUN THIS: make demo
+demo:
+	docker compose down -v --remove-orphans
+	docker compose up -d --build
+	@echo "Waiting for Neo4j..."
+	@until docker exec coacc-neo4j cypher-shell -u neo4j -p "$${NEO4J_PASSWORD:-}" "RETURN 1" >/dev/null 2>&1; do sleep 2; done
+	bash infra/scripts/seed-dev.sh
+	@echo "Demo environment ready. Visit http://localhost:3000"
+
+clean-data:
+	find data -mindepth 1 -maxdepth 1 -not -name ".gitkeep" -exec rm -rf {} +
+	@echo "Data directory cleaned."
 
 dev:
 	docker compose up -d
@@ -51,9 +81,6 @@ etl:
 
 frontend:
 	cd frontend && npm run dev
-
-seed:
-	bash infra/scripts/seed-dev.sh
 
 sync-colombia-registry:
 	python3 scripts/sync_colombia_portal_registry.py

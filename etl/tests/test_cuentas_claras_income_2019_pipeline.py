@@ -41,6 +41,6 @@ def test_load_creates_election_relationships() -> None:
     assert any(
         "OPTIONAL MATCH (p:Person {document_id: row.source_key})" in str(call)
         and "OPTIONAL MATCH (c:Company {document_id: row.source_key})" in str(call)
-        and "MERGE (donor)-[r:DOOU {receipt: row.receipt}]->(e)" in str(call)
+        and "MERGE (donor)-[r:DONO_A {receipt: row.receipt}]->(e)" in str(call)
         for call in run_calls
     )

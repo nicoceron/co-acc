@@ -8,7 +8,7 @@ WHERE elementId(c) = $company_id
    OR c.cnpj = $company_identifier_formatted
 CALL {
   WITH c
-  MATCH (a:Amendment)-[:BENEFICIOU]->(c)
+  MATCH (a:Amendment)-[:BENEFICIO]->(c)
   RETURN collect(DISTINCT a.amendment_id) AS amendment_ids
 }
 CALL {
@@ -25,8 +25,8 @@ CALL {
 }
 CALL {
   WITH c
-  MATCH (a:Amendment)-[:BENEFICIOU]->(c)
-  OPTIONAL MATCH (a)-[:GEROU_CONVENIO]->(cv:Convenio)
+  MATCH (a:Amendment)-[:BENEFICIO]->(c)
+  OPTIONAL MATCH (a)-[:GENERO_CONVENIO]->(cv:Convenio)
   RETURN collect(DISTINCT cv.convenio_id) AS convenio_ids,
          sum(DISTINCT coalesce(cv.value, 0.0)) AS convenio_total
 }
@@ -51,7 +51,7 @@ WHERE size(amendment_ids) > 0
   AND size(evidence_refs) > 0
 RETURN 'amendment_beneficiary_contracts' AS pattern_id,
        coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
-       c.razao_social AS company_name,
+       c.razon_social AS company_name,
        toFloat(size(amendment_ids) + size(convenio_ids) + size(contract_ids)) AS risk_signal,
        amount_total AS amount_total,
        window_start AS window_start,

@@ -69,7 +69,7 @@ def build_payload() -> dict[str, object]:
             "id": "rel:1",
             "source": "company:alpha",
             "target": "contract:001",
-            "type": "VENCEU",
+            "type": "GANO",
             "properties": {"source": "synthetic"},
         },
         {
