@@ -307,7 +307,7 @@ describe("Dashboard", () => {
     }
   });
 
-  it("filters prioritized people by corruption-style overlap groups", async () => {
+  it("filters prioritized people by risk-style overlap groups", async () => {
     await setLanguage("en");
     try {
       const user = userEvent.setup();

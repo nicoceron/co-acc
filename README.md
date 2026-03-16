@@ -24,7 +24,7 @@ Colombian public data is transparent but **fragmented**. A contractor might appe
 - **30+ Curated Pipelines:** Automated ETL for SECOP (I, II, Integrated), SIGEP, SGR (Royalties), PACO, and more.
 - **Unified Graph Schema:** A battle-tested Neo4j model that handles millions of nodes and relationships.
 - **Interactive Explorer:** A React-based frontend to visualize entities and navigate their connections.
-- **Detection Engine:** Pre-configured Cypher queries to surface 10+ types of corruption-style signals.
+- **Detection Engine:** Pre-configured Cypher queries to surface 10+ types of risk-style signals.
 - **High Performance:** Designed to scale to 10M+ nodes on consumer-grade hardware.
 
 ---
@@ -81,12 +81,16 @@ bash infra/scripts/seed-dev.sh
 
 ---
 
-## ⚖️ Ethics & Governance
+## Legal & Ethics
 
-This project handles public data but adheres to strict privacy and ethical standards:
-- **[ETHICS.md](ETHICS.md):** Guidelines for responsible investigation.
-- **[PRIVACY.md](PRIVACY.md):** How we handle PII and sensitive identifiers.
-- **[SECURITY.md](SECURITY.md):** Vulnerability reporting and data protection.
+This project is governed by strict ethical and legal standards for public data processing:
+
+- **[ETHICS.md](ETHICS.md):** Ethical guidelines for data-driven investigations.
+- **[LGPD.md](LGPD.md):** Compliance with data protection principles (Ley 1581 / LGPD).
+- **[PRIVACY.md](PRIVACY.md):** Public-surface privacy rules and redaction policies.
+- **[SECURITY.md](SECURITY.md):** Security policy and vulnerability reporting.
+- **[ABUSE_RESPONSE.md](ABUSE_RESPONSE.md):** Procedures for reporting and responding to data abuse.
+- **[TERMS.md](TERMS.md):** Terms of use for the open-graph infrastructure.
 - **[DISCLAIMER.md](DISCLAIMER.md):** Legal disclaimers regarding official data sources.
 
 ---
