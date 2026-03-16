@@ -58,12 +58,20 @@ def _str_to_bool(value: str) -> bool:
 
 
 def _default_registry_path() -> Path:
-    resolved = Path(__file__).resolve()
-    for parent in resolved.parents:
-        candidate = parent / "docs" / "source_registry_co_v1.csv"
+    # Search for the docs directory starting from the current file's parent
+    # up to the root or a reasonable limit.
+    current = Path(__file__).resolve().parent
+    for _ in range(10):
+        candidate = current / "docs" / "source_registry_co_v1.csv"
         if candidate.exists():
             return candidate
-    return resolved.parents[4] / "docs" / "source_registry_co_v1.csv"
+        if (current / ".git").exists() or current.parent == current:
+            # Reached repo root or filesystem root
+            break
+        current = current.parent
+
+    # Fallback to a relative path from the expected repo root structure
+    return Path(__file__).resolve().parents[4] / "docs" / "source_registry_co_v1.csv"
 
 
 def get_registry_path() -> Path:
