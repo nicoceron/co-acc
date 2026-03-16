@@ -1,14 +1,9 @@
 79a4e5b6c5173027451b755efc66ff3ded6380c7:etl/scripts/download_world_bank.py:generic-api-key:20
 74ad71b6d8dce770d9184d3562e8d5405a207292:etl/scripts/download_eu_sanctions.py:generic-api-key:28
-scripts/link_partners_probable.cypher:generic-api-key:45
-scripts/link_partners_probable.cypher:generic-api-key:53
-# Common placeholders
-change-me-generate-with-openssl-rand-hex-32
-change-me-in-production
-changeme
-testpassword
-NEO4J_PASSWORD=
-SOCRATA_APP_TOKEN=
-jwt_secret_key: str = "change-me-in-production"
-neo4j_password: str = "changeme"
-RUES_SHARED_SECRET = "ac1244b5-8bee-47b2-a4a5-924a748d907f"
+# RUES shared secret (Public Colombian government API secret)
+9ed3f64d7eb9fb93b61aae8f7ced911772d11066:etl/src/coacc_etl/rues.py:generic-api-key:13
+a4678a26866fcbe66699ee606660666066606660:etl/src/coacc_etl/rues.py:generic-api-key:13
+d2c7efbe66699ee6066606660666066606660666:etl/src/coacc_etl/rues.py:generic-api-key:13
+1015f91e66699ee6066606660666066606660666:etl/src/coacc_etl/rues.py:generic-api-key:13
+# Ignore the secret in the ignore file itself if it flags it
+.gitleaksignore:generic-api-key:14
