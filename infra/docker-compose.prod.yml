@@ -1,3 +1,5 @@
+name: co-acc
+
 services:
   caddy:
     image: caddy:2-alpine
