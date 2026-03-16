@@ -48,3 +48,20 @@
 .stat {
   color: var(--text-secondary);
 }
+
+.sourceLink {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.sourceLink:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.divider {
+  margin: 0 var(--space-xs);
+  color: var(--border);
+  user-select: none;
+}
