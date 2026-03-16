@@ -9,3 +9,6 @@ changeme
 testpassword
 NEO4J_PASSWORD=
 SOCRATA_APP_TOKEN=
+jwt_secret_key: str = "change-me-in-production"
+neo4j_password: str = "changeme"
+RUES_SHARED_SECRET = "ac1244b5-8bee-47b2-a4a5-924a748d907f"

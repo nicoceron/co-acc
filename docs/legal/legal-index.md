@@ -27,6 +27,10 @@ This repository uses a public-safe profile:
 | **Partner** | `authorized` | Core + SLA + Data Transfer Agreement |
 | **Internal** | `development` | Core + Internal SecOps |
 
+## Change log policy
+
+Policies are versioned and updated via GitHub Pull Requests. Significant changes require a 7-day public notice period.
+
 ## Change log
 
 - **v1.1.0**: Updated for Colombia-only scope.
