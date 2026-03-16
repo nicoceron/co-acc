@@ -34,14 +34,6 @@ You can build the full Colombia graph on your own hardware:
 2.  **Ingest:** Run `make etl-all` to process and link the data into Neo4j.
 3.  **Analyze:** Use the built-in pattern engine to detect execution gaps and prioritized entities.
 
-### Limited Hardware / Quick Start (Hot Data)
-
-If you are running on limited hardware (e.g., 16GB RAM / 50GB disk) or want to see results quickly, use the "Hot Data" mode. This loads only the most recent and high-signal data (Sanctions, Sensitive Positions, and Ley 2013 Disclosures):
-
-```bash
-make etl-hot-data
-```
-
 ## Quick Start
 
 ```bash
