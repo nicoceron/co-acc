@@ -118,7 +118,7 @@ jobs:
 
   public-boundary-gate:
     name: Public Boundary Gate
-    if: github.repository == 'nicoceron/colombia-corruption-graph'
+    if: github.repository == 'nicoceron/co-acc'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
