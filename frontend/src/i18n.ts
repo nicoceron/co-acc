@@ -13,7 +13,7 @@ const resources = {
       landing: {
         hero: "Rastree los contratos públicos de Colombia",
         heroSubtitle:
-          "Un grafo abierto solo para Colombia construido a partir de conjuntos de datos oficiales sobre contratación, sanciones, declaraciones, regalías, salud y educación.",
+          "Un grafo abierto solo para Colombia construido a partir de conjuntos oficiales sobre contratación, cargos públicos, declaraciones, regalías, salud, educación y financiamiento electoral.",
         badge: "CO-ACC · Colombia",
         cta: "Explorar el grafo",
         stats: {
@@ -26,10 +26,10 @@ const resources = {
           sectionHeading: "Lo que revela CO-ACC",
           graph: "Mapee cualquier conexión",
           graphDesc:
-            "Navegue por empresas, contratos, sanciones y registros del sector público en un explorador de grafos.",
+            "Navegue por empresas, contratos, cargos públicos, declaraciones y registros del sector público en un solo explorador.",
           patterns: "Detecte patrones",
           patternsDesc:
-            "Comience primero por contratación y sanciones, luego extienda el grafo con declaraciones y datos fiscales.",
+            "Encuentre cruces entre contratación, cargos públicos, donaciones, declaraciones y otras señales de riesgo con fuentes atribuidas.",
           investigations: "Investigue en profundidad",
           investigationsDesc:
             "Construya dossieres con atribución de fuente, notas, etiquetas y exportaciones para revisión manual.",
@@ -45,7 +45,7 @@ const resources = {
             "Normalice identificadores de empresas y contratos en torno al NIT y campos de documentos de proveedores.",
           step3: "Analizar",
           step3Desc:
-            "Explore el grafo, revise grupos de contratos e inspeccione sanciones vinculadas a proveedores.",
+            "Explore el grafo, revise grupos contractuales y detecte solapes entre funcionarios, proveedores, donantes y declaraciones.",
         },
         trust: {
           openSourceValue: "AGPL-3.0",
@@ -94,25 +94,33 @@ const resources = {
         quickStats: "Estatísticas",
         watchlistKicker: "motor público de riesgo",
         watchlistSubtitle:
-          "Personas y empresas priorizadas a partir de contratos, nómina, elecciones, sanciones y cruce de declaraciones.",
+          "Personas y empresas priorizadas por cruces reales entre contratación, cargos públicos, elecciones, declaraciones y financiamiento público.",
         watchlistLabel: "priorización",
         prioritizedPeople: "Personas priorizadas",
         watchlistNote:
-          "Señales de registros públicos enlazadas automáticamente. Muestran riesgo, no prueban corrupción.",
+          "Registros públicos enlazados automáticamente. Filtre por tipo de cruce; muestran riesgo, no prueban corrupción.",
         watchlistEmpty: "No se encontraron personas multiseñal con la carga actual.",
         watchlistError: "No fue posible cargar la cola de personas.",
+        peopleFiltersLabel: "Filtrar personas",
+        peopleFilterAll: "Todo",
+        peopleFilterOfficeSupplier: "Cargo + contratos",
+        peopleFilterDonorVendor: "Donaciones + contratos",
+        peopleFilterDisclosures: "Declaraciones + contratos",
+        peopleFilterCandidates: "Candidaturas",
+        peopleFilterCount: "{{count}} de {{total}} visibles",
+        peopleFilterEmpty: "Ninguna persona priorizada coincide con este filtro.",
         companyWatchlistSubtitle:
-          "Empresas priorizadas por sanciones, descalce de capacidad, brechas de ejecución y cruces con recursos públicos.",
+          "Empresas priorizadas por descalce de capacidad, baja competencia, brechas de ejecución y cruces con funcionarios o recursos públicos.",
         prioritizedCompanies: "Empresas priorizadas",
         companyWatchlistEmpty: "No se encontraron empresas multiseñal con la carga actual.",
         companyWatchlistError: "No fue posible cargar la cola de empresas.",
         buyerWatchlistSubtitle:
-          "Compradores públicos priorizados por concentración de proveedores, exposición a sancionados y brechas entre compromiso, factura y ejecución.",
+          "Compradores públicos priorizados por concentración, baja competencia, exposición repetida a proveedores riesgosos y brechas entre compromiso, factura y ejecución.",
         prioritizedBuyers: "Compradores públicos priorizados",
         buyerWatchlistEmpty: "No se encontraron compradores con señales suficientes.",
         buyerWatchlistError: "No fue posible cargar la cola de compradores.",
         territoryWatchlistSubtitle:
-          "Territorios priorizados por concentración contractual, proveedores sancionados y señales de incompatibilidad o brechas de ejecución.",
+          "Territorios priorizados por concentración contractual, incompatibilidades entre actores públicos y privados, y brechas de ejecución.",
         prioritizedTerritories: "Territorios priorizados",
         territoryWatchlistEmpty: "No se encontraron territorios con señales suficientes.",
         territoryWatchlistError: "No fue posible cargar la cola territorial.",
@@ -548,7 +556,7 @@ const resources = {
       landing: {
         hero: "Trace Colombia's public contracts",
         heroSubtitle:
-          "A Colombia-only open graph built from official datasets on procurement, sanctions, disclosures, royalties, health, and education.",
+          "A Colombia-only open graph built from official datasets on procurement, public office, disclosures, royalties, health, education, and election finance.",
         badge: "CO-ACC · Colombia",
         cta: "Explore the graph",
         stats: {
@@ -561,10 +569,10 @@ const resources = {
           sectionHeading: "What CO-ACC reveals",
           graph: "Map any connection",
           graphDesc:
-            "Navigate companies, contracts, sanctions, and public-sector records in one graph explorer.",
+            "Navigate companies, contracts, public-office records, disclosures, and procurement links in one graph explorer.",
           patterns: "Detect patterns",
           patternsDesc:
-            "Start from procurement and sanctions first, then extend the graph with disclosures and fiscal data.",
+            "Surface overlaps across procurement, public office, election money, disclosures, and fiscal anomalies with attributed sources.",
           investigations: "Investigate in depth",
           investigationsDesc:
             "Build source-attributed dossiers with notes, tags, and exports for manual review.",
@@ -580,7 +588,7 @@ const resources = {
             "Normalize company and contract identifiers around NIT and supplier document fields.",
           step3: "Analyze",
           step3Desc:
-            "Search the graph, review contract clusters, and inspect sanctions tied to suppliers.",
+            "Search the graph, review contract clusters, and inspect overlaps between officials, suppliers, donors, and disclosures.",
         },
         trust: {
           openSourceValue: "AGPL-3.0",
@@ -629,25 +637,33 @@ const resources = {
         quickStats: "Statistics",
         watchlistKicker: "cross-source watchlist",
         watchlistSubtitle:
-          "People and companies prioritized from contracts, payroll, elections, sanctions, and disclosure overlap.",
+          "People and companies prioritized from real overlaps across contracts, public office, elections, disclosures, and public funding.",
         watchlistLabel: "priority queue",
         prioritizedPeople: "Prioritized people",
         watchlistNote:
-          "Automatically cross-matched public-record signals. Not an accusation.",
+          "Automatically cross-matched public records. Filter by overlap type; not an accusation.",
         watchlistEmpty: "No multi-signal people were found with the current data.",
         watchlistError: "Failed to load the watchlist.",
+        peopleFiltersLabel: "Filter people",
+        peopleFilterAll: "All",
+        peopleFilterOfficeSupplier: "Office + contracts",
+        peopleFilterDonorVendor: "Donations + contracts",
+        peopleFilterDisclosures: "Disclosures + contracts",
+        peopleFilterCandidates: "Candidates",
+        peopleFilterCount: "{{count}} of {{total}} visible",
+        peopleFilterEmpty: "No prioritized people match this filter.",
         companyWatchlistSubtitle:
-          "Companies prioritized by sanctions, public-funding overlap, low competition, and capacity or execution anomalies.",
+          "Companies prioritized by capacity mismatch, low competition, execution gaps, and overlap with public officials or funding streams.",
         prioritizedCompanies: "Prioritized companies",
         companyWatchlistEmpty: "No multi-signal companies were found with the current data.",
         companyWatchlistError: "Failed to load the company watchlist.",
         buyerWatchlistSubtitle:
-          "Public buyers prioritized by supplier concentration, sanctioned suppliers, and budget-execution gaps.",
+          "Public buyers prioritized by supplier concentration, low competition, repeated risky suppliers, and budget-execution gaps.",
         prioritizedBuyers: "Prioritized buyers",
         buyerWatchlistEmpty: "No high-signal buyers were found with the current data.",
         buyerWatchlistError: "Failed to load the buyer watchlist.",
         territoryWatchlistSubtitle:
-          "Territories prioritized by supplier concentration, sanctioned suppliers, and execution discrepancies.",
+          "Territories prioritized by supplier concentration, public-private incompatibilities, and execution discrepancies.",
         prioritizedTerritories: "Prioritized territories",
         territoryWatchlistEmpty: "No high-signal territories were found with the current data.",
         territoryWatchlistError: "Failed to load the territory watchlist.",

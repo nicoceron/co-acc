@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -30,12 +31,20 @@ const mockGetPrioritizedCompanies = vi.mocked(getPrioritizedCompanies);
 const mockGetPrioritizedBuyers = vi.mocked(getPrioritizedBuyers);
 const mockGetPrioritizedTerritories = vi.mocked(getPrioritizedTerritories);
 
-function renderDashboard() {
-  return render(
-    <MemoryRouter>
-      <Dashboard />
-    </MemoryRouter>,
-  );
+async function renderDashboard() {
+  await act(async () => {
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>,
+    );
+  });
+}
+
+async function setLanguage(language: string) {
+  await act(async () => {
+    await i18n.changeLanguage(language);
+  });
 }
 
 describe("Dashboard", () => {
@@ -52,7 +61,7 @@ describe("Dashboard", () => {
       size: 5,
     });
     mockGetPrioritizedPeople.mockResolvedValue({
-      total: 1,
+      total: 2,
       people: [
         {
           entity_id: "4:abc",
@@ -88,6 +97,43 @@ describe("Dashboard", () => {
               human_review_needed: true,
               what_is_unproven: "No demuestra intercambio indebido.",
               next_step: "Compare fechas de donación y adjudicación.",
+            },
+          ],
+        },
+        {
+          entity_id: "4:ghi",
+          name: "Carlos Disclosure",
+          document_id: "99887766",
+          suspicion_score: 11,
+          signal_types: 4,
+          office_count: 0,
+          donation_count: 0,
+          donation_value: 0,
+          candidacy_count: 0,
+          asset_count: 2,
+          asset_value: 0,
+          finance_count: 2,
+          finance_value: 0,
+          supplier_contract_count: 3,
+          supplier_contract_value: 880_000_000,
+          conflict_disclosure_count: 2,
+          disclosure_reference_count: 6,
+          corporate_activity_disclosure_count: 1,
+          donor_vendor_loop_count: 0,
+          offices: [],
+          alerts: [
+            {
+              alert_type: "disclosure_risk_stack",
+              finding_class: "textual_mention",
+              severity_score: 74,
+              confidence_tier: "C",
+              reason_text:
+                "Las declaraciones oficiales muestran intereses privados o referencias textuales relevantes.",
+              evidence_refs: ["documento:99887766"],
+              source_list: ["Ley 2013 / Integridad Pública", "SECOP / SECOP II"],
+              human_review_needed: true,
+              what_is_unproven: "Las menciones textuales no identifican por sí solas un beneficiario final.",
+              next_step: "Revise la declaración original y contraste empresas o procesos mencionados.",
             },
           ],
         },
@@ -227,9 +273,9 @@ describe("Dashboard", () => {
   });
 
   it("renders the expanded Spanish risk radar", async () => {
-    await i18n.changeLanguage("es-CO");
+    await setLanguage("es-CO");
     try {
-      renderDashboard();
+      await renderDashboard();
 
       await waitFor(() => {
         expect(screen.getAllByText(/Personas priorizadas/i).length).toBeGreaterThan(0);
@@ -257,7 +303,29 @@ describe("Dashboard", () => {
         expect(screen.getAllByText(/Aún no probado/i).length).toBeGreaterThan(0);
       });
     } finally {
-      await i18n.changeLanguage("en");
+      await setLanguage("en");
+    }
+  });
+
+  it("filters prioritized people by corruption-style overlap groups", async () => {
+    await setLanguage("en");
+    try {
+      const user = userEvent.setup();
+      await renderDashboard();
+
+      await waitFor(() => {
+        expect(screen.getByText("Adriana Maria Mejia Aguado")).toBeInTheDocument();
+        expect(screen.getByText("Carlos Disclosure")).toBeInTheDocument();
+        expect(screen.getByText("2 of 2 visible")).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByRole("button", { name: "Donations + contracts" }));
+
+      expect(screen.getByText("Adriana Maria Mejia Aguado")).toBeInTheDocument();
+      expect(screen.queryByText("Carlos Disclosure")).not.toBeInTheDocument();
+      expect(screen.getByText("1 of 2 visible")).toBeInTheDocument();
+    } finally {
+      await setLanguage("en");
     }
   });
 });

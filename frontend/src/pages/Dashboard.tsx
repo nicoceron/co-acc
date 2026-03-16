@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 import { AlertTriangle } from "lucide-react";
@@ -22,6 +22,58 @@ import { Skeleton } from "@/components/common/Skeleton";
 import { useToastStore } from "@/stores/toast";
 
 import styles from "./Dashboard.module.css";
+
+type PeopleFilterId =
+  | "all"
+  | "office_contract"
+  | "donor_contract"
+  | "disclosure_contract"
+  | "candidates";
+
+const PEOPLE_WATCHLIST_LIMIT = 24;
+const COMPANY_WATCHLIST_LIMIT = 24;
+const BUYER_WATCHLIST_LIMIT = 12;
+const TERRITORY_WATCHLIST_LIMIT = 12;
+const QUICK_SEARCH_LIMIT = 12;
+
+const PEOPLE_FILTERS: Array<{
+  id: PeopleFilterId;
+  labelKey: string;
+  matches: (person: PrioritizedPerson) => boolean;
+}> = [
+  {
+    id: "all",
+    labelKey: "dashboard.peopleFilterAll",
+    matches: () => true,
+  },
+  {
+    id: "office_contract",
+    labelKey: "dashboard.peopleFilterOfficeSupplier",
+    matches: (person) => person.office_count > 0 && person.supplier_contract_count > 0,
+  },
+  {
+    id: "donor_contract",
+    labelKey: "dashboard.peopleFilterDonorVendor",
+    matches: (person) => person.donation_count > 0 && person.supplier_contract_count > 0,
+  },
+  {
+    id: "disclosure_contract",
+    labelKey: "dashboard.peopleFilterDisclosures",
+    matches: (person) => (
+      person.supplier_contract_count > 0
+      && (
+        person.conflict_disclosure_count > 0
+        || person.disclosure_reference_count > 0
+        || person.corporate_activity_disclosure_count > 0
+      )
+    ),
+  },
+  {
+    id: "candidates",
+    labelKey: "dashboard.peopleFilterCandidates",
+    matches: (person) => person.candidacy_count > 0,
+  },
+];
 
 function getNumberLocale(language: string): string {
   if (language.startsWith("es")) {
@@ -188,6 +240,7 @@ export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const [activePeopleFilter, setActivePeopleFilter] = useState<PeopleFilterId>("all");
 
   useEffect(() => {
     listInvestigations(1, 3)
@@ -200,73 +253,57 @@ export function Dashboard() {
     let cancelled = false;
 
     async function loadWatchlists() {
-      try {
-        const peopleResponse = await getPrioritizedPeople(8);
-        if (!cancelled) {
-          setWatchlist(peopleResponse.people);
-          setWatchlistError(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setWatchlist([]);
-          setWatchlistError(true);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingWatchlist(false);
-        }
+      const [
+        peopleResult,
+        companyResult,
+        buyerResult,
+        territoryResult,
+      ] = await Promise.allSettled([
+        getPrioritizedPeople(PEOPLE_WATCHLIST_LIMIT),
+        getPrioritizedCompanies(COMPANY_WATCHLIST_LIMIT),
+        getPrioritizedBuyers(BUYER_WATCHLIST_LIMIT),
+        getPrioritizedTerritories(TERRITORY_WATCHLIST_LIMIT),
+      ]);
+
+      if (cancelled) {
+        return;
       }
 
-      try {
-        const companyResponse = await getPrioritizedCompanies(8);
-        if (!cancelled) {
-          setCompanyWatchlist(companyResponse.companies);
-          setCompanyWatchlistError(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setCompanyWatchlist([]);
-          setCompanyWatchlistError(true);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingCompanyWatchlist(false);
-        }
+      if (peopleResult.status === "fulfilled") {
+        setWatchlist(peopleResult.value.people);
+        setWatchlistError(false);
+      } else {
+        setWatchlist([]);
+        setWatchlistError(true);
       }
+      setLoadingWatchlist(false);
 
-      try {
-        const buyerResponse = await getPrioritizedBuyers(6);
-        if (!cancelled) {
-          setBuyerWatchlist(buyerResponse.buyers);
-          setBuyerWatchlistError(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setBuyerWatchlist([]);
-          setBuyerWatchlistError(true);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingBuyerWatchlist(false);
-        }
+      if (companyResult.status === "fulfilled") {
+        setCompanyWatchlist(companyResult.value.companies);
+        setCompanyWatchlistError(false);
+      } else {
+        setCompanyWatchlist([]);
+        setCompanyWatchlistError(true);
       }
+      setLoadingCompanyWatchlist(false);
 
-      try {
-        const territoryResponse = await getPrioritizedTerritories(6);
-        if (!cancelled) {
-          setTerritoryWatchlist(territoryResponse.territories);
-          setTerritoryWatchlistError(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setTerritoryWatchlist([]);
-          setTerritoryWatchlistError(true);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingTerritoryWatchlist(false);
-        }
+      if (buyerResult.status === "fulfilled") {
+        setBuyerWatchlist(buyerResult.value.buyers);
+        setBuyerWatchlistError(false);
+      } else {
+        setBuyerWatchlist([]);
+        setBuyerWatchlistError(true);
       }
+      setLoadingBuyerWatchlist(false);
+
+      if (territoryResult.status === "fulfilled") {
+        setTerritoryWatchlist(territoryResult.value.territories);
+        setTerritoryWatchlistError(false);
+      } else {
+        setTerritoryWatchlist([]);
+        setTerritoryWatchlistError(true);
+      }
+      setLoadingTerritoryWatchlist(false);
     }
 
     void loadWatchlists();
@@ -281,7 +318,7 @@ export function Dashboard() {
     if (!q) return;
     setSearching(true);
     try {
-      const res = await searchEntities(q, undefined, 1, 5);
+      const res = await searchEntities(q, undefined, 1, QUICK_SEARCH_LIMIT);
       setSearchResults(res.results);
     } catch {
       setSearchResults([]);
@@ -297,6 +334,13 @@ export function Dashboard() {
   );
   const numberLocale = getNumberLocale(i18n.language);
   const numberFormatter = new Intl.NumberFormat(numberLocale);
+  const filteredWatchlist = useMemo(() => {
+    const activeFilter = PEOPLE_FILTERS.find((filter) => filter.id === activePeopleFilter);
+    if (!activeFilter) {
+      return watchlist;
+    }
+    return watchlist.filter(activeFilter.matches);
+  }, [activePeopleFilter, watchlist]);
 
   return (
     <div className={styles.page}>
@@ -350,6 +394,31 @@ export function Dashboard() {
           <p className={styles.sectionNote}>{t("dashboard.watchlistNote")}</p>
         </div>
 
+        {!loadingWatchlist && !watchlistError && watchlist.length > 0 && (
+          <div className={styles.filterBar}>
+            <span className={styles.filterLabel}>{t("dashboard.peopleFiltersLabel")}</span>
+            <div className={styles.filterChips}>
+              {PEOPLE_FILTERS.map((filter) => (
+                <button
+                  key={filter.id}
+                  type="button"
+                  className={`${styles.filterChip} ${activePeopleFilter === filter.id ? styles.filterChipActive : ""}`}
+                  onClick={() => setActivePeopleFilter(filter.id)}
+                  aria-pressed={activePeopleFilter === filter.id}
+                >
+                  {t(filter.labelKey)}
+                </button>
+              ))}
+            </div>
+            <span className={styles.filterMeta}>
+              {t("dashboard.peopleFilterCount", {
+                count: filteredWatchlist.length,
+                total: watchlist.length,
+              })}
+            </span>
+          </div>
+        )}
+
         {loadingWatchlist ? (
           <div className={styles.watchlistGrid}>
             <Skeleton variant="rect" height="320px" />
@@ -360,9 +429,11 @@ export function Dashboard() {
           <p className={styles.empty}>{t("dashboard.watchlistError")}</p>
         ) : watchlist.length === 0 ? (
           <p className={styles.empty}>{t("dashboard.watchlistEmpty")}</p>
+        ) : filteredWatchlist.length === 0 ? (
+          <p className={styles.empty}>{t("dashboard.peopleFilterEmpty")}</p>
         ) : (
           <div className={styles.watchlistGrid}>
-            {watchlist.map((person, index) => (
+            {filteredWatchlist.map((person, index) => (
               <button
                 key={person.entity_id}
                 className={styles.watchlistCard}

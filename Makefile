@@ -37,10 +37,10 @@ demo-bogota:
 	@echo "Waiting for Neo4j..."
 	@until docker exec coacc-neo4j cypher-shell -u neo4j -p "$${NEO4J_PASSWORD:-}" "RETURN 1" >/dev/null 2>&1; do sleep 2; done
 	@echo "Downloading targeted Bogotá data..."
-	# SIGEP: Politicians in Bogota
-	cd etl && uv run python scripts/download_socrata_dataset.py --dataset-id 2jzx-383z --output ../data/sigep_public_servants/sigep_public_servants.csv --where "departamento_entidad='Bogotá D.C.'" --limit 20000 --mode paged-json
+	# SIGEP: Politicians in Bogota (Filtering by Birth Department as a proxy for region)
+	cd etl && uv run python scripts/download_socrata_dataset.py --dataset-id 2jzx-383z --output ../data/sigep_public_servants/sigep_public_servants.csv --where "departamentodenacimiento='BOGOTÁ. D.C.'" --limit 20000 --mode paged-json
 	# SECOP II: Contracts in Bogota
-	cd etl && uv run python scripts/download_socrata_dataset.py --dataset-id jbjy-vk9h --output ../data/secop_ii_contracts/secop_ii_contracts.csv --where "departamento='Bogotá D.C.'" --limit 20000 --mode paged-json
+	cd etl && uv run python scripts/download_socrata_dataset.py --dataset-id jbjy-vk9h --output ../data/secop_ii_contracts/secop_ii_contracts.csv --where "departamento='Distrito Capital de Bogotá'" --limit 20000 --mode paged-json
 	# MapaInversiones: Projects in Bogota
 	cd etl && uv run python scripts/download_mapa_inversiones_report.py --report project-basics --output ../data/mapa_inversiones_projects/mapa_inversiones_projects.csv
 	# PACO: Sanctions (not filterable by city easily, download all)

@@ -34,6 +34,7 @@ _buyer_watchlist_cache: dict[int, tuple[float, PrioritizedBuyersResponse]] = {}
 _territory_watchlist_cache: dict[int, tuple[float, PrioritizedTerritoriesResponse]] = {}
 _snapshot_cache: dict[str, tuple[float, list[dict[str, Any]]]] = {}
 _SNAPSHOT_DIR = Path(__file__).resolve().parent.parent / "data" / "watchlists"
+_MAX_WATCHLIST_LIMIT = 100
 
 
 def _compact_float(value: float | int | None) -> str:
@@ -902,7 +903,7 @@ async def prioritized_people_watchlist(
     if should_hide_person_entities():
         return PrioritizedPeopleResponse(people=[], total=0)
 
-    safe_limit = max(1, min(limit, 25))
+    safe_limit = max(1, min(limit, _MAX_WATCHLIST_LIMIT))
     cached = _watchlist_cache.get(safe_limit)
     now = time.monotonic()
     if cached is not None and (now - cached[0]) < 300:
@@ -954,7 +955,7 @@ async def prioritized_company_watchlist(
     session: Annotated[AsyncSession, Depends(get_session)],
     limit: int = 12,
 ) -> PrioritizedCompaniesResponse:
-    safe_limit = max(1, min(limit, 25))
+    safe_limit = max(1, min(limit, _MAX_WATCHLIST_LIMIT))
     cached = _company_watchlist_cache.get(safe_limit)
     now = time.monotonic()
     if cached is not None and (now - cached[0]) < 300:
@@ -1013,7 +1014,7 @@ async def prioritized_buyer_watchlist(
     session: Annotated[AsyncSession, Depends(get_session)],
     limit: int = 12,
 ) -> PrioritizedBuyersResponse:
-    safe_limit = max(1, min(limit, 25))
+    safe_limit = max(1, min(limit, _MAX_WATCHLIST_LIMIT))
     cached = _buyer_watchlist_cache.get(safe_limit)
     now = time.monotonic()
     if cached is not None and (now - cached[0]) < 300:
@@ -1101,7 +1102,7 @@ async def prioritized_territory_watchlist(
     session: Annotated[AsyncSession, Depends(get_session)],
     limit: int = 12,
 ) -> PrioritizedTerritoriesResponse:
-    safe_limit = max(1, min(limit, 25))
+    safe_limit = max(1, min(limit, _MAX_WATCHLIST_LIMIT))
     cached = _territory_watchlist_cache.get(safe_limit)
     now = time.monotonic()
     if cached is not None and (now - cached[0]) < 300:

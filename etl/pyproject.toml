@@ -1,7 +1,7 @@
 [project]
 name = "coacc-etl"
 version = "0.1.0"
-description = "CO-ACC ETL — Data ingestion pipelines for Colombian public data"
+description = "Data ingestion pipelines for the CO-ACC open-source graph infrastructure project."
 requires-python = ">=3.12"
 license = "AGPL-3.0-or-later"
 dependencies = [

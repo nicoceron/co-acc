@@ -1,7 +1,7 @@
 [project]
 name = "coacc-api"
 version = "0.1.0"
-description = "CO-ACC API — Colombian public data anti-corruption graph tool"
+description = "An open-source graph infrastructure project that consolidates fragmented Colombian public datasets into a single queryable Neo4j graph."
 requires-python = ">=3.12"
 license = "AGPL-3.0-or-later"
 dependencies = [

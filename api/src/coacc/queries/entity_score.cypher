@@ -57,7 +57,7 @@ WITH e, lbls, equivs, connection_count, source_list,
 UNWIND equivs AS eq3
 OPTIONAL MATCH (eq3)-[:DONO_A]->(d)
 WITH e, lbls, equivs, connection_count, source_list, contract_volume,
-     COALESCE(sum(d.valor), 0) AS donation_volume
+     COALESCE(sum(coalesce(d.value, d.valor, 0.0)), 0.0) AS donation_volume
 // Debt/loan volume across all equivalents
 UNWIND equivs AS eq4
 OPTIONAL MATCH (eq4)-[:RECEBEU_EMPRESTIMO|DEVE]->(f:Finance)

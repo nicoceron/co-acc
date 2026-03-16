@@ -173,6 +173,22 @@ def test_entity_score_query_traverses_same_as() -> None:
     assert "type(r) <> 'SAME_AS'" in cypher
 
 
+def test_entity_score_query_uses_donation_value_property() -> None:
+    CypherLoader.clear_cache()
+    cypher = CypherLoader.load("entity_score")
+    assert "coalesce(d.value, d.valor, 0.0)" in cypher
+
+
+def test_prioritized_people_query_uses_real_overlap_signals() -> None:
+    CypherLoader.clear_cache()
+    cypher = CypherLoader.load("meta_prioritized_people")
+    assert "DECLARO_BIEN" in cypher
+    assert "DECLARO_FINANZAS" in cypher
+    assert "DONO_A" in cypher
+    assert "CANDIDATO_EM" in cypher
+    assert "feel 'alive'" not in cypher
+
+
 def test_entity_timeline_query_traverses_same_as() -> None:
     """Verify entity_timeline.cypher includes events from SAME_AS equivalents."""
     CypherLoader.clear_cache()
