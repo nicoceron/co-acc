@@ -18,6 +18,7 @@ import {
   getLeadPriorityBadge,
   getValidationConfidenceBadge,
   humanizePublicText,
+  isCorroboratedInvestigation,
   QUICK_GLOSSARY,
   type ReviewBadge,
 } from "@/lib/review";
@@ -85,6 +86,17 @@ const BASE_CATALOG: CatalogDefinition[] = [
     title: "Elefante blanco",
     description: "Obras o contratos donde pagos, facturación o avance reportado no cierran bien con la ejecución.",
     aliases: ["elefante_blanco", "budget_execution_discrepancy", "Facturación o pagos por delante de la ejecución"],
+  },
+  {
+    id: "microdesfalco_contable",
+    title: "Microdesfalco contable",
+    description: "Tesorería, nómina, conciliaciones y excepciones contables donde aparecen cheques, descuadres o edición sensible de registros.",
+    aliases: [
+      "microdesfalco_contable",
+      "payroll_cheque_exception",
+      "treasury_jsp7_gap",
+      "deleted_crp_sequence",
+    ],
   },
   {
     id: "vendedor_objetos_robados",
@@ -864,11 +876,7 @@ export function Results() {
     };
 
     for (const investigation of investigations) {
-      if (
-        investigation.status === "public_case"
-        || (investigation.verified_open_data?.length ?? 0) > 0
-        || investigation.public_sources.length > 0
-      ) {
+      if (isCorroboratedInvestigation(investigation)) {
         addCorroboratedKeys(investigation.entity_id, investigation.subject_ref);
       }
     }
@@ -876,7 +884,7 @@ export function Results() {
       addCorroboratedKeys(validationCase.entity_id, validationCase.entity_ref);
     }
     for (const lead of featuredLeadIndex.values()) {
-      if (lead.matched_validation_titles.length > 0 || lead.public_sources.length > 0) {
+      if (lead.matched_validation_titles.length > 0) {
         addCorroboratedKeys(lead.entity_id, lead.document_id);
       }
     }
@@ -891,10 +899,7 @@ export function Results() {
           investigation,
           lookupRisk(investigation.entity_id, investigation.subject_ref),
         ),
-        corroborated:
-          investigation.status === "public_case"
-          || (investigation.verified_open_data?.length ?? 0) > 0
-          || investigation.public_sources.length > 0,
+        corroborated: isCorroboratedInvestigation(investigation),
         investigation,
       });
       registerKeys(section.definition.id, investigation.entity_id, investigation.subject_ref);
@@ -929,8 +934,7 @@ export function Results() {
       if (isCovered(section.definition.id, row.entity_id, rowDocumentId)) continue;
       const corroborated =
         buildIdentityKeys(row.entity_id, rowDocumentId).some((key) => corroboratedKeys.has(key))
-        || Boolean(featuredLead?.matched_validation_titles.length)
-        || Boolean(featuredLead?.public_sources.length);
+        || Boolean(featuredLead?.matched_validation_titles.length);
       section.items.push({
         kind: "lead",
         key: `${queueKind}:${row.entity_id}`,

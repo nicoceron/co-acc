@@ -35,10 +35,13 @@ DETAIL_GRAPH_NODE_TYPE_LIMITS = {
 DETAIL_GRAPH_EDGE_TYPE_LIMITS = {
     "MANTIENE_A": 24,
 }
-INVESTIGATION_LIMIT = 17
+INVESTIGATION_LIMIT = 18
 GENERATED_INVESTIGATION_LIMIT = 4
 UNGRD_STRUCTURED_EVIDENCE_PATH = Path(
     "audit-results/investigations/ungrd-public-evidence-2026-03-27/structured-evidence.json"
+)
+TRANSMILENIO_FINANCE_EVIDENCE_PATH = Path(
+    "audit-results/investigations/transmilenio-finance-2026-03-28/structured-evidence.json"
 )
 UNGRD_CASE_IDS = {
     "olmedo_lopez_ungrd_bulletin_record",
@@ -88,6 +91,11 @@ SIGNAL_LABELS = {
     "sensitive_public_official_supplier_overlap": "Proveedor ligado a cargo sensible",
     "split_contracts_below_threshold": "Paquetes repetidos de contratos bajo umbral",
     "shared_officer_supplier_network": "Red compartida de directivos en proveedores",
+    "microdesfalco_contable": "Microdesfalco contable",
+    "payroll_cheque_exception": "Cheques excepcionales para nómina",
+    "treasury_jsp7_gap": "Descuadre entre tesorería y JSP7",
+    "deleted_crp_sequence": "Consecutivo CRP eliminado en JSP7",
+    "financial_process_corruption_risk": "Riesgo de corrupción en gestión financiera y contable",
 }
 
 METRIC_LABELS = {
@@ -131,6 +139,19 @@ METRIC_LABELS = {
     "invoice_total": "facturación",
     "linked_supplier_company_count": "empresas proveedoras enlazadas",
     "low_competition_bid_count": "procesos de baja competencia",
+    "deleted_crp_sequence_count": "consecutivos CRP eliminados",
+    "financial_process_corruption_control_count": "controles en proceso financiero",
+    "financial_process_corruption_risk_count": "riesgos de corrupción en proceso financiero",
+    "management_contract_count": "contratos reportados en gestión",
+    "management_contract_modification_count": "modificaciones contractuales",
+    "management_contract_novelty_count": "novedades contractuales",
+    "management_supplier_request_count": "solicitudes de información a proveedores",
+    "pac_district_transfer_total": "transferencias PAC del Distrito",
+    "pac_fet_transfer_total": "transferencias PAC al FET",
+    "payroll_cheque_exception_count": "cheques excepcionales de nómina",
+    "payroll_cheque_exception_total": "valor de cheques excepcionales",
+    "payroll_teller_window_request_count": "solicitudes de cobro por ventanilla",
+    "priority_score": "puntaje prioritario",
     "official_case_bulletin_count": "boletines oficiales",
     "official_officer_count": "directivos públicos",
     "official_role_count": "roles públicos",
@@ -154,6 +175,16 @@ METRIC_LABELS = {
     "supplier_contract_count": "contratos como proveedor",
     "supplier_contract_value": "valor contratado",
     "suspension_contract_count": "contratos suspendidos",
+    "total_corruption_control_count": "controles anticorrupción totales",
+    "total_corruption_risk_count": "riesgos anticorrupción totales",
+    "treasury_cdt_count": "CDT activos",
+    "treasury_cdt_nominal_total": "valor nominal de CDT",
+    "treasury_convenio_payment_count": "pagos de convenios",
+    "treasury_convenio_payment_total": "valor de pagos de convenios",
+    "treasury_jsp7_difference_total": "descuadre tesorería vs JSP7",
+    "third_party_non_holder_rule_signal": "ruta formal para pagos a terceros no titulares",
+    "vehicle_owner_payment_count": "pagos a propietarios de vehículos",
+    "vehicle_owner_payment_total": "valor pagado a propietarios de vehículos",
 }
 
 IGNORED_PATTERN_KEYS = {
@@ -214,6 +245,8 @@ def format_signal_label(signal_id: str) -> str:
 
 def compact_money(value: float | int) -> str:
     amount = float(value or 0.0)
+    if amount >= 1_000_000_000_000:
+        return f"COP {amount / 1_000_000_000_000:.1f}T"
     if amount >= 1_000_000_000:
         return f"COP {amount / 1_000_000_000:.1f}B"
     if amount >= 1_000_000:
@@ -248,6 +281,10 @@ def load_ungrd_structured_evidence() -> dict[str, Any] | None:
     return load_optional_json(UNGRD_STRUCTURED_EVIDENCE_PATH)
 
 
+def load_transmilenio_finance_evidence() -> dict[str, Any] | None:
+    return load_optional_json(TRANSMILENIO_FINANCE_EVIDENCE_PATH)
+
+
 def ungrd_document_sources(bundle: dict[str, Any] | None) -> list[str]:
     if not bundle:
         return []
@@ -257,6 +294,18 @@ def ungrd_document_sources(bundle: dict[str, Any] | None) -> list[str]:
             url = str(page.get("url") or "").strip()
             if url:
                 sources.append(url)
+    for document in bundle.get("documents", []) or []:
+        if isinstance(document, dict):
+            url = str(document.get("source_url") or "").strip()
+            if url:
+                sources.append(url)
+    return dedupe_strings(sources)
+
+
+def transmilenio_document_sources(bundle: dict[str, Any] | None) -> list[str]:
+    if not bundle:
+        return []
+    sources = [str(url).strip() for url in (bundle.get("official_sources") or []) if str(url).strip()]
     for document in bundle.get("documents", []) or []:
         if isinstance(document, dict):
             url = str(document.get("source_url") or "").strip()
@@ -3698,6 +3747,136 @@ def build_generated_payment_supervision_archive_investigation(
     }
 
 
+def build_transmilenio_finance_investigation(bundle: dict[str, Any]) -> dict[str, Any]:
+    metrics = bundle.get("metrics") or {}
+    alerts = [item for item in (bundle.get("alerts") or []) if isinstance(item, dict)]
+    summary = bundle.get("summary") or {}
+
+    cheque_count = int(metrics.get("payroll_cheque_exception_count") or 0)
+    cheque_total = float(metrics.get("payroll_cheque_exception_total") or 0.0)
+    jsp7_gap_total = float(metrics.get("treasury_jsp7_difference_total") or 0.0)
+    deleted_sequences = [str(value) for value in (metrics.get("deleted_crp_sequences") or []) if str(value).strip()]
+    financial_risk_count = int(metrics.get("financial_process_corruption_risk_count") or 0)
+    financial_control_count = int(metrics.get("financial_process_corruption_control_count") or 0)
+    convenio_payments = int(metrics.get("treasury_convenio_payment_count") or 0)
+    convenio_payment_total = float(metrics.get("treasury_convenio_payment_total") or 0.0)
+    vehicle_payments = int(metrics.get("vehicle_owner_payment_count") or 0)
+    vehicle_payment_total = float(metrics.get("vehicle_owner_payment_total") or 0.0)
+
+    findings: list[str] = []
+    if cheque_count > 0:
+        findings.append(
+            f"La auditoría OCI 2024-053 registró {cheque_count} cheques excepcionales de nómina por {compact_money(cheque_total)} para un solo funcionario, junto con solicitud de cobro directo por ventanilla."
+        )
+    if jsp7_gap_total > 0:
+        findings.append(
+            f"La misma auditoría reportó un descuadre de {compact_money(jsp7_gap_total)} entre el reporte de tesorería y el aplicativo JSP7."
+        )
+    if deleted_sequences:
+        findings.append(
+            "El expediente también documenta eliminación de consecutivo presupuestal desde el perfil administrador de JSP7: "
+            + ", ".join(deleted_sequences[:3])
+            + "."
+        )
+    if financial_risk_count > 0 or financial_control_count > 0:
+        findings.append(
+            f"El PTEP 2025 mantiene a Gestión de Información Financiera y Contable con {financial_risk_count} riesgo(s) de corrupción y {financial_control_count} control(es) declarados."
+        )
+    if convenio_payments > 0 or vehicle_payments > 0:
+        findings.append(
+            f"El anexo de tesorería 2025 muestra {convenio_payments} pagos de convenios por {compact_money(convenio_payment_total)} y {vehicle_payments} pagos a propietarios de vehículos por {compact_money(vehicle_payment_total)}."
+        )
+    if int(metrics.get("contractor_mass_payment_order_signal") or 0) > 0:
+        findings.append(
+            "La propia tesorería reporta órdenes de pago masivas para contratistas, lo que vuelve más importante revisar controles por lote, usuario y tercero beneficiario."
+        )
+    if int(metrics.get("third_party_non_holder_rule_signal") or 0) > 0:
+        findings.append(
+            "El informe de gestión conserva una ruta formal para pagos a terceros no titulares del derecho; no prueba desvío, pero sí marca una excepción operativa que conviene auditar."
+        )
+
+    verified_open_data = dedupe_strings(
+        [
+            *[
+                f"{str(alert.get('title') or '').strip()} · {str(alert.get('summary') or '').strip()}"
+                for alert in alerts[:4]
+                if str(alert.get("title") or "").strip() and str(alert.get("summary") or "").strip()
+            ],
+            *[
+                f"Documentos oficiales reunidos · {int(summary.get('documents_total') or 0)} PDF(s) públicos con {int(summary.get('alerts_total') or 0)} señal(es) estructuradas."
+            ],
+        ]
+    )
+
+    evidence_metrics = {
+        "payroll_cheque_exception_count": cheque_count,
+        "payroll_cheque_exception_total": cheque_total,
+        "payroll_teller_window_request_count": metrics.get("payroll_teller_window_request_count") or 0,
+        "treasury_jsp7_difference_total": jsp7_gap_total,
+        "deleted_crp_sequence_count": metrics.get("deleted_crp_sequence_count") or 0,
+        "financial_process_corruption_risk_count": financial_risk_count,
+        "financial_process_corruption_control_count": financial_control_count,
+        "treasury_convenio_payment_count": convenio_payments,
+        "treasury_convenio_payment_total": convenio_payment_total,
+        "vehicle_owner_payment_count": vehicle_payments,
+        "vehicle_owner_payment_total": vehicle_payment_total,
+        "pac_district_transfer_total": metrics.get("pac_district_transfer_total") or 0.0,
+        "pac_fet_transfer_total": metrics.get("pac_fet_transfer_total") or 0.0,
+        "management_contract_modification_count": metrics.get("management_contract_modification_count") or 0,
+        "management_supplier_request_count": metrics.get("management_supplier_request_count") or 0,
+        "priority_score": metrics.get("priority_score") or 0,
+    }
+
+    return {
+        "slug": "transmilenio-microdesfalco-contable",
+        "title": "TRANSMILENIO S.A.: microdesfalco contable y excepciones de tesorería",
+        "category": "microdesfalco_contable",
+        "status": "generated_lead",
+        "entity_id": "company-transmilenio-sa",
+        "entity_type": "company",
+        "subject_name": "TRANSMILENIO S.A.",
+        "subject_ref": None,
+        "summary": "Pista nueva basada en auditoría financiera oficial, anexos de tesorería y reglas públicas de pago que ya muestran excepciones de nómina, descuadres de ingresos y edición sensible en JSP7.",
+        "why_it_matters": "No identifica todavía al contador o funcionario responsable, pero sí delimita una zona roja verificable donde conviene pedir libro auxiliar, órdenes de pago, consecutivos de cheque, conciliaciones bancarias y trazas de usuario.",
+        "findings": findings,
+        "evidence": build_metrics_evidence(
+            evidence_metrics,
+            [
+                "payroll_cheque_exception_count",
+                "payroll_cheque_exception_total",
+                "payroll_teller_window_request_count",
+                "treasury_jsp7_difference_total",
+                "deleted_crp_sequence_count",
+                "financial_process_corruption_risk_count",
+                "financial_process_corruption_control_count",
+                "treasury_convenio_payment_count",
+                "treasury_convenio_payment_total",
+                "vehicle_owner_payment_count",
+                "vehicle_owner_payment_total",
+                "pac_district_transfer_total",
+                "pac_fet_transfer_total",
+                "management_contract_modification_count",
+                "management_supplier_request_count",
+                "priority_score",
+            ],
+        ),
+        "verified_open_data": verified_open_data,
+        "open_questions": [
+            "Dato transaccional fino · faltan libro auxiliar, órdenes de pago, consecutivos de cheque y conciliaciones bancarias por tercero o funcionario.",
+            "Responsable individual · falta identificar al funcionario que recibió los 10 cheques y la cadena de aprobación de esa excepción.",
+            "Trazabilidad técnica · falta revisar bitácoras de usuario y permisos del perfil administrador sobre JSP7, especialmente alrededor del consecutivo CRP eliminado.",
+        ],
+        "tags": [
+            "microdesfalco_contable",
+            "payroll_cheque_exception",
+            "treasury_jsp7_gap",
+            "deleted_crp_sequence",
+        ],
+        "public_sources": transmilenio_document_sources(bundle),
+        "graph": None,
+    }
+
+
 def build_investigations(
     api_base: str,
     validation_cases: list[dict[str, Any]],
@@ -3708,6 +3887,7 @@ def build_investigations(
     by_case_id = {str(case.get("case_id") or ""): case for case in validation_cases}
     investigations: list[dict[str, Any]] = []
     ungrd_bundle = load_ungrd_structured_evidence()
+    transmilenio_finance_bundle = load_transmilenio_finance_evidence()
 
     if (san_jose := by_case_id.get("san_jose_education_control_capture")):
         if (investigation := build_san_jose_investigation(api_base, san_jose)) is not None:
@@ -3750,6 +3930,9 @@ def build_investigations(
                 graph_lookup(str(egobus.get("entity_id") or "")),
             )
         )
+
+    if transmilenio_finance_bundle:
+        investigations.append(build_transmilenio_finance_investigation(transmilenio_finance_bundle))
 
     for case_id in (
         "alejandro_ospina_coll_bulletin_exposure",

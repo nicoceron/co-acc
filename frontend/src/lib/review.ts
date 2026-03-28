@@ -85,8 +85,8 @@ export function getLeadConfidenceBadge(lead: MaterializedLead): ReviewBadge {
 export function isCorroboratedInvestigation(investigation: MaterializedInvestigation): boolean {
   return (
     investigation.status === "public_case"
-    || (investigation.verified_open_data?.length ?? 0) > 0
-    || investigation.public_sources.length > 0
+    || (investigation.reported_sources?.length ?? 0) > 0
+    || (investigation.reported_claims?.length ?? 0) > 0
   );
 }
 

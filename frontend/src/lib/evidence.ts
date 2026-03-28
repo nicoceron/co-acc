@@ -15,11 +15,14 @@ const SIGNAL_LABELS: Record<string, string> = {
   interadministrative_channel_stacking: "Convenios interadministrativos apilados con contratación regular",
   invoice_execution_gap: "Facturas sin avance material suficiente",
   low_competition_bidding: "Baja competencia o invitación directa",
+  microdesfalco_contable: "Microdesfalco contable",
   official_case_bulletin_exposure: "Boletín oficial con exposición pública",
   official_case_bulletin_record: "Registro en boletín oficial",
+  payroll_cheque_exception: "Cheques excepcionales para nómina",
   payment_supervision_risk_stack: "Supervisión de pagos sobre contratos riesgosos",
   public_money_channel_stacking: "Canales públicos múltiples sobre el mismo actor",
   public_official_supplier_overlap: "Proveedor con directivo o vínculo en cargo público",
+  deleted_crp_sequence: "Consecutivo CRP eliminado en JSP7",
   sanctioned_person_exposure_stack: "Sanciones oficiales con exposición pública",
   sanctioned_still_receiving: "Proveedor sancionado que siguió recibiendo contratos",
   sanctioned_health_operator_overlap: "Prestador de salud con sanciones",
@@ -27,6 +30,7 @@ const SIGNAL_LABELS: Record<string, string> = {
   sensitive_public_official_supplier_overlap: "Proveedor ligado a cargo sensible",
   split_contracts_below_threshold: "Paquetes repetidos de contratos bajo umbral",
   shared_officer_supplier_network: "Red compartida de directivos en proveedores",
+  treasury_jsp7_gap: "Descuadre entre tesorería y JSP7",
 };
 
 const RELATION_LABELS: Record<string, string> = {

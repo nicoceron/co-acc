@@ -96,7 +96,8 @@ const SAMPLE_PACK = {
       findings: ["Hallazgo nuevo"],
       evidence: [{ label: "brecha de ejecución", value: "1" }],
       tags: ["budget_execution_discrepancy"],
-      public_sources: [],
+      public_sources: ["https://example.com/fuente-oficial"],
+      verified_open_data: ["Hallazgo estructurado en documento oficial."],
     },
     {
       slug: "san-jose-icaft-network",
