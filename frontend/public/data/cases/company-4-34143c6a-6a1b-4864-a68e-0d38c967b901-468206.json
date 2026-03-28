@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468206",
+  "title": "EMPRESAS AGUAS DE FACATATIVA ACUEDUCTO ALCANTARILLADO ASEO Y SERVICIOS COMPLEMENTARIOS EA",
+  "subtitle": "Empresa · 8001886600",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468206",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468206",
+        "label": "EMPRESAS AGUAS DE FACATATIVA ACUEDUCTO ALCANTARILLADO ASEO Y SERVICIOS COMPLEMENTARIOS EA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 12,
+          "contract_value": 3822973307.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8001886600"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468206:official:1",
+        "label": "FRANCISCO JAVIER BELTRAN BUSTOS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468206:contracts",
+        "label": "Contratos detectados (12)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 12,
+          "total_value": 3822973307.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468206:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468206",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468206:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468206",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 12,
+          "total_value": 3822973307.0
+        }
+      }
+    ]
+  }
+}

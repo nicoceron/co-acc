@@ -99,7 +99,7 @@ async def search_entities(
             sources = [SourceAttribution(database=s) for s in source_val]
 
         doc_id = record["document_id"]
-        # Only expose cpf/cnpj as document, not internal element IDs
+        # Only expose public document identifiers, not internal element IDs
         document = str(doc_id) if doc_id and not str(doc_id).startswith("4:") else None
 
         results.append(SearchResult(

@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468222",
+  "title": "CARLOS JULIO BELTRAN",
+  "subtitle": "Empresa · 79306941",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468222",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468222",
+        "label": "CARLOS JULIO BELTRAN",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 179,
+          "contract_value": 11282667927.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "79306941"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468222:official:1",
+        "label": "ISMAEL YESID LUQUE MARTINEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468222:contracts",
+        "label": "Contratos detectados (179)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 179,
+          "total_value": 11282667927.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468222:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468222",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468222:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468222",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 179,
+          "total_value": 11282667927.0
+        }
+      }
+    ]
+  }
+}

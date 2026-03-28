@@ -1,0 +1,624 @@
+.page {
+  --paper: color-mix(in oklab, var(--bg-secondary) 80%, #221c12 20%);
+  --paper-strong: color-mix(in oklab, var(--bg-primary) 70%, #120e09 30%);
+  --editorial-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  min-height: 100vh;
+  padding: clamp(5rem, 7vw, 6.5rem) clamp(1.1rem, 3vw, 2.6rem) 4rem;
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--color-warning) 12%, transparent) 0, transparent 34%),
+    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 16%, transparent) 0, transparent 28%),
+    linear-gradient(180deg, #13110f 0%, #090a09 100%);
+}
+
+.frame {
+  max-width: 1380px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.reviewStrip,
+.glossaryStrip {
+  display: grid;
+  gap: 1rem;
+}
+
+.topBar,
+.hero,
+.storyCard,
+.railCard,
+.exhibitCard,
+.inspectorCard,
+.sourcesCard,
+.stateWrap {
+  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  background:
+    linear-gradient(180deg, rgba(19, 17, 14, 0.95), rgba(12, 12, 11, 0.98)),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 31px,
+      rgba(255, 255, 255, 0.02) 31px,
+      rgba(255, 255, 255, 0.02) 32px
+    );
+  box-shadow: var(--shadow-md);
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.statusPill,
+.metaPill,
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 24%, var(--border));
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.statusPill {
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  color: var(--text-primary);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.75fr);
+  gap: 1.2rem;
+  padding: clamp(1.3rem, 2.8vw, 2rem);
+}
+
+.heroMain {
+  display: grid;
+  align-content: start;
+}
+
+.eyebrow,
+.sectionHead span,
+.propertyRow span,
+.actorChip small {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.title {
+  margin-top: 0.8rem;
+  font-family: var(--editorial-serif);
+  font-size: clamp(2.5rem, 5vw, 4.7rem);
+  line-height: 0.94;
+  letter-spacing: -0.04em;
+  max-width: 12ch;
+}
+
+.subjectLine {
+  margin-top: 1rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+.summary {
+  max-width: 68ch;
+  margin-top: 1rem;
+  color: var(--text-primary);
+  font-size: clamp(1rem, 1.6vw, 1.18rem);
+  line-height: 1.7;
+}
+
+.whyBlock {
+  margin-top: 1.2rem;
+  padding-left: 1rem;
+  border-left: 2px solid color-mix(in oklab, var(--color-warning) 46%, transparent);
+}
+
+.whyBlock strong {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-warning);
+}
+
+.whyBlock p,
+.exhibitLead,
+.stateText {
+  color: var(--text-secondary);
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.2rem;
+}
+
+.metaPill {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tagChip {
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
+  color: var(--text-secondary);
+}
+
+.heroSide {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  align-content: start;
+}
+
+.reviewStrip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.reviewCard,
+.glossaryCard {
+  padding: 1rem 1.05rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  background:
+    linear-gradient(180deg, rgba(19, 17, 14, 0.95), rgba(12, 12, 11, 0.98)),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 31px,
+      rgba(255, 255, 255, 0.02) 31px,
+      rgba(255, 255, 255, 0.02) 32px
+    );
+  box-shadow: var(--shadow-md);
+}
+
+.reviewLabel {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.reviewBadge {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.7rem;
+  padding: 0.42rem 0.72rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  font-family: var(--font-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.reviewHigh {
+  background: color-mix(in oklab, var(--color-success) 12%, transparent);
+  border-color: color-mix(in oklab, var(--color-success) 26%, var(--border));
+  color: var(--text-primary);
+}
+
+.reviewMedium {
+  background: color-mix(in oklab, var(--color-warning) 12%, transparent);
+  border-color: color-mix(in oklab, var(--color-warning) 26%, var(--border));
+  color: var(--text-primary);
+}
+
+.reviewInitial {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+}
+
+.reviewCard p,
+.glossaryCard p {
+  margin-top: 0.7rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.glossaryGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.glossaryCard strong {
+  display: block;
+  font-family: var(--editorial-serif);
+  font-size: 1.1rem;
+  line-height: 1.05;
+}
+
+.statCard {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.statCard span {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.statCard strong {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--editorial-serif);
+  font-size: 1.7rem;
+}
+
+.bodyGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.72fr);
+  gap: 1.1rem;
+  align-items: start;
+}
+
+.verificationBoard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "reported verified"
+    "open open";
+  gap: 1rem;
+}
+
+.verificationCard {
+  padding: 1.15rem 1.2rem 1.25rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  background:
+    linear-gradient(180deg, rgba(19, 17, 14, 0.96), rgba(10, 10, 9, 0.98)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 45%);
+  box-shadow: var(--shadow-md);
+}
+
+.claimsCard {
+  grid-area: reported;
+  border-color: color-mix(in oklab, var(--color-warning) 24%, var(--border));
+  background:
+    linear-gradient(180deg, rgba(24, 19, 13, 0.96), rgba(11, 10, 8, 0.98)),
+    linear-gradient(135deg, rgba(194, 141, 71, 0.08), transparent 42%);
+}
+
+.verifiedCard {
+  grid-area: verified;
+  border-color: color-mix(in oklab, var(--accent) 28%, var(--border));
+  background:
+    linear-gradient(180deg, rgba(13, 18, 16, 0.96), rgba(8, 11, 10, 0.98)),
+    linear-gradient(135deg, rgba(104, 177, 156, 0.08), transparent 42%);
+}
+
+.openCard {
+  grid-area: open;
+  background:
+    linear-gradient(180deg, rgba(17, 16, 14, 0.96), rgba(10, 10, 9, 0.98)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 45%);
+}
+
+.boardTitle {
+  margin-top: 0.9rem;
+  font-family: var(--editorial-serif);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  line-height: 1.05;
+  max-width: 18ch;
+}
+
+.boardList {
+  margin-top: 1rem;
+  padding-left: 0;
+  display: grid;
+  gap: 0.78rem;
+  list-style: none;
+}
+
+.boardListItem {
+  display: grid;
+  gap: 0.38rem;
+  padding: 0.9rem 0.95rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.boardListItem span {
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.boardItemLabel {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.boardSources {
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid color-mix(in oklab, var(--accent) 16%, transparent);
+}
+
+.boardSourcesTitle {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.boardSourceList {
+  margin-top: 0.7rem;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.boardSourceList a {
+  color: var(--text-primary);
+  text-decoration-color: color-mix(in oklab, var(--accent) 35%, transparent);
+  word-break: break-word;
+}
+
+.storyCard,
+.exhibitCard,
+.inspectorCard,
+.railCard,
+.sourcesCard {
+  padding: 1.2rem;
+}
+
+.evidenceRail {
+  display: grid;
+  gap: 1rem;
+}
+
+.sectionHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text-primary);
+}
+
+.findingsList {
+  margin-top: 1rem;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.85rem;
+  color: var(--text-primary);
+}
+
+.findingsList li {
+  line-height: 1.65;
+}
+
+.evidenceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.evidenceCard {
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  display: grid;
+  gap: 0.28rem;
+}
+
+.evidenceCard span,
+.traceButton span,
+.emptyState {
+  color: var(--text-secondary);
+}
+
+.evidenceCard strong {
+  font-size: 1.15rem;
+  line-height: 1.1;
+}
+
+.evidenceCard small {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.actorList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.actorChip {
+  min-width: 140px;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border));
+  background: rgba(255, 255, 255, 0.03);
+  text-align: left;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.actorChip span {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.exhibitLead {
+  margin-top: 0.75rem;
+  max-width: 70ch;
+}
+
+.traceList {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.traceButton {
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
+  background: rgba(255, 255, 255, 0.03);
+  text-align: left;
+  cursor: pointer;
+}
+
+.traceButton strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.traceButton span {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.84rem;
+}
+
+.graphStage {
+  height: min(68vh, 720px);
+  min-height: 440px;
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 8%, transparent), transparent 45%),
+    linear-gradient(180deg, rgba(9, 11, 10, 0.8), rgba(7, 9, 8, 0.95));
+}
+
+.inspectorTitle {
+  margin-top: 1rem;
+  font-family: var(--editorial-serif);
+  font-size: 2rem;
+  line-height: 0.98;
+}
+
+.inspectorMeta {
+  margin-top: 0.55rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.propertyList {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.propertyRow {
+  display: grid;
+  gap: 0.2rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid color-mix(in oklab, var(--accent) 12%, transparent);
+}
+
+.propertyRow strong {
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  word-break: break-word;
+}
+
+.sourceList {
+  margin-top: 0.9rem;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.sourceList a {
+  color: var(--text-primary);
+  text-decoration-color: color-mix(in oklab, var(--accent) 40%, transparent);
+  word-break: break-word;
+}
+
+.stateWrap {
+  max-width: 760px;
+  margin: 6rem auto 0;
+  padding: 2rem;
+}
+
+.stateEyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.stateTitle {
+  margin-top: 0.9rem;
+  font-family: var(--editorial-serif);
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 0.96;
+}
+
+@media (max-width: 1040px) {
+  .hero,
+  .bodyGrid,
+  .reviewStrip {
+    grid-template-columns: 1fr;
+  }
+
+  .verificationBoard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "reported"
+      "verified"
+      "open";
+  }
+
+  .heroSide,
+  .evidenceGrid,
+  .glossaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding-inline: 0.8rem;
+  }
+
+  .topBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .heroSide,
+  .evidenceGrid,
+  .glossaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .graphStage {
+    min-height: 360px;
+    height: 56vh;
+  }
+}

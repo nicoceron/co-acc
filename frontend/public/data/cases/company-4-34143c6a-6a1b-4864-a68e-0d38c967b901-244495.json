@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495",
+  "title": "MINTRABAJO NIVEL CENTRAL*/",
+  "subtitle": "Empresa · 830115226",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495",
+        "label": "MINTRABAJO NIVEL CENTRAL*/",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 41,
+          "contract_value": 6897843564.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "830115226"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495:official:1",
+        "label": "MARCELA CASTRO MACIAS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495:official:2",
+        "label": "PABLO EDGAR PINTO PINTO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495:contracts",
+        "label": "Contratos detectados (41)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 41,
+          "total_value": 6897843564.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244495",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 41,
+          "total_value": 6897843564.0
+        }
+      }
+    ]
+  }
+}

@@ -2,17 +2,37 @@ MATCH (p)
 WHERE (elementId(p) = $person_id
        OR p.document_id = $person_document_id
        OR p.cedula = $person_document_id)
+CALL {
+  WITH p
+  OPTIONAL MATCH (p)-[:OFFICER_OF]->(officer_company:Company)
+  OPTIONAL MATCH (same_company:Company)
+  WHERE same_company.document_id = $person_document_id
+     OR same_company.nit = $person_document_id
+  WITH [company IN collect(DISTINCT officer_company) + collect(DISTINCT same_company)
+        WHERE company IS NOT NULL] AS linked_companies
+  UNWIND CASE
+           WHEN size(linked_companies) = 0 THEN [null]
+           ELSE linked_companies
+         END AS linked_company
+  WITH DISTINCT linked_company
+  OPTIONAL MATCH ()-[award:CONTRATOU]->(linked_company)
+  RETURN count(DISTINCT linked_company) AS linked_company_count,
+         count(DISTINCT award.summary_id) AS supplier_contract_count,
+         coalesce(sum(coalesce(award.total_value, 0.0)), 0.0) AS supplier_contract_value,
+         collect(DISTINCT award.summary_id) AS summary_ids,
+         min(coalesce(award.first_date, award.last_date)) AS window_start,
+         max(coalesce(award.last_date, award.first_date)) AS window_end
+}
 MATCH (p)-[:RECIBIO_SALARIO]->(o:PublicOffice)
-MATCH (c:Company {document_id: coalesce(p.document_id, p.cedula)})
-MATCH ()-[award:CONTRATOU]->(c)
 OPTIONAL MATCH (p)-[d:DONO_A]->(:Election)
 OPTIONAL MATCH (p)-[:DECLARO_FINANZAS]->(f:Finance {type: 'CONFLICT_DISCLOSURE'})
 WITH p,
      collect(DISTINCT coalesce(o.role, o.cargo, o.name, o.org))[0..5] AS office_names,
-     count(DISTINCT award.summary_id) AS supplier_contract_count,
-     sum(coalesce(award.total_value, 0.0)) AS supplier_contract_value,
+     linked_company_count,
+     supplier_contract_count,
+     supplier_contract_value,
      count(DISTINCT d) AS donation_count,
-     sum(coalesce(d.value, 0.0)) AS donation_value,
+     sum(coalesce(d.value, d.valor, 0.0)) AS donation_value,
      count(DISTINCT f) AS conflict_disclosure_count,
      max(
        CASE
@@ -24,11 +44,12 @@ WITH p,
          ELSE 0
        END
      ) AS conflict_flag,
-     collect(DISTINCT award.summary_id) AS summary_ids,
-     min(coalesce(award.first_date, award.last_date)) AS window_start,
-     max(coalesce(award.last_date, award.first_date)) AS window_end
+     summary_ids,
+     window_start,
+     window_end
 WITH p,
      office_names,
+     linked_company_count,
      supplier_contract_count,
      supplier_contract_value,
      donation_count,
@@ -45,11 +66,17 @@ RETURN 'donor_official_vendor_loop' AS pattern_id,
        p.document_id AS document_id,
        toFloat(
          supplier_contract_count
+         + CASE
+             WHEN linked_company_count >= 2 THEN 2
+             WHEN linked_company_count = 1 THEN 1
+             ELSE 0
+           END
          + donation_count
          + CASE WHEN conflict_disclosure_count > 0 THEN 2 ELSE 0 END
          + CASE WHEN conflict_flag = 1 THEN 1 ELSE 0 END
        ) AS risk_signal,
        office_names AS office_names,
+       toInteger(linked_company_count) AS linked_company_count,
        toInteger(supplier_contract_count) AS supplier_contract_count,
        supplier_contract_value AS supplier_contract_value,
        toInteger(donation_count) AS donation_count,

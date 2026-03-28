@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467934",
+  "title": "NANCY YANETH CORTES CASTIBLANCO",
+  "subtitle": "Empresa · 52154921",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467934",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467934",
+        "label": "NANCY YANETH CORTES CASTIBLANCO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 50,
+          "contract_value": 2236194346.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "52154921"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467934:official:1",
+        "label": "MILTON HERNANDO PEREZ ORDONEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467934:contracts",
+        "label": "Contratos detectados (50)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 50,
+          "total_value": 2236194346.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467934:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467934",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467934:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467934",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 50,
+          "total_value": 2236194346.0
+        }
+      }
+    ]
+  }
+}

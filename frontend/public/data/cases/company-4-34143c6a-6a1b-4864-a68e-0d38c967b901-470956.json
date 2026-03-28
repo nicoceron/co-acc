@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470956",
+  "title": "RUBEN DARIO BRINEZ SABOGAL",
+  "subtitle": "Empresa · 80051686",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470956",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470956",
+        "label": "RUBEN DARIO BRINEZ SABOGAL",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 30,
+          "contract_value": 2020697392.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "80051686"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470956:official:1",
+        "label": "NUBIA LUCIA WILCHES QUINTANA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470956:contracts",
+        "label": "Contratos detectados (30)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 30,
+          "total_value": 2020697392.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470956:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470956",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470956:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470956",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 30,
+          "total_value": 2020697392.0
+        }
+      }
+    ]
+  }
+}

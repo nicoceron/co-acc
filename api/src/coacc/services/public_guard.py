@@ -9,7 +9,6 @@ from coacc.config import settings
 PERSON_LABELS = {"Person", "Partner"}
 INTERNAL_LABELS = {"User", "Investigation", "Annotation", "Tag"}
 SENSITIVE_PROP_KEYS = {
-    "cpf",
     "cedula",
     "numero_documento",
     "doc_partial",
@@ -54,7 +53,6 @@ def sanitize_public_properties(
         key: value
         for key, value in props.items()
         if key not in SENSITIVE_PROP_KEYS
-        and "cpf" not in key.lower()
         and "cedula" not in key.lower()
     }
 

@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468022",
+  "title": "CLEMENTE RENE",
+  "subtitle": "Empresa · 97470658",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468022",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468022",
+        "label": "CLEMENTE RENE",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 33,
+          "contract_value": 8800725496.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "97470658"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468022:official:1",
+        "label": "MILTON HERNANDO PEREZ ORDONEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468022:contracts",
+        "label": "Contratos detectados (33)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 33,
+          "total_value": 8800725496.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468022:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468022",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468022:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468022",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 33,
+          "total_value": 8800725496.0
+        }
+      }
+    ]
+  }
+}

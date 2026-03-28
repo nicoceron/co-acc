@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243311",
+  "title": "DEPARTAMENTO DE ANTIOQUIA//",
+  "subtitle": "Empresa · 890900286",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243311",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243311",
+        "label": "DEPARTAMENTO DE ANTIOQUIA//",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 2226,
+          "contract_value": 4363675697667.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "890900286"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243311:official:1",
+        "label": "LUIS ALBERTO CHAVEZ SUAREA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243311:contracts",
+        "label": "Contratos detectados (2226)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 2226,
+          "total_value": 4363675697667.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243311:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243311",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243311:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243311",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 2226,
+          "total_value": 4363675697667.0
+        }
+      }
+    ]
+  }
+}

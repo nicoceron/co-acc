@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132",
+  "title": "FUNDACION ADULTO MAYOR DE VENECIA CUNDINAMARCA",
+  "subtitle": "Empresa · 8906800883",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132",
+        "label": "FUNDACION ADULTO MAYOR DE VENECIA CUNDINAMARCA",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 133,
+          "contract_value": 17378342869.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8906800883"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132:official:1",
+        "label": "FABIO LOZANO TORRES",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132:official:2",
+        "label": "MIGUEL ANGEL BARBOSA RICO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132:contracts",
+        "label": "Contratos detectados (133)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 133,
+          "total_value": 17378342869.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273132",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 133,
+          "total_value": 17378342869.0
+        }
+      }
+    ]
+  }
+}

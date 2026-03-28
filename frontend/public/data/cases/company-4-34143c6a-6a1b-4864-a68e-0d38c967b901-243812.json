@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243812",
+  "title": "ALCALDIA MUNICIPAL DE GIRARDOT",
+  "subtitle": "Empresa · 890680378",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243812",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243812",
+        "label": "ALCALDIA MUNICIPAL DE GIRARDOT",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 198,
+          "contract_value": 230314074012.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "890680378"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243812:official:1",
+        "label": "CESAR FABIAN VILLALBA ACEVEDO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243812:contracts",
+        "label": "Contratos detectados (198)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 198,
+          "total_value": 230314074012.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243812:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243812",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243812:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243812",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 198,
+          "total_value": 230314074012.0
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273066",
+  "title": "CUNDINAMARCA - ALCALDÍA MUNICIPIO DE PASCA",
+  "subtitle": "Empresa · 8000741205",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273066",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273066",
+        "label": "CUNDINAMARCA - ALCALDÍA MUNICIPIO DE PASCA",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 140,
+          "contract_value": 16198249636.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8000741205"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273066:official:1",
+        "label": "ELKIN JAVIER PARRA PEDRAZA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273066:contracts",
+        "label": "Contratos detectados (140)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 140,
+          "total_value": 16198249636.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273066:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273066",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273066:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273066",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 140,
+          "total_value": 16198249636.0
+        }
+      }
+    ]
+  }
+}

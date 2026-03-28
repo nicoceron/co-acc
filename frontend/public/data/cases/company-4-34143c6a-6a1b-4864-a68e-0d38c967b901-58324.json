@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:58324",
+  "title": "WALTER TARCICIO ACOSTA BARRETO",
+  "subtitle": "Empresa · 93201530",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:58324",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:58324",
+        "label": "WALTER TARCICIO ACOSTA BARRETO",
+        "type": "company",
+        "properties": {
+          "risk_score": 11,
+          "signal_types": 3,
+          "contract_count": 10,
+          "contract_value": 1021211483.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "93201530"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:58324:official:1",
+        "label": "WALTER TARCICIO ACOSTA BARRETO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:58324:contracts",
+        "label": "Contratos detectados (10)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 10,
+          "total_value": 1021211483.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:58324:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:58324",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:58324:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:58324",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 10,
+          "total_value": 1021211483.0
+        }
+      }
+    ]
+  }
+}

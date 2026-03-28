@@ -4,8 +4,6 @@ WHERE elementId(c) = $company_id
    OR c.document_id = $company_identifier_formatted
    OR c.nit = $company_identifier
    OR c.nit = $company_identifier_formatted
-   OR c.cnpj = $company_identifier
-   OR c.cnpj = $company_identifier_formatted
 MATCH (buyer:Company)-[award:CONTRATOU]->(c)
 WHERE coalesce(award.buyer_name, buyer.razon_social, buyer.name) IS NOT NULL
   AND trim(coalesce(award.buyer_name, buyer.razon_social, buyer.name)) <> ''
@@ -45,7 +43,7 @@ WITH c,
      [x IN contract_ids WHERE x IS NOT NULL AND x <> ''] AS evidence_refs
 WHERE size(evidence_refs) > 0
 RETURN 'contract_concentration' AS pattern_id,
-       coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
+       coalesce(c.document_id, c.nit) AS company_identifier,
        c.razon_social AS company_name,
        toFloat(size(risky_orgs) + size(evidence_refs)) AS risk_signal,
        amount_total AS amount_total,

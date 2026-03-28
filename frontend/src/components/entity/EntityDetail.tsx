@@ -18,8 +18,6 @@ const DOCUMENT_KEYS = [
   "nit",
   "cedula",
   "numero_documento",
-  "cpf",
-  "cnpj",
   "bid_id",
   "asset_id",
   "finance_id",

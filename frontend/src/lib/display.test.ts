@@ -13,12 +13,12 @@ describe("display helpers", () => {
   });
 
   it("formats known schema keys into readable labels", () => {
-    expect(formatPropertyLabel("razon_social")).toBe("Legal name");
-    expect(formatPropertyLabel("buyer_document_id")).toBe("Buyer document ID");
-    expect(formatPropertyLabel("execution_ratio")).toBe("Execution ratio");
-    expect(formatPropertyLabel("operating_revenue_current")).toBe("Operating revenue (current year)");
-    expect(formatPropertyLabel("transaction_count")).toBe("Transaction count");
-    expect(formatPropertyLabel("identity_status")).toBe("Identity status");
+    expect(formatPropertyLabel("razon_social")).toBe("Razón social");
+    expect(formatPropertyLabel("buyer_document_id")).toBe("Documento del comprador");
+    expect(formatPropertyLabel("execution_ratio")).toBe("Avance de ejecución");
+    expect(formatPropertyLabel("operating_revenue_current")).toBe("Ingresos operacionales (año actual)");
+    expect(formatPropertyLabel("transaction_count")).toBe("Cantidad de transacciones");
+    expect(formatPropertyLabel("identity_status")).toBe("Estado de identidad");
   });
 
   it("humanizes unknown identifiers safely", () => {

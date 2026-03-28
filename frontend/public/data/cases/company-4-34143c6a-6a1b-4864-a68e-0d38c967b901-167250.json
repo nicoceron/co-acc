@@ -1,0 +1,93 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250",
+  "title": "STEFANINI SYSMAN S.A.S",
+  "subtitle": "Empresa · 8000212618",
+  "summary": "La empresa tiene 3 antecedente(s) sancionatorios y mantiene exposición en contratación pública.",
+  "tags": [
+    "Proveedor con antecedentes sancionatorios",
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250",
+        "label": "STEFANINI SYSMAN S.A.S",
+        "type": "company",
+        "properties": {
+          "risk_score": 13,
+          "signal_types": 3,
+          "contract_count": 515,
+          "contract_value": 9621662014.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8000212618"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250:official:1",
+        "label": "ISMAEL YESID LUQUE MARTINEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250:sanctions",
+        "label": "Sanciones oficiales (3)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 3
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250:contracts",
+        "label": "Contratos detectados (515)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 515,
+          "total_value": 9621662014.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 3
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167250",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 515,
+          "total_value": 9621662014.0
+        }
+      }
+    ]
+  }
+}

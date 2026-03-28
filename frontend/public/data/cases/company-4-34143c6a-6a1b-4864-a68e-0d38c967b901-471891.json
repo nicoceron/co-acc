@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471891",
+  "title": "EJERCITO NACIONAL DE COLOMBIA - BATALLO DE A.S.P.C. NO. 1 CACIQUE TUNDAMA",
+  "subtitle": "Empresa · 8001306467",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471891",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471891",
+        "label": "EJERCITO NACIONAL DE COLOMBIA - BATALLO DE A.S.P.C. NO. 1 CACIQUE TUNDAMA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 24,
+          "contract_value": 8412534313.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8001306467"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471891:official:1",
+        "label": "CORONEL RUBEN DARIO CAMELO DAZA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471891:contracts",
+        "label": "Contratos detectados (24)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 24,
+          "total_value": 8412534313.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471891:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471891",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471891:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471891",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 24,
+          "total_value": 8412534313.0
+        }
+      }
+    ]
+  }
+}

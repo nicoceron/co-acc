@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471491",
+  "title": "ALLISON ANDREA PAEZ RODRIGUEZ",
+  "subtitle": "Empresa · 53118700",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471491",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471491",
+        "label": "ALLISON ANDREA PAEZ RODRIGUEZ",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 13,
+          "contract_value": 5682277742.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "53118700"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471491:official:1",
+        "label": "ALLISON ANDREA PAEZ RODRIGUEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471491:contracts",
+        "label": "Contratos detectados (13)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 13,
+          "total_value": 5682277742.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471491:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471491",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471491:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471491",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 13,
+          "total_value": 5682277742.0
+        }
+      }
+    ]
+  }
+}

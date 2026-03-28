@@ -632,9 +632,9 @@ def test_investigation_update_coalesce_includes_all_entity_id_fields() -> None:
         CypherLoader.clear_cache()
 
     required_fields = [
-        "e.document_id", "e.nit", "e.cedula", "e.numero_documento", "e.cpf", "e.cnpj",
+        "e.document_id", "e.nit", "e.cedula", "e.numero_documento",
         "e.contract_id", "e.sanction_id", "e.amendment_id",
-        "e.cnes_code", "e.finance_id", "e.embargo_id", "e.school_id",
+        "e.reps_code", "e.finance_id", "e.embargo_id", "e.school_id",
         "e.convenio_id", "e.stats_id",
     ]
     for field in required_fields:

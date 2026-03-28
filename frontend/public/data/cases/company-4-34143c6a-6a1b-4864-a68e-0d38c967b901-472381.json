@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472381",
+  "title": "MIGUEL ANGEL TIBAVISCO",
+  "subtitle": "Empresa · 80745461",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472381",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472381",
+        "label": "MIGUEL ANGEL TIBAVISCO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 47,
+          "contract_value": 2772141602.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "80745461"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472381:official:1",
+        "label": "MIGUEL ANGEL TIBAVISCO RODRIGUEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472381:contracts",
+        "label": "Contratos detectados (47)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 47,
+          "total_value": 2772141602.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472381:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472381",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472381:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472381",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 47,
+          "total_value": 2772141602.0
+        }
+      }
+    ]
+  }
+}

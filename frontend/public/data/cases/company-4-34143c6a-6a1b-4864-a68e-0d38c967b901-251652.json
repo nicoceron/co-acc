@@ -1,0 +1,77 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:251652",
+  "title": "DISPAPELES S.A.S",
+  "subtitle": "Empresa · 860028580",
+  "summary": "La exposición contractual supera de forma material la escala financiera reportada por la empresa (1027.9x).",
+  "tags": [
+    "Contratación muy superior al tamaño financiero reportado",
+    "Paquetes repetidos de contratos bajo umbral"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:251652",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:251652",
+        "label": "DISPAPELES S.A.S",
+        "type": "company",
+        "properties": {
+          "risk_score": 11,
+          "signal_types": 2,
+          "contract_count": 2083,
+          "contract_value": 283100153230.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "860028580"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:251652:contracts",
+        "label": "Contratos detectados (2083)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 2083,
+          "total_value": 283100153230.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:251652:split-groups",
+        "label": "Paquetes bajo umbral (1)",
+        "type": "bid",
+        "properties": {
+          "group_count": 1,
+          "total_value": 280447.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:251652:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:251652",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 2083,
+          "total_value": 283100153230.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:251652:split-groups",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:251652",
+        "type": "ADJUDICOU_A",
+        "confidence": 1.0,
+        "properties": {
+          "group_count": 1,
+          "total_value": 280447.0
+        }
+      }
+    ]
+  }
+}

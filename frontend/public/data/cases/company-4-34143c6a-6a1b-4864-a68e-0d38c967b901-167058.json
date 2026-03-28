@@ -1,0 +1,98 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058",
+  "title": "BUREAU VERITAS COLOMBIA LTDA",
+  "subtitle": "Empresa · 800184195",
+  "summary": "La exposición contractual supera de forma material la escala financiera reportada por la empresa (992.3x).",
+  "tags": [
+    "Contratación muy superior al tamaño financiero reportado",
+    "Proveedor sancionado que siguió recibiendo contratos",
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058",
+        "label": "BUREAU VERITAS COLOMBIA LTDA",
+        "type": "company",
+        "properties": {
+          "risk_score": 15,
+          "signal_types": 3,
+          "contract_count": 136,
+          "contract_value": 172337883297.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "800184195"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058:sanctions",
+        "label": "Sanciones oficiales (1)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058:contracts",
+        "label": "Contratos detectados (136)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 136,
+          "total_value": 172337883297.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058:sanction-window",
+        "label": "Contratos en ventana sancionatoria (2)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 2,
+          "total_value": 7656337710.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 1
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 136,
+          "total_value": 172337883297.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058:sanction-window",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167058",
+        "type": "CONTRATOU",
+        "confidence": 0.95,
+        "properties": {
+          "contract_count": 2,
+          "total_value": 7656337710.0
+        }
+      }
+    ]
+  }
+}

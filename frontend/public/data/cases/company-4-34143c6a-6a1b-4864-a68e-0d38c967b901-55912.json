@@ -1,0 +1,95 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912",
+  "title": "LUIS ALBERTO DONOSO RINCON",
+  "subtitle": "Empresa · 79579860",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público",
+    "Facturación o pagos por delante de la ejecución"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912",
+        "label": "LUIS ALBERTO DONOSO RINCON",
+        "type": "company",
+        "properties": {
+          "risk_score": 9,
+          "signal_types": 3,
+          "contract_count": 9,
+          "contract_value": 753452018.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "79579860"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912:official:1",
+        "label": "LUIS ALBERTO DONOSO RINCON",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912:contracts",
+        "label": "Contratos detectados (9)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 9,
+          "total_value": 753452018.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912:execution-gap",
+        "label": "Brecha de ejecución (2)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 2,
+          "invoice_total_value": 399633.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 9,
+          "total_value": 753452018.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912:execution-gap",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55912",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 2,
+          "invoice_total_value": 399633.0
+        }
+      }
+    ]
+  }
+}

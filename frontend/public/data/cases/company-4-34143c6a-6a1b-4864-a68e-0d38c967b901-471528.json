@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471528",
+  "title": "DEYIS YANDIRA RADA MARTINEZ",
+  "subtitle": "Empresa · 55300222",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471528",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471528",
+        "label": "DEYIS YANDIRA RADA MARTINEZ",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 210,
+          "contract_value": 115723050809.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "55300222"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471528:official:1",
+        "label": "DEYIS YANDIRA RADA MARTINEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471528:contracts",
+        "label": "Contratos detectados (210)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 210,
+          "total_value": 115723050809.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471528:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471528",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471528:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471528",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 210,
+          "total_value": 115723050809.0
+        }
+      }
+    ]
+  }
+}

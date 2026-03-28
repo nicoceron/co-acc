@@ -1,0 +1,97 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352",
+  "title": "RESGUARDO INDIGENA BAJO RIO GUAINIAY RIO NEGRO",
+  "subtitle": "Empresa · 0000000",
+  "summary": "La empresa tiene 1 antecedente(s) sancionatorios y mantiene exposición en contratación pública.",
+  "tags": [
+    "Proveedor con antecedentes sancionatorios",
+    "Paquetes repetidos de contratos bajo umbral"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352",
+        "label": "RESGUARDO INDIGENA BAJO RIO GUAINIAY RIO NEGRO",
+        "type": "company",
+        "properties": {
+          "risk_score": 13,
+          "signal_types": 3,
+          "contract_count": 378,
+          "contract_value": 172087243957.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "0000000"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352:sanctions",
+        "label": "Sanciones oficiales (1)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352:contracts",
+        "label": "Contratos detectados (378)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 378,
+          "total_value": 172087243957.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352:split-groups",
+        "label": "Paquetes bajo umbral (1)",
+        "type": "bid",
+        "properties": {
+          "group_count": 1,
+          "total_value": 547450.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 1
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 378,
+          "total_value": 172087243957.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352:split-groups",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253352",
+        "type": "ADJUDICOU_A",
+        "confidence": 1.0,
+        "properties": {
+          "group_count": 1,
+          "total_value": 547450.0
+        }
+      }
+    ]
+  }
+}

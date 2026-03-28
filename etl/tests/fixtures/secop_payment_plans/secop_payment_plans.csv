@@ -1,0 +1,4 @@
+id_del_contrato,id_de_pago,numero_de_factura,fecha_estimada_de_pago,fecha_real_de_pago,valor_a_pagar,estado,documento_supervisor,nombre_supervisor,tipo_documento_supervisor,aprobado_por,n_mero_de_radicaci_n,cufe
+CO1.PCCNTR.3001,1,FAC-001,2025-02-10T00:00:00.000,2025-02-12T00:00:00.000,500.00,PAGADO,52123456,Ana Perez,Cedula,Director A,RAD-001,CUFE-001
+CO1.PCCNTR.3001,2,FAC-002,2025-03-10T00:00:00.000,,700.00,PENDIENTE REGISTRO,52123456,Ana Perez,Cedula,Director B,RAD-002,CUFE-002
+CO1.PCCNTR.3002,3,FAC-003,2025-02-20T00:00:00.000,2025-02-20T00:00:00.000,300.00,PAGADO,80012345,Carlos Ruiz,Cedula,Director C,RAD-003,CUFE-003

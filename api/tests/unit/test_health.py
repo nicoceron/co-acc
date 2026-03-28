@@ -51,6 +51,7 @@ async def test_meta_sources(client: AsyncClient) -> None:
     assert "status" in first
     assert "implementation_state" in first
     assert "load_state" in first
+    assert "signal_promotion_state" in first
     assert "in_universe_v1" in first
     assert "discovery_status" in first
     assert "last_seen_url" in first
@@ -114,6 +115,9 @@ async def test_meta_stats(client: AsyncClient) -> None:
     assert data["stale_sources"] == summary["stale_sources"]
     assert data["blocked_external_sources"] == summary["blocked_external_sources"]
     assert data["quality_fail_sources"] == summary["quality_fail_sources"]
+    assert data["promoted_sources"] == summary["promoted_sources"]
+    assert data["enrichment_only_sources"] == summary["enrichment_only_sources"]
+    assert data["quarantined_sources"] == summary["quarantined_sources"]
     assert data["discovered_uningested_sources"] == summary["discovered_uningested_sources"]
 
 
@@ -150,7 +154,7 @@ async def test_meta_prioritized_people_watchlist(client: AsyncClient) -> None:
                 "offices": ["Gerente"],
             }
         ],
-    ):
+    ), patch("coacc.routers.meta._load_watchlist_snapshot", return_value=None):
         response = await client.get("/api/v1/meta/watchlist/people?limit=5")
 
     assert response.status_code == 200

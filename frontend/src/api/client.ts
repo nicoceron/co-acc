@@ -102,10 +102,20 @@ export interface PrioritizedPerson {
   finance_value: number;
   supplier_contract_count: number;
   supplier_contract_value: number;
+  person_sanction_count?: number;
+  disciplinary_sanction_count?: number;
+  fiscal_responsibility_count?: number;
   conflict_disclosure_count: number;
   disclosure_reference_count: number;
   corporate_activity_disclosure_count: number;
   donor_vendor_loop_count: number;
+  payment_supervision_count?: number;
+  payment_supervision_company_count?: number;
+  payment_supervision_risk_contract_count?: number;
+  payment_supervision_discrepancy_contract_count?: number;
+  payment_supervision_suspension_contract_count?: number;
+  payment_supervision_pending_contract_count?: number;
+  payment_supervision_contract_value?: number;
   offices: string[];
   alerts: RiskAlert[];
 }

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Navigate, Route, Routes, useParams } from "react-router";
+import { Navigate, Route, Routes, useLocation, useParams } from "react-router";
 
 import { AppShell } from "./components/common/AppShell";
 import { PublicShell } from "./components/common/PublicShell";
@@ -8,10 +8,12 @@ import { IS_PATTERNS_ENABLED, IS_PUBLIC_MODE } from "./config/runtime";
 import { Baseline } from "./pages/Baseline";
 import { Dashboard } from "./pages/Dashboard";
 import { Investigations } from "./pages/Investigations";
+import { InvestigationDossier } from "./pages/InvestigationDossier";
 import { Landing } from "./pages/Landing";
 import { Login } from "./pages/Login";
 import { Patterns } from "./pages/Patterns";
 import { Register } from "./pages/Register";
+import { Results } from "./pages/Results";
 import { Search } from "./pages/Search";
 import { SharedInvestigation } from "./pages/SharedInvestigation";
 import { useAuthStore } from "./stores/auth";
@@ -41,10 +43,18 @@ function GraphRedirect() {
 
 export function App() {
   const restore = useAuthStore((s) => s.restore);
+  const location = useLocation();
 
   useEffect(() => {
+    if (
+      location.pathname.startsWith("/results")
+      || location.pathname.startsWith("/investigations")
+    ) {
+      useAuthStore.setState((state) => ({ ...state, restored: true }));
+      return;
+    }
     restore();
-  }, [restore]);
+  }, [location.pathname, restore]);
 
   return (
     <Routes>
@@ -57,6 +67,9 @@ export function App() {
         )}
       >
         <Route index element={<Landing />} />
+        <Route path="results" element={<Results />} />
+        <Route path="investigations" element={<Results />} />
+        <Route path="investigations/:slug" element={<InvestigationDossier />} />
         {!IS_PUBLIC_MODE && <Route path="login" element={<Login />} />}
         {!IS_PUBLIC_MODE && <Route path="register" element={<Register />} />}
       </Route>

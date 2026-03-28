@@ -1,0 +1,97 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552",
+  "title": "JOHN FRANCO",
+  "subtitle": "Empresa · 79391917",
+  "summary": "La empresa registra al menos un contrato con fecha dentro de una ventana pública de sanción vigente o no cerrada.",
+  "tags": [
+    "Proveedor sancionado que siguió recibiendo contratos",
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552",
+        "label": "JOHN FRANCO",
+        "type": "company",
+        "properties": {
+          "risk_score": 12,
+          "signal_types": 2,
+          "contract_count": 165,
+          "contract_value": 4546371718.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "79391917"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552:sanctions",
+        "label": "Sanciones oficiales (5)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 5
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552:contracts",
+        "label": "Contratos detectados (165)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 165,
+          "total_value": 4546371718.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552:sanction-window",
+        "label": "Contratos en ventana sancionatoria (5)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 5,
+          "total_value": 83088670.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 5
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 165,
+          "total_value": 4546371718.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552:sanction-window",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479552",
+        "type": "CONTRATOU",
+        "confidence": 0.95,
+        "properties": {
+          "contract_count": 5,
+          "total_value": 83088670.0
+        }
+      }
+    ]
+  }
+}

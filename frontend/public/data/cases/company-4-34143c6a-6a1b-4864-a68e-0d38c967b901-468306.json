@@ -1,0 +1,108 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306",
+  "title": "DIRECCION SECCIONAL DE FISCALIA DE CUCUTA NORTE DE SANTANDER",
+  "subtitle": "Empresa · 8001527832",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306",
+        "label": "DIRECCION SECCIONAL DE FISCALIA DE CUCUTA NORTE DE SANTANDER",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 78,
+          "contract_value": 50064997254.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8001527832"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306:official:1",
+        "label": "JUAN CARLOS CANAL ALBAN",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306:official:2",
+        "label": "RAFAEL FERNANDO ARIZA URBINA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306:official:3",
+        "label": "GRACIELA YANEZ ORDONEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306:contracts",
+        "label": "Contratos detectados (78)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 78,
+          "total_value": 50064997254.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306:official:3",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468306",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 78,
+          "total_value": 50064997254.0
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796",
+  "title": "CUNDINAMARCA - CONCEJO MUNICIPIO DE SAN JUAN DE RÍO SECO",
+  "subtitle": "Empresa · 8999994224",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796",
+        "label": "CUNDINAMARCA - CONCEJO MUNICIPIO DE SAN JUAN DE RÍO SECO",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 252,
+          "contract_value": 42864677158.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8999994224"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796:official:1",
+        "label": "JOSE GREGORIO ESPEJO JIMENEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796:official:2",
+        "label": "OLGA LILIANA RAMIREZ MANCERA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796:contracts",
+        "label": "Contratos detectados (252)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 252,
+          "total_value": 42864677158.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273796",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 252,
+          "total_value": 42864677158.0
+        }
+      }
+    ]
+  }
+}

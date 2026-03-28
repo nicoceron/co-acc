@@ -22,6 +22,14 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _row_value(row: pd.Series, *keys: str) -> str:
+    for key in keys:
+        value = clean_text(row.get(key))
+        if value:
+            return value
+    return ""
+
+
 class HigherEdEnrollmentPipeline(Pipeline):
     """Load MEN higher-education enrollment by institution/program/period."""
 
@@ -63,38 +71,62 @@ class HigherEdEnrollmentPipeline(Pipeline):
         rels: list[dict[str, Any]] = []
 
         for _, row in self._raw.iterrows():
-            institution_code = clean_text(row.get("c_digo_de_la_instituci_n"))
-            program_code = clean_text(row.get("c_digo_snies_delprograma"))
-            year = clean_text(row.get("a_o"))
-            semester = clean_text(row.get("semestre"))
-            municipality_code = clean_text(row.get("c_digo_del_municipio_programa"))
+            institution_code = _row_value(
+                row,
+                "c_digo_de_la_instituci_n",
+                "codigo_de_la_institucion",
+            )
+            program_code = _row_value(
+                row,
+                "c_digo_snies_delprograma",
+                "codigo_snies_delprograma",
+            )
+            year = _row_value(row, "a_o", "ano")
+            semester = _row_value(row, "semestre")
+            municipality_code = _row_value(
+                row,
+                "c_digo_del_municipio_programa",
+                "codigo_del_municipio_programa",
+            )
             if not institution_code or not program_code or not year or not semester:
                 continue
 
             school_id = f"{program_code}_{year}_{semester}_{municipality_code or 'na'}"
-            institution_name = clean_name(row.get("instituci_n_de_educaci_n_superior_ies"))
+            institution_name = clean_name(
+                _row_value(
+                    row,
+                    "instituci_n_de_educaci_n_superior_ies",
+                    "institucion_de_educacion_superior_ies",
+                )
+            )
             company_map[institution_code] = {
-                "document_id": institution_code,
+                "document_id": f"coedu_{institution_code}",
                 "name": institution_name or institution_code,
                 "razon_social": institution_name or institution_code,
-                "department": clean_text(row.get("departamento_de_domicilio_de_la_ies")),
-                "municipality": clean_text(row.get("municipio_dedomicilio_de_la_ies")),
+                "education_institution_code": institution_code,
+                "department": _row_value(row, "departamento_de_domicilio_de_la_ies"),
+                "municipality": _row_value(row, "municipio_dedomicilio_de_la_ies"),
                 "source": "higher_ed_enrollment",
                 "country": "CO",
+                "synthetic_document_id": True,
             }
 
-            enrolled = parse_integer(row.get("matriculados_2015")) or 0
+            enrolled = parse_integer(_row_value(row, "matriculados_2015", "total_matriculados")) or 0
             current = education_map.setdefault(
                 school_id,
                 {
                     "school_id": school_id,
-                    "name": clean_name(row.get("programa_acad_mico")) or school_id,
+                    "name": clean_name(
+                        _row_value(row, "programa_acad_mico", "programa_academico")
+                    ) or school_id,
                     "institution_name": institution_name,
-                    "knowledge_area": clean_text(
-                        row.get("n_cleo_b_sico_del_conocimiento_nbc")
+                    "knowledge_area": _row_value(
+                        row,
+                        "n_cleo_b_sico_del_conocimiento_nbc",
+                        "nucleo_basico_del_conocimiento_nbc",
                     ),
-                    "department": clean_text(row.get("departamento_de_oferta_del_programa")),
-                    "municipality": clean_text(row.get("municipio_de_oferta_del_programa")),
+                    "department": _row_value(row, "departamento_de_oferta_del_programa"),
+                    "municipality": _row_value(row, "municipio_de_oferta_del_programa"),
                     "year": parse_integer(year),
                     "semester": semester,
                     "enrolled_total": 0,
@@ -119,18 +151,32 @@ class HigherEdEnrollmentPipeline(Pipeline):
         loaded = 0
 
         if self.companies:
-            loaded += loader.load_nodes("Company", self.companies, key_field="document_id")
+            company_query = """
+                UNWIND $rows AS row
+                MERGE (c:Company {education_institution_code: row.education_institution_code})
+                ON CREATE SET c.document_id = row.document_id,
+                              c.synthetic_document_id = true
+                SET c.name = coalesce(c.name, row.name),
+                    c.razon_social = coalesce(c.razon_social, row.razon_social),
+                    c.department = coalesce(c.department, row.department),
+                    c.municipality = coalesce(c.municipality, row.municipality),
+                    c.country = coalesce(c.country, row.country),
+                    c.source = CASE
+                        WHEN coalesce(c.source, '') = '' THEN row.source
+                        ELSE c.source
+                    END
+            """
+            loaded += loader.run_query(company_query, self.companies)
         if self.education_nodes:
             loaded += loader.load_nodes("Education", self.education_nodes, key_field="school_id")
         if self.rels:
-            loaded += loader.load_relationships(
-                rel_type="MANTIENE_A",
-                rows=self.rels,
-                source_label="Company",
-                source_key="document_id",
-                target_label="Education",
-                target_key="school_id",
-                properties=["source"],
-            )
+            rel_query = """
+                UNWIND $rows AS row
+                MATCH (c:Company {education_institution_code: row.source_key})
+                MATCH (e:Education {school_id: row.target_key})
+                MERGE (c)-[r:MANTIENE_A]->(e)
+                SET r.source = row.source
+            """
+            loaded += loader.run_query(rel_query, self.rels)
 
         self.rows_loaded = loaded

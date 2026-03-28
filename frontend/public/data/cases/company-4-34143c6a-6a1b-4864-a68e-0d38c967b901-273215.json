@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215",
+  "title": "CAUCA - ALCALDÍA MUNICIPIO DE VILLA RICA",
+  "subtitle": "Empresa · 8905033730",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215",
+        "label": "CAUCA - ALCALDÍA MUNICIPIO DE VILLA RICA",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 32,
+          "contract_value": 18179098880.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8905033730"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215:official:1",
+        "label": "EMPERATRIZ MISSE MILLAN",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215:official:2",
+        "label": "PEPE RUIZ PAREDES",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215:contracts",
+        "label": "Contratos detectados (32)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 32,
+          "total_value": 18179098880.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273215",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 32,
+          "total_value": 18179098880.0
+        }
+      }
+    ]
+  }
+}

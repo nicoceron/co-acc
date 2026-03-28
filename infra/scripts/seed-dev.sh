@@ -9,23 +9,32 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CYPHER_FILE="${SCRIPT_DIR}/seed-dev.cypher"
 NEO4J_URI="${NEO4J_URI:-bolt://localhost:7687}"
 NEO4J_USER="${NEO4J_USER:-neo4j}"
-NEO4J_PASSWORD="${NEO4J_PASSWORD:?NEO4J_PASSWORD must be set}"
+NEO4J_PASSWORD="${NEO4J_PASSWORD:-}"
 
 echo "Seeding Neo4j at ${NEO4J_URI}..."
 
-export NEO4J_PASSWORD
-
 if command -v cypher-shell &>/dev/null; then
-  cypher-shell \
-    -a "${NEO4J_URI}" \
-    -u "${NEO4J_USER}" \
-    --env NEO4J_PASSWORD \
-    -f "${CYPHER_FILE}"
+  if [[ -n "${NEO4J_PASSWORD}" ]]; then
+    export NEO4J_PASSWORD
+    cypher-shell \
+      -a "${NEO4J_URI}" \
+      -u "${NEO4J_USER}" \
+      --env NEO4J_PASSWORD \
+      -f "${CYPHER_FILE}"
+  else
+    cypher-shell \
+      -a "${NEO4J_URI}" \
+      -f "${CYPHER_FILE}"
+  fi
 elif command -v docker &>/dev/null; then
-  docker exec -i -e NEO4J_PASSWORD="${NEO4J_PASSWORD}" coacc-neo4j cypher-shell \
-    -u "${NEO4J_USER}" \
-    --env NEO4J_PASSWORD \
-    < "${CYPHER_FILE}"
+  if [[ -n "${NEO4J_PASSWORD}" ]]; then
+    docker exec -i -e NEO4J_PASSWORD="${NEO4J_PASSWORD}" coacc-neo4j cypher-shell \
+      -u "${NEO4J_USER}" \
+      --env NEO4J_PASSWORD \
+      < "${CYPHER_FILE}"
+  else
+    docker exec -i coacc-neo4j cypher-shell < "${CYPHER_FILE}"
+  fi
 else
   echo "Error: cypher-shell not found and docker not available."
   echo "Install cypher-shell or run 'docker compose up -d' first."

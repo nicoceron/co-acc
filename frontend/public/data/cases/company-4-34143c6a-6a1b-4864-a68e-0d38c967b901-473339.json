@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473339",
+  "title": "DIEGO FELIPE BUSTOS BUSTOS",
+  "subtitle": "Empresa · 1032393464",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473339",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473339",
+        "label": "DIEGO FELIPE BUSTOS BUSTOS",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 19,
+          "contract_value": 9306407910.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "1032393464"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473339:official:1",
+        "label": "DIEGO FELIPE BUSTOS BUSTOS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473339:contracts",
+        "label": "Contratos detectados (19)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 19,
+          "total_value": 9306407910.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473339:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473339",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473339:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473339",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 19,
+          "total_value": 9306407910.0
+        }
+      }
+    ]
+  }
+}

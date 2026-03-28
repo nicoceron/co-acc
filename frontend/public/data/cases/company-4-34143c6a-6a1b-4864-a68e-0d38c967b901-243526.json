@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243526",
+  "title": "GENNY MILENA PADILLA REINOSO",
+  "subtitle": "Empresa · 65828981",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243526",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243526",
+        "label": "GENNY MILENA PADILLA REINOSO",
+        "type": "company",
+        "properties": {
+          "risk_score": 9,
+          "signal_types": 3,
+          "contract_count": 7,
+          "contract_value": 173152461.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "65828981"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243526:official:1",
+        "label": "GENNY MILENA PADILLA REINOSO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243526:contracts",
+        "label": "Contratos detectados (7)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 7,
+          "total_value": 173152461.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243526:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243526",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243526:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243526",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 7,
+          "total_value": 173152461.0
+        }
+      }
+    ]
+  }
+}

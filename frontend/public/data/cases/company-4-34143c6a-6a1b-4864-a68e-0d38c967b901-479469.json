@@ -1,0 +1,97 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469",
+  "title": "GUILLERMO URBANO ARDILA",
+  "subtitle": "Empresa · 1014197171",
+  "summary": "La empresa registra al menos un contrato con fecha dentro de una ventana pública de sanción vigente o no cerrada.",
+  "tags": [
+    "Proveedor sancionado que siguió recibiendo contratos",
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469",
+        "label": "GUILLERMO URBANO ARDILA",
+        "type": "company",
+        "properties": {
+          "risk_score": 12,
+          "signal_types": 2,
+          "contract_count": 12,
+          "contract_value": 3724128293.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "1014197171"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469:sanctions",
+        "label": "Sanciones oficiales (3)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 3
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469:contracts",
+        "label": "Contratos detectados (12)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 12,
+          "total_value": 3724128293.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469:sanction-window",
+        "label": "Contratos en ventana sancionatoria (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "total_value": 13210000.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 3
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 12,
+          "total_value": 3724128293.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469:sanction-window",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479469",
+        "type": "CONTRATOU",
+        "confidence": 0.95,
+        "properties": {
+          "contract_count": 1,
+          "total_value": 13210000.0
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473203",
+  "title": "AIRBUS DEFENCE AND SPACE SA",
+  "subtitle": "Empresa · 28006104",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473203",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473203",
+        "label": "AIRBUS DEFENCE AND SPACE SA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 26,
+          "contract_value": 290570887582.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "28006104"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473203:official:1",
+        "label": "JULIANA CAMACHO MARTINEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473203:contracts",
+        "label": "Contratos detectados (26)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 26,
+          "total_value": 290570887582.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473203:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473203",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473203:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473203",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 26,
+          "total_value": 290570887582.0
+        }
+      }
+    ]
+  }
+}

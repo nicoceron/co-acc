@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468346",
+  "title": "VALLE DEL CAUCA - CONCEJO MUNICIPIO DE TORO",
+  "subtitle": "Empresa · 8919009854",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468346",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468346",
+        "label": "VALLE DEL CAUCA - CONCEJO MUNICIPIO DE TORO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 22,
+          "contract_value": 1606087784.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8919009854"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468346:official:1",
+        "label": "JULIAN ANTONIO BEDOYA MENESES",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468346:contracts",
+        "label": "Contratos detectados (22)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 22,
+          "total_value": 1606087784.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468346:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468346",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468346:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468346",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 22,
+          "total_value": 1606087784.0
+        }
+      }
+    ]
+  }
+}

@@ -25,7 +25,7 @@ from coacc.services.source_registry import load_source_registry, source_registry
 router = APIRouter(prefix="/api/v1/public", tags=["public"])
 _PUBLIC_PROVIDER = CommunityIntelligenceProvider()
 
-_PERSON_DOC_KEYS = {"cpf", "cedula", "numero_documento", "doc_partial", "doc_raw"}
+_PERSON_DOC_KEYS = {"cedula", "numero_documento", "doc_partial", "doc_raw"}
 
 
 def _clean_identifier(raw: str) -> str:
@@ -69,6 +69,9 @@ async def public_meta(
             "stale_sources": summary["stale_sources"],
             "blocked_external_sources": summary["blocked_external_sources"],
             "quality_fail_sources": summary["quality_fail_sources"],
+            "promoted_sources": summary["promoted_sources"],
+            "enrichment_only_sources": summary["enrichment_only_sources"],
+            "quarantined_sources": summary["quarantined_sources"],
             "discovered_uningested_sources": summary["discovered_uningested_sources"],
         },
     }
@@ -93,7 +96,7 @@ async def _resolve_company(
     labels = record["entity_labels"]
     enforce_person_access_policy(labels)
     company = record["c"]
-    identifier = str(company.get("document_id") or company.get("nit") or company.get("cnpj") or "")
+    identifier = str(company.get("document_id") or company.get("nit") or "")
     return record["entity_id"], identifier
 
 
@@ -184,7 +187,7 @@ async def public_graph_for_company(
                         clean_props.get(
                             "nit",
                             clean_props.get(
-                                "cnpj",
+                                "nit",
                                 clean_props.get(
                                     "bid_id",
                                     clean_props.get(

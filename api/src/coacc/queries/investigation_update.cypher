@@ -4,7 +4,7 @@ SET i.title = COALESCE($title, i.title),
     i.updated_at = datetime()
 WITH i
 OPTIONAL MATCH (i)-[:INCLUDES]->(e)
-WITH i, collect(coalesce(e.document_id, e.nit, e.cedula, e.numero_documento, e.cpf, e.cnpj, e.contract_id, e.sanction_id, e.amendment_id, e.cnes_code, e.finance_id, e.embargo_id, e.school_id, e.convenio_id, e.stats_id, e.bid_id, e.asset_id, e.office_id, elementId(e))) AS eids
+WITH i, collect(coalesce(e.document_id, e.nit, e.cedula, e.numero_documento, e.contract_id, e.sanction_id, e.amendment_id, e.finance_id, e.embargo_id, e.school_id, e.convenio_id, e.stats_id, e.bid_id, e.asset_id, e.office_id, elementId(e))) AS eids
 RETURN i.id AS id,
        i.title AS title,
        i.description AS description,

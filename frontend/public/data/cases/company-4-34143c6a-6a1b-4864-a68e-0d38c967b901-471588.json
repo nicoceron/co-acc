@@ -1,0 +1,116 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588",
+  "title": "LILIA MARINA CASTELLANOS JAIMES",
+  "subtitle": "Empresa · 63505871",
+  "summary": "La empresa registra al menos un contrato con fecha dentro de una ventana pública de sanción vigente o no cerrada.",
+  "tags": [
+    "Proveedor sancionado que siguió recibiendo contratos",
+    "Proveedor con directivo o vínculo en cargo público",
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588",
+        "label": "LILIA MARINA CASTELLANOS JAIMES",
+        "type": "company",
+        "properties": {
+          "risk_score": 17,
+          "signal_types": 4,
+          "contract_count": 20,
+          "contract_value": 1483894023.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "63505871"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588:official:1",
+        "label": "LILIA MARINA CASTELLANOS JAIMES",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588:sanctions",
+        "label": "Sanciones oficiales (1)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588:contracts",
+        "label": "Contratos detectados (20)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 20,
+          "total_value": 1483894023.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588:sanction-window",
+        "label": "Contratos en ventana sancionatoria (6)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 6,
+          "total_value": 554367866.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 1
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 20,
+          "total_value": 1483894023.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588:sanction-window",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471588",
+        "type": "CONTRATOU",
+        "confidence": 0.95,
+        "properties": {
+          "contract_count": 6,
+          "total_value": 554367866.0
+        }
+      }
+    ]
+  }
+}

@@ -117,6 +117,18 @@ PATTERN_METADATA: dict[str, dict[str, str]] = {
             " in active public-office or payroll records (SIGEP)"
         ),
     },
+    "sensitive_public_official_supplier_overlap": {
+        "name_es": "Proveedor con directivo en cargo sensible",
+        "name_en": "Supplier with officer in a sensitive public role",
+        "desc_es": (
+            "Empresa proveedora vinculada a personas que figuran"
+            " en cargos sensibles a la corrupción o al control presupuestal"
+        ),
+        "desc_en": (
+            "Supplier company linked to people who appear"
+            " in roles flagged as corruption-sensitive or budget-control sensitive"
+        ),
+    },
     "low_competition_bidding": {
         "name_es": "Recurrencia en baja competencia",
         "name_en": "Recurring low-competition bidding",
@@ -175,6 +187,104 @@ PATTERN_METADATA: dict[str, dict[str, str]] = {
         "desc_en": (
             "Contract exposure materially exceeds the company's"
             " reported operating revenue or asset base"
+        ),
+    },
+    "company_donor_vendor_overlap": {
+        "name_es": "Empresa donante con contratación pública",
+        "name_en": "Company donor with public contracts",
+        "desc_es": (
+            "La misma empresa aparece como donante electoral"
+            " y también como contratista del Estado"
+        ),
+        "desc_en": (
+            "The same company appears in campaign donations"
+            " and also as a public contractor"
+        ),
+    },
+    "shared_officer_supplier_network": {
+        "name_es": "Red de proveedores con directivo compartido",
+        "name_en": "Supplier network with shared officer",
+        "desc_es": (
+            "La empresa comparte representante legal o directivo"
+            " con otras proveedoras que también reciben contratos públicos"
+        ),
+        "desc_en": (
+            "The company shares an officer or legal representative"
+            " with other suppliers that also receive public contracts"
+        ),
+    },
+    "public_money_channel_stacking": {
+        "name_es": "Apilamiento de canales de dinero público",
+        "name_en": "Public-money channel stacking",
+        "desc_es": (
+            "La misma empresa aparece en varios canales de gasto público:"
+            " contratos, regalías, beneficios, administración de recursos o salud"
+        ),
+        "desc_en": (
+            "The same company appears across multiple public-spending channels:"
+            " contracts, royalties, benefit flows, managed funds, or health operations"
+        ),
+    },
+    "sanctioned_health_operator_overlap": {
+        "name_es": "Operador de salud sancionado con contratación",
+        "name_en": "Sanctioned health operator with contracts",
+        "desc_es": (
+            "Prestador u operador de salud con sanciones públicas"
+            " y exposición contractual estatal"
+        ),
+        "desc_en": (
+            "Health provider or operator with public sanctions"
+            " and recurring state-contract exposure"
+        ),
+    },
+    "contract_suspension_stacking": {
+        "name_es": "Suspensiones repetidas de contratos",
+        "name_en": "Repeated contract suspensions",
+        "desc_es": (
+            "La empresa aparece en contratos con suspensiones reiteradas,"
+            " un patrón sensible cuando coincide con facturación o cambios postadjudicación"
+        ),
+        "desc_en": (
+            "The company appears in contracts with repeated suspensions,"
+            " a sensitive pattern when paired with invoicing or post-award changes"
+        ),
+    },
+    "payment_supervision_risk_stack": {
+        "name_es": "Supervisión de pagos sobre contratos riesgosos",
+        "name_en": "Payment supervision over risky contracts",
+        "desc_es": (
+            "La persona figura en supervisión de pagos o interventoría de contratos"
+            " que también muestran brechas de ejecución, suspensiones o pagos pendientes"
+        ),
+        "desc_en": (
+            "The person appears in payment-supervision or interventor roles on contracts"
+            " that also show execution gaps, suspensions, or pending payments"
+        ),
+    },
+    "sanctioned_person_exposure_stack": {
+        "name_es": "Sanciones oficiales con exposición pública",
+        "name_en": "Official sanctions with public exposure",
+        "desc_es": (
+            "La persona registra sanciones disciplinarias, fiscales o de control"
+            " y además aparece en contratación, nómina pública, actividad electoral"
+            " o supervisión de pagos"
+        ),
+        "desc_en": (
+            "The person has disciplinary, fiscal, or control sanctions"
+            " and also appears in procurement, public payroll, election activity,"
+            " or payment-supervision roles"
+        ),
+    },
+    "interadministrative_channel_stacking": {
+        "name_es": "Apilamiento de convenios interadministrativos",
+        "name_en": "Interadministrative-channel stacking",
+        "desc_es": (
+            "La empresa aparece como contraparte en convenios interadministrativos"
+            " y también como contratista regular, con señales adicionales de riesgo"
+        ),
+        "desc_en": (
+            "The company appears as an interadministrative-agreement counterparty"
+            " and also as a regular contractor, with additional risk overlays"
         ),
     },
     "donor_official_vendor_loop": {

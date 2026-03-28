@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473066",
+  "title": "ILDUARA MARIA CORREA OSPINA",
+  "subtitle": "Empresa · 1020413596",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473066",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473066",
+        "label": "ILDUARA MARIA CORREA OSPINA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 89,
+          "contract_value": 1585445678.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "1020413596"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473066:official:1",
+        "label": "HERNAN DARIO AGUILAR RAMIREZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473066:contracts",
+        "label": "Contratos detectados (89)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 89,
+          "total_value": 1585445678.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473066:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473066",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473066:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473066",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 89,
+          "total_value": 1585445678.0
+        }
+      }
+    ]
+  }
+}

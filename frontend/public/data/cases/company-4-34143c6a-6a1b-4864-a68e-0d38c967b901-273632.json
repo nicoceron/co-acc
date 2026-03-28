@@ -1,0 +1,108 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632",
+  "title": "ACOVANET SYSTEM LTDA.",
+  "subtitle": "Empresa · 8999993423",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632",
+        "label": "ACOVANET SYSTEM LTDA.",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 116,
+          "contract_value": 108716032198.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8999993423"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632:official:1",
+        "label": "LUIS HERNAN ZAMBRANO HERNANDEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632:official:2",
+        "label": "NICOLAS GARCIA BUSTOS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632:official:3",
+        "label": "ADRIANA LUCIA MELO MELO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632:contracts",
+        "label": "Contratos detectados (116)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 116,
+          "total_value": 108716032198.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632:official:3",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273632",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 116,
+          "total_value": 108716032198.0
+        }
+      }
+    ]
+  }
+}

@@ -26,30 +26,50 @@ COMMUNITY_COMPANY_PATTERN_IDS = (
     "debtor_contracts",
     "inexigibility_recurrence",
     "public_official_supplier_overlap",
+    "sensitive_public_official_supplier_overlap",
     "low_competition_bidding",
     "invoice_execution_gap",
     "invoice_commitment_gap",
     "funding_spike_then_awards",
     "company_capacity_mismatch",
+    "company_donor_vendor_overlap",
+    "shared_officer_supplier_network",
+    "public_money_channel_stacking",
+    "sanctioned_health_operator_overlap",
+    "contract_suspension_stacking",
+    "interadministrative_channel_stacking",
 )
 
 COMMUNITY_PERSON_PATTERN_IDS = (
     "donor_official_vendor_loop",
     "disclosure_risk_stack",
+    "payment_supervision_risk_stack",
+    "sanctioned_person_exposure_stack",
 )
 
 COMMUNITY_PATTERN_IDS = COMMUNITY_COMPANY_PATTERN_IDS + COMMUNITY_PERSON_PATTERN_IDS
 
 COMMUNITY_ANALYSIS_PATTERN_IDS = (
     "sanctioned_supplier_record",
+    "sanctioned_still_receiving",
+    "split_contracts_below_threshold",
     "public_official_supplier_overlap",
+    "sensitive_public_official_supplier_overlap",
     "low_competition_bidding",
     "invoice_execution_gap",
     "invoice_commitment_gap",
     "funding_spike_then_awards",
     "company_capacity_mismatch",
+    "company_donor_vendor_overlap",
+    "shared_officer_supplier_network",
+    "public_money_channel_stacking",
+    "sanctioned_health_operator_overlap",
+    "contract_suspension_stacking",
+    "interadministrative_channel_stacking",
     "donor_official_vendor_loop",
     "disclosure_risk_stack",
+    "payment_supervision_risk_stack",
+    "sanctioned_person_exposure_stack",
 )
 
 COMMUNITY_COMPANY_PATTERN_QUERIES: dict[str, str] = {
@@ -61,16 +81,27 @@ COMMUNITY_COMPANY_PATTERN_QUERIES: dict[str, str] = {
     "debtor_contracts": "public_pattern_debtor_contracts",
     "inexigibility_recurrence": "public_pattern_inexigibility_recurrence",
     "public_official_supplier_overlap": "public_pattern_public_official_supplier_overlap",
+    "sensitive_public_official_supplier_overlap": (
+        "public_pattern_sensitive_public_official_supplier_overlap"
+    ),
     "low_competition_bidding": "public_pattern_low_competition_bidding",
     "invoice_execution_gap": "public_pattern_invoice_execution_gap",
     "invoice_commitment_gap": "public_pattern_invoice_commitment_gap",
     "funding_spike_then_awards": "public_pattern_funding_spike_then_awards",
     "company_capacity_mismatch": "public_pattern_company_capacity_mismatch",
+    "company_donor_vendor_overlap": "public_pattern_company_donor_vendor_overlap",
+    "shared_officer_supplier_network": "public_pattern_shared_officer_supplier_network",
+    "public_money_channel_stacking": "public_pattern_public_money_channel_stacking",
+    "sanctioned_health_operator_overlap": "public_pattern_sanctioned_health_operator_overlap",
+    "contract_suspension_stacking": "public_pattern_contract_suspension_stacking",
+    "interadministrative_channel_stacking": "public_pattern_interadministrative_channel_stacking",
 }
 
 COMMUNITY_PERSON_PATTERN_QUERIES: dict[str, str] = {
     "donor_official_vendor_loop": "public_pattern_donor_official_vendor_loop",
     "disclosure_risk_stack": "public_pattern_disclosure_risk_stack",
+    "payment_supervision_risk_stack": "public_pattern_payment_supervision_risk_stack",
+    "sanctioned_person_exposure_stack": "public_pattern_sanctioned_person_exposure_stack",
 }
 
 COMMUNITY_PATTERN_QUERIES = {
@@ -178,6 +209,8 @@ def _community_pattern_params(
         "company_identifier": company_identifier,
         "company_identifier_formatted": company_identifier_formatted,
         "pattern_split_threshold_value": settings.pattern_split_threshold_value,
+        "pattern_split_min_average_value": settings.pattern_split_min_average_value,
+        "pattern_split_min_total_value": settings.pattern_split_min_total_value,
         "pattern_split_min_count": settings.pattern_split_min_count,
         "pattern_share_threshold": settings.pattern_share_threshold,
         "pattern_srp_min_orgs": settings.pattern_srp_min_orgs,
@@ -199,6 +232,7 @@ def _community_person_pattern_params(
         "pattern_max_evidence_refs": settings.pattern_max_evidence_refs,
         "pattern_min_contract_value": settings.pattern_min_contract_value,
         "pattern_min_contract_count": settings.pattern_min_contract_count,
+        "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
     }
 
 

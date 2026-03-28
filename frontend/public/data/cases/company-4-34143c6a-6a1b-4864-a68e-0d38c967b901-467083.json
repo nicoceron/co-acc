@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083",
+  "title": "LUISA FERNANDA GIRALDO OSORIO",
+  "subtitle": "Empresa · 1053774857",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083",
+        "label": "LUISA FERNANDA GIRALDO OSORIO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 36,
+          "contract_value": 1471387318.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "1053774857"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083:official:1",
+        "label": "LUISA FERNANDA GIRALDO OSORIO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083:official:2",
+        "label": "CARLOS ABAD RAMIREZ TORO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083:contracts",
+        "label": "Contratos detectados (36)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 36,
+          "total_value": 1471387318.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467083",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 36,
+          "total_value": 1471387318.0
+        }
+      }
+    ]
+  }
+}

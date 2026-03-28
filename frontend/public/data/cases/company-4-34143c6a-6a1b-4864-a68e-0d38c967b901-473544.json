@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473544",
+  "title": "COMERCIALIZADORA INTERNACIONAL CORTICENTRO",
+  "subtitle": "Empresa · 9002078490",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473544",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473544",
+        "label": "COMERCIALIZADORA INTERNACIONAL CORTICENTRO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 14,
+          "contract_value": 1732102201.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "9002078490"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473544:official:1",
+        "label": "KARIN ANDREA VILLAMIZAR FLOREZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473544:contracts",
+        "label": "Contratos detectados (14)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 14,
+          "total_value": 1732102201.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473544:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473544",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473544:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473544",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 14,
+          "total_value": 1732102201.0
+        }
+      }
+    ]
+  }
+}

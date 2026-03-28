@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468439",
+  "title": "ASOCIACION CANAL LOCAL DE TELEVISION DE MEDELLIN - TELEMEDELLIN",
+  "subtitle": "Empresa · 811006762",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468439",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468439",
+        "label": "ASOCIACION CANAL LOCAL DE TELEVISION DE MEDELLIN - TELEMEDELLIN",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 435,
+          "contract_value": 2541153815603.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "811006762"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468439:official:1",
+        "label": "DIEGO ALBERTO SEPULVEDA ARGAEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468439:contracts",
+        "label": "Contratos detectados (435)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 435,
+          "total_value": 2541153815603.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468439:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468439",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468439:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468439",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 435,
+          "total_value": 2541153815603.0
+        }
+      }
+    ]
+  }
+}

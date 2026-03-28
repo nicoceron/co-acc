@@ -1,0 +1,93 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800",
+  "title": "ANA LUCIA TRUJILLO MARTINEZ",
+  "subtitle": "Persona · 52904331",
+  "summary": "La misma persona aparece como donante electoral y también como proveedora o directiva de proveedor con contratación pública.",
+  "tags": [
+    "Donante que también aparece como proveedor",
+    "Declaraciones con referencias corporativas o conflictos"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800",
+        "label": "ANA LUCIA TRUJILLO MARTINEZ",
+        "type": "person",
+        "properties": {
+          "risk_score": 40,
+          "signal_types": 3
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "52904331"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800:donations",
+        "label": "Donaciones (1)",
+        "type": "election",
+        "properties": {
+          "donation_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800:supplier-contracts",
+        "label": "Contratos como proveedora/o (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "total_value": 71073600.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800:conflicts",
+        "label": "Declaraciones de conflicto (2)",
+        "type": "finance",
+        "properties": {
+          "conflict_disclosure_count": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800:donations",
+        "type": "DONO_A",
+        "confidence": 1.0,
+        "properties": {
+          "donation_count": 1
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800:supplier-contracts",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1,
+          "total_value": 71073600.0
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:82800:conflicts",
+        "type": "DECLARO_FINANZAS",
+        "confidence": 1.0,
+        "properties": {
+          "conflict_disclosure_count": 2
+        }
+      }
+    ]
+  }
+}

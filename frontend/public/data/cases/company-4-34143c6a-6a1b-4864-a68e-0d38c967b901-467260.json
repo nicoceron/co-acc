@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467260",
+  "title": "CORPORACION PARQUE TECNOLOGICO DE INNOVACION DEL CAFE Y SU CAFICULTURA",
+  "subtitle": "Empresa · 900911575",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467260",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467260",
+        "label": "CORPORACION PARQUE TECNOLOGICO DE INNOVACION DEL CAFE Y SU CAFICULTURA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 19,
+          "contract_value": 3100410824.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "900911575"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467260:official:1",
+        "label": "HERNANDO RAMIREZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467260:contracts",
+        "label": "Contratos detectados (19)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 19,
+          "total_value": 3100410824.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467260:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467260",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467260:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467260",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 19,
+          "total_value": 3100410824.0
+        }
+      }
+    ]
+  }
+}

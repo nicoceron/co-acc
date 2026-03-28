@@ -75,6 +75,16 @@ const PEOPLE_FILTERS: Array<{
   },
 ];
 
+const PRACTICE_KEYS = [
+  "dashboard.practiceRigging",
+  "dashboard.practiceDonorVendor",
+  "dashboard.practiceOfficialSupplier",
+  "dashboard.practiceSharedOfficer",
+  "dashboard.practiceSanctionedHealth",
+  "dashboard.practiceBudgetLeakage",
+  "dashboard.practicePublicMoney",
+] as const;
+
 function getNumberLocale(language: string): string {
   if (language.startsWith("es")) {
     return "es-CO";
@@ -349,6 +359,21 @@ export function Dashboard() {
           <p className={styles.kicker}>{t("dashboard.watchlistKicker")}</p>
           <h1 className={styles.title}>{t("dashboard.welcome")}</h1>
           <p className={styles.subtitle}>{t("dashboard.watchlistSubtitle")}</p>
+          <div className={styles.practiceBand}>
+            <span className={styles.practiceLabel}>
+              {t("dashboard.practiceCoverageLabel")}
+            </span>
+            <div className={styles.practiceGrid}>
+              {PRACTICE_KEYS.map((key, index) => (
+                <span key={key} className={styles.practicePill}>
+                  <span className={styles.practiceIndex}>
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  {t(key)}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className={styles.heroStats}>

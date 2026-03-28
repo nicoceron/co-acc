@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246372",
+  "title": "ALCALDÍA MUNICIPAL DE SASAIMA",
+  "subtitle": "Empresa · 800094752",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246372",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246372",
+        "label": "ALCALDÍA MUNICIPAL DE SASAIMA",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 264,
+          "contract_value": 53216316095.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "800094752"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246372:official:1",
+        "label": "JUAN CARLOS RAMOS FLORES",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246372:contracts",
+        "label": "Contratos detectados (264)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 264,
+          "total_value": 53216316095.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246372:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246372",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246372:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246372",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 264,
+          "total_value": 53216316095.0
+        }
+      }
+    ]
+  }
+}

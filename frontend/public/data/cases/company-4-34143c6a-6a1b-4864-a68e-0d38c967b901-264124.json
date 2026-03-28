@@ -1,0 +1,74 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:264124",
+  "title": "COMPANIA COLOMBIANA DE CONSTRUCCION S.A. _ COD S.A.",
+  "subtitle": "Empresa · 830042460",
+  "summary": "La empresa tiene 4 antecedente(s) sancionatorios y mantiene exposición en contratación pública.",
+  "tags": [
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:264124",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:264124",
+        "label": "COMPANIA COLOMBIANA DE CONSTRUCCION S.A. _ COD S.A.",
+        "type": "company",
+        "properties": {
+          "risk_score": 9,
+          "signal_types": 2,
+          "contract_count": 15,
+          "contract_value": 20401259276.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "830042460"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:264124:sanctions",
+        "label": "Sanciones oficiales (4)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 4
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:264124:contracts",
+        "label": "Contratos detectados (15)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 15,
+          "total_value": 20401259276.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:264124:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:264124",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 4
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:264124:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:264124",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 15,
+          "total_value": 20401259276.0
+        }
+      }
+    ]
+  }
+}

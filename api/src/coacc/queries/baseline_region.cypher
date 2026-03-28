@@ -21,7 +21,7 @@ WITH region, co, contract_count, total_value,
      toFloat(region_total_value) / CASE WHEN region_companies > 0
        THEN toFloat(region_companies) ELSE 1.0 END AS avg_value
 RETURN co.razon_social AS company_name,
-       coalesce(co.document_id, co.nit, co.cnpj) AS company_document_id,
+       coalesce(co.document_id, co.nit) AS company_document_id,
        elementId(co) AS company_id,
        region,
        contract_count,

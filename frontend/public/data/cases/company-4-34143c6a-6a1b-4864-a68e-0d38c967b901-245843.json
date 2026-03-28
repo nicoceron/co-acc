@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245843",
+  "title": "MUNICIPIO DE PEREIRA- OFICIAL",
+  "subtitle": "Empresa · 891480030",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245843",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245843",
+        "label": "MUNICIPIO DE PEREIRA- OFICIAL",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 186,
+          "contract_value": 418798724255.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "891480030"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245843:official:1",
+        "label": "LILIANA GIRALDO GOMEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245843:contracts",
+        "label": "Contratos detectados (186)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 186,
+          "total_value": 418798724255.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245843:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245843",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245843:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245843",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 186,
+          "total_value": 418798724255.0
+        }
+      }
+    ]
+  }
+}

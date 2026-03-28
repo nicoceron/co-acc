@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473114",
+  "title": "SANDRA XIMENA BECERRA ORTEGA",
+  "subtitle": "Empresa · 1013629685",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473114",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473114",
+        "label": "SANDRA XIMENA BECERRA ORTEGA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 14,
+          "contract_value": 6648043206.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "1013629685"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473114:official:1",
+        "label": "BECERRA ORTEGA SANDRA XIMENA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473114:contracts",
+        "label": "Contratos detectados (14)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 14,
+          "total_value": 6648043206.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473114:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473114",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473114:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473114",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 14,
+          "total_value": 6648043206.0
+        }
+      }
+    ]
+  }
+}

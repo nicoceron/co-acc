@@ -1,0 +1,91 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287",
+  "title": "FUENTES CABALLERO WILLIAM ALIRIO",
+  "subtitle": "Persona · 79485264",
+  "summary": "La persona figura como supervisor(a) de pago en 1 contrato(s) sobre 1 proveedor(es), y 1 muestran brechas de ejecución o compromiso, pagos pendientes.",
+  "tags": [
+    "Supervisión de pagos sobre contratos riesgosos",
+    "Declaraciones con referencias corporativas o conflictos"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287",
+        "label": "FUENTES CABALLERO WILLIAM ALIRIO",
+        "type": "person",
+        "properties": {
+          "risk_score": 58,
+          "signal_types": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "79485264"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287:public-offices",
+        "label": "Cargos públicos (1)",
+        "type": "public_office",
+        "properties": {
+          "office_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287:conflicts",
+        "label": "Declaraciones de conflicto (1)",
+        "type": "finance",
+        "properties": {
+          "conflict_disclosure_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287:payment-supervision",
+        "label": "Supervisión de pagos (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287:public-offices",
+        "type": "RECIBIO_SALARIO",
+        "confidence": 1.0,
+        "properties": {
+          "office_count": 1
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287:conflicts",
+        "type": "DECLARO_FINANZAS",
+        "confidence": 1.0,
+        "properties": {
+          "conflict_disclosure_count": 1
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:6287:payment-supervision",
+        "type": "SUPERVISA_PAGO",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1
+        }
+      }
+    ]
+  }
+}

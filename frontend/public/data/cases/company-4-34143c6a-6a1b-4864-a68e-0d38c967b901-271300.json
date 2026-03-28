@@ -1,0 +1,76 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:271300",
+  "title": "PAPELERIA EL CID S.A.S.",
+  "subtitle": "Empresa · 800021033",
+  "summary": "La empresa aparece en paquetes repetidos de contratos con valores medios bajos y valor total agregado suficiente para revisar posible fraccionamiento.",
+  "tags": [
+    "Paquetes repetidos de contratos bajo umbral"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:271300",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:271300",
+        "label": "PAPELERIA EL CID S.A.S.",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 1,
+          "contract_count": 107213,
+          "contract_value": 11464707876.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "800021033"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:271300:contracts",
+        "label": "Contratos detectados (107213)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 107213,
+          "total_value": 11464707876.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:271300:split-groups",
+        "label": "Paquetes bajo umbral (1)",
+        "type": "bid",
+        "properties": {
+          "group_count": 1,
+          "total_value": 605022324.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:271300:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:271300",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 107213,
+          "total_value": 11464707876.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:271300:split-groups",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:271300",
+        "type": "ADJUDICOU_A",
+        "confidence": 1.0,
+        "properties": {
+          "group_count": 1,
+          "total_value": 605022324.0
+        }
+      }
+    ]
+  }
+}

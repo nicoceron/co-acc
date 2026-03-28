@@ -29,9 +29,6 @@ CREATE CONSTRAINT investigation_id_unique IF NOT EXISTS
 CREATE CONSTRAINT amendment_id_unique IF NOT EXISTS
   FOR (a:Amendment) REQUIRE a.amendment_id IS UNIQUE;
 
-CREATE CONSTRAINT health_cnes_code_unique IF NOT EXISTS
-  FOR (h:Health) REQUIRE h.cnes_code IS UNIQUE;
-
 CREATE CONSTRAINT finance_id_unique IF NOT EXISTS
   FOR (f:Finance) REQUIRE f.finance_id IS UNIQUE;
 
@@ -56,6 +53,9 @@ CREATE INDEX company_razon_social IF NOT EXISTS
 
 CREATE INDEX company_document_id IF NOT EXISTS
   FOR (c:Company) ON (c.document_id);
+
+CREATE INDEX company_education_institution_code IF NOT EXISTS
+  FOR (c:Company) ON (c.education_institution_code);
 
 CREATE INDEX contract_value IF NOT EXISTS
   FOR (c:Contract) ON (c.value);
@@ -125,7 +125,7 @@ CREATE INDEX ingestion_run_started_at IF NOT EXISTS
 // ── Fulltext Search Index ───────────────────────────────
 CREATE FULLTEXT INDEX entity_search IF NOT EXISTS
   FOR (n:Person|Company|Contract|Bid|Sanction|Election|Amendment|Finance|DeclaredAsset|Health|Education|PublicOffice|SourceDocument)
-  ON EACH [n.name, n.razon_social, n.document_id, n.nit, n.cedula, n.numero_documento, n.cnes_code, n.object, n.contracting_org, n.infraction, n.org, n.function, n.subject, n.text, n.topic, n.url, n.reference, n.bid_id, n.asset_id, n.office_id, n.finance_id, n.election_id];
+  ON EACH [n.name, n.razon_social, n.document_id, n.nit, n.cedula, n.numero_documento, n.object, n.contracting_org, n.infraction, n.org, n.function, n.subject, n.text, n.topic, n.url, n.reference, n.bid_id, n.asset_id, n.office_id, n.finance_id, n.election_id];
 
 // ── User Constraints ────────────────────────────────────
 CREATE CONSTRAINT user_email_unique IF NOT EXISTS

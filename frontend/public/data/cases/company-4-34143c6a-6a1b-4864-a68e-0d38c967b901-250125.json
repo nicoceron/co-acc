@@ -1,0 +1,74 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:250125",
+  "title": "DARIO ERNESTO GALINDO MENDOZA",
+  "subtitle": "Empresa · 1049626374",
+  "summary": "La empresa tiene 1 antecedente(s) sancionatorios y mantiene exposición en contratación pública.",
+  "tags": [
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:250125",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:250125",
+        "label": "DARIO ERNESTO GALINDO MENDOZA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 203,
+          "contract_value": 3936885290.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "1049626374"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:250125:sanctions",
+        "label": "Sanciones oficiales (1)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:250125:contracts",
+        "label": "Contratos detectados (203)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 203,
+          "total_value": 3936885290.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:250125:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:250125",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 1
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:250125:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:250125",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 203,
+          "total_value": 3936885290.0
+        }
+      }
+    ]
+  }
+}

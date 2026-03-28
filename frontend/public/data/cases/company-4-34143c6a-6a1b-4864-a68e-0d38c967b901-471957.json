@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471957",
+  "title": "GESTION DE SEGURIDAD ELECTRONICA S.A",
+  "subtitle": "Empresa · 9002042728",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471957",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471957",
+        "label": "GESTION DE SEGURIDAD ELECTRONICA S.A",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 442,
+          "contract_value": 10948423132.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "9002042728"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471957:official:1",
+        "label": "JAVIER FELIPE SANCHEZ IREGUI",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471957:contracts",
+        "label": "Contratos detectados (442)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 442,
+          "total_value": 10948423132.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471957:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471957",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471957:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471957",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 442,
+          "total_value": 10948423132.0
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273381",
+  "title": "CUNDINAMARCA - CONCEJO MUNICIPIO DE ALBAN",
+  "subtitle": "Empresa · 8999994500",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273381",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273381",
+        "label": "CUNDINAMARCA - CONCEJO MUNICIPIO DE ALBAN",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 146,
+          "contract_value": 18482089613.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8999994500"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273381:official:1",
+        "label": "JORGE CHAVARRO BUSTOS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273381:contracts",
+        "label": "Contratos detectados (146)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 146,
+          "total_value": 18482089613.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273381:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273381",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273381:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273381",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 146,
+          "total_value": 18482089613.0
+        }
+      }
+    ]
+  }
+}

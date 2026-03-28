@@ -57,7 +57,7 @@ def _infer_identity_quality(
             props.get("document_id")
             or props.get("cedula")
             or props.get("numero_documento")
-            or props.get("cpf")
+            or props.get("document_id")
         )
         if isinstance(doc_value, str) and re.match(r"^\d{5,14}$", re.sub(r"[.\-/]", "", doc_value)):
             return "strong"

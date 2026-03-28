@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470736",
+  "title": "RUBIELSA QUEVEDO HIDALGO",
+  "subtitle": "Empresa · 40030536",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470736",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470736",
+        "label": "RUBIELSA QUEVEDO HIDALGO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 26,
+          "contract_value": 1729908642.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "40030536"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470736:official:1",
+        "label": "RUBIELSA QUEVEDO HIDALGO40.030.536",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470736:contracts",
+        "label": "Contratos detectados (26)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 26,
+          "total_value": 1729908642.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470736:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470736",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470736:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470736",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 26,
+          "total_value": 1729908642.0
+        }
+      }
+    ]
+  }
+}

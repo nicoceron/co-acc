@@ -1,0 +1,97 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545",
+  "title": "ALONSO RAFAEL OCAMPO ARRIETA",
+  "subtitle": "Empresa · 72311499",
+  "summary": "La empresa registra al menos un contrato con fecha dentro de una ventana pública de sanción vigente o no cerrada.",
+  "tags": [
+    "Proveedor sancionado que siguió recibiendo contratos",
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545",
+        "label": "ALONSO RAFAEL OCAMPO ARRIETA",
+        "type": "company",
+        "properties": {
+          "risk_score": 11,
+          "signal_types": 2,
+          "contract_count": 61,
+          "contract_value": 2337117595.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "72311499"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545:sanctions",
+        "label": "Sanciones oficiales (1)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545:contracts",
+        "label": "Contratos detectados (61)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 61,
+          "total_value": 2337117595.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545:sanction-window",
+        "label": "Contratos en ventana sancionatoria (7)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 7,
+          "total_value": 244235070.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 1
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 61,
+          "total_value": 2337117595.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545:sanction-window",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479545",
+        "type": "CONTRATOU",
+        "confidence": 0.95,
+        "properties": {
+          "contract_count": 7,
+          "total_value": 244235070.0
+        }
+      }
+    ]
+  }
+}

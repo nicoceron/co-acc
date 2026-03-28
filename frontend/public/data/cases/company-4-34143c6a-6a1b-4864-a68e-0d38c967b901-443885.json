@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:443885",
+  "title": "ALCALDIA MUNICIPAL DE RESTREPO VALLE DEL CAUCA",
+  "subtitle": "Empresa · 891902191",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:443885",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:443885",
+        "label": "ALCALDIA MUNICIPAL DE RESTREPO VALLE DEL CAUCA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 67,
+          "contract_value": 14086031599.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "891902191"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:443885:official:1",
+        "label": "DIANA PATRICIA GRUESO ZUNIGA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:443885:contracts",
+        "label": "Contratos detectados (67)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 67,
+          "total_value": 14086031599.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:443885:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:443885",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:443885:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:443885",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 67,
+          "total_value": 14086031599.0
+        }
+      }
+    ]
+  }
+}

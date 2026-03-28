@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266675",
+  "title": "LUCIO FRANCO BRAVO RODRIGUEZ",
+  "subtitle": "Empresa · 12975995",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266675",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266675",
+        "label": "LUCIO FRANCO BRAVO RODRIGUEZ",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 17,
+          "contract_value": 228773666.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "12975995"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266675:official:1",
+        "label": "FRANCO LUCIO BRAVO RODRIGUEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266675:contracts",
+        "label": "Contratos detectados (17)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 17,
+          "total_value": 228773666.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266675:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266675",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266675:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266675",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 17,
+          "total_value": 228773666.0
+        }
+      }
+    ]
+  }
+}

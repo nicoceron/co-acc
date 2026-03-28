@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472895",
+  "title": "MULTISTREAM LATINOAMERICA S.A.S",
+  "subtitle": "Empresa · 9002071952",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472895",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472895",
+        "label": "MULTISTREAM LATINOAMERICA S.A.S",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 18,
+          "contract_value": 1515717387.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "9002071952"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472895:official:1",
+        "label": "ANDRES MAURICIO PRIETO CALAMBAS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472895:contracts",
+        "label": "Contratos detectados (18)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 18,
+          "total_value": 1515717387.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472895:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472895",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472895:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472895",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 18,
+          "total_value": 1515717387.0
+        }
+      }
+    ]
+  }
+}

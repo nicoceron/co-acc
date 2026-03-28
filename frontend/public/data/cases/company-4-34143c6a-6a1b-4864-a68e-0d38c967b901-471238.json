@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471238",
+  "title": "SOCIEDAD CENTRAL DE INVERSIONES S.A. C.I.S.A.",
+  "subtitle": "Empresa · 8600429455",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471238",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471238",
+        "label": "SOCIEDAD CENTRAL DE INVERSIONES S.A. C.I.S.A.",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 102,
+          "contract_value": 50940577890.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8600429455"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471238:official:1",
+        "label": "PAOLA GOMEZ CAMPOS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471238:contracts",
+        "label": "Contratos detectados (102)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 102,
+          "total_value": 50940577890.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471238:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471238",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471238:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471238",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 102,
+          "total_value": 50940577890.0
+        }
+      }
+    ]
+  }
+}

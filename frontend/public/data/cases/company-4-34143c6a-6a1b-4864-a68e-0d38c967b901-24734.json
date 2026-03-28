@@ -1,0 +1,73 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24734",
+  "title": "SERVICIOS POSTALES NACIONALES S.A.S",
+  "subtitle": "Empresa · 900062917",
+  "summary": "La exposición contractual supera de forma material la escala financiera reportada por la empresa (18661.3x).",
+  "tags": [
+    "Contratación muy superior al tamaño financiero reportado",
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24734",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24734",
+        "label": "SERVICIOS POSTALES NACIONALES S.A.S",
+        "type": "company",
+        "properties": {
+          "risk_score": 14,
+          "signal_types": 4,
+          "contract_count": 7671,
+          "contract_value": 4961982759677.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "900062917"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24734:official:1",
+        "label": "JUAN MANUEL REYES ALVAREZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24734:contracts",
+        "label": "Contratos detectados (7671)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 7671,
+          "total_value": 4961982759677.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24734:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24734",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24734:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24734",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 7671,
+          "total_value": 4961982759677.0
+        }
+      }
+    ]
+  }
+}

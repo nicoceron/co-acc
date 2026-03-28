@@ -310,24 +310,39 @@ function GraphCanvasInner({
   }, []);
 
   const fittedRef = useRef(false);
+  const fitGraph = useCallback((transitionMs = 300, padding = 64) => {
+    fgRef.current?.zoomToFit(transitionMs, padding);
+  }, []);
 
-  // Auto-fit once after initial layout
   useEffect(() => {
     fittedRef.current = false;
-  }, [data]);
+  }, [data, layoutMode]);
+
+  useEffect(() => {
+    const fg = fgRef.current;
+    if (!fg || dimensions.width <= 0 || dimensions.height <= 0 || data.nodes.length === 0) {
+      return;
+    }
+
+    fg.resumeAnimation();
+    const timer = window.setTimeout(() => {
+      fitGraph(450, 64);
+      fittedRef.current = true;
+      window.setTimeout(() => {
+        fg.pauseAnimation();
+      }, 600);
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [data, dimensions.height, dimensions.width, fitGraph, layoutMode]);
 
   const handleEngineStop = useCallback(() => {
     if (!fittedRef.current) {
+      fitGraph(300, 64);
       fittedRef.current = true;
-      setTimeout(() => {
-        fgRef.current?.zoomToFit(300, 50);
-        // Defer pause until after zoomToFit animation completes
-        setTimeout(() => fgRef.current?.pauseAnimation(), 350);
-      }, 200);
-    } else {
-      fgRef.current?.pauseAnimation();
     }
-  }, []);
+    fgRef.current?.pauseAnimation();
+  }, [fitGraph]);
 
   // Cleanup: pause animation on unmount to stop RAF loop surviving navigation
   useEffect(() => {
@@ -361,7 +376,7 @@ function GraphCanvasInner({
 
   const handleZoomIn = useCallback(() => fgRef.current?.zoom(zoomRef.current * 1.5, 300), []);
   const handleZoomOut = useCallback(() => fgRef.current?.zoom(zoomRef.current / 1.5, 300), []);
-  const handleFitView = useCallback(() => fgRef.current?.zoomToFit(300, 40), []);
+  const handleFitView = useCallback(() => fitGraph(300, 40), [fitGraph]);
   const handleResetZoom = useCallback(() => fgRef.current?.zoom(1, 300), []);
 
   const handleExportPng = useCallback(() => {
@@ -438,13 +453,13 @@ function GraphCanvasInner({
           onBackgroundClick={handleBackgroundClick}
           onLinkClick={handleLinkClick}
           onZoom={handleZoom}
+          onEngineStop={handleEngineStop}
           backgroundColor="rgba(0,0,0,0)"
           linkDirectionalParticles={0}
           cooldownTime={4000}
           d3AlphaDecay={0.03}
           d3VelocityDecay={0.5}
           warmupTicks={30}
-          onEngineStop={handleEngineStop}
           dagMode={layoutMode === "hierarchy" ? "td" : undefined}
           nodeCanvasObjectMode={nodeCanvasObjectMode}
           nodeCanvasObject={nodeCanvasObject}

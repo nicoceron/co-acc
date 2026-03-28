@@ -1,0 +1,93 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109",
+  "title": "JHON ALEXANDER MELGAREJO CELEITA",
+  "subtitle": "Persona · 79956337",
+  "summary": "La misma persona aparece en candidaturas electorales y también como proveedora o directiva de proveedor con contratación pública.",
+  "tags": [
+    "Candidatura y contratación en la misma persona",
+    "Declaraciones con referencias corporativas o conflictos"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109",
+        "label": "JHON ALEXANDER MELGAREJO CELEITA",
+        "type": "person",
+        "properties": {
+          "risk_score": 52,
+          "signal_types": 3
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "79956337"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109:candidacies",
+        "label": "Candidaturas (1)",
+        "type": "election",
+        "properties": {
+          "candidacy_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109:supplier-contracts",
+        "label": "Contratos como proveedora/o (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "total_value": 80000000.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109:conflicts",
+        "label": "Declaraciones de conflicto (2)",
+        "type": "finance",
+        "properties": {
+          "conflict_disclosure_count": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109:candidacies",
+        "type": "CANDIDATO_EM",
+        "confidence": 1.0,
+        "properties": {
+          "candidacy_count": 1
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109:supplier-contracts",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1,
+          "total_value": 80000000.0
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:74109:conflicts",
+        "type": "DECLARO_FINANZAS",
+        "confidence": 1.0,
+        "properties": {
+          "conflict_disclosure_count": 2
+        }
+      }
+    ]
+  }
+}

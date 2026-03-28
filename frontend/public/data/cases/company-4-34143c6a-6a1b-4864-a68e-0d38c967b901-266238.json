@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266238",
+  "title": "CORPORACION AUTONOMA REGIONAL DE NARIÑO",
+  "subtitle": "Empresa · 891222322",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266238",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266238",
+        "label": "CORPORACION AUTONOMA REGIONAL DE NARIÑO",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 80,
+          "contract_value": 54473885263.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "891222322"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266238:official:1",
+        "label": "EDGAR ROBERTO MORA GOMEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266238:contracts",
+        "label": "Contratos detectados (80)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 80,
+          "total_value": 54473885263.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266238:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266238",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266238:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:266238",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 80,
+          "total_value": 54473885263.0
+        }
+      }
+    ]
+  }
+}

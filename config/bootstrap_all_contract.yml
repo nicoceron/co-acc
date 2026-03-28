@@ -1,12 +1,72 @@
 {
   "contract_version": "2026-03-15",
   "full_historical_default": true,
-  "expected_implemented_count": 30,
+  "expected_implemented_count": 52,
   "core_sources": [
     "secop_integrado",
     "secop_ii_contracts",
     "paco_sanctions",
     "sigep_public_servants"
+  ],
+  "signal_roles": {
+    "promoted": [
+      "asset_disclosures",
+      "company_registry_c82u",
+      "conflict_disclosures",
+      "cuentas_claras_income_2019",
+      "fiscal_findings",
+      "fiscal_responsibility",
+      "health_providers",
+      "paco_sanctions",
+      "secop_contract_additions",
+      "secop_contract_execution",
+      "secop_contract_suspensions",
+      "secop_ii_contracts",
+      "secop_ii_processes",
+      "secop_i_historical_processes",
+      "secop_integrado",
+      "secop_invoices",
+      "secop_interadmin_agreements",
+      "secop_offers",
+      "secop_sanctions",
+      "secop_suppliers",
+      "sgr_expense_execution",
+      "sgr_projects",
+      "siri_antecedents",
+      "sigep_public_servants",
+      "sigep_sensitive_positions"
+    ],
+    "enrichment_only": [
+      "higher_ed_directors",
+      "higher_ed_enrollment",
+      "higher_ed_institutions",
+      "igac_property_transactions",
+      "mapa_inversiones_projects",
+      "official_case_bulletins",
+      "company_branches_nb3d",
+      "dnp_project_executors",
+      "dnp_project_beneficiary_locations",
+      "dnp_project_beneficiary_characterization",
+      "dnp_project_locations",
+      "dnp_project_contract_links",
+      "pte_sector_commitments",
+      "pte_top_contracts",
+      "registraduria_death_status_checks",
+      "rues_chambers",
+      "secop_budget_commitments",
+      "secop_cdp_requests",
+      "secop_contract_modifications",
+      "secop_additional_locations",
+      "secop_document_archives",
+      "secop_execution_locations",
+      "secop_i_resource_origins",
+      "secop_payment_plans",
+      "secop_process_bpin",
+      "supersoc_top_companies"
+    ],
+    "quarantined": [
+      "secop_budget_items"
+    ]
   ],
   "sources": [
     {
@@ -20,6 +80,12 @@
       "acquisition_mode": "api",
       "required_inputs": ["data/secop_ii_contracts/*"],
       "core": true
+    },
+    {
+      "pipeline_id": "official_case_bulletins",
+      "acquisition_mode": "curated_official_documents",
+      "required_inputs": ["data/official_case_bulletins/*"],
+      "core": false
     },
     {
       "pipeline_id": "paco_sanctions",
@@ -70,6 +136,30 @@
       "core": false
     },
     {
+      "pipeline_id": "company_registry_c82u",
+      "acquisition_mode": "api_connected_batch",
+      "required_inputs": ["data/company_registry_c82u/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "company_branches_nb3d",
+      "acquisition_mode": "api_connected_batch",
+      "required_inputs": ["data/company_branches_nb3d/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "higher_ed_institutions",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/higher_ed_institutions/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "higher_ed_directors",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/higher_ed_directors/*"],
+      "core": false
+    },
+    {
       "pipeline_id": "higher_ed_enrollment",
       "acquisition_mode": "api",
       "required_inputs": ["data/higher_ed_enrollment/*"],
@@ -82,9 +172,57 @@
       "core": false
     },
     {
+      "pipeline_id": "siri_antecedents",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/siri_antecedents/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "fiscal_responsibility",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/fiscal_responsibility/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "fiscal_findings",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/fiscal_findings/*"],
+      "core": false
+    },
+    {
       "pipeline_id": "mapa_inversiones_projects",
       "acquisition_mode": "api",
       "required_inputs": ["data/mapa_inversiones_projects/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "dnp_project_executors",
+      "acquisition_mode": "api_connected_batch",
+      "required_inputs": ["data/dnp_project_executors/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "dnp_project_beneficiary_locations",
+      "acquisition_mode": "api_connected_batch",
+      "required_inputs": ["data/dnp_project_beneficiary_locations/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "dnp_project_beneficiary_characterization",
+      "acquisition_mode": "api_connected_batch",
+      "required_inputs": ["data/dnp_project_beneficiary_characterization/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "dnp_project_locations",
+      "acquisition_mode": "api_connected_batch",
+      "required_inputs": ["data/dnp_project_locations/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "dnp_project_contract_links",
+      "acquisition_mode": "derived_graph_link",
+      "required_inputs": [],
       "core": false
     },
     {
@@ -136,6 +274,24 @@
       "core": false
     },
     {
+      "pipeline_id": "secop_payment_plans",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_payment_plans/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_process_bpin",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_process_bpin/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_budget_items",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_budget_items/*"],
+      "core": false
+    },
+    {
       "pipeline_id": "secop_contract_execution",
       "acquisition_mode": "api",
       "required_inputs": ["data/secop_contract_execution/*"],
@@ -145,6 +301,18 @@
       "pipeline_id": "secop_execution_locations",
       "acquisition_mode": "api",
       "required_inputs": ["data/secop_execution_locations/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_additional_locations",
+      "acquisition_mode": "api_connected_batch",
+      "required_inputs": ["data/secop_additional_locations/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_document_archives",
+      "acquisition_mode": "api_connected_batch",
+      "required_inputs": ["data/secop_document_archives/*"],
       "core": false
     },
     {
@@ -160,9 +328,36 @@
       "core": false
     },
     {
+      "pipeline_id": "secop_contract_suspensions",
+      "acquisition_mode": "api",
+      "required_inputs": ["data/secop_contract_suspensions/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_interadmin_agreements",
+      "acquisition_mode": "api",
+      "required_inputs": [
+        "data/secop_interadmin_agreements/*",
+        "data/secop_interadmin_agreements_historical/*"
+      ],
+      "core": false
+    },
+    {
       "pipeline_id": "secop_suppliers",
       "acquisition_mode": "api",
       "required_inputs": ["data/secop_suppliers/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_i_historical_processes",
+      "acquisition_mode": "api_connected_batch",
+      "required_inputs": ["data/secop_i_historical_processes/*"],
+      "core": false
+    },
+    {
+      "pipeline_id": "secop_i_resource_origins",
+      "acquisition_mode": "api_connected_batch",
+      "required_inputs": ["data/secop_i_resource_origins/*"],
       "core": false
     },
     {

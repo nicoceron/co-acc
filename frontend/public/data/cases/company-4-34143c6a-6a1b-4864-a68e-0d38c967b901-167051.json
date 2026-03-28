@@ -1,0 +1,75 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167051",
+  "title": "EXPERTOS SEGURIDAD LTDA",
+  "subtitle": "Empresa · 800010866",
+  "summary": "La exposición contractual supera de forma material la escala financiera reportada por la empresa (170.3x).",
+  "tags": [
+    "Contratación muy superior al tamaño financiero reportado",
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167051",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167051",
+        "label": "EXPERTOS SEGURIDAD LTDA",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 2,
+          "contract_count": 50,
+          "contract_value": 14372198017.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "800010866"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167051:sanctions",
+        "label": "Sanciones oficiales (1)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167051:contracts",
+        "label": "Contratos detectados (50)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 50,
+          "total_value": 14372198017.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167051:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167051",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 1
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167051:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167051",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 50,
+          "total_value": 14372198017.0
+        }
+      }
+    ]
+  }
+}

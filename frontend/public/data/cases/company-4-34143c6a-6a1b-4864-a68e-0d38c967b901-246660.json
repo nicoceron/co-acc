@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246660",
+  "title": "MUNICIPIO DE VILLA DEL ROSARIO**",
+  "subtitle": "Empresa · 890503373",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246660",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246660",
+        "label": "MUNICIPIO DE VILLA DEL ROSARIO**",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 80,
+          "contract_value": 64423083328.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "890503373"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246660:official:1",
+        "label": "PEPE RUIZ PAREDES",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246660:contracts",
+        "label": "Contratos detectados (80)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 80,
+          "total_value": 64423083328.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246660:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246660",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246660:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:246660",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 80,
+          "total_value": 64423083328.0
+        }
+      }
+    ]
+  }
+}

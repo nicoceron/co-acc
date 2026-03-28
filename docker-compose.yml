@@ -41,6 +41,7 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3100}
     volumes:
       - ./docs/source_registry_co_v1.csv:/app/docs/source_registry_co_v1.csv:ro
+      - ./api/src/coacc/data/watchlists:/app/src/coacc/data/watchlists
     depends_on:
       neo4j:
         condition: service_healthy

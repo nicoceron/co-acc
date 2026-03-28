@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471031",
+  "title": "CLAUDIA ANGELICA RAMIREZ SALAMANCA",
+  "subtitle": "Empresa · 51981503",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471031",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471031",
+        "label": "CLAUDIA ANGELICA RAMIREZ SALAMANCA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 12,
+          "contract_value": 25043152540.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "51981503"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471031:official:1",
+        "label": "CLAUDIA ANGELICA RAMIREZ SALAMANCA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471031:contracts",
+        "label": "Contratos detectados (12)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 12,
+          "total_value": 25043152540.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471031:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471031",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471031:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471031",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 12,
+          "total_value": 25043152540.0
+        }
+      }
+    ]
+  }
+}

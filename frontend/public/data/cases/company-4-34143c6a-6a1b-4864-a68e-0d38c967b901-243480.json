@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243480",
+  "title": "MUNICIPIO DE ANAPOIMA/",
+  "subtitle": "Empresa · 890680097",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243480",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243480",
+        "label": "MUNICIPIO DE ANAPOIMA/",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 213,
+          "contract_value": 144105888316.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "890680097"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243480:official:1",
+        "label": "JORGE ALBERTO GODOY LOZANO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243480:contracts",
+        "label": "Contratos detectados (213)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 213,
+          "total_value": 144105888316.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243480:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243480",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243480:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243480",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 213,
+          "total_value": 144105888316.0
+        }
+      }
+    ]
+  }
+}

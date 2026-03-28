@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468645",
+  "title": "SILVIA PAOLA LUNA ANAYA",
+  "subtitle": "Empresa · 1119816383",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468645",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468645",
+        "label": "SILVIA PAOLA LUNA ANAYA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 24,
+          "contract_value": 1547237938.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "1119816383"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468645:official:1",
+        "label": "RODRIGO GERMAN ALEJANDRO LARREAMENDY JOERNS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468645:contracts",
+        "label": "Contratos detectados (24)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 24,
+          "total_value": 1547237938.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468645:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468645",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468645:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468645",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 24,
+          "total_value": 1547237938.0
+        }
+      }
+    ]
+  }
+}

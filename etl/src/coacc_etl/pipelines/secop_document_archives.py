@@ -1,0 +1,284 @@
+from __future__ import annotations
+
+import logging
+from collections import defaultdict
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+import pandas as pd
+
+from coacc_etl.base import Pipeline
+from coacc_etl.loader import Neo4jBatchLoader
+from coacc_etl.pipelines.colombia_procurement import (
+    build_company_row,
+    make_company_document_id,
+    merge_company,
+    merge_limited_unique,
+    procurement_relation_id,
+    procurement_year,
+)
+from coacc_etl.pipelines.colombia_shared import (
+    clean_name,
+    clean_text,
+    extract_url,
+    parse_iso_date,
+    read_csv_normalized,
+)
+from coacc_etl.streaming import iter_csv_chunks
+from coacc_etl.transforms import deduplicate_rows
+
+if TYPE_CHECKING:
+    from neo4j import Driver
+
+logger = logging.getLogger(__name__)
+
+
+def _archive_label(row: dict[str, Any]) -> str:
+    return clean_text(row.get("descripci_n")) or clean_text(row.get("nombre_archivo"))
+
+
+def _archive_type_flags(*values: object) -> dict[str, bool]:
+    parts = [clean_text(value).lower() for value in values if clean_text(value)]
+    text = " ".join(parts)
+    return {
+        "supervision": any(token in text for token in ("supervis", "interventor", "interventoria")),
+        "payment": any(token in text for token in ("pago", "factura", "cuenta de cobro", "cufe")),
+        "assignment": any(token in text for token in ("designaci", "delegaci", "apoyo a la supervision")),
+        "start_record": any(token in text for token in ("acta de inicio", "oficio de inicio")),
+        "resume": "hoja de vida" in text,
+        "report": any(token in text for token in ("informe", "acta de supervis")),
+    }
+
+
+class SecopDocumentArchivesPipeline(Pipeline):
+    """Aggregate SECOP II public document-index rows onto contract summaries."""
+
+    name = "secop_document_archives"
+    source_id = "secop_document_archives"
+
+    def __init__(
+        self,
+        driver: Driver,
+        data_dir: str = "./data",
+        limit: int | None = None,
+        chunk_size: int = 50_000,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
+        self._raw: pd.DataFrame = pd.DataFrame()
+        self.procurements: list[dict[str, Any]] = []
+
+    def _csv_path(self) -> Path:
+        return Path(self.data_dir) / "secop_document_archives" / "secop_document_archives.csv"
+
+    def _contracts_csv_path(self) -> Path:
+        return Path(self.data_dir) / "secop_ii_contracts" / "secop_ii_contracts.csv"
+
+    def extract(self) -> None:
+        csv_path = self._csv_path()
+        if not csv_path.exists():
+            logger.warning("[%s] file not found: %s", self.name, csv_path)
+            return
+
+        self._raw = read_csv_normalized(str(csv_path), dtype=str, keep_default_na=False)
+        if self.limit:
+            self._raw = self._raw.head(self.limit)
+        self.rows_in = len(self._raw)
+
+    def _build_process_summary_lookup(self, process_ids: set[str]) -> dict[str, list[str]]:
+        csv_path = self._contracts_csv_path()
+        if not csv_path.exists():
+            raise FileNotFoundError(csv_path)
+
+        lookup: dict[str, set[str]] = defaultdict(set)
+        company_map: dict[str, dict[str, Any]] = {}
+
+        for chunk in iter_csv_chunks(
+            csv_path,
+            chunk_size=self.chunk_size,
+            dtype=str,
+            keep_default_na=False,
+        ):
+            for row in chunk.to_dict(orient="records"):
+                process_id = clean_text(row.get("proceso_de_compra"))
+                if not process_id or process_id not in process_ids:
+                    continue
+
+                buyer_name = clean_name(row.get("nombre_entidad"))
+                buyer_document = make_company_document_id(
+                    row.get("nit_entidad"),
+                    buyer_name,
+                    kind="buyer",
+                )
+                supplier_name = clean_name(row.get("proveedor_adjudicado"))
+                supplier_document = make_company_document_id(
+                    row.get("documento_proveedor"),
+                    supplier_name,
+                    kind="supplier",
+                )
+                if (
+                    not buyer_document
+                    or not supplier_document
+                    or not buyer_name
+                    or not supplier_name
+                ):
+                    continue
+
+                merge_company(
+                    company_map,
+                    build_company_row(
+                        document_id=buyer_document,
+                        name=buyer_name,
+                        source="secop_ii_contracts",
+                    ),
+                )
+                merge_company(
+                    company_map,
+                    build_company_row(
+                        document_id=supplier_document,
+                        name=supplier_name,
+                        source="secop_ii_contracts",
+                    ),
+                )
+
+                summary_id = procurement_relation_id(
+                    "secop_ii_contracts",
+                    buyer_document,
+                    supplier_document,
+                    procurement_year(row.get("fecha_de_firma")),
+                )
+                lookup[process_id].add(summary_id)
+
+        return {process_id: sorted(summary_ids) for process_id, summary_ids in lookup.items()}
+
+    def _aggregate_frame(
+        self,
+        frame: pd.DataFrame,
+        process_summary_lookup: dict[str, list[str]],
+    ) -> list[dict[str, Any]]:
+        procurement_map: dict[str, dict[str, Any]] = {}
+
+        for row in frame.to_dict(orient="records"):
+            process_id = clean_text(row.get("proceso"))
+            if not process_id:
+                continue
+            summary_ids = process_summary_lookup.get(process_id)
+            if not summary_ids:
+                continue
+
+            archive_label = _archive_label(row)
+            archive_name = clean_text(row.get("nombre_archivo"))
+            archive_url = extract_url(row.get("url_descarga_documento"))
+            archive_extension = clean_text(row.get("extensi_n")).lower()
+            archive_uploaded_at = parse_iso_date(row.get("fecha_carga"))
+            archive_document_id = clean_text(row.get("id_documento"))
+            contract_ref = clean_text(row.get("n_mero_de_contrato"))
+
+            for summary_id in summary_ids:
+                current = procurement_map.setdefault(
+                    summary_id,
+                    {
+                        "summary_id": summary_id,
+                        "archive_document_count": 0,
+                        "archive_supervision_document_count": 0,
+                        "archive_payment_document_count": 0,
+                        "archive_assignment_document_count": 0,
+                        "archive_start_record_document_count": 0,
+                        "archive_resume_document_count": 0,
+                        "archive_report_document_count": 0,
+                        "archive_document_names": [],
+                        "archive_document_urls": [],
+                        "archive_document_refs": [],
+                        "archive_document_extensions": [],
+                        "archive_document_last_upload": None,
+                    },
+                )
+                current["archive_document_count"] += 1
+                archive_flags = _archive_type_flags(
+                    archive_label,
+                    archive_name,
+                    contract_ref,
+                )
+                if archive_flags["supervision"]:
+                    current["archive_supervision_document_count"] += 1
+                if archive_flags["payment"]:
+                    current["archive_payment_document_count"] += 1
+                if archive_flags["assignment"]:
+                    current["archive_assignment_document_count"] += 1
+                if archive_flags["start_record"]:
+                    current["archive_start_record_document_count"] += 1
+                if archive_flags["resume"]:
+                    current["archive_resume_document_count"] += 1
+                if archive_flags["report"]:
+                    current["archive_report_document_count"] += 1
+                current["archive_document_names"] = merge_limited_unique(
+                    list(current.get("archive_document_names", [])),
+                    archive_label,
+                    archive_name,
+                    limit=12,
+                )
+                current["archive_document_urls"] = merge_limited_unique(
+                    list(current.get("archive_document_urls", [])),
+                    archive_url,
+                    limit=6,
+                )
+                current["archive_document_refs"] = merge_limited_unique(
+                    list(current.get("archive_document_refs", [])),
+                    archive_document_id,
+                    contract_ref,
+                    process_id,
+                    limit=12,
+                )
+                current["archive_document_extensions"] = merge_limited_unique(
+                    list(current.get("archive_document_extensions", [])),
+                    archive_extension,
+                    limit=6,
+                )
+                if archive_uploaded_at and (
+                    not current.get("archive_document_last_upload")
+                    or archive_uploaded_at > current["archive_document_last_upload"]
+                ):
+                    current["archive_document_last_upload"] = archive_uploaded_at
+
+        return deduplicate_rows(list(procurement_map.values()), ["summary_id"])
+
+    def transform(self) -> None:
+        process_ids = {
+            clean_text(value)
+            for value in self._raw.get("proceso", pd.Series(dtype=str)).tolist()
+            if clean_text(value)
+        }
+        if not process_ids:
+            self.procurements = []
+            return
+
+        try:
+            lookup = self._build_process_summary_lookup(process_ids)
+        except FileNotFoundError:
+            logger.warning("[%s] secop_ii_contracts source file not found; skipping", self.name)
+            self.procurements = []
+            return
+
+        self.procurements = self._aggregate_frame(self._raw, lookup)
+
+    def _load_query(self) -> str:
+        return """
+            UNWIND $rows AS row
+            MATCH ()-[r:CONTRATOU {summary_id: row.summary_id}]->()
+            SET r.archive_document_count = row.archive_document_count,
+                r.archive_supervision_document_count = row.archive_supervision_document_count,
+                r.archive_payment_document_count = row.archive_payment_document_count,
+                r.archive_assignment_document_count = row.archive_assignment_document_count,
+                r.archive_start_record_document_count = row.archive_start_record_document_count,
+                r.archive_resume_document_count = row.archive_resume_document_count,
+                r.archive_report_document_count = row.archive_report_document_count,
+                r.archive_document_names = row.archive_document_names,
+                r.archive_document_urls = row.archive_document_urls,
+                r.archive_document_refs = row.archive_document_refs,
+                r.archive_document_extensions = row.archive_document_extensions,
+                r.archive_document_last_upload = row.archive_document_last_upload
+        """
+
+    def load(self) -> None:
+        loader = Neo4jBatchLoader(self.driver)
+        self.rows_loaded = loader.run_query(self._load_query(), self.procurements)

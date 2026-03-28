@@ -1,0 +1,77 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245403",
+  "title": "SAP COLOMBIA SAS",
+  "subtitle": "Empresa · 900320612",
+  "summary": "La exposición contractual supera de forma material la escala financiera reportada por la empresa (355.6x).",
+  "tags": [
+    "Contratación muy superior al tamaño financiero reportado",
+    "Paquetes repetidos de contratos bajo umbral"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245403",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245403",
+        "label": "SAP COLOMBIA SAS",
+        "type": "company",
+        "properties": {
+          "risk_score": 11,
+          "signal_types": 2,
+          "contract_count": 253,
+          "contract_value": 359265234229.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "900320612"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245403:contracts",
+        "label": "Contratos detectados (253)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 253,
+          "total_value": 359265234229.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245403:split-groups",
+        "label": "Paquetes bajo umbral (1)",
+        "type": "bid",
+        "properties": {
+          "group_count": 1,
+          "total_value": 203419.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245403:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245403",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 253,
+          "total_value": 359265234229.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245403:split-groups",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245403",
+        "type": "ADJUDICOU_A",
+        "confidence": 1.0,
+        "properties": {
+          "group_count": 1,
+          "total_value": 203419.0
+        }
+      }
+    ]
+  }
+}

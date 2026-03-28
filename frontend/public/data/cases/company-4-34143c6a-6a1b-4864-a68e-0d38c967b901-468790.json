@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468790",
+  "title": "EDWIN ARTURO RUIZ MORENO",
+  "subtitle": "Empresa · 79844029",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468790",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468790",
+        "label": "EDWIN ARTURO RUIZ MORENO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 60,
+          "contract_value": 3835588834.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "79844029"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468790:official:1",
+        "label": "RODRIGO GERMAN ALEJANDRO LARREAMENDY JOERNS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468790:contracts",
+        "label": "Contratos detectados (60)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 60,
+          "total_value": 3835588834.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468790:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468790",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468790:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468790",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 60,
+          "total_value": 3835588834.0
+        }
+      }
+    ]
+  }
+}

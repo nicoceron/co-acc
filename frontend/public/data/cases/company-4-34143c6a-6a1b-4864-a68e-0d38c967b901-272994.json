@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994",
+  "title": "CUNDINAMARCA - CONCEJO MUNICIPAL DE BITUIMA",
+  "subtitle": "Empresa · 8999997085",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994",
+        "label": "CUNDINAMARCA - CONCEJO MUNICIPAL DE BITUIMA",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 263,
+          "contract_value": 49544452976.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8999997085"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994:official:1",
+        "label": "ALEXANDER ERNESTO HORTUA GONZALEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994:official:2",
+        "label": "ISMAEL YESID LUQUE MARTINEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994:contracts",
+        "label": "Contratos detectados (263)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 263,
+          "total_value": 49544452976.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:272994",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 263,
+          "total_value": 49544452976.0
+        }
+      }
+    ]
+  }
+}

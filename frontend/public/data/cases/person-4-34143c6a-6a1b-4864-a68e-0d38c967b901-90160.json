@@ -1,0 +1,93 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160",
+  "title": "MARTINEZ ALVARO",
+  "subtitle": "Persona · 14224067",
+  "summary": "La misma persona aparece como donante electoral y también como proveedora o directiva de proveedor con contratación pública.",
+  "tags": [
+    "Donante que también aparece como proveedor",
+    "Declaraciones con referencias corporativas o conflictos"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160",
+        "label": "MARTINEZ ALVARO",
+        "type": "person",
+        "properties": {
+          "risk_score": 64,
+          "signal_types": 4
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "14224067"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160:donations",
+        "label": "Donaciones (2)",
+        "type": "election",
+        "properties": {
+          "donation_count": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160:supplier-contracts",
+        "label": "Contratos como proveedora/o (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "total_value": 23412480.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160:conflicts",
+        "label": "Declaraciones de conflicto (1)",
+        "type": "finance",
+        "properties": {
+          "conflict_disclosure_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160:donations",
+        "type": "DONO_A",
+        "confidence": 1.0,
+        "properties": {
+          "donation_count": 2
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160:supplier-contracts",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1,
+          "total_value": 23412480.0
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:90160:conflicts",
+        "type": "DECLARO_FINANZAS",
+        "confidence": 1.0,
+        "properties": {
+          "conflict_disclosure_count": 1
+        }
+      }
+    ]
+  }
+}

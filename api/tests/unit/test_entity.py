@@ -13,9 +13,9 @@ EXPECTED_LABELS = {
 
 # Expected entity ID property fields in lookup/coalesce chains.
 EXPECTED_ID_FIELDS = {
-    "document_id", "nit", "cedula", "numero_documento", "cpf", "cnpj",
+    "document_id", "nit", "cedula", "numero_documento", "document_id", "nit",
     "contract_id", "sanction_id", "amendment_id",
-    "cnes_code", "finance_id", "embargo_id", "school_id", "convenio_id",
+    "reps_code", "finance_id", "embargo_id", "school_id", "convenio_id",
     "stats_id",
 }
 
@@ -121,9 +121,9 @@ def test_entity_by_id_has_all_11_id_fields() -> None:
     """entity_by_id.cypher must resolve all supported entity ID property fields."""
     cypher = _load_cypher("entity_by_id")
     all_fields = {
-        "document_id", "nit", "cedula", "numero_documento", "cpf", "cnpj",
+        "document_id", "nit", "cedula", "numero_documento", "document_id", "nit",
         "contract_id", "sanction_id", "amendment_id",
-        "cnes_code", "finance_id", "embargo_id", "school_id",
+        "reps_code", "finance_id", "embargo_id", "school_id",
         "convenio_id", "stats_id",
     }
     for field in all_fields:
@@ -164,9 +164,9 @@ INVESTIGATION_COALESCE_QUERIES = [
 ]
 
 ALL_ID_FIELDS = [
-    "e.document_id", "e.nit", "e.cedula", "e.numero_documento", "e.cpf", "e.cnpj",
+    "e.document_id", "e.nit", "e.cedula", "e.numero_documento",
     "e.contract_id", "e.sanction_id", "e.amendment_id",
-    "e.cnes_code", "e.finance_id", "e.embargo_id", "e.school_id",
+    "e.reps_code", "e.finance_id", "e.embargo_id", "e.school_id",
     "e.convenio_id", "e.stats_id",
 ]
 

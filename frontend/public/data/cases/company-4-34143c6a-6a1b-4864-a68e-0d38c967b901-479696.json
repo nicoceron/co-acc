@@ -1,0 +1,97 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696",
+  "title": "LUIS FERNANDO ARBOLEDA RUIZ",
+  "subtitle": "Empresa · 70044383",
+  "summary": "La empresa tiene 4 antecedente(s) sancionatorios y mantiene exposición en contratación pública.",
+  "tags": [
+    "Proveedor con antecedentes sancionatorios",
+    "Proveedor sancionado que siguió recibiendo contratos"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696",
+        "label": "LUIS FERNANDO ARBOLEDA RUIZ",
+        "type": "company",
+        "properties": {
+          "risk_score": 12,
+          "signal_types": 2,
+          "contract_count": 14,
+          "contract_value": 704071224.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "70044383"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696:sanctions",
+        "label": "Sanciones oficiales (4)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 4
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696:contracts",
+        "label": "Contratos detectados (14)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 14,
+          "total_value": 704071224.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696:sanction-window",
+        "label": "Contratos en ventana sancionatoria (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "total_value": 16226500.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 4
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 14,
+          "total_value": 704071224.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696:sanction-window",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479696",
+        "type": "CONTRATOU",
+        "confidence": 0.95,
+        "properties": {
+          "contract_count": 1,
+          "total_value": 16226500.0
+        }
+      }
+    ]
+  }
+}

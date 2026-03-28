@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:39401",
+  "title": "COMPANIA DE SEGUROS DE VIDA AURORA S.A",
+  "subtitle": "Empresa · 860022137",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:39401",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:39401",
+        "label": "COMPANIA DE SEGUROS DE VIDA AURORA S.A",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 117,
+          "contract_value": 10345432644.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "860022137"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:39401:official:1",
+        "label": "ALVARO HERNAN VELEZ MILLAN",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:39401:contracts",
+        "label": "Contratos detectados (117)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 117,
+          "total_value": 10345432644.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:39401:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:39401",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:39401:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:39401",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 117,
+          "total_value": 10345432644.0
+        }
+      }
+    ]
+  }
+}

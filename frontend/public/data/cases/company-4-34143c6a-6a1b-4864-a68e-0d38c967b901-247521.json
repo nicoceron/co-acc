@@ -1,0 +1,73 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:247521",
+  "title": "ALMACENES EXITO S A",
+  "subtitle": "Empresa · 890900608",
+  "summary": "La exposición contractual supera de forma material la escala financiera reportada por la empresa (4.6x).",
+  "tags": [
+    "Contratación muy superior al tamaño financiero reportado",
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:247521",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:247521",
+        "label": "ALMACENES EXITO S A",
+        "type": "company",
+        "properties": {
+          "risk_score": 13,
+          "signal_types": 4,
+          "contract_count": 1212,
+          "contract_value": 64082375364.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "890900608"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:247521:official:1",
+        "label": "LUCIA ISABEL CORDERO SALGADO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:247521:contracts",
+        "label": "Contratos detectados (1212)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1212,
+          "total_value": 64082375364.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:247521:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:247521",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:247521:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:247521",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1212,
+          "total_value": 64082375364.0
+        }
+      }
+    ]
+  }
+}

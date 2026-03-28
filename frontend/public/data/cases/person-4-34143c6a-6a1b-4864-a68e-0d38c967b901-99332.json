@@ -1,0 +1,91 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332",
+  "title": "ANGELICA ROCIO MARTINEZ TORRES",
+  "subtitle": "Persona · 1018421450",
+  "summary": "La persona figura como supervisor(a) de pago en 1 contrato(s) sobre 1 proveedor(es), y 1 muestran brechas de ejecución o compromiso, pagos pendientes.",
+  "tags": [
+    "Supervisión de pagos sobre contratos riesgosos",
+    "Declaraciones con referencias corporativas o conflictos"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332",
+        "label": "ANGELICA ROCIO MARTINEZ TORRES",
+        "type": "person",
+        "properties": {
+          "risk_score": 60,
+          "signal_types": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "1018421450"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332:donations",
+        "label": "Donaciones (1)",
+        "type": "election",
+        "properties": {
+          "donation_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332:conflicts",
+        "label": "Declaraciones de conflicto (3)",
+        "type": "finance",
+        "properties": {
+          "conflict_disclosure_count": 3
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332:payment-supervision",
+        "label": "Supervisión de pagos (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332:donations",
+        "type": "DONO_A",
+        "confidence": 1.0,
+        "properties": {
+          "donation_count": 1
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332:conflicts",
+        "type": "DECLARO_FINANZAS",
+        "confidence": 1.0,
+        "properties": {
+          "conflict_disclosure_count": 3
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99332:payment-supervision",
+        "type": "SUPERVISA_PAGO",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468549",
+  "title": "ANDRES FERNANDO ARANGO ARIAS",
+  "subtitle": "Empresa · 10185492",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468549",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468549",
+        "label": "ANDRES FERNANDO ARANGO ARIAS",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 83,
+          "contract_value": 8508171519.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "10185492"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468549:official:1",
+        "label": "RODRIGO GERMAN ALEJANDRO LARREAMENDY JOERNS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468549:contracts",
+        "label": "Contratos detectados (83)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 83,
+          "total_value": 8508171519.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468549:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468549",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468549:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:468549",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 83,
+          "total_value": 8508171519.0
+        }
+      }
+    ]
+  }
+}

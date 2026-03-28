@@ -4,8 +4,6 @@ WHERE elementId(c) = $company_id
    OR c.document_id = $company_identifier_formatted
    OR c.nit = $company_identifier
    OR c.nit = $company_identifier_formatted
-   OR c.cnpj = $company_identifier
-   OR c.cnpj = $company_identifier_formatted
 MATCH (buyer:Company)-[award:ADJUDICOU_A]->(c)
 WHERE toLower(coalesce(award.modality, '')) CONTAINS 'inexig'
   AND coalesce(award.process_count, 0) >= toInteger($pattern_inexig_min_recurrence)
@@ -23,7 +21,7 @@ WITH c,
      reduce(flat = [], ids IN id_groups | flat + ids) AS evidence_refs
 WHERE size(evidence_refs) > 0
 RETURN 'inexigibility_recurrence' AS pattern_id,
-       coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
+       coalesce(c.document_id, c.nit) AS company_identifier,
        c.razon_social AS company_name,
        toFloat(recurring_groups) AS risk_signal,
        amount_total AS amount_total,

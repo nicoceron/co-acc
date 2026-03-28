@@ -1,0 +1,77 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:25612",
+  "title": "COMCEL COMUNICACION CELULAR S.A.",
+  "subtitle": "Empresa · 800153993",
+  "summary": "La exposición contractual supera de forma material la escala financiera reportada por la empresa (191.4x).",
+  "tags": [
+    "Contratación muy superior al tamaño financiero reportado",
+    "Paquetes repetidos de contratos bajo umbral"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:25612",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:25612",
+        "label": "COMCEL COMUNICACION CELULAR S.A.",
+        "type": "company",
+        "properties": {
+          "risk_score": 11,
+          "signal_types": 2,
+          "contract_count": 895,
+          "contract_value": 2985594491503.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "800153993"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:25612:contracts",
+        "label": "Contratos detectados (895)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 895,
+          "total_value": 2985594491503.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:25612:split-groups",
+        "label": "Paquetes bajo umbral (2)",
+        "type": "bid",
+        "properties": {
+          "group_count": 2,
+          "total_value": 1676506.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:25612:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:25612",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 895,
+          "total_value": 2985594491503.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:25612:split-groups",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:25612",
+        "type": "ADJUDICOU_A",
+        "confidence": 1.0,
+        "properties": {
+          "group_count": 2,
+          "total_value": 1676506.0
+        }
+      }
+    ]
+  }
+}

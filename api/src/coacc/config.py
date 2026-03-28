@@ -33,7 +33,9 @@ class Settings(BaseSettings):
     public_allow_person: bool = False
     public_allow_entity_lookup: bool = False
     public_allow_investigations: bool = False
-    pattern_split_threshold_value: float = 80000.0
+    pattern_split_threshold_value: float = 50_000_000.0
+    pattern_split_min_average_value: float = 10_000_000.0
+    pattern_split_min_total_value: float = 80_000_000.0
     pattern_split_min_count: int = 3
     pattern_share_threshold: float = 0.6
     pattern_srp_min_orgs: int = 5

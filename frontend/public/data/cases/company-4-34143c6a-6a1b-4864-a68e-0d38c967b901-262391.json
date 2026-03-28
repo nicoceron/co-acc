@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:262391",
+  "title": "FUNDACION UNIVERSIDAD DEL VALLE",
+  "subtitle": "Empresa · 8001871519",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:262391",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:262391",
+        "label": "FUNDACION UNIVERSIDAD DEL VALLE",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 150,
+          "contract_value": 82175154165.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8001871519"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:262391:official:1",
+        "label": "ANDRES MAURICIO PRIETO CALAMBAS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:262391:contracts",
+        "label": "Contratos detectados (150)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 150,
+          "total_value": 82175154165.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:262391:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:262391",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:262391:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:262391",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 150,
+          "total_value": 82175154165.0
+        }
+      }
+    ]
+  }
+}

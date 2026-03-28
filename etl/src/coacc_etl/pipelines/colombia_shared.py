@@ -188,7 +188,10 @@ def normalize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def read_csv_normalized(path: str, **kwargs: Any) -> pd.DataFrame:
-    df = pd.read_csv(path, **kwargs)
+    try:
+        df = pd.read_csv(path, **kwargs)
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame()
     if not isinstance(df, pd.DataFrame):
         raise TypeError(f"Expected DataFrame, got {type(df)}")
     return normalize_dataframe_columns(df)
@@ -207,11 +210,16 @@ def read_csv_normalized_with_fallback(
             if not isinstance(df, pd.DataFrame):
                 continue
             return normalize_dataframe_columns(df)
+        except pd.errors.EmptyDataError:
+            return pd.DataFrame()
         except UnicodeDecodeError as exc:
             last_error = exc
     if last_error is not None:
         raise last_error
-    df = pd.read_csv(path, **kwargs)
+    try:
+        df = pd.read_csv(path, **kwargs)
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame()
     if not isinstance(df, pd.DataFrame):
         raise TypeError(f"Expected DataFrame, got {type(df)}")
     return normalize_dataframe_columns(df)

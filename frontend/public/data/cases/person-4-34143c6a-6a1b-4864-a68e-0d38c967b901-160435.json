@@ -1,0 +1,90 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435",
+  "title": "HERMAN MARTINEZ GOMEZ",
+  "subtitle": "Persona · 10246928",
+  "summary": "La persona registra 1 sanción(es) de responsabilidad fiscal en fuentes oficiales de control y además aparece con 20 donación(es) electorales, 1 candidatura(s).",
+  "tags": [
+    "Sanciones oficiales con exposición pública"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435",
+        "label": "HERMAN MARTINEZ GOMEZ",
+        "type": "person",
+        "properties": {
+          "risk_score": 46,
+          "signal_types": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "10246928"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435:sanctions",
+        "label": "Sanciones oficiales (1)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435:candidacies",
+        "label": "Candidaturas (1)",
+        "type": "election",
+        "properties": {
+          "candidacy_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435:donations",
+        "label": "Donaciones (20)",
+        "type": "election",
+        "properties": {
+          "donation_count": 20
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435:sanctions",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 1
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435:candidacies",
+        "type": "CANDIDATO_EM",
+        "confidence": 1.0,
+        "properties": {
+          "candidacy_count": 1
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:160435:donations",
+        "type": "DONO_A",
+        "confidence": 1.0,
+        "properties": {
+          "donation_count": 20
+        }
+      }
+    ]
+  }
+}

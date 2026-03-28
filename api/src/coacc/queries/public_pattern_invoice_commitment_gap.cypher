@@ -4,8 +4,6 @@ WHERE elementId(c) = $company_id
    OR c.document_id = $company_identifier_formatted
    OR c.nit = $company_identifier
    OR c.nit = $company_identifier_formatted
-   OR c.cnpj = $company_identifier
-   OR c.cnpj = $company_identifier_formatted
 MATCH (:Company)-[award:CONTRATOU]->(c)
 WHERE coalesce(award.commitment_total_value, 0.0) > 0
   AND coalesce(award.invoice_total_value, 0.0) >
@@ -30,7 +28,7 @@ WITH c,
 WHERE contract_count >= toInteger($pattern_min_contract_count)
   OR amount_total >= toFloat($pattern_min_contract_value)
 RETURN 'invoice_commitment_gap' AS pattern_id,
-       coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
+       coalesce(c.document_id, c.nit) AS company_identifier,
        coalesce(c.razon_social, c.name) AS company_name,
        toFloat(contract_count + size(evidence_refs)) AS risk_signal,
        amount_total AS amount_total,

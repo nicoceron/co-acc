@@ -5,10 +5,13 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import re
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
 
 START_MARKER = "<!-- SOURCE_SUMMARY_START -->"
 END_MARKER = "<!-- SOURCE_SUMMARY_END -->"
@@ -27,6 +30,14 @@ IMPLEMENTED_SOURCE_MODELS: dict[str, tuple[str, str]] = {
     "cuentas_claras_income_2019": (
         "`Person`, `Company`, `Election`, `CANDIDATO_EM`, `DONO_A`",
         "Campaign income disclosures for the 2019 territorial election cycle.",
+    ),
+    "fiscal_findings": (
+        "`Company`, `Finding`, `TIENE_HALLAZGO`",
+        "Official Contraloría fiscal findings tied to audited entities and radicados.",
+    ),
+    "fiscal_responsibility": (
+        "`Company`, `Sanction`, `SANCIONADA`",
+        "Official fiscal-responsibility sanctions from Contraloría / SIREF.",
     ),
     "health_providers": (
         "`Company`, `Health`, `OPERA_UNIDAD`",
@@ -79,6 +90,10 @@ IMPLEMENTED_SOURCE_MODELS: dict[str, tuple[str, str]] = {
     "sgr_projects": (
         "`Company`, `Convenio`, `ADMINISTRA`",
         "Royalty-system investment projects tied to their executing entities.",
+    ),
+    "siri_antecedents": (
+        "`Person`, `Sanction`, `SANCIONADA`",
+        "Official SIRI antecedents with person-level disciplinary and related inhabilidad records.",
     ),
     "secop_contract_additions": (
         "`Contract`",
@@ -143,12 +158,70 @@ def parse_bool(value: str) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "y"}
 
 
-def compute_counts(registry_path: Path) -> dict[str, int]:
-    rows = list(csv.DictReader(registry_path.open(encoding="utf-8", newline="")))
+def fetch_runtime_sources(api_base: str) -> dict[str, dict[str, str]]:
+    normalized_base = api_base.strip().rstrip("/")
+    if not normalized_base:
+        return {}
+    url = f"{normalized_base}/api/v1/meta/sources"
+    try:
+        with urlopen(url, timeout=20) as response:
+            payload = json.load(response)
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError):
+        return {}
+
+    runtime_sources: dict[str, dict[str, str]] = {}
+    for source in payload.get("sources") or []:
+        source_id = str(source.get("id") or "").strip()
+        if source_id:
+            runtime_sources[source_id] = source
+    return runtime_sources
+
+
+def overlay_runtime_rows(
+    rows: list[dict[str, str]],
+    runtime_sources: dict[str, dict[str, str]],
+) -> list[dict[str, str]]:
+    if not runtime_sources:
+        return rows
+
+    overlaid: list[dict[str, str]] = []
+    for row in rows:
+        source_id = (row.get("source_id") or "").strip()
+        runtime = runtime_sources.get(source_id)
+        if runtime is None:
+            overlaid.append(row)
+            continue
+
+        updated = dict(row)
+        for field in (
+            "status",
+            "implementation_state",
+            "load_state",
+            "signal_promotion_state",
+            "access_mode",
+            "public_access_mode",
+            "discovery_status",
+            "last_seen_url",
+            "cadence_expected",
+            "cadence_observed",
+            "quality_status",
+            "notes",
+        ):
+            value = runtime.get(field)
+            if value not in (None, ""):
+                updated[field] = str(value)
+        overlaid.append(updated)
+    return overlaid
+
+
+def compute_counts(rows: list[dict[str, str]]) -> dict[str, int]:
     universe = [row for row in rows if parse_bool(row.get("in_universe_v1", ""))]
 
     status = Counter((row.get("status") or "").strip() for row in universe)
     load_state = Counter((row.get("load_state") or "").strip() for row in universe)
+    promotion_state = Counter(
+        (row.get("signal_promotion_state") or "promoted").strip() for row in universe
+    )
     implemented = [row for row in universe if (row.get("implementation_state") or "").strip() == "implemented"]
 
     return {
@@ -162,6 +235,9 @@ def compute_counts(registry_path: Path) -> dict[str, int]:
         "status_stale": status.get("stale", 0),
         "status_blocked_external": status.get("blocked_external", 0),
         "status_not_built": status.get("not_built", 0),
+        "promoted": promotion_state.get("promoted", 0),
+        "enrichment_only": promotion_state.get("enrichment_only", 0),
+        "quarantined": promotion_state.get("quarantined", 0),
     }
 
 
@@ -169,17 +245,23 @@ def load_registry_rows(registry_path: Path) -> list[dict[str, str]]:
     return list(csv.DictReader(registry_path.open(encoding="utf-8", newline="")))
 
 
-def render_block(counts: dict[str, int], stamp_utc: str) -> str:
+def render_block(counts: dict[str, int], stamp_utc: str, source_descriptor: str) -> str:
     return "\n".join(
         [
             START_MARKER,
-            f"**Generated from `docs/source_registry_co_v1.csv` (as-of UTC: {stamp_utc})**",
+            f"**Generated from {source_descriptor} (as-of UTC: {stamp_utc})**",
             "",
             f"- Universe v1 sources: {counts['universe']}",
             f"- Implemented pipelines: {counts['implemented']}",
             f"- Loaded sources (load_state=loaded): {counts['loaded']}",
             f"- Partial sources (load_state=partial): {counts['partial_load']}",
             f"- Not loaded sources (load_state=not_loaded): {counts['not_loaded']}",
+            (
+                "- Signal roles: "
+                f"promoted={counts['promoted']}, "
+                f"enrichment_only={counts['enrichment_only']}, "
+                f"quarantined={counts['quarantined']}"
+            ),
             (
                 "- Status counts: "
                 f"loaded={counts['status_loaded']}, "
@@ -203,19 +285,20 @@ def render_implemented_block(rows: list[dict[str, str]]) -> str:
 
     lines = [
         IMPLEMENTED_START_MARKER,
-        "| Source | Pipeline | What it loads | Notes |",
-        "|---|---|---|---|",
+        "| Source | Pipeline | Signal Role | What it loads | Notes |",
+        "|---|---|---|---|---|",
     ]
     for row in implemented_rows:
         source_id = row.get("source_id", "")
         name = row.get("name", source_id)
         pipeline_id = row.get("pipeline_id", "")
+        signal_role = (row.get("signal_promotion_state") or "promoted").strip() or "promoted"
         what_it_loads, note = IMPLEMENTED_SOURCE_MODELS.get(
             source_id,
             ("See pipeline implementation.", row.get("notes", "")),
         )
         lines.append(
-            f"| {name} | `{pipeline_id}` | {what_it_loads} | {note} |"
+            f"| {name} | `{pipeline_id}` | `{signal_role}` | {what_it_loads} | {note} |"
         )
     lines.append(IMPLEMENTED_END_MARKER)
     return "\n".join(lines)
@@ -237,6 +320,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate summary block in docs/data-sources.md")
     parser.add_argument("--registry-path", default="docs/source_registry_co_v1.csv")
     parser.add_argument("--docs-path", default="docs/data-sources.md")
+    parser.add_argument("--api-base", default="")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--stamp-utc", default="")
     args = parser.parse_args()
@@ -249,8 +333,15 @@ def main() -> int:
     stamp = args.stamp_utc or (existing_stamp if args.check else datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"))
 
     rows = load_registry_rows(registry_path)
-    counts = compute_counts(registry_path)
-    expected_block = render_block(counts, stamp)
+    runtime_sources = fetch_runtime_sources(args.api_base)
+    rows = overlay_runtime_rows(rows, runtime_sources)
+    counts = compute_counts(rows)
+    source_descriptor = "`docs/source_registry_co_v1.csv`"
+    if runtime_sources and args.api_base.strip():
+        source_descriptor += (
+            f" + live runtime overlay from `{args.api_base.rstrip('/')}/api/v1/meta/sources`"
+        )
+    expected_block = render_block(counts, stamp, source_descriptor)
     rendered = replace_block(doc_text, expected_block, START_MARKER, END_MARKER)
     implemented_block = render_implemented_block(rows)
     rendered = replace_block(

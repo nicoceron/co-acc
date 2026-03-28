@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:133335",
+  "title": "UNIVERSIDAD COOPERATIVA DE COLOMBIA",
+  "subtitle": "Empresa · 860029924",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:133335",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:133335",
+        "label": "UNIVERSIDAD COOPERATIVA DE COLOMBIA",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 495,
+          "contract_value": 242136237791.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "860029924"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:133335:official:1",
+        "label": "TANIA GICELA BOLANOS ENRIQUEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:133335:contracts",
+        "label": "Contratos detectados (495)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 495,
+          "total_value": 242136237791.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:133335:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:133335",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:133335:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:133335",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 495,
+          "total_value": 242136237791.0
+        }
+      }
+    ]
+  }
+}

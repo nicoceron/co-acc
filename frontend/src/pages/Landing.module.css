@@ -1,277 +1,322 @@
-/* Investigative Portal Landing */
+.page {
+  --editorial-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  padding: clamp(4.5rem, 6vw, 6rem) clamp(1rem, 3vw, 2.4rem) 4rem;
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--color-warning) 10%, transparent) 0, transparent 28%),
+    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 10%, transparent) 0, transparent 24%),
+    linear-gradient(180deg, #100f0d 0%, #090908 100%);
+}
+
+.hero,
+.investigationCard,
+.proofCard,
+.methodCard,
+.sourceCard {
+  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  background:
+    linear-gradient(180deg, rgba(18, 16, 13, 0.94), rgba(10, 10, 10, 0.98)),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 28px,
+      rgba(255, 255, 255, 0.02) 28px,
+      rgba(255, 255, 255, 0.02) 29px
+    );
+  box-shadow: var(--shadow-md);
+}
 
 .hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: clamp(1.4rem, 3vw, 2rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.75fr);
+  gap: 1rem;
+}
+
+.heroCopy {
+  display: grid;
+  align-content: start;
+}
+
+.badge,
+.sectionEyebrow,
+.cardEyebrow {
+  display: inline-flex;
   align-items: center;
-  padding: var(--space-2xl);
-  position: relative;
-  background: radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-  border-bottom: 1px solid var(--border);
-}
-
-.heroContent {
-  max-width: 800px;
-  text-align: center;
-  z-index: 10;
-}
-
-.heroLeft {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border: 1px solid var(--accent);
-  color: var(--accent);
+  gap: 0.4rem;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  margin-bottom: var(--space-xl);
+  color: var(--accent);
 }
 
 .title {
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: 500;
-  line-height: 1;
-  color: var(--text-primary);
-  margin-bottom: var(--space-lg);
-  letter-spacing: -0.02em;
+  margin-top: 1rem;
+  max-width: 11ch;
+  font-family: var(--editorial-serif);
+  font-size: clamp(3rem, 6vw, 5.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
 }
 
 .subtitle {
-  font-family: var(--font-sans);
-  font-size: var(--font-size-lg);
-  color: var(--text-secondary);
-  margin-bottom: var(--space-2xl);
-  max-width: 60ch;
-  line-height: 1.6;
+  max-width: 66ch;
+  margin-top: 1rem;
+  color: var(--text-primary);
+  font-size: clamp(1rem, 1.65vw, 1.16rem);
+  line-height: 1.75;
 }
 
-.cta {
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.primaryCta,
+.secondaryCta,
+.inlineAction {
   display: inline-flex;
-  padding: var(--space-md) var(--space-xl);
-  background: var(--accent);
-  color: var(--bg-primary);
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  border: none;
-  transition: all var(--transition-fast);
+  text-decoration: none;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
-.cta:hover {
-  background: var(--text-primary);
-  color: var(--bg-primary);
-  box-shadow: 0 0 20px var(--accent-dim);
+.primaryCta {
+  border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 26%, transparent), color-mix(in oklab, var(--accent) 16%, transparent));
+  color: var(--text-primary);
+}
+
+.secondaryCta,
+.inlineAction {
+  border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .disclaimer {
-  margin-top: var(--space-2xl);
-  font-family: var(--font-mono);
-  font-size: 10px;
+  max-width: 62ch;
+  margin-top: 1rem;
   color: var(--text-muted);
-  max-width: 400px;
-  line-height: 1.6;
+  font-size: 0.88rem;
+  line-height: 1.7;
 }
 
-.heroRight {
-  display: none; /* Removed for extreme minimalism */
-}
-
-/* === Section Typography === */
-.sectionLabel {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  margin-bottom: var(--space-md);
-}
-
-.sectionHeading {
-  font-family: var(--font-display);
-  font-size: var(--font-size-2xl);
-  color: var(--text-primary);
-  margin-bottom: var(--space-2xl);
-}
-
-/* === Features - High Density Grid === */
-.features {
-  padding: var(--space-4xl) var(--space-2xl);
-  border-bottom: 1px solid var(--border);
-}
-
-.featuresGrid {
+.heroEvidence {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-xl);
-  max-width: 1200px;
-  margin: 0 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  align-content: start;
 }
 
-/* === How It Works - Tactical Steps === */
-.howItWorks {
-  padding: var(--space-4xl) var(--space-2xl);
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
-}
-
-.stepsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-2xl);
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.step {
-  padding: var(--space-lg);
+.metricCard {
+  padding: 1rem;
   border: 1px solid var(--border);
-  background: var(--bg-primary);
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.stepNumber {
+.metricCard span {
   display: block;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  color: var(--accent);
-  margin-bottom: var(--space-sm);
-}
-
-.stepTitle {
-  display: block;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: var(--font-size-md);
-  color: var(--text-primary);
-  text-transform: uppercase;
-  margin-bottom: var(--space-xs);
-}
-
-.stepDesc {
-  font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  line-height: 1.6;
+  font-size: 0.82rem;
 }
 
-/* === Trust Strip - Tactical Stats === */
-.trust {
-  display: flex;
-  background: var(--bg-primary);
-  border-bottom: 1px solid var(--border);
-}
-
-.trustItem {
-  flex: 1;
-  padding: var(--space-xl);
-  border-right: 1px solid var(--border);
-  text-align: center;
-}
-
-.trustValue {
+.metricCard strong {
   display: block;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xl);
-  color: var(--accent);
+  margin-top: 0.35rem;
+  font-family: var(--editorial-serif);
+  font-size: 1.8rem;
 }
 
-.trustLabel {
+.section {
+  max-width: 1380px;
+  margin: 1.6rem auto 0;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 520ms ease,
+    transform 520ms ease;
+}
+
+.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.sectionHead h2 {
+  margin-top: 0.5rem;
+  font-family: var(--editorial-serif);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  line-height: 0.98;
+  max-width: 18ch;
+}
+
+.proofBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--color-success) 28%, var(--border));
+  background: color-mix(in oklab, var(--color-success) 10%, transparent);
   font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-/* === Sources - Data Registry === */
-.sources {
-  padding: var(--space-4xl) var(--space-2xl);
+.frontPageGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.95fr);
+  gap: 1rem;
+}
+
+.supportingStories {
+  display: grid;
+  gap: 1rem;
+}
+
+.investigationCard,
+.proofCard,
+.methodCard,
+.sourceCard {
+  padding: 1.1rem;
+}
+
+.investigationCardFeatured {
+  min-height: 100%;
+}
+
+.investigationCard h3,
+.proofCard h3,
+.methodCard h3 {
+  margin-top: 0.45rem;
+  font-family: var(--editorial-serif);
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  line-height: 1.02;
+}
+
+.cardMeta {
+  margin-top: 0.45rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.cardSummary,
+.sourceCard p,
+.methodCard p {
+  margin-top: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.7rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.proofGrid,
+.methodologyGrid,
+.sourcesGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.proofGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.methodologyGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.methodCard svg {
+  color: var(--accent);
 }
 
 .sourcesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1px;
-  background: var(--border);
-  max-width: 1200px;
-  margin: 0 auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.sourceCard {
-  background: var(--bg-primary);
-  padding: var(--space-md);
-  transition: background var(--transition-fast);
-}
-
-.sourceCard:hover {
-  background: var(--bg-tertiary);
-}
-
-.sourceName {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-primary);
-  margin-bottom: var(--space-xs);
-}
-
-.sourceCount {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--accent);
-}
-
-.sourceDesc {
-  display: block;
-  font-size: 10px;
-  color: var(--text-muted);
-  margin-top: var(--space-xs);
-}
-
-/* === Footer === */
-.footer {
-  padding: var(--space-3xl) var(--space-2xl);
-  background: var(--bg-primary);
-}
-
-.footerInner {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.footerTop {
+.sourceHead {
   display: flex;
-  gap: var(--space-xl);
-  margin-bottom: var(--space-xl);
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: baseline;
 }
 
-.footerLink {
+.sourceHead strong {
+  font-size: 0.96rem;
+}
+
+.sourceHead span {
+  color: var(--accent);
   font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
+  font-size: 0.84rem;
 }
 
-.footerBrand {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  color: var(--text-primary);
-  letter-spacing: 0.2em;
+@media (max-width: 1100px) {
+  .hero,
+  .frontPageGrid,
+  .methodologyGrid,
+  .sourcesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .proofGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.footerDisclaimer {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: var(--space-md);
-  max-width: 600px;
+@media (max-width: 760px) {
+  .page {
+    padding-inline: 0.8rem;
+  }
+
+  .heroEvidence,
+  .proofGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionHead {
+    flex-direction: column;
+    align-items: start;
+  }
 }

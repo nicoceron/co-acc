@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:259896",
+  "title": "GOBIERNO DEPARTAMENTAL",
+  "subtitle": "Empresa · 8001136727",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:259896",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:259896",
+        "label": "GOBIERNO DEPARTAMENTAL",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 158,
+          "contract_value": 987730871121.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8001136727"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:259896:official:1",
+        "label": "ELKIN ANSELMO OLIVEROS POLANIA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:259896:contracts",
+        "label": "Contratos detectados (158)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 158,
+          "total_value": 987730871121.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:259896:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:259896",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:259896:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:259896",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 158,
+          "total_value": 987730871121.0
+        }
+      }
+    ]
+  }
+}

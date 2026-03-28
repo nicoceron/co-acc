@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470714",
+  "title": "COOPERATIVA DE VIGILANTES STARCOOP C.T.A.",
+  "subtitle": "Empresa · 8301014767",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470714",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470714",
+        "label": "COOPERATIVA DE VIGILANTES STARCOOP C.T.A.",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 121,
+          "contract_value": 586275459528.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8301014767"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470714:official:1",
+        "label": "NIDIA VIZCAINO MORENO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470714:contracts",
+        "label": "Contratos detectados (121)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 121,
+          "total_value": 586275459528.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470714:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470714",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470714:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470714",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 121,
+          "total_value": 586275459528.0
+        }
+      }
+    ]
+  }
+}

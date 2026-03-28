@@ -14,14 +14,8 @@ import click
 import httpx
 from dotenv import load_dotenv
 
-# Search for .env starting from script parent up to project root
 env_path = Path(__file__).resolve().parents[2] / ".env"
-click.echo(f"Debug: Loading .env from {env_path}")
 load_dotenv(env_path, override=True)
-
-for k, v in os.environ.items():
-    if k.startswith("SOCRATA_"):
-        click.echo(f"Debug Env: {k}={v}")
 
 
 def _dataset_url(domain: str, dataset_id: str) -> str:
@@ -34,6 +28,43 @@ def _export_url(domain: str, dataset_id: str) -> str:
 
 def _tmp_output_path(output_path: Path) -> Path:
     return output_path.with_suffix(f"{output_path.suffix}.part")
+
+
+def _request_json_with_retry(
+    client: httpx.Client,
+    *,
+    dataset_id: str,
+    domain: str,
+    params: dict[str, Any],
+    description: str,
+) -> list[dict[str, Any]] | list[Any]:
+    last_error: Exception | None = None
+    for attempt in range(6):
+        try:
+            response = client.get(_dataset_url(domain, dataset_id), params=params)
+            response.raise_for_status()
+            payload = response.json()
+            if not isinstance(payload, list):
+                raise click.ClickException(
+                    f"Unexpected Socrata payload: {description} is not a list"
+                )
+            return payload
+        except httpx.HTTPStatusError as exc:
+            last_error = exc
+            status_code = exc.response.status_code
+            if status_code not in {408, 429, 500, 502, 503, 504}:
+                raise
+        except (httpx.HTTPError, click.ClickException) as exc:
+            last_error = exc
+        wait_seconds = min(2 ** attempt, 30)
+        click.echo(
+            f"Retrying {description} after {wait_seconds}s due to {last_error}",
+            err=True,
+        )
+        time.sleep(wait_seconds)
+
+    assert last_error is not None
+    raise click.ClickException(f"{description} failed: {last_error}")
 
 
 def _download_via_export(
@@ -74,55 +105,51 @@ def _download_via_paged_json(
     workers: int,
     limit: int | None = None,
     where: str | None = None,
+    order: str | None = None,
+    skip_count: bool = False,
 ) -> int:
     tmp_path = _tmp_output_path(output_path)
     fieldnames: list[str] = []
+    total_available: int | None = None
+    if not skip_count:
+        params = {"$select": "count(*)"}
+        if where:
+            params["$where"] = where
 
-    params = {"$select": "count(*)"}
-    if where:
-        params["$where"] = where
-
-    count_response = client.get(_dataset_url(domain, dataset_id), params=params)
-    count_response.raise_for_status()
-    count_payload = count_response.json()
-    if not isinstance(count_payload, list) or not count_payload:
-        raise click.ClickException("Unexpected Socrata payload: count query returned no rows")
-    total_available = int(count_payload[0]["count"])
-
-    if limit is not None:
-        total_available = min(total_available, limit)
-
-    def fetch_page(offset: int) -> list[dict[str, Any]]:
-        last_error: Exception | None = None
-        for attempt in range(6):
-            try:
-                page_params = {"$limit": batch_size, "$offset": offset}
-                if where:
-                    page_params["$where"] = where
-                response = client.get(
-                    _dataset_url(domain, dataset_id),
-                    params=page_params,
-                )
-                response.raise_for_status()
-                rows = response.json()
-                if not isinstance(rows, list):
-                    raise click.ClickException("Unexpected Socrata payload: page is not a list")
-                return [row for row in rows if isinstance(row, dict)]
-            except httpx.HTTPStatusError as exc:
-                last_error = exc
-                status_code = exc.response.status_code
-                if status_code not in {408, 429, 500, 502, 503, 504}:
-                    raise
-            except httpx.HTTPError as exc:
-                last_error = exc
-            wait_seconds = min(2 ** attempt, 30)
+        try:
+            count_payload = _request_json_with_retry(
+                client,
+                dataset_id=dataset_id,
+                domain=domain,
+                params=params,
+                description=f"count query for {dataset_id}",
+            )
+            if not count_payload:
+                raise click.ClickException("Count query returned no rows")
+            total_available = int(count_payload[0]["count"])
+            if limit is not None:
+                total_available = min(total_available, limit)
+        except click.ClickException as exc:
             click.echo(
-                f"Retrying offset {offset:,} after {wait_seconds}s due to {last_error}",
+                "Count query unavailable for "
+                f"{dataset_id}; falling back to sequential paging ({exc})",
                 err=True,
             )
-            time.sleep(wait_seconds)
-        assert last_error is not None
-        raise click.ClickException(f"Paged JSON download failed at offset {offset:,}: {last_error}")
+
+    def fetch_page(offset: int) -> list[dict[str, Any]]:
+        page_params = {"$limit": batch_size, "$offset": offset}
+        if where:
+            page_params["$where"] = where
+        if order:
+            page_params["$order"] = order
+        rows = _request_json_with_retry(
+            client,
+            dataset_id=dataset_id,
+            domain=domain,
+            params=page_params,
+            description=f"page fetch for {dataset_id} at offset {offset:,}",
+        )
+        return [row for row in rows if isinstance(row, dict)]
 
     first_page = fetch_page(0)
     if not first_page:
@@ -149,35 +176,52 @@ def _download_via_paged_json(
 
         write_rows(first_page)
 
-        offsets = list(range(len(first_page), total_available, batch_size))
-        if workers <= 1:
-            for offset in offsets:
-                rows = fetch_page(offset)
+        if total_available is None:
+            next_offset = len(first_page)
+            while True:
+                if limit is not None and total_rows >= limit:
+                    break
+                rows = fetch_page(next_offset)
+                if not rows:
+                    break
+                if limit is not None:
+                    rows = rows[: max(limit - total_rows, 0)]
                 if not rows:
                     break
                 write_rows(rows)
+                if len(rows) < batch_size:
+                    break
+                next_offset += batch_size
         else:
-            max_workers = max(1, workers)
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                active: dict[Future[list[dict[str, Any]]], int] = {}
-                next_index = 0
+            offsets = list(range(len(first_page), total_available, batch_size))
+            if workers <= 1:
+                for offset in offsets:
+                    rows = fetch_page(offset)
+                    if not rows:
+                        break
+                    write_rows(rows)
+            else:
+                max_workers = max(1, workers)
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    active: dict[Future[list[dict[str, Any]]], int] = {}
+                    next_index = 0
 
-                while next_index < len(offsets) and len(active) < max_workers:
-                    offset = offsets[next_index]
-                    active[executor.submit(fetch_page, offset)] = offset
-                    next_index += 1
+                    while next_index < len(offsets) and len(active) < max_workers:
+                        offset = offsets[next_index]
+                        active[executor.submit(fetch_page, offset)] = offset
+                        next_index += 1
 
-                while active:
-                    done, _ = wait(active.keys(), return_when=FIRST_COMPLETED)
-                    for future in done:
-                        active.pop(future)
-                        rows = future.result()
-                        if rows:
-                            write_rows(rows)
-                        while next_index < len(offsets) and len(active) < max_workers:
-                            offset = offsets[next_index]
-                            active[executor.submit(fetch_page, offset)] = offset
-                            next_index += 1
+                    while active:
+                        done, _ = wait(active.keys(), return_when=FIRST_COMPLETED)
+                        for future in done:
+                            active.pop(future)
+                            rows = future.result()
+                            if rows:
+                                write_rows(rows)
+                            while next_index < len(offsets) and len(active) < max_workers:
+                                offset = offsets[next_index]
+                                active[executor.submit(fetch_page, offset)] = offset
+                                next_index += 1
 
     tmp_path.replace(output_path)
     return total_rows
@@ -192,6 +236,8 @@ def _download_via_paged_json(
 @click.option("--timeout", default=60, show_default=True, type=int)
 @click.option("--limit", type=int, default=None, help="Limit rows processed")
 @click.option("--where", type=str, default=None, help="SoQL WHERE clause")
+@click.option("--order", type=str, default=None, help="SoQL ORDER BY clause")
+@click.option("--skip-count", is_flag=True, help="Skip initial count(*) and page sequentially")
 @click.option(
     "--mode",
     type=click.Choice(["auto", "export", "paged-json"]),
@@ -208,6 +254,8 @@ def main(
     timeout: int,
     limit: int | None,
     where: str | None,
+    order: str | None,
+    skip_count: bool,
     mode: str,
 ) -> None:
     """Download a Socrata dataset and write it to CSV."""
@@ -219,13 +267,10 @@ def main(
     key_id = os.getenv("SOCRATA_KEY_ID", "").strip()
     key_secret = os.getenv("SOCRATA_KEY_SECRET", "").strip()
 
-    # Socrata often rejects requests that send both Basic Auth and an App Token 
-    # if the App Token is the same as the Key ID. 
+    # Socrata often rejects requests that send both Basic Auth and an App Token
+    # if the App Token is the same as the Key ID.
     if app_token and app_token != key_id:
         headers["X-App-Token"] = app_token
-
-    click.echo(f"Debug: Using Key ID: {key_id}")
-    click.echo(f"Debug: Using App Token header: {headers.get('X-App-Token')}")
 
     auth = None
     if key_id and key_secret:
@@ -272,6 +317,8 @@ def main(
             workers=paged_json_workers,
             limit=limit,
             where=where,
+            order=order,
+            skip_count=skip_count,
         )
         click.echo(f"Wrote {total_rows:,} rows to {output_path} via paged JSON")
 

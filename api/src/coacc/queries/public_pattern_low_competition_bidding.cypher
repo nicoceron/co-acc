@@ -4,8 +4,6 @@ WHERE elementId(c) = $company_id
    OR c.document_id = $company_identifier_formatted
    OR c.nit = $company_identifier
    OR c.nit = $company_identifier_formatted
-   OR c.cnpj = $company_identifier
-   OR c.cnpj = $company_identifier_formatted
 MATCH (c)-[offer:SUMINISTRO_LICITACAO]->(b:Bid)
 WHERE coalesce(b.offer_count, 0) <= 2
    OR coalesce(b.direct_invitation, false) = true
@@ -26,7 +24,7 @@ WITH c,
 WHERE bid_count >= toInteger($pattern_min_contract_count)
    OR amount_total >= toFloat($pattern_min_contract_value)
 RETURN 'low_competition_bidding' AS pattern_id,
-       coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
+       coalesce(c.document_id, c.nit) AS company_identifier,
        coalesce(c.razon_social, c.name) AS company_name,
        toFloat(bid_count + direct_invitation_count + size(evidence_refs)) AS risk_signal,
        amount_total AS amount_total,

@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472224",
+  "title": "JUAN DE JESUS APONTE BUITRAGO",
+  "subtitle": "Empresa · 79974196",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472224",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472224",
+        "label": "JUAN DE JESUS APONTE BUITRAGO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 21,
+          "contract_value": 1665008274.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "79974196"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472224:official:1",
+        "label": "JUAN DE JESUS APONTE BUITRAGO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472224:contracts",
+        "label": "Contratos detectados (21)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 21,
+          "total_value": 1665008274.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472224:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472224",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472224:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472224",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 21,
+          "total_value": 1665008274.0
+        }
+      }
+    ]
+  }
+}

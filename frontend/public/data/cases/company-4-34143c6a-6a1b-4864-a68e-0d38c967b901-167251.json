@@ -1,0 +1,97 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251",
+  "title": "SYSMAN S.A.S",
+  "subtitle": "Empresa · 800021261",
+  "summary": "La empresa registra al menos un contrato con fecha dentro de una ventana pública de sanción vigente o no cerrada.",
+  "tags": [
+    "Proveedor sancionado que siguió recibiendo contratos",
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251",
+        "label": "SYSMAN S.A.S",
+        "type": "company",
+        "properties": {
+          "risk_score": 13,
+          "signal_types": 3,
+          "contract_count": 1689,
+          "contract_value": 77817051723.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "800021261"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251:sanctions",
+        "label": "Sanciones oficiales (2)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251:contracts",
+        "label": "Contratos detectados (1689)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1689,
+          "total_value": 77817051723.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251:sanction-window",
+        "label": "Contratos en ventana sancionatoria (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "total_value": 16590000.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 2
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1689,
+          "total_value": 77817051723.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251:sanction-window",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167251",
+        "type": "CONTRATOU",
+        "confidence": 0.95,
+        "properties": {
+          "contract_count": 1,
+          "total_value": 16590000.0
+        }
+      }
+    ]
+  }
+}

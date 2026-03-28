@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472449",
+  "title": "FUNDACION DEPORTIVA ARNOLDO IGUARAN ¿FUNDAI¿",
+  "subtitle": "Empresa · 9001099481",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472449",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472449",
+        "label": "FUNDACION DEPORTIVA ARNOLDO IGUARAN ¿FUNDAI¿",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 24,
+          "contract_value": 1464806590.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "9001099481"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472449:official:1",
+        "label": "CAMILO IGUARAN CAMPO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472449:contracts",
+        "label": "Contratos detectados (24)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 24,
+          "total_value": 1464806590.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472449:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472449",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472449:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472449",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 24,
+          "total_value": 1464806590.0
+        }
+      }
+    ]
+  }
+}

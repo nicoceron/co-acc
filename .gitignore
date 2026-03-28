@@ -79,6 +79,8 @@ scripts/audit-prompts/
 
 # Playwright MCP cache
 .playwright-mcp/
+.playwright-cli/
+.gemini/
 
 # Claude plans
 .claude/plans/

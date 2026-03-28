@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273577",
+  "title": "NARIÑO - ALCALDÍA MUNICIPIO DE ARBOLEDA (BERRUECOS)",
+  "subtitle": "Empresa · 8000933868",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273577",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273577",
+        "label": "NARIÑO - ALCALDÍA MUNICIPIO DE ARBOLEDA (BERRUECOS)",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 237,
+          "contract_value": 110569106535.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8000933868"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273577:official:1",
+        "label": "JORGE ALBERTO GODOY LOZANO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273577:contracts",
+        "label": "Contratos detectados (237)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 237,
+          "total_value": 110569106535.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273577:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273577",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273577:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273577",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 237,
+          "total_value": 110569106535.0
+        }
+      }
+    ]
+  }
+}

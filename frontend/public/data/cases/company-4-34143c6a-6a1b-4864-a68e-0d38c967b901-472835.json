@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472835",
+  "title": "COMPANIA COMERCIAL CURACAO DE COLOMBIA S.A.",
+  "subtitle": "Empresa · 8600048717",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472835",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472835",
+        "label": "COMPANIA COMERCIAL CURACAO DE COLOMBIA S.A.",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 138,
+          "contract_value": 524276100289.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8600048717"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472835:official:1",
+        "label": "ANDRES MAURICIO PRIETO CALAMBAS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472835:contracts",
+        "label": "Contratos detectados (138)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 138,
+          "total_value": 524276100289.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472835:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472835",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472835:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472835",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 138,
+          "total_value": 524276100289.0
+        }
+      }
+    ]
+  }
+}

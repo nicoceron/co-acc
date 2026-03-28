@@ -1,122 +1,567 @@
 // CO-ACC Colombia demo seed
-// Small synthetic fixture for local exploration
+// Synthetic Bogota-focused graph aligned to the live community pattern engine.
 
 MATCH (n) DETACH DELETE n;
 
-CREATE (p1:Person {
-  document_id: '1032456789',
-  cedula: '1032456789',
-  name: 'ANA MARIA TORRES',
-  is_pep: true,
-  role: 'ALCALDESA'
-});
+CREATE
+  (buyer1:Company {
+    document_id: '899999061',
+    nit: '899999061',
+    name: 'SECRETARIA DISTRITAL DE MOVILIDAD',
+    razon_social: 'SECRETARIA DISTRITAL DE MOVILIDAD',
+    department: 'BOGOTA D.C.',
+    municipality: 'BOGOTA D.C.',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (buyer2:Company {
+    document_id: '860516998',
+    nit: '860516998',
+    name: 'INSTITUTO DE DESARROLLO URBANO IDU',
+    razon_social: 'INSTITUTO DE DESARROLLO URBANO IDU',
+    department: 'BOGOTA D.C.',
+    municipality: 'BOGOTA D.C.',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (buyer3:Company {
+    document_id: '900100981',
+    nit: '900100981',
+    name: 'SUBRED INTEGRADA DE SALUD CENTRO ORIENTE',
+    razon_social: 'SUBRED INTEGRADA DE SALUD CENTRO ORIENTE',
+    department: 'BOGOTA D.C.',
+    municipality: 'BOGOTA D.C.',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (c1:Company {
+    document_id: '901234567',
+    nit: '901234567',
+    name: 'CONSORCIO CAPITAL URBANO SAS',
+    razon_social: 'CONSORCIO CAPITAL URBANO SAS',
+    sector: 'infrastructure',
+    department: 'BOGOTA D.C.',
+    municipality: 'BOGOTA D.C.',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (c2:Company {
+    document_id: '901234568',
+    nit: '901234568',
+    name: 'URBAN LOGISTICA INTEGRADA SAS',
+    razon_social: 'URBAN LOGISTICA INTEGRADA SAS',
+    sector: 'logistics',
+    department: 'BOGOTA D.C.',
+    municipality: 'BOGOTA D.C.',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (c3:Company {
+    document_id: '901234569',
+    nit: '901234569',
+    name: 'RED SALUD CAPITAL SAS',
+    razon_social: 'RED SALUD CAPITAL SAS',
+    sector: 'health',
+    department: 'BOGOTA D.C.',
+    municipality: 'BOGOTA D.C.',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (c4:Company {
+    document_id: '901234570',
+    nit: '901234570',
+    name: 'GRUPO INMOBILIARIO SABANA SAS',
+    razon_social: 'GRUPO INMOBILIARIO SABANA SAS',
+    sector: 'real_estate',
+    department: 'BOGOTA D.C.',
+    municipality: 'BOGOTA D.C.',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (c5:Company {
+    document_id: '901234571',
+    nit: '901234571',
+    name: 'INGENIERIA CUNDI SAS',
+    razon_social: 'INGENIERIA CUNDI SAS',
+    sector: 'engineering',
+    department: 'CUNDINAMARCA',
+    municipality: 'SOACHA',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (p1:Person {
+    document_id: '52100123',
+    cedula: '52100123',
+    name: 'LAURA CATALINA MORENO',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (p2:Person {
+    document_id: '80331122',
+    cedula: '80331122',
+    name: 'CARLOS EDUARDO PINZON',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (office1:PublicOffice {
+    office_id: 'office-laura-contract',
+    name: 'DIRECTORA DE CONTRATACION',
+    role: 'DIRECTORA DE CONTRATACION',
+    org: 'SECRETARIA DISTRITAL DE MOVILIDAD',
+    sensitive_position: true,
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (election1:Election {
+    election_id: 'cc2019-bogota-001',
+    name: 'CAMPANA DISTRITAL BOGOTA 2019',
+    candidate_name: 'CANDIDATO BOGOTA',
+    candidate_document_id: '900000001',
+    year: 2019,
+    cargo: 'ALCALDIA MAYOR',
+    municipio: 'BOGOTA D.C.',
+    uf: 'BOGOTA D.C.',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (asset1:DeclaredAsset {
+    asset_id: 'asset-laura-001',
+    name: 'ASSET DISCLOSURE LAURA',
+    has_board_roles: true,
+    has_corporate_interests: true,
+    has_private_activities: true,
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (conflict1:Finance {
+    finance_id: 'conflict-laura-001',
+    name: 'CONFLICT DISCLOSURE LAURA',
+    type: 'CONFLICT_DISCLOSURE',
+    family_conflicts: true,
+    partner_involved: false,
+    direct_interests: true,
+    other_possible_conflicts: true,
+    company_document_mention_count: 2,
+    company_name_mention_count: 2,
+    process_reference_count: 1,
+    family_term_count: 2,
+    legal_role_term_count: 1,
+    litigation_term_count: 0,
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (supersoc1:Finance {
+    finance_id: 'supersoc-c1-001',
+    name: 'SUPERSOC C1',
+    type: 'SUPERSOC_TOP_COMPANY',
+    operating_revenue_current: 400000000.0,
+    total_assets_current: 600000000.0,
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (supersoc2:Finance {
+    finance_id: 'supersoc-c2-001',
+    name: 'SUPERSOC C2',
+    type: 'SUPERSOC_TOP_COMPANY',
+    operating_revenue_current: 180000000.0,
+    total_assets_current: 220000000.0,
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (supersoc4:Finance {
+    finance_id: 'supersoc-c4-001',
+    name: 'SUPERSOC C4',
+    type: 'SUPERSOC_TOP_COMPANY',
+    operating_revenue_current: 250000000.0,
+    total_assets_current: 320000000.0,
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (sgr1:Finance {
+    finance_id: 'sgr-c1-001',
+    name: 'SGR C1 001',
+    type: 'SGR_EXPENSE_EXECUTION',
+    value: 800000000.0,
+    date: '2024-06-15',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (sgr2:Finance {
+    finance_id: 'sgr-c1-002',
+    name: 'SGR C1 002',
+    type: 'SGR_EXPENSE_EXECUTION',
+    value: 500000000.0,
+    date: '2024-10-01',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (sgr3:Finance {
+    finance_id: 'sgr-c4-001',
+    name: 'SGR C4 001',
+    type: 'SGR_EXPENSE_EXECUTION',
+    value: 320000000.0,
+    date: '2024-07-20',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (admin1:Finance {
+    finance_id: 'pte-admin-001',
+    name: 'PTE ADMIN FLOW 001',
+    type: 'PTE_TOP_CONTRACT',
+    value: 420000000.0,
+    value_paid: 200000000.0,
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (benef1:Finance {
+    finance_id: 'pte-benef-001',
+    name: 'PTE BENEF FLOW 001',
+    type: 'PTE_TOP_CONTRACT',
+    value: 510000000.0,
+    value_paid: 230000000.0,
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (debt1:Finance {
+    finance_id: 'debt-c4-001',
+    name: 'DEUDA ACTIVA C4',
+    type: 'divida_ativa',
+    value: 180000000.0,
+    date: '2024-03-10',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (amend1:Amendment {
+    amendment_id: 'ADD-BOG-001',
+    name: 'ADICION BOGOTA 001',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (convenio1:Convenio {
+    convenio_id: 'CONV-BOG-001',
+    name: 'CONVENIO BOGOTA 001',
+    value: 250000000.0,
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (health1:Health {
+    reps_code: 'H001',
+    name: 'HOSPITAL KENNEDY',
+    municipio: 'BOGOTA D.C.',
+    uf: 'BOGOTA D.C.',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (sanction1:Sanction {
+    sanction_id: 'SIRI-001',
+    name: 'INHABILIDAD TEMPORAL',
+    type: 'SIRI',
+    date_start: '2025-01-01',
+    date_end: '2025-12-31',
+    issuing_entity: 'PACO',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (bid1:Bid {
+    bid_id: 'BID-MOV-001',
+    name: 'MANTENIMIENTO SEMAFORICO',
+    direct_invitation: true,
+    offer_count: 1,
+    first_offer_date: '2024-01-10',
+    last_offer_date: '2024-01-10',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (bid2:Bid {
+    bid_id: 'BID-IDU-001',
+    name: 'MALLA VIAL LOCAL',
+    direct_invitation: false,
+    offer_count: 2,
+    first_offer_date: '2024-04-02',
+    last_offer_date: '2024-04-08',
+    source: 'synthetic',
+    country: 'CO'
+  }),
+  (bid3:Bid {
+    bid_id: 'BID-MOV-002',
+    name: 'LOGISTICA URBANA',
+    direct_invitation: false,
+    offer_count: 2,
+    first_offer_date: '2024-03-03',
+    last_offer_date: '2024-03-06',
+    source: 'synthetic',
+    country: 'CO'
+  });
 
-CREATE (p2:Person {
-  document_id: '79865412',
-  cedula: '79865412',
-  name: 'JUAN CAMILO RESTREPO',
-  is_pep: false
-});
-
-CREATE (c1:Company {
-  document_id: '901234567',
-  nit: '901234567',
-  name: 'CONSORCIO ANDINO SAS',
-  razon_social: 'CONSORCIO ANDINO SAS',
-  sector: 'infrastructure',
-  city: 'Bogota D.C.',
-  country: 'CO',
-  source: 'secop_integrado'
-});
-
-CREATE (c2:Company {
-  document_id: '800765432',
-  nit: '800765432',
-  name: 'SALUD ABIERTA SAS',
-  razon_social: 'SALUD ABIERTA SAS',
-  sector: 'health',
-  city: 'Medellin',
-  country: 'CO',
-  source: 'secop_integrado'
-});
-
-CREATE (c3:Company {
-  document_id: '900123456',
-  nit: '900123456',
-  name: 'CONSORCIO VIAL DEL NORTE',
-  razon_social: 'CONSORCIO VIAL DEL NORTE',
-  sector: 'transport',
-  city: 'Bogota D.C.',
-  country: 'CO',
-  source: 'secop_sanctions'
-});
-
-CREATE (k1:Contract {
-  contract_id: 'CO1.PCCNTR.1001',
-  name: 'Interventoria de obra publica',
-  object: 'Interventoria de obra publica',
-  value: 1500000000.0,
-  contracting_org: 'ALCALDIA DE MEDELLIN',
-  city: 'Medellin',
-  department: 'Antioquia',
-  process_id: 'CO1.PCCNTR.5001',
-  source: 'secop_integrado'
-});
-
-CREATE (k2:Contract {
-  contract_id: 'CO1.PCCNTR.1002',
-  name: 'Suministro de equipos medicos',
-  object: 'Suministro de equipos medicos',
-  value: 450000000.0,
-  contracting_org: 'GOBERNACION DE CUNDINAMARCA',
-  city: 'Bogota D.C.',
-  department: 'Cundinamarca',
-  process_id: 'CO1.PCCNTR.5002',
-  source: 'secop_integrado'
-});
-
-CREATE (k3:Contract {
-  contract_id: 'ANI-001-2024',
-  name: 'Intervencion vial regional',
-  object: 'Intervencion vial regional',
-  value: 2100000000.0,
-  contracting_org: 'AGENCIA NACIONAL DE INFRAESTRUCTURA',
-  city: 'Bogota D.C.',
-  department: 'Bogota D.C.',
-  process_id: 'ANI-PROC-2024-01',
-  source: 'secop_integrado'
-});
-
-CREATE (s1:Sanction {
-  sanction_id: 'secop_ii_CO1.BDOS.5786919_RES-SECOPII-99',
-  name: 'Clausula Penal',
-  type: 'SECOP_II_SANCTION',
-  value: 1080000.0,
-  issuing_entity: 'FONDO DE PRESTACIONES ECONOMICAS CESANTIAS Y PENSIONES',
-  source: 'secop_sanctions'
-});
-
-CREATE (s2:Sanction {
-  sanction_id: 'secop_i_ANI-001-2024_RES-2024-001',
-  name: 'RES-2024-001',
-  type: 'SECOP_I_SANCTION',
-  value: 250000000.0,
-  issuing_entity: 'AGENCIA NACIONAL DE INFRAESTRUCTURA',
-  source: 'secop_sanctions'
-});
-
-CREATE (f1:Finance {
-  finance_id: 'SGR-001',
-  name: 'Proyecto SGR 001',
-  value: 980000000.0,
-  source: 'sgr_projects'
-});
-
-CREATE (p1)-[:SOCIO_DE]->(c1);
-CREATE (p2)-[:SOCIO_DE]->(c2);
-CREATE (c1)-[:GANO {source: 'secop_integrado'}]->(k1);
-CREATE (c2)-[:GANO {source: 'secop_integrado'}]->(k2);
-CREATE (c3)-[:GANO {source: 'secop_integrado'}]->(k3);
-CREATE (c1)-[:SANCIONADA {source: 'secop_sanctions'}]->(s1);
-CREATE (c3)-[:SANCIONADA {source: 'secop_sanctions'}]->(s2);
-CREATE (c1)-[:DEVE {source: 'synthetic'}]->(f1);
+MATCH
+  (buyer1:Company {document_id: '899999061'}),
+  (buyer2:Company {document_id: '860516998'}),
+  (buyer3:Company {document_id: '900100981'}),
+  (c1:Company {document_id: '901234567'}),
+  (c2:Company {document_id: '901234568'}),
+  (c3:Company {document_id: '901234569'}),
+  (c4:Company {document_id: '901234570'}),
+  (c5:Company {document_id: '901234571'}),
+  (p1:Person {document_id: '52100123'}),
+  (p2:Person {document_id: '80331122'}),
+  (office1:PublicOffice {office_id: 'office-laura-contract'}),
+  (election1:Election {election_id: 'cc2019-bogota-001'}),
+  (asset1:DeclaredAsset {asset_id: 'asset-laura-001'}),
+  (conflict1:Finance {finance_id: 'conflict-laura-001'}),
+  (supersoc1:Finance {finance_id: 'supersoc-c1-001'}),
+  (supersoc2:Finance {finance_id: 'supersoc-c2-001'}),
+  (supersoc4:Finance {finance_id: 'supersoc-c4-001'}),
+  (sgr1:Finance {finance_id: 'sgr-c1-001'}),
+  (sgr2:Finance {finance_id: 'sgr-c1-002'}),
+  (sgr3:Finance {finance_id: 'sgr-c4-001'}),
+  (admin1:Finance {finance_id: 'pte-admin-001'}),
+  (benef1:Finance {finance_id: 'pte-benef-001'}),
+  (debt1:Finance {finance_id: 'debt-c4-001'}),
+  (amend1:Amendment {amendment_id: 'ADD-BOG-001'}),
+  (convenio1:Convenio {convenio_id: 'CONV-BOG-001'}),
+  (health1:Health {reps_code: 'H001'}),
+  (sanction1:Sanction {sanction_id: 'SIRI-001'}),
+  (bid1:Bid {bid_id: 'BID-MOV-001'}),
+  (bid2:Bid {bid_id: 'BID-IDU-001'}),
+  (bid3:Bid {bid_id: 'BID-MOV-002'})
+CREATE
+  (p1)-[:RECIBIO_SALARIO {
+    source: 'synthetic',
+    salary: 18000000.0,
+    start_date: '2023-01-15',
+    sensitive_position: true
+  }]->(office1),
+  (p1)-[:OFFICER_OF {source: 'synthetic', role: 'LEGAL_REPRESENTATIVE'}]->(c1),
+  (p1)-[:OFFICER_OF {source: 'synthetic', role: 'SHAREHOLDER'}]->(c4),
+  (p2)-[:OFFICER_OF {source: 'synthetic', role: 'LEGAL_REPRESENTATIVE'}]->(c1),
+  (p2)-[:OFFICER_OF {source: 'synthetic', role: 'LEGAL_REPRESENTATIVE'}]->(c2),
+  (p1)-[:DONO_A {
+    source: 'synthetic',
+    receipt: 'DON-001',
+    value: 120000000.0,
+    date: '2019-08-02',
+    concept: 'APORTE EN EFECTIVO'
+  }]->(election1),
+  (p1)-[:DONO_A {
+    source: 'synthetic',
+    receipt: 'DON-002',
+    value: 85000000.0,
+    date: '2019-09-11',
+    concept: 'APORTE EN ESPECIE'
+  }]->(election1),
+  (p1)-[:CANDIDATO_EM {source: 'synthetic'}]->(election1),
+  (c4)-[:DONO_A {
+    source: 'synthetic',
+    receipt: 'CDON-001',
+    value: 80000000.0,
+    date: '2019-07-15',
+    concept: 'APORTE EMPRESARIAL'
+  }]->(election1),
+  (p1)-[:DECLARO_BIEN {source: 'synthetic'}]->(asset1),
+  (p1)-[:DECLARO_FINANZAS {source: 'synthetic'}]->(conflict1),
+  (c1)-[:DECLARO_FINANZAS {source: 'synthetic'}]->(supersoc1),
+  (c2)-[:DECLARO_FINANZAS {source: 'synthetic'}]->(supersoc2),
+  (c4)-[:DECLARO_FINANZAS {source: 'synthetic'}]->(supersoc4),
+  (c1)-[:SUMINISTRO {source: 'synthetic'}]->(sgr1),
+  (c1)-[:SUMINISTRO {source: 'synthetic'}]->(sgr2),
+  (c4)-[:SUMINISTRO {source: 'synthetic'}]->(sgr3),
+  (c4)-[:ADMINISTRA {source: 'synthetic'}]->(admin1),
+  (c4)-[:BENEFICIO {source: 'synthetic'}]->(benef1),
+  (c4)-[:DEVE {source: 'synthetic'}]->(debt1),
+  (amend1)-[:BENEFICIO {source: 'synthetic'}]->(c4),
+  (amend1)-[:GENERO_CONVENIO {source: 'synthetic'}]->(convenio1),
+  (c3)-[:OPERA_UNIDAD {source: 'synthetic'}]->(health1),
+  (c3)-[:SANCIONADA {source: 'synthetic'}]->(sanction1),
+  (c1)-[:SUMINISTRO_LICITACAO {
+    source: 'synthetic',
+    offer_count: 1,
+    offer_value_total: 280000000.0,
+    average_offer_value: 280000000.0,
+    first_offer_date: '2024-01-10',
+    last_offer_date: '2024-01-10',
+    latest_offer_id: 'OFFER-001',
+    evidence_refs: ['BID-MOV-001', 'OFFER-001']
+  }]->(bid1),
+  (c1)-[:SUMINISTRO_LICITACAO {
+    source: 'synthetic',
+    offer_count: 1,
+    offer_value_total: 2100000000.0,
+    average_offer_value: 2100000000.0,
+    first_offer_date: '2024-04-02',
+    last_offer_date: '2024-04-08',
+    latest_offer_id: 'OFFER-002',
+    evidence_refs: ['BID-IDU-001', 'OFFER-002']
+  }]->(bid2),
+  (c2)-[:SUMINISTRO_LICITACAO {
+    source: 'synthetic',
+    offer_count: 1,
+    offer_value_total: 50000000.0,
+    average_offer_value: 50000000.0,
+    first_offer_date: '2024-03-03',
+    last_offer_date: '2024-03-06',
+    latest_offer_id: 'OFFER-003',
+    evidence_refs: ['BID-MOV-002', 'OFFER-003']
+  }]->(bid3),
+  (buyer1)-[:CONTRATOU {
+    source: 'synthetic',
+    summary_id: 'SECOP-BOG-001',
+    buyer_document_id: '899999061',
+    buyer_name: 'SECRETARIA DISTRITAL DE MOVILIDAD',
+    supplier_document_id: '901234567',
+    supplier_name: 'CONSORCIO CAPITAL URBANO SAS',
+    department: 'BOGOTA D.C.',
+    city: 'BOGOTA D.C.',
+    contract_count: 4,
+    total_value: 280000000.0,
+    average_value: 70000000.0,
+    first_date: '2024-02-01',
+    last_date: '2024-11-20',
+    modality: 'CONTRATACION DIRECTA',
+    status: 'ACTIVO',
+    invoice_total_value: 480000000.0,
+    commitment_total_value: 300000000.0,
+    execution_actual_progress_max: 15.0,
+    evidence_refs: ['CONT-MOV-001', 'CONT-MOV-002', 'CONT-MOV-003', 'CONT-MOV-004']
+  }]->(c1),
+  (buyer2)-[:CONTRATOU {
+    source: 'synthetic',
+    summary_id: 'SECOP-BOG-002',
+    buyer_document_id: '860516998',
+    buyer_name: 'INSTITUTO DE DESARROLLO URBANO IDU',
+    supplier_document_id: '901234567',
+    supplier_name: 'CONSORCIO CAPITAL URBANO SAS',
+    department: 'BOGOTA D.C.',
+    city: 'BOGOTA D.C.',
+    contract_count: 2,
+    total_value: 2200000000.0,
+    average_value: 1100000000.0,
+    first_date: '2024-04-15',
+    last_date: '2024-12-02',
+    modality: 'LICITACION PUBLICA',
+    status: 'ACTIVO',
+    invoice_total_value: 150000000.0,
+    commitment_total_value: 100000000.0,
+    execution_actual_progress_max: 18.0,
+    evidence_refs: ['CONT-IDU-001', 'CONT-IDU-002']
+  }]->(c1),
+  (buyer1)-[:CONTRATOU {
+    source: 'synthetic',
+    summary_id: 'SECOP-BOG-003',
+    buyer_document_id: '899999061',
+    buyer_name: 'SECRETARIA DISTRITAL DE MOVILIDAD',
+    supplier_document_id: '901234568',
+    supplier_name: 'URBAN LOGISTICA INTEGRADA SAS',
+    department: 'BOGOTA D.C.',
+    city: 'BOGOTA D.C.',
+    contract_count: 1,
+    total_value: 50000000.0,
+    average_value: 50000000.0,
+    first_date: '2024-03-20',
+    last_date: '2024-03-20',
+    modality: 'MINIMA CUANTIA',
+    status: 'ACTIVO',
+    evidence_refs: ['CONT-MOV-005']
+  }]->(c2),
+  (buyer1)-[:CONTRATOU {
+    source: 'synthetic',
+    summary_id: 'SECOP-BOG-004',
+    buyer_document_id: '899999061',
+    buyer_name: 'SECRETARIA DISTRITAL DE MOVILIDAD',
+    supplier_document_id: '901234571',
+    supplier_name: 'INGENIERIA CUNDI SAS',
+    department: 'BOGOTA D.C.',
+    city: 'BOGOTA D.C.',
+    contract_count: 1,
+    total_value: 20000000.0,
+    average_value: 20000000.0,
+    first_date: '2024-06-01',
+    last_date: '2024-06-01',
+    modality: 'MINIMA CUANTIA',
+    status: 'ACTIVO',
+    evidence_refs: ['CONT-MOV-006']
+  }]->(c5),
+  (buyer3)-[:CONTRATOU {
+    source: 'synthetic',
+    summary_id: 'SECOP-BOG-005',
+    buyer_document_id: '900100981',
+    buyer_name: 'SUBRED INTEGRADA DE SALUD CENTRO ORIENTE',
+    supplier_document_id: '901234569',
+    supplier_name: 'RED SALUD CAPITAL SAS',
+    department: 'BOGOTA D.C.',
+    city: 'BOGOTA D.C.',
+    contract_count: 3,
+    total_value: 950000000.0,
+    average_value: 316666666.67,
+    first_date: '2025-03-01',
+    last_date: '2025-09-15',
+    modality: 'SELECCION ABREVIADA',
+    status: 'ACTIVO',
+    invoice_total_value: 180000000.0,
+    commitment_total_value: 120000000.0,
+    execution_actual_progress_max: 22.0,
+    evidence_refs: ['CONT-SALUD-001', 'CONT-SALUD-002', 'CONT-SALUD-003']
+  }]->(c3),
+  (buyer2)-[:CONTRATOU {
+    source: 'synthetic',
+    summary_id: 'SECOP-BOG-006',
+    buyer_document_id: '860516998',
+    buyer_name: 'INSTITUTO DE DESARROLLO URBANO IDU',
+    supplier_document_id: '901234570',
+    supplier_name: 'GRUPO INMOBILIARIO SABANA SAS',
+    department: 'BOGOTA D.C.',
+    city: 'BOGOTA D.C.',
+    contract_count: 1,
+    total_value: 600000000.0,
+    average_value: 600000000.0,
+    first_date: '2024-05-01',
+    last_date: '2024-09-10',
+    modality: 'INEXIGIBILIDAD',
+    status: 'ACTIVO',
+    evidence_refs: ['CONT-IDU-003']
+  }]->(c4),
+  (buyer1)-[:CONTRATOU {
+    source: 'synthetic',
+    summary_id: 'SECOP-BOG-007',
+    buyer_document_id: '899999061',
+    buyer_name: 'SECRETARIA DISTRITAL DE MOVILIDAD',
+    supplier_document_id: '901234570',
+    supplier_name: 'GRUPO INMOBILIARIO SABANA SAS',
+    department: 'BOGOTA D.C.',
+    city: 'BOGOTA D.C.',
+    contract_count: 1,
+    total_value: 350000000.0,
+    average_value: 350000000.0,
+    first_date: '2024-08-12',
+    last_date: '2024-11-18',
+    modality: 'CONTRATACION DIRECTA',
+    status: 'ACTIVO',
+    evidence_refs: ['CONT-MOV-007']
+  }]->(c4),
+  (buyer2)-[:ADJUDICOU_A {
+    source: 'synthetic',
+    summary_id: 'PROC-BOG-INEX-001',
+    buyer_document_id: '860516998',
+    buyer_name: 'INSTITUTO DE DESARROLLO URBANO IDU',
+    supplier_document_id: '901234570',
+    supplier_name: 'GRUPO INMOBILIARIO SABANA SAS',
+    process_count: 3,
+    total_value: 600000000.0,
+    first_date: '2024-05-01',
+    last_date: '2024-09-10',
+    modality: 'INEXIGIBILIDAD',
+    evidence_refs: ['PROC-BOG-INEX-001']
+  }]->(c4),
+  (buyer1)-[:ADJUDICOU_A {
+    source: 'synthetic',
+    summary_id: 'PROC-BOG-LOW-001',
+    buyer_document_id: '899999061',
+    buyer_name: 'SECRETARIA DISTRITAL DE MOVILIDAD',
+    supplier_document_id: '901234567',
+    supplier_name: 'CONSORCIO CAPITAL URBANO SAS',
+    process_count: 2,
+    total_value: 280000000.0,
+    first_date: '2024-01-10',
+    last_date: '2024-02-01',
+    modality: 'CONTRATACION DIRECTA',
+    evidence_refs: ['PROC-BOG-LOW-001']
+  }]->(c1);

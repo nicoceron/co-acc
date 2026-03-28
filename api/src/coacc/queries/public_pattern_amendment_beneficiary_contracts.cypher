@@ -4,8 +4,6 @@ WHERE elementId(c) = $company_id
    OR c.document_id = $company_identifier_formatted
    OR c.nit = $company_identifier
    OR c.nit = $company_identifier_formatted
-   OR c.cnpj = $company_identifier
-   OR c.cnpj = $company_identifier_formatted
 CALL {
   WITH c
   MATCH (a:Amendment)-[:BENEFICIO]->(c)
@@ -50,7 +48,7 @@ WHERE size(amendment_ids) > 0
   AND size(contract_ids) > 0
   AND size(evidence_refs) > 0
 RETURN 'amendment_beneficiary_contracts' AS pattern_id,
-       coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
+       coalesce(c.document_id, c.nit) AS company_identifier,
        c.razon_social AS company_name,
        toFloat(size(amendment_ids) + size(convenio_ids) + size(contract_ids)) AS risk_signal,
        amount_total AS amount_total,

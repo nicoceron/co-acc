@@ -4,8 +4,6 @@ WHERE elementId(c) = $company_id
    OR c.document_id = $company_identifier_formatted
    OR c.nit = $company_identifier
    OR c.nit = $company_identifier_formatted
-   OR c.cnpj = $company_identifier
-   OR c.cnpj = $company_identifier_formatted
 MATCH (p)-[:OFFICER_OF]->(c)
 WHERE EXISTS { (p)-[:RECIBIO_SALARIO]->(:PublicOffice) }
 OPTIONAL MATCH (p)-[:RECIBIO_SALARIO]->(o:PublicOffice)
@@ -30,7 +28,7 @@ WITH c,
      [x IN summary_ids WHERE x IS NOT NULL AND x <> ''] AS evidence_refs
 WHERE contract_count >= 1
 RETURN 'public_official_supplier_overlap' AS pattern_id,
-       coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
+       coalesce(c.document_id, c.nit) AS company_identifier,
        coalesce(c.razon_social, c.name) AS company_name,
        toFloat(official_officer_count + official_role_count + contract_count) AS risk_signal,
        amount_total AS amount_total,

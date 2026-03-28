@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471047",
+  "title": "CANAL REGIONAL DE TELEVISION TEVEANDINA LTDA - TEVEANDINA LTDA",
+  "subtitle": "Empresa · 8300053704",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471047",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471047",
+        "label": "CANAL REGIONAL DE TELEVISION TEVEANDINA LTDA - TEVEANDINA LTDA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 130,
+          "contract_value": 151405884932.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8300053704"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471047:official:1",
+        "label": "ANA CATALINA CEBALLOS CARRIAZO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471047:contracts",
+        "label": "Contratos detectados (130)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 130,
+          "total_value": 151405884932.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471047:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471047",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471047:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:471047",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 130,
+          "total_value": 151405884932.0
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883",
+  "title": "POSITIVA COMPANIA DE SEGUROS S.A",
+  "subtitle": "Empresa · 8600111536",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883",
+        "label": "POSITIVA COMPANIA DE SEGUROS S.A",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 713,
+          "contract_value": 114156542394.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8600111536"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883:official:1",
+        "label": "MARINA GUTIERREZ GOMEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883:official:2",
+        "label": "NORBERTO ALONSO ESPINEL ORTEGA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883:official:3",
+        "label": "ALVARO HERNAN VELEZ MILLAN",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883:contracts",
+        "label": "Contratos detectados (713)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 713,
+          "total_value": 114156542394.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883:official:3",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466883",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 713,
+          "total_value": 114156542394.0
+        }
+      }
+    ]
+  }
+}

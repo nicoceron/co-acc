@@ -69,7 +69,7 @@ def safe_extract_zip(
     zip_path: Path,
     output_dir: Path,
     *,
-    max_total_bytes: int = 50 * 1024**3,  # 50GB default (CNPJ zips are huge)
+    max_total_bytes: int = 50 * 1024**3,  # 50GB default (some raw source zips can be large)
 ) -> list[Path]:
     """Safely extract ZIP with path traversal and bomb guards.
 

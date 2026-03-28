@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469217",
+  "title": "MINISTERIO DEL INTERIOR - FONDO NACIONAL DE SEGURIDAD Y CONVIVENCIA CIUDADANA - FONSECON",
+  "subtitle": "Empresa · 8301144756",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469217",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469217",
+        "label": "MINISTERIO DEL INTERIOR - FONDO NACIONAL DE SEGURIDAD Y CONVIVENCIA CIUDADANA - FONSECON",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 29,
+          "contract_value": 53302012481.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8301144756"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469217:official:1",
+        "label": "MARIA FERNANDA RANGEL ESPARZA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469217:contracts",
+        "label": "Contratos detectados (29)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 29,
+          "total_value": 53302012481.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469217:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469217",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469217:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469217",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 29,
+          "total_value": 53302012481.0
+        }
+      }
+    ]
+  }
+}

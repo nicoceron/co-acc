@@ -1,0 +1,74 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244222",
+  "title": "NO APLICA",
+  "subtitle": "Empresa · 12345678",
+  "summary": "La empresa tiene 1 antecedente(s) sancionatorios y mantiene exposición en contratación pública.",
+  "tags": [
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244222",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244222",
+        "label": "NO APLICA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 17,
+          "contract_value": 31816719618.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "12345678"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244222:sanctions",
+        "label": "Sanciones oficiales (1)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244222:contracts",
+        "label": "Contratos detectados (17)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 17,
+          "total_value": 31816719618.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244222:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244222",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 1
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244222:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244222",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 17,
+          "total_value": 31816719618.0
+        }
+      }
+    ]
+  }
+}

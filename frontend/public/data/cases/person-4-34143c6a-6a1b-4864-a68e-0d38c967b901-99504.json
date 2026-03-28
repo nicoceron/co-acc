@@ -1,0 +1,70 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99504",
+  "title": "LONDER GUIOVANNY CAMARGO GARCIA",
+  "subtitle": "Persona · 79541705",
+  "summary": "Las declaraciones oficiales muestran intereses privados o referencias textuales relevantes: 6 mención(es), 2 declaración(es) de conflicto y 2 señal(es) de actividad corporativa.",
+  "tags": [
+    "Declaraciones con referencias corporativas o conflictos"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99504",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99504",
+        "label": "LONDER GUIOVANNY CAMARGO GARCIA",
+        "type": "person",
+        "properties": {
+          "risk_score": 53,
+          "signal_types": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "79541705"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99504:conflicts",
+        "label": "Declaraciones de conflicto (2)",
+        "type": "finance",
+        "properties": {
+          "conflict_disclosure_count": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99504:references",
+        "label": "Referencias societarias (6)",
+        "type": "company",
+        "properties": {
+          "reference_count": 6
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99504",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99504:conflicts",
+        "type": "DECLARO_FINANZAS",
+        "confidence": 1.0,
+        "properties": {
+          "conflict_disclosure_count": 2
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99504",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:99504:references",
+        "type": "REFERENTE_A",
+        "confidence": 1.0,
+        "properties": {
+          "reference_count": 6
+        }
+      }
+    ]
+  }
+}

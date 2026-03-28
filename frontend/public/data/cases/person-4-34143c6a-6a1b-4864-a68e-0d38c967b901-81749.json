@@ -1,0 +1,72 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:81749",
+  "title": "YENNY ANDREA CARDENAS LEON",
+  "subtitle": "Persona · 46383509",
+  "summary": "Las declaraciones oficiales muestran intereses privados o referencias textuales relevantes: 0 mención(es), 2 declaración(es) de conflicto y 0 señal(es) de actividad corporativa.",
+  "tags": [
+    "Declaraciones con referencias corporativas o conflictos"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:81749",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:81749",
+        "label": "YENNY ANDREA CARDENAS LEON",
+        "type": "person",
+        "properties": {
+          "risk_score": 50,
+          "signal_types": 3
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "46383509"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:81749:supplier-contracts",
+        "label": "Contratos como proveedora/o (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "total_value": 45000000.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:81749:conflicts",
+        "label": "Declaraciones de conflicto (2)",
+        "type": "finance",
+        "properties": {
+          "conflict_disclosure_count": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:81749",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:81749:supplier-contracts",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1,
+          "total_value": 45000000.0
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:81749",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:81749:conflicts",
+        "type": "DECLARO_FINANZAS",
+        "confidence": 1.0,
+        "properties": {
+          "conflict_disclosure_count": 2
+        }
+      }
+    ]
+  }
+}

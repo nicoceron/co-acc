@@ -1,0 +1,76 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:973647",
+  "title": "DIOMER ARISTIZABAL DUQUE",
+  "subtitle": "Empresa · 8028884",
+  "summary": "La empresa aparece en paquetes repetidos de contratos con valores medios bajos y valor total agregado suficiente para revisar posible fraccionamiento.",
+  "tags": [
+    "Paquetes repetidos de contratos bajo umbral"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:973647",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:973647",
+        "label": "DIOMER ARISTIZABAL DUQUE",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 1,
+          "contract_count": 119723,
+          "contract_value": 17496318684.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8028884"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:973647:contracts",
+        "label": "Contratos detectados (119723)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 119723,
+          "total_value": 17496318684.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:973647:split-groups",
+        "label": "Paquetes bajo umbral (1)",
+        "type": "bid",
+        "properties": {
+          "group_count": 1,
+          "total_value": 203065487.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:973647:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:973647",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 119723,
+          "total_value": 17496318684.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:973647:split-groups",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:973647",
+        "type": "ADJUDICOU_A",
+        "confidence": 1.0,
+        "properties": {
+          "group_count": 1,
+          "total_value": 203065487.0
+        }
+      }
+    ]
+  }
+}

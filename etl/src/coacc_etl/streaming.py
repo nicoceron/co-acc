@@ -20,7 +20,12 @@ def iter_csv_chunks(
 ) -> Iterator[pd.DataFrame]:
     """Yield CSV chunks, respecting an optional global row limit."""
     processed = 0
-    for chunk in pd.read_csv(csv_path, chunksize=chunk_size, **read_csv_kwargs):
+    try:
+        chunk_iter = pd.read_csv(csv_path, chunksize=chunk_size, **read_csv_kwargs)
+    except pd.errors.EmptyDataError:
+        return
+
+    for chunk in chunk_iter:
         if limit is not None:
             remaining = limit - processed
             if remaining <= 0:

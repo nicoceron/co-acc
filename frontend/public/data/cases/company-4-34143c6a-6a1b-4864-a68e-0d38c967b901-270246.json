@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:270246",
+  "title": "FISCALIA GENERAL DE LA NACION SECCIONAL MAGADALENA MEDIO",
+  "subtitle": "Empresa · 900796335",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:270246",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:270246",
+        "label": "FISCALIA GENERAL DE LA NACION SECCIONAL MAGADALENA MEDIO",
+        "type": "company",
+        "properties": {
+          "risk_score": 9,
+          "signal_types": 3,
+          "contract_count": 3,
+          "contract_value": 744038136.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "900796335"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:270246:official:1",
+        "label": "JUAN CARLOS CANAL ALBAN",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:270246:contracts",
+        "label": "Contratos detectados (3)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 3,
+          "total_value": 744038136.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:270246:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:270246",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:270246:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:270246",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 3,
+          "total_value": 744038136.0
+        }
+      }
+    ]
+  }
+}

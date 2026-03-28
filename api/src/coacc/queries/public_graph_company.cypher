@@ -4,13 +4,11 @@ WHERE elementId(center) = $company_id
    OR center.document_id = $company_identifier_formatted
    OR center.nit = $company_identifier
    OR center.nit = $company_identifier_formatted
-   OR center.cnpj = $company_identifier
-   OR center.cnpj = $company_identifier_formatted
 CALL apoc.path.expandConfig(
   center,
   {
-    relationshipFilter: "SOCIO_DE|GANO|CONTRATOU|ADJUDICOU_A|SANCIONADA|DEVE|RECEBEU_EMPRESTIMO|BENEFICIO|GENERO_CONVENIO|MUNICIPAL_GANO|MUNICIPAL_LICITO|LICITO|SUMINISTRO_LICITACAO|REFERENTE_A|ADMINISTRA",
-    labelFilter: "+Company|+Contract|+Sanction|+Finance|+Amendment|+Convenio|+Bid|+MunicipalContract|+MunicipalBid|-Person|-Partner|-User|-Investigation|-Annotation|-Tag",
+    relationshipFilter: "SOCIO_DE|GANO|CONTRATOU|ADJUDICOU_A|SANCIONADA|TIENE_HALLAZGO|DEVE|RECEBEU_EMPRESTIMO|BENEFICIO|GENERO_CONVENIO|CELEBRO_CONVENIO_INTERADMIN|MUNICIPAL_GANO|MUNICIPAL_LICITO|LICITO|SUMINISTRO_LICITACAO|REFERENTE_A|ADMINISTRA",
+    labelFilter: "+Company|+Contract|+Sanction|+Finding|+Finance|+Amendment|+Convenio|+Bid|+MunicipalContract|+MunicipalBid|-Person|-Partner|-User|-Investigation|-Annotation|-Tag",
     maxLevel: toInteger($depth),
     bfs: true,
     uniqueness: "RELATIONSHIP_PATH",

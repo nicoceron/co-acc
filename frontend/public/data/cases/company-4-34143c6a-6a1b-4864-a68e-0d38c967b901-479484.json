@@ -1,0 +1,97 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484",
+  "title": "YUBER HOLMEDIS CALIXTO CASTRO",
+  "subtitle": "Empresa · 1118537029",
+  "summary": "La empresa registra al menos un contrato con fecha dentro de una ventana pública de sanción vigente o no cerrada.",
+  "tags": [
+    "Proveedor sancionado que siguió recibiendo contratos",
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484",
+        "label": "YUBER HOLMEDIS CALIXTO CASTRO",
+        "type": "company",
+        "properties": {
+          "risk_score": 11,
+          "signal_types": 2,
+          "contract_count": 22,
+          "contract_value": 501274200.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "1118537029"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484:sanctions",
+        "label": "Sanciones oficiales (1)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484:contracts",
+        "label": "Contratos detectados (22)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 22,
+          "total_value": 501274200.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484:sanction-window",
+        "label": "Contratos en ventana sancionatoria (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "total_value": 47460000.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 1
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 22,
+          "total_value": 501274200.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484:sanction-window",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479484",
+        "type": "CONTRATOU",
+        "confidence": 0.95,
+        "properties": {
+          "contract_count": 1,
+          "total_value": 47460000.0
+        }
+      }
+    ]
+  }
+}

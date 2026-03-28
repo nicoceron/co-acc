@@ -1,0 +1,77 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:23753",
+  "title": "ORACLE COLOMBIA LTDA",
+  "subtitle": "Empresa · 800103052",
+  "summary": "La exposición contractual supera de forma material la escala financiera reportada por la empresa (2207.8x).",
+  "tags": [
+    "Contratación muy superior al tamaño financiero reportado",
+    "Facturación o pagos por delante de la ejecución"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:23753",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:23753",
+        "label": "ORACLE COLOMBIA LTDA",
+        "type": "company",
+        "properties": {
+          "risk_score": 9,
+          "signal_types": 2,
+          "contract_count": 822,
+          "contract_value": 1407300135872.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "800103052"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:23753:contracts",
+        "label": "Contratos detectados (822)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 822,
+          "total_value": 1407300135872.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:23753:execution-gap",
+        "label": "Brecha de ejecución (8)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 8,
+          "invoice_total_value": 3246303654.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:23753:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:23753",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 822,
+          "total_value": 1407300135872.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:23753:execution-gap",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:23753",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 8,
+          "invoice_total_value": 3246303654.0
+        }
+      }
+    ]
+  }
+}

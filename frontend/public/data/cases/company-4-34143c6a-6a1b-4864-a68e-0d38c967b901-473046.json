@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473046",
+  "title": "NUEVA EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN RAFAEL DE JERICO",
+  "subtitle": "Empresa · 8909807659",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473046",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473046",
+        "label": "NUEVA EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN RAFAEL DE JERICO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 50,
+          "contract_value": 3169246681.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8909807659"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473046:official:1",
+        "label": "HERNAN DARIO AGUILAR RAMIREZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473046:contracts",
+        "label": "Contratos detectados (50)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 50,
+          "total_value": 3169246681.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473046:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473046",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473046:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473046",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 50,
+          "total_value": 3169246681.0
+        }
+      }
+    ]
+  }
+}

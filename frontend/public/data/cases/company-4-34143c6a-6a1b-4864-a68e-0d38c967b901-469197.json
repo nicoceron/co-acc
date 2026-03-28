@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469197",
+  "title": "ANTIOQUIA - OFICINA DE REGISTRO DE INSTRUMENTOS PÚBLICOS - SOPETRÁN",
+  "subtitle": "Empresa · 8999990070",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469197",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469197",
+        "label": "ANTIOQUIA - OFICINA DE REGISTRO DE INSTRUMENTOS PÚBLICOS - SOPETRÁN",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 27,
+          "contract_value": 2068033000.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8999990070"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469197:official:1",
+        "label": "LUZ ADRIANA ALZATE ECHEVERRI",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469197:contracts",
+        "label": "Contratos detectados (27)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 27,
+          "total_value": 2068033000.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469197:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469197",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469197:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469197",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 27,
+          "total_value": 2068033000.0
+        }
+      }
+    ]
+  }
+}

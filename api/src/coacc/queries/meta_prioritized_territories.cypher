@@ -2,25 +2,42 @@ MATCH ()-[award:CONTRATOU]->(c:Company)
 WITH trim(coalesce(award.department, '')) AS department,
      trim(coalesce(award.city, '')) AS municipality,
      c,
-     count(DISTINCT award.summary_id) AS supplier_contract_count,
+     toInteger(sum(coalesce(award.contract_count, 1))) AS supplier_contract_count,
      coalesce(sum(coalesce(award.total_value, 0.0)), 0.0) AS supplier_value,
      count(DISTINCT coalesce(award.buyer_document_id, award.buyer_name)) AS supplier_buyer_count,
-     count(
-       DISTINCT CASE
+     toInteger(sum(
+       CASE
          WHEN coalesce(award.offer_count, 0) <= 2 OR coalesce(award.direct_invitation, false)
-         THEN award.summary_id
-         ELSE null
+         THEN coalesce(award.contract_count, 1)
+         ELSE 0
        END
-     ) AS supplier_low_competition_contract_count,
-     count(
-       DISTINCT CASE
+     )) AS supplier_low_competition_contract_count,
+     toInteger(sum(
+       CASE
          WHEN coalesce(award.direct_invitation, false)
-         THEN award.summary_id
-         ELSE null
+         THEN coalesce(award.contract_count, 1)
+         ELSE 0
        END
-     ) AS supplier_direct_invitation_contract_count,
-     count(
-       DISTINCT CASE
+     )) AS supplier_direct_invitation_contract_count,
+     toInteger(sum(
+       CASE
+         WHEN coalesce(award.invoice_total_value, 0.0) > 0.0
+           AND coalesce(award.execution_actual_progress_max, 0.0) < 25.0
+         THEN coalesce(award.contract_count, 1)
+         ELSE 0
+       END
+     )) AS supplier_execution_gap_contract_count,
+     toInteger(sum(
+       CASE
+         WHEN coalesce(award.commitment_total_value, 0.0) > 0.0
+           AND coalesce(award.invoice_total_value, 0.0) >
+               coalesce(award.commitment_total_value, 0.0) * (1.0 + toFloat($pattern_min_discrepancy_ratio))
+         THEN coalesce(award.contract_count, 1)
+         ELSE 0
+       END
+     )) AS supplier_commitment_gap_contract_count,
+     toInteger(sum(
+       CASE
          WHEN (
            coalesce(award.invoice_total_value, 0.0) > 0.0
            AND coalesce(award.execution_actual_progress_max, 0.0) < 25.0
@@ -29,10 +46,10 @@ WITH trim(coalesce(award.department, '')) AS department,
            AND coalesce(award.invoice_total_value, 0.0) >
                coalesce(award.commitment_total_value, 0.0) * (1.0 + toFloat($pattern_min_discrepancy_ratio))
          )
-         THEN award.summary_id
-         ELSE null
+         THEN coalesce(award.contract_count, 1)
+         ELSE 0
        END
-     ) AS supplier_discrepancy_contract_count,
+     )) AS supplier_discrepancy_contract_count,
      coalesce(
        sum(
          CASE
@@ -51,6 +68,34 @@ WITH trim(coalesce(award.department, '')) AS department,
      EXISTS {
        MATCH (c)-[:SANCIONADA]->(:Sanction)
      } AS supplier_has_sanction
+CALL {
+  WITH c
+  OPTIONAL MATCH (p:Person)-[:OFFICER_OF]->(c)
+  WHERE EXISTS {
+    MATCH (p)-[:RECIBIO_SALARIO]->(:PublicOffice)
+  }
+  RETURN count(DISTINCT p) AS supplier_official_overlap_count
+}
+CALL {
+  WITH c, supplier_value
+  OPTIONAL MATCH (c)-[:DECLARO_FINANZAS]->(f:Finance {type: 'SUPERSOC_TOP_COMPANY'})
+  RETURN max(
+           CASE
+             WHEN f IS NOT NULL AND (
+               (
+                 coalesce(f.operating_revenue_current, 0.0) > 0.0
+                 AND supplier_value / toFloat(f.operating_revenue_current) >= 2.0
+               ) OR (
+                 coalesce(f.total_assets_current, 0.0) > 0.0
+                 AND supplier_value / toFloat(f.total_assets_current) >= 1.0
+               )
+             )
+             THEN 1
+             ELSE 0
+           END
+         ) AS supplier_capacity_mismatch_flag
+}
+WITH *
 WHERE department <> '' OR municipality <> ''
 WITH CASE
        WHEN municipality <> '' AND department <> '' THEN municipality + '|' + department
@@ -76,10 +121,14 @@ WITH CASE
      supplier_buyer_count,
      supplier_low_competition_contract_count,
      supplier_direct_invitation_contract_count,
+     supplier_execution_gap_contract_count,
+     supplier_commitment_gap_contract_count,
      supplier_discrepancy_contract_count,
      supplier_discrepancy_value,
      supplier_has_sanction,
-     coalesce(c.razon_social, c.name, c.document_id, c.nit, c.cnpj) AS supplier_name
+     supplier_official_overlap_count,
+     supplier_capacity_mismatch_flag,
+     coalesce(c.razon_social, c.name, c.document_id, c.nit) AS supplier_name
 ORDER BY territory_id ASC,
          supplier_value DESC,
          supplier_contract_count DESC,
@@ -98,6 +147,8 @@ WITH territory_id,
      count(*) AS supplier_count,
      sum(supplier_low_competition_contract_count) AS low_competition_contract_count,
      sum(supplier_direct_invitation_contract_count) AS direct_invitation_contract_count,
+     sum(supplier_execution_gap_contract_count) AS execution_gap_contract_count,
+     sum(supplier_commitment_gap_contract_count) AS commitment_gap_contract_count,
      sum(
        CASE
          WHEN supplier_has_sanction THEN supplier_contract_count
@@ -110,6 +161,18 @@ WITH territory_id,
          ELSE 0.0
        END
      ) AS sanctioned_supplier_value,
+     sum(
+       CASE
+         WHEN supplier_official_overlap_count > 0 THEN supplier_contract_count
+         ELSE 0
+       END
+     ) AS official_overlap_contract_count,
+     sum(
+       CASE
+         WHEN supplier_capacity_mismatch_flag > 0 THEN 1
+         ELSE 0
+       END
+     ) AS capacity_mismatch_supplier_count,
      sum(supplier_discrepancy_contract_count) AS discrepancy_contract_count,
      coalesce(sum(supplier_discrepancy_value), 0.0) AS discrepancy_value
 WITH territory_id,
@@ -125,8 +188,10 @@ WITH territory_id,
      direct_invitation_contract_count,
      sanctioned_supplier_contract_count,
      sanctioned_supplier_value,
-     0 AS official_overlap_contract_count,
-     0 AS capacity_mismatch_supplier_count,
+     official_overlap_contract_count,
+     capacity_mismatch_supplier_count,
+     execution_gap_contract_count,
+     commitment_gap_contract_count,
      discrepancy_contract_count,
      discrepancy_value
 WITH territory_id,
@@ -148,6 +213,8 @@ WITH territory_id,
      sanctioned_supplier_value,
      official_overlap_contract_count,
      capacity_mismatch_supplier_count,
+     execution_gap_contract_count,
+     commitment_gap_contract_count,
      discrepancy_contract_count,
      discrepancy_value
 WITH territory_id,
@@ -166,12 +233,16 @@ WITH territory_id,
      sanctioned_supplier_value,
      official_overlap_contract_count,
      capacity_mismatch_supplier_count,
+     execution_gap_contract_count,
+     commitment_gap_contract_count,
      discrepancy_contract_count,
      discrepancy_value,
      (
        CASE WHEN top_supplier_share >= 0.35 THEN 1 ELSE 0 END +
        CASE WHEN low_competition_contract_count > 0 OR direct_invitation_contract_count > 0 THEN 1 ELSE 0 END +
        CASE WHEN sanctioned_supplier_contract_count > 0 THEN 1 ELSE 0 END +
+       CASE WHEN official_overlap_contract_count > 0 THEN 1 ELSE 0 END +
+       CASE WHEN capacity_mismatch_supplier_count > 0 THEN 1 ELSE 0 END +
        CASE WHEN discrepancy_contract_count > 0 THEN 1 ELSE 0 END
      ) AS signal_types,
      (
@@ -190,6 +261,16 @@ WITH territory_id,
        CASE
          WHEN sanctioned_supplier_contract_count >= 5 THEN 4
          WHEN sanctioned_supplier_contract_count >= 1 THEN 3
+         ELSE 0
+       END +
+       CASE
+         WHEN official_overlap_contract_count >= 5 THEN 4
+         WHEN official_overlap_contract_count >= 1 THEN 3
+         ELSE 0
+       END +
+       CASE
+         WHEN capacity_mismatch_supplier_count >= 3 THEN 3
+         WHEN capacity_mismatch_supplier_count >= 1 THEN 2
          ELSE 0
        END +
        CASE
@@ -222,6 +303,8 @@ RETURN territory_id,
        toFloat(sanctioned_supplier_value) AS sanctioned_supplier_value,
        toInteger(official_overlap_contract_count) AS official_overlap_contract_count,
        toInteger(capacity_mismatch_supplier_count) AS capacity_mismatch_supplier_count,
+       toInteger(execution_gap_contract_count) AS execution_gap_contract_count,
+       toInteger(commitment_gap_contract_count) AS commitment_gap_contract_count,
        toInteger(discrepancy_contract_count) AS discrepancy_contract_count,
        toFloat(discrepancy_value) AS discrepancy_value
 ORDER BY suspicion_score DESC,

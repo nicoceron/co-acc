@@ -4,8 +4,6 @@ WHERE elementId(c) = $company_id
    OR c.document_id = $company_identifier_formatted
    OR c.nit = $company_identifier
    OR c.nit = $company_identifier_formatted
-   OR c.cnpj = $company_identifier
-   OR c.cnpj = $company_identifier_formatted
 CALL {
   WITH c
   MATCH (c)-[:DEVE]->(debt:Finance)
@@ -61,7 +59,7 @@ WHERE size(debt_ids) > 0
   AND size(contract_ids) > 0
   AND size(evidence_refs) > 0
 RETURN 'debtor_contracts' AS pattern_id,
-       coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
+       coalesce(c.document_id, c.nit) AS company_identifier,
        c.razon_social AS company_name,
        toFloat(size(debt_ids) + size(contract_ids)) AS risk_signal,
        amount_total AS amount_total,

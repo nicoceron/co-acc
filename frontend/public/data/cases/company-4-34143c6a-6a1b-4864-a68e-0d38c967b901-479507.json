@@ -1,0 +1,97 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507",
+  "title": "HECTOR NEYIB GACHA HOWARD",
+  "subtitle": "Empresa · 18005618",
+  "summary": "La empresa registra al menos un contrato con fecha dentro de una ventana pública de sanción vigente o no cerrada.",
+  "tags": [
+    "Proveedor sancionado que siguió recibiendo contratos",
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507",
+        "label": "HECTOR NEYIB GACHA HOWARD",
+        "type": "company",
+        "properties": {
+          "risk_score": 12,
+          "signal_types": 2,
+          "contract_count": 16,
+          "contract_value": 365474337.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "18005618"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507:sanctions",
+        "label": "Sanciones oficiales (3)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 3
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507:contracts",
+        "label": "Contratos detectados (16)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 16,
+          "total_value": 365474337.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507:sanction-window",
+        "label": "Contratos en ventana sancionatoria (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "total_value": 43920000.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 3
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 16,
+          "total_value": 365474337.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507:sanction-window",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:479507",
+        "type": "CONTRATOU",
+        "confidence": 0.95,
+        "properties": {
+          "contract_count": 1,
+          "total_value": 43920000.0
+        }
+      }
+    ]
+  }
+}

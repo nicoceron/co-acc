@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:431054",
+  "title": "EMPRESA AGUAS DE FACATATIVA SAS ESP",
+  "subtitle": "Empresa · 800188660",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:431054",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:431054",
+        "label": "EMPRESA AGUAS DE FACATATIVA SAS ESP",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 95,
+          "contract_value": 110960578626.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "800188660"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:431054:official:1",
+        "label": "VARGAS LEYTON GUSTAVO ALFONSO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:431054:contracts",
+        "label": "Contratos detectados (95)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 95,
+          "total_value": 110960578626.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:431054:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:431054",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:431054:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:431054",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 95,
+          "total_value": 110960578626.0
+        }
+      }
+    ]
+  }
+}

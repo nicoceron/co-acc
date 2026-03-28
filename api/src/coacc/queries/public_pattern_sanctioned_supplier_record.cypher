@@ -4,8 +4,6 @@ WHERE elementId(c) = $company_id
    OR c.document_id = $company_identifier_formatted
    OR c.nit = $company_identifier
    OR c.nit = $company_identifier_formatted
-   OR c.cnpj = $company_identifier
-   OR c.cnpj = $company_identifier_formatted
 MATCH (c)-[:SANCIONADA]->(s:Sanction)
 OPTIONAL MATCH ()-[award:CONTRATOU]->(c)
 WITH c,
@@ -30,7 +28,7 @@ WITH c,
      window_end,
      [x IN sanction_refs WHERE x IS NOT NULL AND x <> ""] AS evidence_refs
 RETURN 'sanctioned_supplier_record' AS pattern_id,
-       coalesce(c.document_id, c.nit, c.cnpj) AS company_identifier,
+       coalesce(c.document_id, c.nit) AS company_identifier,
        coalesce(c.razon_social, c.name) AS company_name,
        toFloat((sanction_count * 2) + CASE WHEN contract_count > 0 THEN 1 ELSE 0 END) AS risk_signal,
        amount_total AS amount_total,

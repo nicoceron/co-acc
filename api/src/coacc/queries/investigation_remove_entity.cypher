@@ -2,9 +2,8 @@ MATCH (u:User {id: $user_id})-[:OWNS]->(i:Investigation {id: $investigation_id})
 MATCH (i)-[r:INCLUDES]->(e)
 WHERE (e.document_id = $entity_id OR e.nit = $entity_id
    OR e.cedula = $entity_id OR e.numero_documento = $entity_id
-   OR e.cpf = $entity_id OR e.cnpj = $entity_id
    OR e.contract_id = $entity_id OR e.sanction_id = $entity_id
-   OR e.amendment_id = $entity_id OR e.cnes_code = $entity_id
+   OR e.amendment_id = $entity_id
    OR e.finance_id = $entity_id OR e.embargo_id = $entity_id
    OR e.school_id = $entity_id OR e.convenio_id = $entity_id
    OR e.partner_id = $entity_id OR e.bid_id = $entity_id

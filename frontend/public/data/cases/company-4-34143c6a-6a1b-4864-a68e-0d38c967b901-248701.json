@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701",
+  "title": "JARDIA BOTANICO DE BOGOTA JOSE CELESTINO MUTIS",
+  "subtitle": "Empresa · 8600301970",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701",
+        "label": "JARDIA BOTANICO DE BOGOTA JOSE CELESTINO MUTIS",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 74,
+          "contract_value": 29485887696.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8600301970"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701:official:1",
+        "label": "LUIS OLMEDO MARTINEZ ZAMORA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701:official:2",
+        "label": "MANUEL AVILA OLARTE",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701:contracts",
+        "label": "Contratos detectados (74)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 74,
+          "total_value": 29485887696.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:248701",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 74,
+          "total_value": 29485887696.0
+        }
+      }
+    ]
+  }
+}

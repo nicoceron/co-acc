@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245891",
+  "title": "ICBF REGIONAL ATLANTICO",
+  "subtitle": "Empresa · 8999992392",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245891",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245891",
+        "label": "ICBF REGIONAL ATLANTICO",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 272,
+          "contract_value": 1290625495679.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8999992392"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245891:official:1",
+        "label": "LUIS EDUARDO CESPEDES DE LOS RIOS.",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245891:contracts",
+        "label": "Contratos detectados (272)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 272,
+          "total_value": 1290625495679.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245891:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245891",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245891:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245891",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 272,
+          "total_value": 1290625495679.0
+        }
+      }
+    ]
+  }
+}

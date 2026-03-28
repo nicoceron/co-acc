@@ -25,9 +25,21 @@ router = APIRouter(prefix="/api/v1/graph", tags=["graph"])
 
 _GRAPH_PROPS = {
     "name", "razon_social", "document_id", "nit", "cedula", "numero_documento",
-    "cnpj", "cpf", "value", "date",
+    "value", "date",
     "type", "uf", "cargo", "partido", "org", "role_name", "office_id", "bid_id", "asset_id",
-    "finance_id", "modality", "publication_date", "start_date", "reference",
+    "finance_id", "finding_id", "radicado", "status", "amount", "audited_year", "report_date",
+    "process_name", "description", "observations", "publication_date", "start_date", "reference",
+    "cdp_request_count", "cdp_balance_total", "cdp_commit_available_total", "cdp_used_value_total",
+    "latest_siif_status", "latest_spending_destination", "registered_in_siif", "bpin_code",
+    "execution_location_count", "execution_locations",
+    "additional_location_count", "additional_locations",
+    "archive_document_count", "archive_document_names", "archive_document_urls",
+    "archive_document_refs", "archive_document_extensions", "archive_document_last_upload",
+    "archive_supervision_document_count", "archive_payment_document_count",
+    "archive_assignment_document_count", "archive_start_record_document_count",
+    "archive_resume_document_count", "archive_report_document_count",
+    "resource_origin_count", "resource_origins", "resource_origin_total",
+    "resource_origin_descriptions", "secop_platform", "historical",
 }
 
 _DEFAULT_LABEL_FILTER = "-User|-Investigation|-Annotation|-Tag"
@@ -48,6 +60,7 @@ _LABEL_MAP: dict[str, str] = {
     "bid": "Bid",
     "publicOffice": "PublicOffice",
     "declaredAsset": "DeclaredAsset",
+    "finding": "Finding",
     "cpi": "Inquiry",
 }
 
@@ -78,6 +91,8 @@ def _extract_label(node: Any, labels: list[str]) -> str:
         return str(props.get("name", props.get("reference", props.get("bid_id", "Bid"))))
     if entity_type == "declaredAsset":
         return str(props.get("name", props.get("form_id", props.get("asset_id", "Declared Asset"))))
+    if entity_type == "finding":
+        return str(props.get("name", props.get("radicado", props.get("finding_id", "Finding"))))
     return str(props.get("name", str(props.get("id", ""))))
 
 
@@ -191,12 +206,13 @@ async def get_graph(
             or props.get("cedula")
             or props.get("numero_documento")
             or props.get("partner_id")
-            or props.get("cpf")
-            or props.get("cnpj")
+            or props.get("document_id")
+            or props.get("nit")
             or props.get("contract_id")
             or props.get("sanction_id")
+            or props.get("finding_id")
             or props.get("amendment_id")
-            or props.get("cnes_code")
+            or props.get("reps_code")
             or props.get("finance_id")
             or props.get("embargo_id")
             or props.get("school_id")

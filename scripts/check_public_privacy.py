@@ -8,12 +8,9 @@ import json
 import re
 from pathlib import Path
 
-CPF_RAW_RE = re.compile(r"(?<!\d)\d{11}(?!\d)")
-CPF_FMT_RE = re.compile(r"\d{3}\.\d{3}\.\d{3}-\d{2}")
 FORBIDDEN_IN_PUBLIC_QUERIES = (
     ":Person",
     ":Partner",
-    ".cpf",
     "doc_partial",
     "doc_raw",
 )
@@ -35,8 +32,6 @@ def check_demo_data(repo_root: Path) -> list[str]:
     demo_dir = repo_root / "data" / "demo"
     for path in sorted(demo_dir.glob("*.json")):
         raw = path.read_text(encoding="utf-8")
-        if CPF_RAW_RE.search(raw) or CPF_FMT_RE.search(raw):
-            errors.append(f"{path}: possible CPF-like value found")
         payload = json.loads(raw)
         for node in payload.get("nodes", []):
             label = str(node.get("type", ""))
@@ -45,7 +40,7 @@ def check_demo_data(repo_root: Path) -> list[str]:
             props = node.get("properties", {})
             if isinstance(props, dict):
                 lowered = {str(k).lower() for k in props.keys()}
-                if "cpf" in lowered or "doc_partial" in lowered or "doc_raw" in lowered:
+                if "doc_partial" in lowered or "doc_raw" in lowered:
                     errors.append(f"{path}: forbidden personal key in demo node")
     return errors
 

@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:445027",
+  "title": "CONCEJO MUNICIPAL DE ANDES",
+  "subtitle": "Empresa · 8909803427",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:445027",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:445027",
+        "label": "CONCEJO MUNICIPAL DE ANDES",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 122,
+          "contract_value": 42429551325.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8909803427"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:445027:official:1",
+        "label": "JHON JAIRO MEJIA ARAMBURO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:445027:contracts",
+        "label": "Contratos detectados (122)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 122,
+          "total_value": 42429551325.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:445027:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:445027",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:445027:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:445027",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 122,
+          "total_value": 42429551325.0
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243621",
+  "title": "AGENCIA DE RENOVACION DEL TERRITORIO",
+  "subtitle": "Empresa · 901006886",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243621",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243621",
+        "label": "AGENCIA DE RENOVACION DEL TERRITORIO",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 20,
+          "contract_value": 226861124157.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "901006886"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243621:official:1",
+        "label": "MARCELA CASTRO MACIAS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243621:contracts",
+        "label": "Contratos detectados (20)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 20,
+          "total_value": 226861124157.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243621:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243621",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243621:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243621",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 20,
+          "total_value": 226861124157.0
+        }
+      }
+    ]
+  }
+}

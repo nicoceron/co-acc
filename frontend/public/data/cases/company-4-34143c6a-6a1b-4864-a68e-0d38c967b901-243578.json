@@ -1,0 +1,108 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578",
+  "title": "ICBF REGIONAL HUILA",
+  "subtitle": "Empresa · 899999239",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578",
+        "label": "ICBF REGIONAL HUILA",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 384,
+          "contract_value": 2367994320427.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "899999239"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578:official:1",
+        "label": "MARTHA ISABEL TOVAR TURMEQUE",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578:official:2",
+        "label": "JULIO CESAR JIMENEZ GARZON,",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578:official:3",
+        "label": "LEONARDO ANDRES CHAVES ROBAYO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578:contracts",
+        "label": "Contratos detectados (384)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 384,
+          "total_value": 2367994320427.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578:official:3",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243578",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 384,
+          "total_value": 2367994320427.0
+        }
+      }
+    ]
+  }
+}

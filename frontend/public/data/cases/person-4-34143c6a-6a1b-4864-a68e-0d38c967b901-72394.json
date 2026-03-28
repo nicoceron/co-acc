@@ -1,0 +1,93 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394",
+  "title": "CESAR AUGUSTO PAIBA ARDILA",
+  "subtitle": "Persona · 80124501",
+  "summary": "La misma persona aparece en candidaturas electorales y también como proveedora o directiva de proveedor con contratación pública.",
+  "tags": [
+    "Candidatura y contratación en la misma persona",
+    "Donante que también aparece como proveedor"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394",
+        "label": "CESAR AUGUSTO PAIBA ARDILA",
+        "type": "person",
+        "properties": {
+          "risk_score": 45,
+          "signal_types": 3
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "80124501"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394:candidacies",
+        "label": "Candidaturas (1)",
+        "type": "election",
+        "properties": {
+          "candidacy_count": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394:donations",
+        "label": "Donaciones (3)",
+        "type": "election",
+        "properties": {
+          "donation_count": 3
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394:supplier-contracts",
+        "label": "Contratos como proveedora/o (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "total_value": 48000000.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394:candidacies",
+        "type": "CANDIDATO_EM",
+        "confidence": 1.0,
+        "properties": {
+          "candidacy_count": 1
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394:donations",
+        "type": "DONO_A",
+        "confidence": 1.0,
+        "properties": {
+          "donation_count": 3
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:72394:supplier-contracts",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1,
+          "total_value": 48000000.0
+        }
+      }
+    ]
+  }
+}

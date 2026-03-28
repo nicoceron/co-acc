@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:27762",
+  "title": "SOLUCIONES INTEGRALES DE INFORMATICA WEB S.A.S (SIIWEB)",
+  "subtitle": "Empresa · 900096259",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:27762",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:27762",
+        "label": "SOLUCIONES INTEGRALES DE INFORMATICA WEB S.A.S (SIIWEB)",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 281,
+          "contract_value": 16428290880.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "900096259"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:27762:official:1",
+        "label": "ELKIN JAVIER PARRA PEDRAZA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:27762:contracts",
+        "label": "Contratos detectados (281)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 281,
+          "total_value": 16428290880.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:27762:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:27762",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:27762:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:27762",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 281,
+          "total_value": 16428290880.0
+        }
+      }
+    ]
+  }
+}

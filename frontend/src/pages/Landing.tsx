@@ -1,16 +1,11 @@
-import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { BadgeCheck, BookOpenText, Link2, Network, ShieldCheck } from "lucide-react";
 import { Link } from "react-router";
 
 import { type StatsResponse, getStats } from "@/api/client";
-import { FeatureCard } from "@/components/landing/FeatureCard";
-import {
-  GraphIcon,
-  InvestigationIcon,
-  PatternIcon,
-} from "@/components/landing/FeatureIcons";
-import { IS_PATTERNS_ENABLED, IS_PUBLIC_MODE } from "@/config/runtime";
-import { StatsBar } from "@/components/landing/StatsBar";
+import { formatSignalLabel } from "@/lib/evidence";
+import { loadMaterializedResultsPack, type MaterializedInvestigation, type MaterializedResultsPack } from "@/lib/materialized";
+import { isCorroboratedInvestigation, isFreshInvestigation } from "@/lib/review";
 
 import styles from "./Landing.module.css";
 
@@ -18,24 +13,23 @@ function useReveal() {
   const setRef = useCallback((node: HTMLElement | null) => {
     if (!node) return;
     const cls = styles.revealed ?? "revealed";
-    const hasMatchMedia = typeof window.matchMedia === "function";
-    const prefersReduced = hasMatchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReduced = typeof window.matchMedia === "function"
+      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced || typeof IntersectionObserver === "undefined") {
       node.classList.add(cls);
       return;
     }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry?.isIntersecting) {
-          node.classList.add(cls);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 },
-    );
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) {
+        node.classList.add(cls);
+        observer.disconnect();
+      }
+    }, { threshold: 0.16 });
+
     observer.observe(node);
   }, []);
+
   return setRef;
 }
 
@@ -46,204 +40,263 @@ function formatCount(n: number): string {
 }
 
 interface SourceDef {
-  nameKey: string;
-  descKey: string;
+  name: string;
+  description: string;
   countFn: (s: StatsResponse) => number | null;
 }
 
 const DATA_SOURCES: SourceDef[] = [
-  { nameKey: "SECOP Integrado", descKey: "landing.sources.secopIntegrated", countFn: (s) => s.contract_count },
-  { nameKey: "SECOP II Procesos", descKey: "landing.sources.secopProcesses", countFn: (s) => s.contract_count },
-  { nameKey: "SECOP II Contratos", descKey: "landing.sources.secopContracts", countFn: (s) => s.contract_count },
-  { nameKey: "SECOP Proveedores", descKey: "landing.sources.secopSuppliers", countFn: (s) => s.company_count },
-  { nameKey: "SECOP Sanciones", descKey: "landing.sources.secopSanctions", countFn: (s) => s.sanction_count },
-  { nameKey: "SIGEP", descKey: "landing.sources.sigep", countFn: (s) => s.person_count },
-  { nameKey: "Puestos Sensibles", descKey: "landing.sources.sensitiveRoles", countFn: (s) => s.person_count },
-  { nameKey: "Activos Ley 2013", descKey: "landing.sources.assetDisclosures", countFn: (s) => s.person_count },
-  { nameKey: "Conflictos", descKey: "landing.sources.conflictDisclosures", countFn: (s) => s.person_count },
-  { nameKey: "SGR Gastos", descKey: "landing.sources.sgrExpenses", countFn: (s) => s.finance_count },
-  { nameKey: "Proyectos SGR", descKey: "landing.sources.sgrProjects", countFn: (s) => s.amendment_count },
-  { nameKey: "REPS Salud", descKey: "landing.sources.healthProviders", countFn: (s) => s.health_count },
-  { nameKey: "MEN Matrícula", descKey: "landing.sources.education", countFn: (s) => s.education_count },
-  { nameKey: "Cuentas Claras", descKey: "landing.sources.cuentasClaras", countFn: (s) => s.election_count },
+  { name: "SECOP Integrado", description: "Contratación pública y trazabilidad de procesos.", countFn: (s) => s.contract_count },
+  { name: "SECOP II Procesos", description: "Diseño del proceso, competencia y adjudicación.", countFn: (s) => s.contract_count },
+  { name: "SECOP II Contratos", description: "Contratos, adiciones, suspensiones y ejecución.", countFn: (s) => s.contract_count },
+  { name: "SECOP Proveedores", description: "Normalización de contratistas y empresas.", countFn: (s) => s.company_count },
+  { name: "SECOP Sanciones", description: "Antecedentes sancionatorios y ventanas activas.", countFn: (s) => s.sanction_count },
+  { name: "SIGEP", description: "Servidores públicos y ocupación institucional.", countFn: (s) => s.person_count },
+  { name: "Puestos Sensibles", description: "Cargos expuestos a mayor riesgo de captura.", countFn: (s) => s.person_count },
+  { name: "Activos Ley 2013", description: "Declaraciones patrimoniales y conflictos.", countFn: (s) => s.person_count },
+  { name: "Conflictos", description: "Referencias corporativas y conflictos declarados.", countFn: (s) => s.person_count },
+  { name: "SGR Gastos", description: "Obras, regalías y posibles elefantes blancos.", countFn: (s) => s.finance_count },
+  { name: "REPS Salud", description: "Prestadores de salud y cruces sancionatorios.", countFn: (s) => s.health_count },
+  { name: "MEN Matrícula", description: "Instituciones y control educativo enlazable.", countFn: (s) => s.education_count },
+  { name: "Cuentas Claras", description: "Financiación política conectada con contratación.", countFn: (s) => s.election_count },
 ];
 
-interface FeatureDef {
-  key: string;
-  icon: ReactNode;
-  iconBg: string;
-}
-
-const FEATURES: FeatureDef[] = [
-  { key: "graph", icon: <GraphIcon />, iconBg: "var(--cyan)" },
-  { key: "patterns", icon: <PatternIcon />, iconBg: "var(--accent)" },
-  { key: "investigations", icon: <InvestigationIcon />, iconBg: "var(--color-info)" },
-];
-
-const STATS_CACHE_KEY = "coacc_stats_cache_v2";
-
-export function Landing() {
-  const { t } = useTranslation();
-
-  const featuresRef = useReveal();
-  const howRef = useReveal();
-  const trustRef = useReveal();
-  const sourcesRef = useReveal();
-
-  const [stats, setStats] = useState<StatsResponse | null>(() => {
-    try {
-      const raw = localStorage.getItem(STATS_CACHE_KEY);
-      return raw ? (JSON.parse(raw) as StatsResponse) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  useEffect(() => {
-    getStats()
-      .then((data) => {
-        setStats(data);
-        localStorage.setItem(STATS_CACHE_KEY, JSON.stringify(data));
-      })
-      .catch(() => {});
-  }, []);
-
-  const visibleFeatures = IS_PATTERNS_ENABLED
-    ? FEATURES
-    : FEATURES.filter((feature) => feature.key !== "patterns");
+function InvestigationFeature({
+  investigation,
+  featured = false,
+}: {
+  investigation: MaterializedInvestigation;
+  featured?: boolean;
+}) {
+  const isFresh = isFreshInvestigation(investigation);
 
   return (
-    <>
-      <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <div className={styles.heroLeft}>
-            <span className={styles.badge}>{t("landing.badge")}</span>
-            <h1 className={styles.title}>{t("landing.hero")}</h1>
-            <p className={styles.subtitle}>{t("landing.heroSubtitle")}</p>
-            <Link to={IS_PUBLIC_MODE ? "/app/search" : "/login"} className={styles.cta}>
-              {t("landing.cta")}
-            </Link>
-            <p className={styles.disclaimer}>{t("app.disclaimer")}</p>
-          </div>
-
-          <div className={styles.heroRight}>
-            <h1 style={{ fontSize: "15vw", margin: 0, padding: 0, color: "var(--bg-secondary)", lineHeight: 0.8, wordBreak: "break-all" }}>
-              DATA<br/>
-              IS<br/>
-              POWER
-            </h1>
-          </div>
-        </div>
-      </section>
-
-      <StatsBar />
-
-      <section className={styles.features}>
-        <div ref={featuresRef} className={`${styles.featuresInner} ${styles.reveal}`}>
-          <span className={styles.sectionLabel}>
-            {t("landing.features.sectionLabel")}
-          </span>
-          <h2 className={styles.sectionHeading}>
-            {t("landing.features.sectionHeading")}
-          </h2>
-          <div className={styles.featuresGrid}>
-            {visibleFeatures.map(({ key, icon, iconBg }) => (
-              <FeatureCard
-                key={key}
-                icon={icon}
-                iconBg={iconBg}
-                title={t(`landing.features.${key}`)}
-                description={t(`landing.features.${key}Desc`)}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.howItWorks}>
-        <div ref={howRef} className={`${styles.howItWorksInner} ${styles.reveal}`}>
-          <span className={styles.sectionLabel}>
-            {t("landing.howItWorks.sectionLabel")}
-          </span>
-          <h2 className={styles.sectionHeading}>
-            {t("landing.howItWorks.sectionHeading")}
-          </h2>
-          <div className={styles.stepsGrid}>
-            {[1, 2, 3].map((n) => (
-              <div key={n} className={styles.step}>
-                <span className={styles.stepNumber}>{n}</span>
-                <span className={styles.stepTitle}>
-                  {t(`landing.howItWorks.step${n}`)}
-                </span>
-                <span className={styles.stepDesc}>
-                  {t(`landing.howItWorks.step${n}Desc`)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div ref={trustRef} className={`${styles.trust} ${styles.reveal}`}>
-        <div className={styles.trustItem}>
-          <span className={styles.trustValue}>{t("landing.trust.openSourceValue")}</span>
-          <span className={styles.trustLabel}>{t("landing.trust.openSource")}</span>
-        </div>
-        <div className={styles.trustItem}>
-          <span className={styles.trustValue}>{t("landing.trust.neutralValue")}</span>
-          <span className={styles.trustLabel}>{t("landing.trust.neutral")}</span>
-        </div>
-        <div className={styles.trustItem}>
-          <span className={styles.trustValue}>{t("landing.trust.auditableValue")}</span>
-          <span className={styles.trustLabel}>{t("landing.trust.auditable")}</span>
-        </div>
+    <article className={`${styles.investigationCard} ${featured ? styles.investigationCardFeatured : ""}`}>
+      <p className={styles.cardEyebrow}>{isFresh ? "Pista nueva" : "Caso corroborado"}</p>
+      <h3>{investigation.title}</h3>
+      <p className={styles.cardMeta}>
+        {investigation.subject_name}
+        {investigation.subject_ref ? ` · ${investigation.subject_ref}` : ""}
+      </p>
+      <p className={styles.cardSummary}>{investigation.summary}</p>
+      <div className={styles.tagRow}>
+        {investigation.tags.slice(0, featured ? 4 : 2).map((tag) => (
+          <span key={`${investigation.slug}-${tag}`} className={styles.tagChip}>{formatSignalLabel(tag)}</span>
+        ))}
       </div>
+      <Link to={`/investigations/${investigation.slug}`} className={styles.inlineAction}>
+        {isFresh ? "Abrir pista" : "Abrir caso"}
+      </Link>
+    </article>
+  );
+}
 
-      <section className={styles.sources}>
-        <div ref={sourcesRef} className={`${styles.sourcesInner} ${styles.reveal}`}>
-          <span className={styles.sectionLabel}>
-            {t("landing.sources.sectionLabel")}
-          </span>
-          <h2 className={styles.sectionHeading}>
-            {t("landing.sources.sectionHeading")}
-          </h2>
-          <div className={styles.sourcesGrid}>
-            {DATA_SOURCES.map((source) => {
-              const count = stats ? source.countFn(stats) : null;
-              return (
-                <div key={source.nameKey} className={styles.sourceCard}>
-                  <div className={styles.sourceHeader}>
-                    <span className={styles.sourceName}>{source.nameKey}</span>
-                    <span className={styles.sourceCount}>
-                      {count != null ? formatCount(count) : "\u2014"}
-                    </span>
-                  </div>
-                  <span className={styles.sourceDesc}>{t(source.descKey)}</span>
-                </div>
-              );
-            })}
+export function Landing() {
+  const [stats, setStats] = useState<StatsResponse | null>(null);
+  const [pack, setPack] = useState<MaterializedResultsPack | null>(null);
+
+  const proofRef = useReveal();
+  const investigationsRef = useReveal();
+  const methodologyRef = useReveal();
+  const sourcesRef = useReveal();
+
+  useEffect(() => {
+    getStats().then(setStats).catch(() => {});
+    const controller = new AbortController();
+    loadMaterializedResultsPack(controller.signal).then(setPack).catch(() => {});
+    return () => controller.abort();
+  }, []);
+
+  const investigations = useMemo(() => pack?.investigations ?? [], [pack]);
+  const freshInvestigations = useMemo(
+    () => investigations.filter((investigation) => isFreshInvestigation(investigation)),
+    [investigations],
+  );
+  const corroboratedInvestigations = useMemo(
+    () => investigations.filter((investigation) => isCorroboratedInvestigation(investigation)),
+    [investigations],
+  );
+  const featuredInvestigation = freshInvestigations[0] ?? null;
+  const supportingInvestigations = freshInvestigations.slice(1, 4);
+  const libraryPreview = corroboratedInvestigations.slice(0, 4);
+  const proofCases = useMemo(
+    () => (pack?.validation.cases ?? []).filter((item) => item.matched).slice(0, 4),
+    [pack],
+  );
+
+  return (
+    <div className={styles.page}>
+      <section className={styles.hero}>
+        <div className={styles.heroCopy}>
+          <p className={styles.badge}>Investigación pública con fuentes verificables</p>
+          <h1 className={styles.title}>
+            Primero descubrir. Después corroborar. No al revés.
+          </h1>
+          <p className={styles.subtitle}>
+            CO-ACC cruza contratación, sanciones, cargos públicos, financiación política, educación y otras fuentes
+            oficiales para producir hallazgos verificables. La lectura pública ahora separa dos flujos: portada para
+            encontrar pistas nuevas y biblioteca aparte para revisar lo ya corroborado.
+          </p>
+          <div className={styles.heroActions}>
+            <Link to="/results" className={styles.primaryCta}>
+              Ver pistas nuevas
+            </Link>
+            <Link to="/investigations" className={styles.secondaryCta}>
+              Biblioteca corroborada
+            </Link>
           </div>
+          <p className={styles.disclaimer}>
+            Los hallazgos son señales investigativas basadas en datos públicos. No sustituyen una decisión judicial ni
+            atribuyen responsabilidad penal por sí solos.
+          </p>
+        </div>
+
+        <aside className={styles.heroEvidence}>
+          <div className={styles.metricCard}>
+            <span>casos corroborados</span>
+            <strong>{pack ? String(pack.validation.matched) : "—"}</strong>
+          </div>
+          <div className={styles.metricCard}>
+            <span>contratos visibles</span>
+            <strong>{stats ? formatCount(stats.contract_count) : "—"}</strong>
+          </div>
+          <div className={styles.metricCard}>
+            <span>fuentes oficiales activas</span>
+            <strong>{pack?.stats.promoted_sources ?? "—"}</strong>
+          </div>
+          <div className={styles.metricCard}>
+            <span>pistas priorizadas</span>
+            <strong>{pack ? formatCount(pack.summary.company_watchlist_count + pack.summary.people_watchlist_count) : "—"}</strong>
+          </div>
+        </aside>
+      </section>
+
+      <section ref={investigationsRef} className={`${styles.section} ${styles.reveal}`}>
+        <div className={styles.sectionHead}>
+          <div>
+            <p className={styles.sectionEyebrow}>Portada</p>
+            <h2>La portada pública ya no empieza por casos viejos: empieza por hallazgos nuevos.</h2>
+          </div>
+          <Link to="/results" className={styles.inlineAction}>
+            Ir a pistas nuevas
+          </Link>
+        </div>
+
+        <div className={styles.frontPageGrid}>
+          {featuredInvestigation ? (
+            <div className={styles.leadStory}>
+              <InvestigationFeature investigation={featuredInvestigation} featured />
+            </div>
+          ) : (
+            <article className={`${styles.investigationCard} ${styles.investigationCardFeatured}`}>
+              <p className={styles.cardEyebrow}>Portada de descubrimiento</p>
+              <h3>Este lote todavía no trae una pista nueva publicada con cierre suficiente.</h3>
+              <p className={styles.cardSummary}>
+                La portada sigue reservada para descubrimiento. Cuando un hallazgo nuevo pase el umbral mínimo de
+                legibilidad pública, aparecerá aquí antes que los casos corroborados.
+              </p>
+              <Link to="/results" className={styles.inlineAction}>
+                Ir a pistas nuevas
+              </Link>
+            </article>
+          )}
+
+          {supportingInvestigations.length > 0 ? (
+            <div className={styles.supportingStories}>
+              {supportingInvestigations.map((investigation) => (
+                <InvestigationFeature key={investigation.slug} investigation={investigation} />
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 
-      <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div className={styles.footerTop}>
-            <Link to={IS_PUBLIC_MODE ? "/app/search" : "/login"} className={styles.footerLink}>
-              {t("landing.footer.platform")}
-            </Link>
-            <span className={styles.footerLink}>
-              {t("landing.footer.methodology")}
-            </span>
-            <span className={styles.footerLink}>
-              {t("landing.footer.license")}
-            </span>
+      <section ref={proofRef} className={`${styles.section} ${styles.reveal}`}>
+        <div className={styles.sectionHead}>
+          <div>
+            <p className={styles.sectionEyebrow}>Biblioteca corroborada</p>
+            <h2>Lo corroborado queda aparte para contrastar, citar y medir si las pistas nuevas van bien encaminadas.</h2>
           </div>
-          <div className={styles.footerDivider} />
-          <span className={styles.footerBrand}>{t("landing.footer.brand")}</span>
-          <p className={styles.footerDisclaimer}>{t("app.disclaimer")}</p>
+          <div className={styles.proofBadge}>
+            <BadgeCheck size={16} />
+            <span>{libraryPreview.length > 0 ? libraryPreview.length : proofCases.length} controles visibles</span>
+          </div>
         </div>
-      </footer>
-    </>
+
+        <div className={styles.proofGrid}>
+          {libraryPreview.length > 0 ? libraryPreview.map((investigation) => (
+            <InvestigationFeature key={investigation.slug} investigation={investigation} />
+          )) : proofCases.map((caseItem) => (
+            <article key={caseItem.case_id} className={styles.proofCard}>
+              <p className={styles.cardEyebrow}>{caseItem.category.replaceAll("_", " ")}</p>
+              <h3>{caseItem.title}</h3>
+              <p className={styles.cardMeta}>{caseItem.entity_name} · {caseItem.entity_ref}</p>
+              <p className={styles.cardSummary}>{caseItem.summary}</p>
+              <div className={styles.tagRow}>
+                {caseItem.matched_signals.slice(0, 3).map((signal) => (
+                  <span key={`${caseItem.case_id}-${signal}`} className={styles.tagChip}>{formatSignalLabel(signal)}</span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="metodologia" ref={methodologyRef} className={`${styles.section} ${styles.reveal}`}>
+        <div className={styles.sectionHead}>
+          <div>
+            <p className={styles.sectionEyebrow}>Metodología</p>
+            <h2>Cómo se convierte una base pública dispersa en una investigación legible</h2>
+          </div>
+        </div>
+
+        <div className={styles.methodologyGrid}>
+          <article className={styles.methodCard}>
+            <Network size={18} />
+            <h3>1. Normalización</h3>
+            <p>Unificamos cédulas, NIT, BPIN, contratos, convenios, geografía y control fiscal para que el grafo conecte actores que los portales publican por separado.</p>
+          </article>
+          <article className={styles.methodCard}>
+            <Link2 size={18} />
+            <h3>2. Cruces y patrones</h3>
+            <p>Cruzamos contratación, sanciones, financiación política, educación, cargos públicos y ejecución contractual para detectar patrones que se repiten.</p>
+          </article>
+          <article className={styles.methodCard}>
+            <ShieldCheck size={18} />
+            <h3>3. Validación</h3>
+            <p>Contrastamos el sistema con casos públicos conocidos para comprobar que las conexiones reproducen hechos verificables antes de publicarlas como evidencia útil.</p>
+          </article>
+          <article className={styles.methodCard}>
+            <BookOpenText size={18} />
+            <h3>4. Dossiers</h3>
+            <p>El resultado no se deja como lista cruda. Cada caso destacado se sirve como dossier con hallazgos, evidencia, nodos y fuentes públicas citables.</p>
+          </article>
+        </div>
+      </section>
+
+      <section ref={sourcesRef} className={`${styles.section} ${styles.reveal}`}>
+        <div className={styles.sectionHead}>
+          <div>
+            <p className={styles.sectionEyebrow}>Registro de fuentes</p>
+            <h2>Fuentes oficiales activas en esta publicación</h2>
+          </div>
+        </div>
+
+        <div className={styles.sourcesGrid}>
+          {DATA_SOURCES.map((source) => {
+            const count = stats ? source.countFn(stats) : null;
+            return (
+              <article key={source.name} className={styles.sourceCard}>
+                <div className={styles.sourceHead}>
+                  <strong>{source.name}</strong>
+                  <span>{count != null ? formatCount(count) : "—"}</span>
+                </div>
+                <p>{source.description}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    </div>
   );
 }

@@ -1,0 +1,95 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993",
+  "title": "ANDREA DEL PILAR ACOSTA BELLO",
+  "subtitle": "Empresa · 52503137",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público",
+    "Facturación o pagos por delante de la ejecución"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993",
+        "label": "ANDREA DEL PILAR ACOSTA BELLO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 3,
+          "contract_count": 13,
+          "contract_value": 1581194666.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "52503137"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993:official:1",
+        "label": "ANDREA DEL PILAR ACOSTA BELLO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993:contracts",
+        "label": "Contratos detectados (13)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 13,
+          "total_value": 1581194666.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993:execution-gap",
+        "label": "Brecha de ejecución (1)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1,
+          "invoice_total_value": 13200000.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 13,
+          "total_value": 1581194666.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993:execution-gap",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:55993",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1,
+          "invoice_total_value": 13200000.0
+        }
+      }
+    ]
+  }
+}

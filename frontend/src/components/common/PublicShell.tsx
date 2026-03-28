@@ -1,4 +1,3 @@
-import { useTranslation } from "react-i18next";
 import { Link, Outlet } from "react-router";
 
 import { IS_PUBLIC_MODE } from "@/config/runtime";
@@ -7,27 +6,45 @@ import { useAuthStore } from "@/stores/auth";
 import styles from "./PublicShell.module.css";
 
 export function PublicShell() {
-  const { t } = useTranslation();
   const token = useAuthStore((s) => s.token);
 
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <Link to="/" className={styles.logo}>
-          {t("app.title")}
-        </Link>
+        <div className={styles.brandBlock}>
+          <Link to="/" className={styles.logo}>
+            CO-ACC
+          </Link>
+          <span className={styles.brandNote}>investigaciones públicas con datos reales de Colombia</span>
+        </div>
+
+        <nav className={styles.nav}>
+          <Link to="/" className={styles.navLink}>
+            Inicio
+          </Link>
+          <Link to="/results" className={styles.navLink}>
+            Pistas nuevas
+          </Link>
+          <Link to="/investigations" className={styles.navLink}>
+            Biblioteca corroborada
+          </Link>
+          <Link to="/#metodologia" className={styles.navLink}>
+            Metodología
+          </Link>
+        </nav>
+
         <div className={styles.actions}>
           {IS_PUBLIC_MODE ? (
-            <Link to="/app/search" className={styles.registerLink}>
-              Open Explorer
+            <Link to="/app/search" className={styles.primaryLink}>
+              Explorar grafo
             </Link>
           ) : !token && (
             <>
-              <Link to="/login" className={styles.authLink}>
-                {t("nav.login")}
+              <Link to="/login" className={styles.secondaryLink}>
+                Ingresar
               </Link>
-              <Link to="/register" className={styles.registerLink}>
-                {t("nav.register")}
+              <Link to="/register" className={styles.primaryLink}>
+                Crear cuenta
               </Link>
             </>
           )}

@@ -14,6 +14,7 @@ class SourceRegistryEntry:
     status: str
     implementation_state: str
     load_state: str
+    signal_promotion_state: str
     frequency: str
     in_universe_v1: bool
     primary_url: str
@@ -37,6 +38,7 @@ class SourceRegistryEntry:
             "status": self.status,
             "implementation_state": self.implementation_state,
             "load_state": self.load_state,
+            "signal_promotion_state": self.signal_promotion_state,
             "frequency": self.frequency,
             "in_universe_v1": self.in_universe_v1,
             "primary_url": self.primary_url,
@@ -102,6 +104,9 @@ def load_source_registry() -> list[SourceRegistryEntry]:
                     status=(row.get("status") or "").strip(),
                     implementation_state=(row.get("implementation_state") or "").strip(),
                     load_state=(row.get("load_state") or "").strip(),
+                    signal_promotion_state=(
+                        (row.get("signal_promotion_state") or "promoted").strip()
+                    ),
                     frequency=(row.get("frequency") or "").strip(),
                     in_universe_v1=_str_to_bool(row.get("in_universe_v1") or ""),
                     primary_url=(row.get("primary_url") or "").strip(),
@@ -140,6 +145,17 @@ def source_registry_summary(entries: list[SourceRegistryEntry]) -> dict[str, int
     blocked = [entry for entry in universe_v1 if entry.status == "blocked_external"]
     quality_fail = [entry for entry in universe_v1 if entry.status == "quality_fail"]
     healthy = [entry for entry in universe_v1 if entry.status == "loaded"]
+    promoted = [
+        entry for entry in universe_v1 if entry.signal_promotion_state == "promoted"
+    ]
+    enrichment_only = [
+        entry
+        for entry in universe_v1
+        if entry.signal_promotion_state == "enrichment_only"
+    ]
+    quarantined = [
+        entry for entry in universe_v1 if entry.signal_promotion_state == "quarantined"
+    ]
     discovered_uningested = [
         entry
         for entry in universe_v1
@@ -155,5 +171,8 @@ def source_registry_summary(entries: list[SourceRegistryEntry]) -> dict[str, int
         "stale_sources": len(stale),
         "blocked_external_sources": len(blocked),
         "quality_fail_sources": len(quality_fail),
+        "promoted_sources": len(promoted),
+        "enrichment_only_sources": len(enrichment_only),
+        "quarantined_sources": len(quarantined),
         "discovered_uningested_sources": len(discovered_uningested),
     }

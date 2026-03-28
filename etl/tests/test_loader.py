@@ -16,20 +16,20 @@ class TestNeo4jBatchLoader:
     def test_load_nodes(self) -> None:
         loader, session = self._make_loader()
         rows = [
-            {"cnpj": "111", "razon_social": "Company A", "uf": "SP"},
-            {"cnpj": "222", "razon_social": "Company B", "uf": "RJ"},
+            {"nit": "111", "razon_social": "Company A", "department": "BOGOTA"},
+            {"nit": "222", "razon_social": "Company B", "department": "ANTIOQUIA"},
         ]
-        count = loader.load_nodes("Company", rows, "cnpj")
+        count = loader.load_nodes("Company", rows, "nit")
         assert count == 2
         session.run.assert_called_once()
         query = session.run.call_args[0][0]
         assert "MERGE" in query
         assert "Company" in query
-        assert "cnpj" in query
+        assert "nit" in query
 
     def test_load_nodes_empty(self) -> None:
         loader, session = self._make_loader()
-        count = loader.load_nodes("Company", [], "cnpj")
+        count = loader.load_nodes("Company", [], "nit")
         assert count == 0
         session.run.assert_not_called()
 
@@ -40,7 +40,7 @@ class TestNeo4jBatchLoader:
         ]
         count = loader.load_relationships(
             "GANO", rows,
-            "Company", "cnpj",
+            "Company", "nit",
             "Contract", "contract_id",
             properties=["value"],
         )
@@ -53,29 +53,29 @@ class TestNeo4jBatchLoader:
     def test_batching(self) -> None:
         loader, session = self._make_loader(batch_size=2)
         rows = [
-            {"cnpj": str(i), "name": f"C{i}"} for i in range(5)
+            {"nit": str(i), "name": f"C{i}"} for i in range(5)
         ]
-        count = loader.load_nodes("Company", rows, "cnpj")
+        count = loader.load_nodes("Company", rows, "nit")
         assert count == 5
         assert session.run.call_count == 3  # 2+2+1
 
     def test_load_nodes_filters_empty_keys(self) -> None:
         loader, session = self._make_loader()
         rows = [
-            {"cnpj": "111", "name": "A"},
-            {"cnpj": "", "name": "B"},
-            {"cnpj": None, "name": "C"},
+            {"nit": "111", "name": "A"},
+            {"nit": "", "name": "B"},
+            {"nit": None, "name": "C"},
             {"name": "D"},  # missing key entirely
-            {"cnpj": "222", "name": "E"},
+            {"nit": "222", "name": "E"},
         ]
-        count = loader.load_nodes("Company", rows, "cnpj")
+        count = loader.load_nodes("Company", rows, "nit")
         assert count == 2
         call_args = session.run.call_args
         batch = (
             call_args[1]["rows"] if call_args[1]
             else call_args[0][1]["rows"]
         )
-        assert all(r["cnpj"] for r in batch)
+        assert all(r["nit"] for r in batch)
 
     def test_load_relationships_filters_empty_keys(self) -> None:
         loader, session = self._make_loader()

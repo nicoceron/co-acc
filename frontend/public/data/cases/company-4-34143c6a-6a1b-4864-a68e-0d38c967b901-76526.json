@@ -1,0 +1,97 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526",
+  "title": "VIGIAS DE COLOMBIA SRL LTDA.",
+  "subtitle": "Empresa · 860050247",
+  "summary": "La empresa registra al menos un contrato con fecha dentro de una ventana pública de sanción vigente o no cerrada.",
+  "tags": [
+    "Proveedor sancionado que siguió recibiendo contratos",
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526",
+        "label": "VIGIAS DE COLOMBIA SRL LTDA.",
+        "type": "company",
+        "properties": {
+          "risk_score": 14,
+          "signal_types": 3,
+          "contract_count": 104,
+          "contract_value": 224269566824.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "860050247"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526:sanctions",
+        "label": "Sanciones oficiales (4)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 4
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526:contracts",
+        "label": "Contratos detectados (104)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 104,
+          "total_value": 224269566824.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526:sanction-window",
+        "label": "Contratos en ventana sancionatoria (12)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 12,
+          "total_value": 20614280440.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 4
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 104,
+          "total_value": 224269566824.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526:sanction-window",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:76526",
+        "type": "CONTRATOU",
+        "confidence": 0.95,
+        "properties": {
+          "contract_count": 12,
+          "total_value": 20614280440.0
+        }
+      }
+    ]
+  }
+}

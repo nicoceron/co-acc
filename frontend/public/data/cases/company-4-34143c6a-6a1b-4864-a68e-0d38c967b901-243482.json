@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482",
+  "title": "EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN ANTONIO DE SESQUILE",
+  "subtitle": "Empresa · 899999158",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482",
+        "label": "EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN ANTONIO DE SESQUILE",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 234,
+          "contract_value": 52781661758.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "899999158"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482:official:1",
+        "label": "HERNANDO FRANCISCO CHICA ZUCCARDI",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482:official:2",
+        "label": "ENRIQUE CABALLERO BORDA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482:contracts",
+        "label": "Contratos detectados (234)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 234,
+          "total_value": 52781661758.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:243482",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 234,
+          "total_value": 52781661758.0
+        }
+      }
+    ]
+  }
+}

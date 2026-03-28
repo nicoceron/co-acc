@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:254306",
+  "title": "MAPFRE SEGUROS GENERALES DE COLOMBIA S.A.",
+  "subtitle": "Empresa · 891700037",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:254306",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:254306",
+        "label": "MAPFRE SEGUROS GENERALES DE COLOMBIA S.A.",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 986,
+          "contract_value": 4352347574287.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "891700037"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:254306:official:1",
+        "label": "YOLANDA ZAPATA GUZMAN",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:254306:contracts",
+        "label": "Contratos detectados (986)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 986,
+          "total_value": 4352347574287.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:254306:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:254306",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:254306:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:254306",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 986,
+          "total_value": 4352347574287.0
+        }
+      }
+    ]
+  }
+}

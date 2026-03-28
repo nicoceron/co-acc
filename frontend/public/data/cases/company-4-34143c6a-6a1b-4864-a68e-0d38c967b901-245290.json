@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245290",
+  "title": "CORPORACION ORGANIZACION EL MINUTO DE DIOS",
+  "subtitle": "Empresa · 860010371",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245290",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245290",
+        "label": "CORPORACION ORGANIZACION EL MINUTO DE DIOS",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 77,
+          "contract_value": 46483029024.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "860010371"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245290:official:1",
+        "label": "RAUL JOSE BUITRAGO ARIAS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245290:contracts",
+        "label": "Contratos detectados (77)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 77,
+          "total_value": 46483029024.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245290:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245290",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245290:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245290",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 77,
+          "total_value": 46483029024.0
+        }
+      }
+    ]
+  }
+}

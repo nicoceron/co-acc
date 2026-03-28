@@ -188,7 +188,7 @@ async def test_public_patterns_company_endpoint_when_enabled(client: AsyncClient
     assert payload["patterns"][0]["exposure_tier"] == "public_safe"
     assert payload["patterns"][0]["data"]["evidence_refs"]
     assert payload["patterns"][0]["data"]["risk_signal"] >= 1
-    assert "cpf" not in str(payload).lower()
+    assert "document_id" not in str(payload).lower()
 
 
 @pytest.mark.anyio
@@ -322,6 +322,9 @@ async def test_stats_hides_person_count_in_public_mode(
             "stale_sources": 0,
             "blocked_external_sources": 0,
             "quality_fail_sources": 0,
+            "promoted_sources": 0,
+            "enrichment_only_sources": 0,
+            "quarantined_sources": 0,
             "discovered_uningested_sources": 0,
         },
     ):

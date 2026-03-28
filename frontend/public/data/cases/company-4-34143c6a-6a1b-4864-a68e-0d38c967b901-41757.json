@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:41757",
+  "title": "LEDYS MARIA IZQUIERDO BORRERO",
+  "subtitle": "Empresa · 32754316",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:41757",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:41757",
+        "label": "LEDYS MARIA IZQUIERDO BORRERO",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 50,
+          "contract_value": 2730947636.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "32754316"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:41757:official:1",
+        "label": "IZQUIERDO BORRERO LEDYS MARIA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:41757:contracts",
+        "label": "Contratos detectados (50)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 50,
+          "total_value": 2730947636.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:41757:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:41757",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:41757:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:41757",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 50,
+          "total_value": 2730947636.0
+        }
+      }
+    ]
+  }
+}

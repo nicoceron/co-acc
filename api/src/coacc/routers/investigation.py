@@ -288,7 +288,7 @@ async def export_investigation_pdf(
     investigation_id: str,
     session: Annotated[AsyncSession, Depends(get_session)],
     user: CurrentUser,
-    lang: Annotated[Literal["pt", "en"], Query()] = "pt",
+    lang: Annotated[Literal["es", "en"], Query()] = "es",
 ) -> Response:
     investigation = await svc.get_investigation(session, investigation_id, user.id)
     if investigation is None:
@@ -303,7 +303,12 @@ async def export_investigation_pdf(
         if record is not None:
             node = record["e"]
             labels = record["entity_labels"]
-            document = str(node.get("cpf", node.get("cnpj", "")))
+            document = str(
+                node.get("document_id")
+                or node.get("nit")
+                or node.get("cedula")
+                or ""
+            )
 
             entities.append({
                 "name": str(node.get("name", "")),

@@ -19,7 +19,7 @@ Expected results:
 bash scripts/bootstrap_public_demo.sh --profile demo
 
 # Full profile (orchestrates docker + ETL loop)
-bash scripts/bootstrap_public_demo.sh --profile full --pipelines cnpj,tse,transparencia,sanctions --download
+bash scripts/bootstrap_public_demo.sh --profile full --pipelines secop_integrado,sigep,paco_sanctions --download
 
 # Heavy one-command full ingestion (all implemented pipelines from contract)
 make bootstrap-all
@@ -42,7 +42,7 @@ Use ETL directly:
 cd etl
 uv sync
 uv run coacc-etl sources
-uv run coacc-etl run --source cnpj --neo4j-password "$NEO4J_PASSWORD" --data-dir ../data
+uv run coacc-etl run --source secop_integrado --neo4j-password "$NEO4J_PASSWORD" --data-dir ../data
 ```
 
 ## What This Does Not Reproduce Automatically

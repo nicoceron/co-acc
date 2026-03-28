@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:129190",
+  "title": "ESE CENTRO DERMATOLOGICO FEDERICO LLERAS ACOSTA",
+  "subtitle": "Empresa · 800247350",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:129190",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:129190",
+        "label": "ESE CENTRO DERMATOLOGICO FEDERICO LLERAS ACOSTA",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 40,
+          "contract_value": 23264203386.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "800247350"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:129190:official:1",
+        "label": "CLAUDIA MARCELA ROJAS DAZA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:129190:contracts",
+        "label": "Contratos detectados (40)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 40,
+          "total_value": 23264203386.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:129190:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:129190",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:129190:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:129190",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 40,
+          "total_value": 23264203386.0
+        }
+      }
+    ]
+  }
+}

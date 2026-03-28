@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467763",
+  "title": "AMPARO ALVARADO NEGRETE",
+  "subtitle": "Empresa · 66927402",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467763",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467763",
+        "label": "AMPARO ALVARADO NEGRETE",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 37,
+          "contract_value": 4975571599.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "66927402"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467763:official:1",
+        "label": "MILTON HERNANDO PEREZ ORDONEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467763:contracts",
+        "label": "Contratos detectados (37)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 37,
+          "total_value": 4975571599.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467763:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467763",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467763:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:467763",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 37,
+          "total_value": 4975571599.0
+        }
+      }
+    ]
+  }
+}

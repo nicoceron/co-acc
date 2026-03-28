@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245200",
+  "title": "CONSORCIO ENGATIVA MUJER 2025",
+  "subtitle": "Empresa · 999999999",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245200",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245200",
+        "label": "CONSORCIO ENGATIVA MUJER 2025",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 49,
+          "contract_value": 136059256316.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "999999999"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245200:official:1",
+        "label": "JIMMY EDUARDO GONZALEZ PALACIO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245200:contracts",
+        "label": "Contratos detectados (49)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 49,
+          "total_value": 136059256316.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245200:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245200",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245200:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245200",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 49,
+          "total_value": 136059256316.0
+        }
+      }
+    ]
+  }
+}

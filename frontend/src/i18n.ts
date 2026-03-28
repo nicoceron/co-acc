@@ -95,6 +95,14 @@ const resources = {
         watchlistKicker: "motor público de riesgo",
         watchlistSubtitle:
           "Personas y empresas priorizadas por cruces reales entre contratación, cargos públicos, elecciones, declaraciones y financiamiento público.",
+        practiceCoverageLabel: "Cobertura activa",
+        practiceRigging: "Direccionamiento y baja competencia",
+        practiceDonorVendor: "Donaciones que terminan en contratos",
+        practiceOfficialSupplier: "Funcionario-proveedor en cargo sensible",
+        practiceSharedOfficer: "Redes con representante compartido",
+        practiceSanctionedHealth: "Operadores de salud sancionados",
+        practiceBudgetLeakage: "Factura, compromiso y ejecución",
+        practicePublicMoney: "Apilamiento de canales públicos",
         watchlistLabel: "priorización",
         prioritizedPeople: "Personas priorizadas",
         watchlistNote:
@@ -638,6 +646,14 @@ const resources = {
         watchlistKicker: "cross-source watchlist",
         watchlistSubtitle:
           "People and companies prioritized from real overlaps across contracts, public office, elections, disclosures, and public funding.",
+        practiceCoverageLabel: "Live coverage",
+        practiceRigging: "Steered awards and low competition",
+        practiceDonorVendor: "Campaign money that turns into contracts",
+        practiceOfficialSupplier: "Officeholder-supplier overlap in sensitive roles",
+        practiceSharedOfficer: "Shared legal-representative networks",
+        practiceSanctionedHealth: "Sanctioned health operators",
+        practiceBudgetLeakage: "Invoice, commitment, and execution gaps",
+        practicePublicMoney: "Stacked public-money channels",
         watchlistLabel: "priority queue",
         prioritizedPeople: "Prioritized people",
         watchlistNote:

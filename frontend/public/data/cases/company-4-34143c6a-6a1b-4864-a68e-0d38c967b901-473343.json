@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473343",
+  "title": "HASBLEIDY HERNANDEZ GUATAQUIRA",
+  "subtitle": "Empresa · 1032396828",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473343",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473343",
+        "label": "HASBLEIDY HERNANDEZ GUATAQUIRA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 32,
+          "contract_value": 1888670154.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "1032396828"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473343:official:1",
+        "label": "HASBLEIDY HERNANDEZ GUATAQUIRA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473343:contracts",
+        "label": "Contratos detectados (32)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 32,
+          "total_value": 1888670154.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473343:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473343",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473343:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:473343",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 32,
+          "total_value": 1888670154.0
+        }
+      }
+    ]
+  }
+}

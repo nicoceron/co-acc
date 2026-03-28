@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469107",
+  "title": "DEPARTAMENTO ADMINISTRATIVO DE LA FUNCION PUBLICA",
+  "subtitle": "Empresa · 8999990207",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469107",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469107",
+        "label": "DEPARTAMENTO ADMINISTRATIVO DE LA FUNCION PUBLICA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 38,
+          "contract_value": 10380086729.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8999990207"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469107:official:1",
+        "label": "GUSTAVO ENRIQUE GARCIA BATE",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469107:contracts",
+        "label": "Contratos detectados (38)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 38,
+          "total_value": 10380086729.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469107:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469107",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469107:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469107",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 38,
+          "total_value": 10380086729.0
+        }
+      }
+    ]
+  }
+}

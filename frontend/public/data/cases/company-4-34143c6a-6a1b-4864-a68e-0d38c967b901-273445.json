@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273445",
+  "title": "CUNDINAMARCA - CONCEJO MUNICIPAL DE FUSAGASUGÁ",
+  "subtitle": "Empresa · 8906800084",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273445",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273445",
+        "label": "CUNDINAMARCA - CONCEJO MUNICIPAL DE FUSAGASUGÁ",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 193,
+          "contract_value": 40319407428.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8906800084"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273445:official:1",
+        "label": "CARLOS ANDRES DAZA BELTRAN",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273445:contracts",
+        "label": "Contratos detectados (193)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 193,
+          "total_value": 40319407428.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273445:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273445",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273445:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:273445",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 193,
+          "total_value": 40319407428.0
+        }
+      }
+    ]
+  }
+}

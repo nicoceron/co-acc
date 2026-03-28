@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221",
+  "title": "UNIDAD PARA LA ATENCION Y REPARACION INTEGRAL A LAS VICTIMAS",
+  "subtitle": "Empresa · 9004904736",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221",
+        "label": "UNIDAD PARA LA ATENCION Y REPARACION INTEGRAL A LAS VICTIMAS",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 28,
+          "contract_value": 42710034565.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "9004904736"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221:official:1",
+        "label": "SARA SANDOVNIK MORENO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221:official:2",
+        "label": "LUIS ALBERTO DONOSO RINCON",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221:contracts",
+        "label": "Contratos detectados (28)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 28,
+          "total_value": 42710034565.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:470221",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 28,
+          "total_value": 42710034565.0
+        }
+      }
+    ]
+  }
+}

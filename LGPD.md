@@ -1,4 +1,4 @@
-# DATA PROTECTION POLICY (LEY 1581 / LGPD) — World Transparency Graph (WTG)
+# DATA PROTECTION POLICY (LEY 1581) — World Transparency Graph (WTG)
 
 Policy-Version: v1.1.0  
 Effective-Date: 2026-03-15  
@@ -6,7 +6,7 @@ Owner: WTG Governance Team
 
 ## Legal basis posture
 
-WTG is operated with a public-interest and transparency posture for analysis of publicly available records, with strict minimization and access controls. This project adheres to the principles of Colombian **Ley 1581 de 2012** and the Brazilian LGPD where applicable.
+WTG is operated with a public-interest and transparency posture for analysis of publicly available records, with strict minimization and access controls. This project adheres to the principles of Colombian **Ley 1581 de 2012**.
 
 This baseline is operational guidance and does not replace formal legal advice.
 

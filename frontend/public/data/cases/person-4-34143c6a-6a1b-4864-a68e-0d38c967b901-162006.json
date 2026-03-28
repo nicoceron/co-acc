@@ -1,0 +1,70 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162006",
+  "title": "BONILLA GONZALEZ RICARDO",
+  "subtitle": "Persona · 19103063",
+  "summary": "La persona registra 2 sanción(es) de responsabilidad fiscal en fuentes oficiales de control y además aparece con 44 donación(es) electorales.",
+  "tags": [
+    "Sanciones oficiales con exposición pública"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162006",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162006",
+        "label": "BONILLA GONZALEZ RICARDO",
+        "type": "person",
+        "properties": {
+          "risk_score": 42,
+          "signal_types": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "19103063"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162006:sanctions",
+        "label": "Sanciones oficiales (2)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162006:donations",
+        "label": "Donaciones (44)",
+        "type": "election",
+        "properties": {
+          "donation_count": 44
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162006",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162006:sanctions",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 2
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162006",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162006:donations",
+        "type": "DONO_A",
+        "confidence": 1.0,
+        "properties": {
+          "donation_count": 44
+        }
+      }
+    ]
+  }
+}

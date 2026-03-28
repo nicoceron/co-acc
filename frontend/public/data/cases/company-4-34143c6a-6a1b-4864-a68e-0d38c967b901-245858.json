@@ -1,0 +1,108 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858",
+  "title": "INSTITUTO NACIONAL PENITENCIARIO Y CARCELARIO INPEC+",
+  "subtitle": "Empresa · 800215546",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858",
+        "label": "INSTITUTO NACIONAL PENITENCIARIO Y CARCELARIO INPEC+",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 400,
+          "contract_value": 18054256184.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "800215546"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858:official:1",
+        "label": "GONZALO PATINO MORENO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858:official:2",
+        "label": "GUSTAVO ADOLFO ARCILA ZAPATA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858:official:3",
+        "label": "CARLOS RAUL CIPAGAUTA PEDRAZA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858:contracts",
+        "label": "Contratos detectados (400)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 400,
+          "total_value": 18054256184.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858:official:3",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:245858",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 400,
+          "total_value": 18054256184.0
+        }
+      }
+    ]
+  }
+}

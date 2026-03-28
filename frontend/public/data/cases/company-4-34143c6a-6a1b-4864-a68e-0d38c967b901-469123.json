@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469123",
+  "title": "AGENCIA LOGISTICA DE LAS FUERZAS MILITARES REGIONAL SUR OCCIDENTE",
+  "subtitle": "Empresa · 8001171978",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469123",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469123",
+        "label": "AGENCIA LOGISTICA DE LAS FUERZAS MILITARES REGIONAL SUR OCCIDENTE",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 47,
+          "contract_value": 5121522089.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8001171978"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469123:official:1",
+        "label": "FREDDY QUINTERO OLIVEROS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469123:contracts",
+        "label": "Contratos detectados (47)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 47,
+          "total_value": 5121522089.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469123:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469123",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469123:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:469123",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 47,
+          "total_value": 5121522089.0
+        }
+      }
+    ]
+  }
+}

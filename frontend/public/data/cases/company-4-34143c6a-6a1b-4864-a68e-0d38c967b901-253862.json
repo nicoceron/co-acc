@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862",
+  "title": "CANAL REGIONAL DE TELEVISION S.A.S",
+  "subtitle": "Empresa · 830005370",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862",
+        "label": "CANAL REGIONAL DE TELEVISION S.A.S",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 337,
+          "contract_value": 1776287471676.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "830005370"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862:official:1",
+        "label": "ALEJANDRO LINARES CAMBEROS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862:official:2",
+        "label": "ANA CATALINA CEBALLOS CARRIAZO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862:contracts",
+        "label": "Contratos detectados (337)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 337,
+          "total_value": 1776287471676.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:253862",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 337,
+          "total_value": 1776287471676.0
+        }
+      }
+    ]
+  }
+}

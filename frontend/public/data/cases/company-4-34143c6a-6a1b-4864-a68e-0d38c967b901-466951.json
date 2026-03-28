@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951",
+  "title": "CORPORACION AUTONOMA REGIONAL DE CUNDINAMARCA -CAR-",
+  "subtitle": "Empresa · 8999990626",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951",
+        "label": "CORPORACION AUTONOMA REGIONAL DE CUNDINAMARCA -CAR-",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 61,
+          "contract_value": 74398965513.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8999990626"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951:official:1",
+        "label": "ANA ERIKA JINNETH PENA CASTELLANOS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951:official:2",
+        "label": "LUIS FERNANDO SANABRIA MARTINEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951:contracts",
+        "label": "Contratos detectados (61)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 61,
+          "total_value": 74398965513.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466951",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 61,
+          "total_value": 74398965513.0
+        }
+      }
+    ]
+  }
+}

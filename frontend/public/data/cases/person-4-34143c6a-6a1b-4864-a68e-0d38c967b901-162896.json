@@ -1,0 +1,70 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162896",
+  "title": "MAURICIO MUNOZ RICAURTE",
+  "subtitle": "Persona · 19281642",
+  "summary": "La persona registra 6 sanción(es) disciplinaria(s) en fuentes oficiales de control y además aparece con 15 donación(es) electorales.",
+  "tags": [
+    "Sanciones oficiales con exposición pública"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162896",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162896",
+        "label": "MAURICIO MUNOZ RICAURTE",
+        "type": "person",
+        "properties": {
+          "risk_score": 38,
+          "signal_types": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "19281642"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162896:sanctions",
+        "label": "Sanciones oficiales (6)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 6
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162896:donations",
+        "label": "Donaciones (15)",
+        "type": "election",
+        "properties": {
+          "donation_count": 15
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162896",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162896:sanctions",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 6
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162896",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:162896:donations",
+        "type": "DONO_A",
+        "confidence": 1.0,
+        "properties": {
+          "donation_count": 15
+        }
+      }
+    ]
+  }
+}

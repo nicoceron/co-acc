@@ -1,0 +1,108 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855",
+  "title": "MINISTERIO DE AMBIENTE Y DESARROLLO SOSTENIBLE",
+  "subtitle": "Empresa · 8301153951",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855",
+        "label": "MINISTERIO DE AMBIENTE Y DESARROLLO SOSTENIBLE",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 50,
+          "contract_value": 39813973864.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8301153951"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855:official:1",
+        "label": "ELIZABERTH GOMEZ SANCHEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855:official:2",
+        "label": "LUISA FERNANDA BALLEN MARTINEZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855:official:3",
+        "label": "ALVARO BARRAGAN RAMIREZ",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855:contracts",
+        "label": "Contratos detectados (50)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 50,
+          "total_value": 39813973864.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855:official:3",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:466855",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 50,
+          "total_value": 39813973864.0
+        }
+      }
+    ]
+  }
+}

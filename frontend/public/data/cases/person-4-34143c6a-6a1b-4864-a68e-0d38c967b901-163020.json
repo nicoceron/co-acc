@@ -1,0 +1,70 @@
+{
+  "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:163020",
+  "title": "MARTHA LUCIA VELEZ VALLEJO",
+  "subtitle": "Persona · 51854861",
+  "summary": "La persona figura como supervisor(a) de pago en 2 contrato(s) sobre 2 proveedor(es), y 2 muestran brechas de ejecución o compromiso, pagos pendientes.",
+  "tags": [
+    "Supervisión de pagos sobre contratos riesgosos"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:163020",
+    "nodes": [
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:163020",
+        "label": "MARTHA LUCIA VELEZ VALLEJO",
+        "type": "person",
+        "properties": {
+          "risk_score": 38,
+          "signal_types": 1
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "51854861"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:163020:donations",
+        "label": "Donaciones (5)",
+        "type": "election",
+        "properties": {
+          "donation_count": 5
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:163020:payment-supervision",
+        "label": "Supervisión de pagos (2)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 2
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:163020",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:163020:donations",
+        "type": "DONO_A",
+        "confidence": 1.0,
+        "properties": {
+          "donation_count": 5
+        }
+      },
+      {
+        "source": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:163020",
+        "target": "person:4:34143c6a-6a1b-4864-a68e-0d38c967b901:163020:payment-supervision",
+        "type": "SUPERVISA_PAGO",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 2
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472030",
+  "title": "JUAN CARLOS RODRIGUEZ ARANA",
+  "subtitle": "Empresa · 79543935",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472030",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472030",
+        "label": "JUAN CARLOS RODRIGUEZ ARANA",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 2,
+          "contract_count": 14,
+          "contract_value": 2786726654.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "79543935"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472030:official:1",
+        "label": "JUAN CARLOS RODRIGUEZ ARANA",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472030:contracts",
+        "label": "Contratos detectados (14)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 14,
+          "total_value": 2786726654.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472030:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472030",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472030:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:472030",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 14,
+          "total_value": 2786726654.0
+        }
+      }
+    ]
+  }
+}

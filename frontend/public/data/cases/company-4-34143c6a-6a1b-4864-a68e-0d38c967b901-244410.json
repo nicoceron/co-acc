@@ -1,0 +1,90 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410",
+  "title": "ANTIOQUIA - SECRETARÍA DE GOBIERNO- DEPARTAMENTO DE ANTIOQUIA",
+  "subtitle": "Empresa · 8909002860",
+  "summary": "La empresa comparte dirección o control con persona(s) que también aparecen en registros activos de cargo o salario público.",
+  "tags": [
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410",
+        "label": "ANTIOQUIA - SECRETARÍA DE GOBIERNO- DEPARTAMENTO DE ANTIOQUIA",
+        "type": "company",
+        "properties": {
+          "risk_score": 10,
+          "signal_types": 3,
+          "contract_count": 613,
+          "contract_value": 1708525671884.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8909002860"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410:official:1",
+        "label": "ANA CRISTINA MORENO PALACIOS",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410:official:2",
+        "label": "NESTOR FERNANDO ZULUAGA GIRALDO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410:contracts",
+        "label": "Contratos detectados (613)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 613,
+          "total_value": 1708525671884.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410:official:2",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:244410",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 613,
+          "total_value": 1708525671884.0
+        }
+      }
+    ]
+  }
+}

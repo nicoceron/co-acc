@@ -77,12 +77,12 @@ class HealthProvidersPipeline(Pipeline):
             }
 
             health_map[site_id] = {
-                "cnes_code": site_id,
+                "reps_code": site_id,
                 "name": clean_name(row.get("nombresede")) or site_id,
                 "provider_name": provider_name,
                 "nature": clean_text(row.get("naturalezajuridica")),
                 "claseprestador": clean_text(row.get("claseprestador")),
-                "atende_sus": clean_text(row.get("ese")),
+                "is_ese": clean_text(row.get("ese")),
                 "uf": clean_text(row.get("departamentodededesc")),
                 "municipio": clean_text(row.get("municipiosededesc")),
                 "address": clean_text(row.get("direcci_nsede")),
@@ -99,7 +99,7 @@ class HealthProvidersPipeline(Pipeline):
             })
 
         self.companies = deduplicate_rows(list(company_map.values()), ["document_id"])
-        self.health_sites = deduplicate_rows(list(health_map.values()), ["cnes_code"])
+        self.health_sites = deduplicate_rows(list(health_map.values()), ["reps_code"])
         self.rels = deduplicate_rows(rels, ["source_key", "target_key"])
 
     def load(self) -> None:
@@ -109,7 +109,7 @@ class HealthProvidersPipeline(Pipeline):
         if self.companies:
             loaded += loader.load_nodes("Company", self.companies, key_field="document_id")
         if self.health_sites:
-            loaded += loader.load_nodes("Health", self.health_sites, key_field="cnes_code")
+            loaded += loader.load_nodes("Health", self.health_sites, key_field="reps_code")
         if self.rels:
             loaded += loader.load_relationships(
                 rel_type="OPERA_UNIDAD",
@@ -117,7 +117,7 @@ class HealthProvidersPipeline(Pipeline):
                 source_label="Company",
                 source_key="document_id",
                 target_label="Health",
-                target_key="cnes_code",
+                target_key="reps_code",
                 properties=["source"],
             )
 

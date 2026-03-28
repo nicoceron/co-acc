@@ -1,0 +1,74 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167108",
+  "title": "CIVING INGENIEROS CONTRATISTAS S. EN C.",
+  "subtitle": "Empresa · 8604512531",
+  "summary": "La empresa tiene 14 antecedente(s) sancionatorios y mantiene exposición en contratación pública.",
+  "tags": [
+    "Proveedor con antecedentes sancionatorios"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167108",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167108",
+        "label": "CIVING INGENIEROS CONTRATISTAS S. EN C.",
+        "type": "company",
+        "properties": {
+          "risk_score": 8,
+          "signal_types": 1,
+          "contract_count": 94,
+          "contract_value": 77351402355.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "8604512531"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167108:sanctions",
+        "label": "Sanciones oficiales (14)",
+        "type": "sanction",
+        "properties": {
+          "sanction_count": 14
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167108:contracts",
+        "label": "Contratos detectados (94)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 94,
+          "total_value": 77351402355.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167108:sanctions",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167108",
+        "type": "SANCIONADA",
+        "confidence": 1.0,
+        "properties": {
+          "sanction_count": 14
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167108:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:167108",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 94,
+          "total_value": 77351402355.0
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683",
+  "title": "AGENCIA LOGISTICA DE GESTION INMOBILIARIA Y DE SERVICIOS DE CUNDINAMARCA",
+  "subtitle": "Empresa · 830021022",
+  "summary": "Los contratos asociados muestran brechas entre facturación y avance de ejecución.",
+  "tags": [
+    "Facturación o pagos por delante de la ejecución",
+    "Proveedor con directivo o vínculo en cargo público"
+  ],
+  "public_sources": [],
+  "graph": {
+    "center_id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683",
+    "nodes": [
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683",
+        "label": "AGENCIA LOGISTICA DE GESTION INMOBILIARIA Y DE SERVICIOS DE CUNDINAMARCA",
+        "type": "company",
+        "properties": {
+          "risk_score": 15,
+          "signal_types": 4,
+          "contract_count": 1493,
+          "contract_value": 2057313632937.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe",
+        "document_id": "830021022"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683:official:1",
+        "label": "SAANDRA CECILIA RIVEROS MORENO",
+        "type": "person",
+        "properties": {},
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683:contracts",
+        "label": "Contratos detectados (1493)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 1493,
+          "total_value": 2057313632937.0
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      },
+      {
+        "id": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683:execution-gap",
+        "label": "Brecha de ejecución (6)",
+        "type": "contract",
+        "properties": {
+          "contract_count": 6,
+          "invoice_total_value": 5437131478.99
+        },
+        "sources": [],
+        "is_pep": false,
+        "exposure_tier": "public_safe"
+      }
+    ],
+    "edges": [
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683:official:1",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683",
+        "type": "OFFICER_OF",
+        "confidence": 1.0,
+        "properties": {
+          "match_reason": "watchlist_overlap"
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683:contracts",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 1493,
+          "total_value": 2057313632937.0
+        }
+      },
+      {
+        "source": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683:execution-gap",
+        "target": "company:4:34143c6a-6a1b-4864-a68e-0d38c967b901:24683",
+        "type": "CONTRATOU",
+        "confidence": 1.0,
+        "properties": {
+          "contract_count": 6,
+          "invoice_total_value": 5437131478.99
+        }
+      }
+    ]
+  }
+}
