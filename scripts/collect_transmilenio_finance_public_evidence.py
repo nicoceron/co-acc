@@ -19,6 +19,10 @@ USER_AGENT = "co-acc-research/1.0 (+https://github.com/nicoceron/co-acc)"
 
 PRIMARY_PAGES: list[dict[str, str]] = [
     {
+        "label": "Informe de Gestión 2023",
+        "url": "https://www.transmilenio.gov.co/comunicaciones/publicaciones/2024/informes-de-gestion/informe-de-gestion-2023",
+    },
+    {
         "label": "Informe de Gestión 2024",
         "url": "https://www.transmilenio.gov.co/publicaciones/154438/informe-de-gestion-2024/",
     },
@@ -34,6 +38,16 @@ PRIMARY_PAGES: list[dict[str, str]] = [
 ]
 
 DIRECT_PDFS: list[dict[str, str]] = [
+    {
+        "label": "Informe de Gestión 2023 de TRANSMILENIO",
+        "url": "https://www.transmilenio.gov.co/files/ad2b1e49-f50f-4f0a-8964-a45bebfbd541/"
+        "4bf24a21-90b8-4e07-bcd9-58201f719145/Informe%20de%20gesti%C3%B3n%202023%20de%20TRANSMILENIO.pdf",
+    },
+    {
+        "label": "Informe de Gestión 2024 de TRANSMILENIO",
+        "url": "https://www.transmilenio.gov.co/files/f208bef4-74dc-4e0d-9ee9-f5114b4800a2/"
+        "0bf33777-f70e-4ec1-b689-86bbf3d52ad3/Informe%20de%20Gesti%C3%B3n%202024%20de%20TRANSMILENIO.pdf",
+    },
     {
         "label": "Auditoría OCI 2024-053 gestión financiera y contable",
         "url": "https://www.transmilenio.gov.co/files/bfa4af5a-c943-42a4-85fe-704999c59c72/"
@@ -53,6 +67,16 @@ DIRECT_PDFS: list[dict[str, str]] = [
         "diciembre%202024.pdf",
     },
     {
+        "label": "Anexo 13 Ingresos de TRANSMILENIO a diciembre 2024",
+        "url": "https://www.transmilenio.gov.co/files/f208bef4-74dc-4e0d-9ee9-f5114b4800a2/"
+        "9a8a19b6-c710-43cd-8906-c69fa30ecffa/Anexo%2013%20Ingresos%20de%20TRANSMILENIO%20a%20diciembre%202024_.pdf",
+    },
+    {
+        "label": "Anexo 15 Modificaciones Presupuestales a diciembre 2024",
+        "url": "https://www.transmilenio.gov.co/files/f208bef4-74dc-4e0d-9ee9-f5114b4800a2/"
+        "c6f18b1a-d0db-4f8e-a70b-8b8acf073c69/Anexo%2015%20Modificaciones%20Presupuestales%20a%20diciembre%202024.pdf",
+    },
+    {
         "label": "Anexo 16 Informe de Tesorería de TRANSMILENIO 2024",
         "url": "https://www.transmilenio.gov.co/files/f208bef4-74dc-4e0d-9ee9-f5114b4800a2/"
         "ddc4317d-451e-436f-a9fa-8d48c5e4c0b4/Anexo%2016%20Informe%20de%20Tesorer%C3%ADa%20de%20"
@@ -60,17 +84,29 @@ DIRECT_PDFS: list[dict[str, str]] = [
     },
 ]
 
-INTERESTING_LABELS = (
-    "Anexo 14",
-    "Anexo 16",
-    "Informe de gestion y sostenibilidad 2025 de TRANSMILENIO",
-    "Anexo 4",
-    "Anexo 5",
-    "Anexo 6",
-    "Notas de Estados Financieros",
-    "Estado de Flujos de Efectivo",
-    "Estados de resultados",
-    "Estado del Resultado Integral",
+KEEP_TOKENS = (
+    "informe de gestión",
+    "informe de gestion",
+    "gestion y sostenibilidad",
+    "anexo 4",
+    "anexo 5",
+    "anexo 13",
+    "anexo 14",
+    "anexo 15",
+    "anexo 16",
+    "informe de tesorería",
+    "informe de tesoreria",
+    "gastos de transmilenio",
+    "ingresos de transmilenio",
+    "modificaciones presupuestales",
+    "gestión presupuestal",
+    "gestion presupuestal",
+    "notas de estados financieros",
+    "estado de flujos de efectivo",
+    "estado del resultado integral",
+    "estados financieros",
+    "certificación de estados financieros",
+    "certificacion de estados financieros",
 )
 
 
@@ -108,7 +144,8 @@ def extract_links(html: str, base_url: str) -> list[dict[str, str]]:
 
 def should_keep(label: str, url: str) -> bool:
     if url.lower().endswith(".pdf"):
-        return any(token.lower() in label.lower() for token in INTERESTING_LABELS)
+        lowered = label.lower()
+        return any(token in lowered for token in KEEP_TOKENS)
     return False
 
 

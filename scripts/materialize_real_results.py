@@ -129,6 +129,8 @@ METRIC_LABELS = {
     "education_procurement_total": "valor contractual vinculado",
     "execution_gap_contract_count": "contratos con brecha de ejecución",
     "execution_gap_invoice_total": "facturación adelantada",
+    "finance_document_year_count": "vigencias documentadas",
+    "finance_document_year_span": "años cubiertos",
     "funding_overlap_event_count": "eventos de cruce financiero",
     "historical_contract_count": "contratos históricos",
     "historical_contract_value": "valor histórico",
@@ -152,6 +154,11 @@ METRIC_LABELS = {
     "payroll_cheque_exception_total": "valor de cheques excepcionales",
     "payroll_teller_window_request_count": "solicitudes de cobro por ventanilla",
     "priority_score": "puntaje prioritario",
+    "recurring_budget_modification_total": "modificaciones presupuestales agregadas",
+    "recurring_budget_modification_year_count": "vigencias con modificaciones presupuestales altas",
+    "recurring_exception_surface_year_count": "vigencias con señales financieras",
+    "recurring_third_party_payment_rule_year_count": "vigencias con ruta de pago a terceros",
+    "recurring_treasury_document_year_count": "vigencias con informe de tesorería",
     "official_case_bulletin_count": "boletines oficiales",
     "official_officer_count": "directivos públicos",
     "official_role_count": "roles públicos",
@@ -3762,8 +3769,19 @@ def build_transmilenio_finance_investigation(bundle: dict[str, Any]) -> dict[str
     convenio_payment_total = float(metrics.get("treasury_convenio_payment_total") or 0.0)
     vehicle_payments = int(metrics.get("vehicle_owner_payment_count") or 0)
     vehicle_payment_total = float(metrics.get("vehicle_owner_payment_total") or 0.0)
+    finance_document_year_count = int(metrics.get("finance_document_year_count") or 0)
+    finance_document_year_span = int(metrics.get("finance_document_year_span") or 0)
+    recurring_exception_year_count = int(metrics.get("recurring_exception_surface_year_count") or 0)
+    recurring_treasury_year_count = int(metrics.get("recurring_treasury_document_year_count") or 0)
+    recurring_third_party_year_count = int(metrics.get("recurring_third_party_payment_rule_year_count") or 0)
+    recurring_budget_modification_year_count = int(metrics.get("recurring_budget_modification_year_count") or 0)
+    recurring_budget_modification_total = float(metrics.get("recurring_budget_modification_total") or 0.0)
 
     findings: list[str] = []
+    if finance_document_year_count > 1:
+        findings.append(
+            f"La revisión ya cubre {finance_document_year_count} vigencias oficiales consecutivas en una ventana de {finance_document_year_span} año(s), lo que permite comparar persistencia y no solo un evento aislado."
+        )
     if cheque_count > 0:
         findings.append(
             f"La auditoría OCI 2024-053 registró {cheque_count} cheques excepcionales de nómina por {compact_money(cheque_total)} para un solo funcionario, junto con solicitud de cobro directo por ventanilla."
@@ -3782,9 +3800,25 @@ def build_transmilenio_finance_investigation(bundle: dict[str, Any]) -> dict[str
         findings.append(
             f"El PTEP 2025 mantiene a Gestión de Información Financiera y Contable con {financial_risk_count} riesgo(s) de corrupción y {financial_control_count} control(es) declarados."
         )
+    if recurring_exception_year_count > 1:
+        findings.append(
+            f"Las señales oficiales ya no aparecen en una sola vigencia: el sistema detecta una superficie recurrente de riesgo financiero en {recurring_exception_year_count} año(s) distintos."
+        )
+    if recurring_budget_modification_year_count > 1:
+        findings.append(
+            f"Los anexos presupuestales agregan modificaciones de gran tamaño en {recurring_budget_modification_year_count} vigencia(s), por {compact_money(recurring_budget_modification_total)} en conjunto."
+        )
+    if recurring_third_party_year_count > 1:
+        findings.append(
+            f"La ruta formal para pagos a terceros no titulares reaparece en {recurring_third_party_year_count} vigencia(s) documentadas, lo que marca una excepción operativa persistente."
+        )
     if convenio_payments > 0 or vehicle_payments > 0:
         findings.append(
             f"El anexo de tesorería 2025 muestra {convenio_payments} pagos de convenios por {compact_money(convenio_payment_total)} y {vehicle_payments} pagos a propietarios de vehículos por {compact_money(vehicle_payment_total)}."
+        )
+    if recurring_treasury_year_count > 1:
+        findings.append(
+            f"La trazabilidad pública de tesorería ya cubre {recurring_treasury_year_count} vigencia(s), suficiente para empezar a comparar patrones de inversión, pagos y operación bancaria entre años."
         )
     if int(metrics.get("contractor_mass_payment_order_signal") or 0) > 0:
         findings.append(
@@ -3824,6 +3858,13 @@ def build_transmilenio_finance_investigation(bundle: dict[str, Any]) -> dict[str
         "pac_fet_transfer_total": metrics.get("pac_fet_transfer_total") or 0.0,
         "management_contract_modification_count": metrics.get("management_contract_modification_count") or 0,
         "management_supplier_request_count": metrics.get("management_supplier_request_count") or 0,
+        "finance_document_year_count": finance_document_year_count,
+        "finance_document_year_span": finance_document_year_span,
+        "recurring_exception_surface_year_count": recurring_exception_year_count,
+        "recurring_treasury_document_year_count": recurring_treasury_year_count,
+        "recurring_third_party_payment_rule_year_count": recurring_third_party_year_count,
+        "recurring_budget_modification_year_count": recurring_budget_modification_year_count,
+        "recurring_budget_modification_total": recurring_budget_modification_total,
         "priority_score": metrics.get("priority_score") or 0,
     }
 
@@ -3836,8 +3877,8 @@ def build_transmilenio_finance_investigation(bundle: dict[str, Any]) -> dict[str
         "entity_type": "company",
         "subject_name": "TRANSMILENIO S.A.",
         "subject_ref": None,
-        "summary": "Pista nueva basada en auditoría financiera oficial, anexos de tesorería y reglas públicas de pago que ya muestran excepciones de nómina, descuadres de ingresos y edición sensible en JSP7.",
-        "why_it_matters": "No identifica todavía al contador o funcionario responsable, pero sí delimita una zona roja verificable donde conviene pedir libro auxiliar, órdenes de pago, consecutivos de cheque, conciliaciones bancarias y trazas de usuario.",
+        "summary": "Pista nueva basada en documentos oficiales de 2023 a 2025 que ya muestran excepciones de nómina, descuadres de ingresos, rutas sensibles de pago y persistencia interanual en tesorería y presupuesto.",
+        "why_it_matters": "No identifica todavía al contador o funcionario responsable, pero sí delimita una zona roja verificable y recurrente donde conviene pedir libro auxiliar, órdenes de pago, consecutivos de cheque, conciliaciones bancarias y trazas de usuario.",
         "findings": findings,
         "evidence": build_metrics_evidence(
             evidence_metrics,
@@ -3857,6 +3898,13 @@ def build_transmilenio_finance_investigation(bundle: dict[str, Any]) -> dict[str
                 "pac_fet_transfer_total",
                 "management_contract_modification_count",
                 "management_supplier_request_count",
+                "finance_document_year_count",
+                "finance_document_year_span",
+                "recurring_exception_surface_year_count",
+                "recurring_treasury_document_year_count",
+                "recurring_third_party_payment_rule_year_count",
+                "recurring_budget_modification_year_count",
+                "recurring_budget_modification_total",
                 "priority_score",
             ],
         ),
@@ -3871,6 +3919,7 @@ def build_transmilenio_finance_investigation(bundle: dict[str, Any]) -> dict[str
             "payroll_cheque_exception",
             "treasury_jsp7_gap",
             "deleted_crp_sequence",
+            "multi_period_finance_exception_surface",
         ],
         "public_sources": transmilenio_document_sources(bundle),
         "graph": None,

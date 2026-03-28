@@ -6,6 +6,7 @@ import json
 import re
 import subprocess
 import time
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
@@ -84,8 +85,18 @@ def pdf_page_count(path: Path) -> int:
 
 
 def parse_plain_amount(raw: str) -> int:
-    digits = re.sub(r"[^\d]", "", raw)
+    cleaned = raw.strip()
+    if "," in cleaned:
+        cleaned = cleaned.split(",", 1)[0]
+    digits = re.sub(r"[^\d]", "", cleaned)
     return int(digits) if digits else 0
+
+
+def parse_signed_plain_amount(raw: str) -> int:
+    cleaned = raw.strip()
+    negative = cleaned.startswith("-")
+    value = parse_plain_amount(cleaned)
+    return -value if negative and value else value
 
 
 def parse_scaled_amount(raw: str, scale: str) -> int:
@@ -93,8 +104,11 @@ def parse_scaled_amount(raw: str, scale: str) -> int:
     if "," in cleaned:
         numeric = float(cleaned.replace(".", "").replace(",", "."))
     elif "." in cleaned:
+        dot_count = cleaned.count(".")
         whole, fractional = cleaned.rsplit(".", 1)
-        if len(fractional) == 3:
+        if dot_count > 1 and len(fractional) in (1, 2):
+            numeric = float(f"{whole.replace('.', '')}.{fractional}")
+        elif len(fractional) == 3:
             numeric = float(cleaned.replace(".", ""))
         else:
             numeric = float(cleaned)
@@ -119,19 +133,34 @@ def extract_excerpt(text: str, pattern: str, radius: int = 220) -> str | None:
     return normalize_text(text[start:end])
 
 
-def classify_document(filename: str) -> str:
-    lowered = filename.lower()
+def extract_document_year(*parts: str) -> int | None:
+    for part in parts:
+        decoded = urllib.parse.unquote(part)
+        match = re.search(r"\b(20\d{2})\b", decoded)
+        if match:
+            year = int(match.group(1))
+            if 2020 <= year <= 2035:
+                return year
+    return None
+
+
+def classify_document(label: str, filename: str) -> str:
+    lowered = f"{label} {filename}".lower()
     if "oci-2024-053" in lowered:
         return "auditoria_financiera_contable"
     if "oci-2025-020" in lowered:
         return "seguimiento_pt ep".replace(" ", "")
-    if "anexo-16" in lowered or "tesoreria" in lowered:
+    if "anexo-16" in lowered or "anexo-5" in lowered or "tesoreria" in lowered or "tesorería" in lowered:
         return "informe_tesoreria"
-    if "anexo-14" in lowered or "gastos" in lowered:
+    if "anexo 14" in lowered or "anexo%2014" in lowered or ("gastos" in lowered and "transmilenio" in lowered):
         return "informe_gastos"
-    if "anexo-4" in lowered:
+    if "anexo 13" in lowered or "anexo%2013" in lowered or "ingresos de transmilenio" in lowered:
+        return "informe_ingresos"
+    if "anexo 15" in lowered or "anexo%2015" in lowered or "modificaciones presupuestales" in lowered:
+        return "informe_modificaciones_presupuestales"
+    if "anexo-4" in lowered or "gestion presupuestal" in lowered or "gestión presupuestal" in lowered:
         return "gestion_presupuestal"
-    if "gestion-y-sostenibilidad" in lowered:
+    if "gestion-y-sostenibilidad" in lowered or "informe de gestión" in lowered or "informe de gestion" in lowered:
         return "informe_gestion"
     return "documento_publico"
 
@@ -144,11 +173,13 @@ def load_documents(bundle_dir: Path, manifest: dict[str, Any]) -> list[dict[str,
         relative = Path(str(item.get("saved_path") or ""))
         path = (bundle_dir / relative).resolve()
         raw_text = pdf_to_text(path)
+        label = str(item.get("label") or "").strip()
         documents.append(
             {
-                "label": str(item.get("label") or "").strip(),
+                "label": label,
                 "filename": path.name,
-                "doc_type": classify_document(path.name),
+                "doc_type": classify_document(label, path.name),
+                "year": extract_document_year(label, path.name, raw_text[:800]),
                 "source_url": str(item.get("url") or "").strip(),
                 "saved_path": str(path),
                 "bytes": int(item.get("bytes") or 0),
@@ -206,15 +237,76 @@ def build_alert(
     }
 
 
+def first_document_of_type(documents: list[dict[str, Any]], doc_type: str) -> dict[str, Any] | None:
+    candidates = [document for document in documents if str(document.get("doc_type") or "") == doc_type]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: int(item.get("year") or 0))
+
+
+def extract_treasury_cdt_total(text: str) -> int:
+    match = re.search(
+        r"dos\s+\(2\)\s+CDT\S*\s+con un valor nominal de \$([0-9\.\,]+)\s+millones",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if not match:
+        return 0
+    return parse_scaled_amount(match.group(1), "millones")
+
+
+def extract_budget_modification_total(document: dict[str, Any]) -> int:
+    text = str(document.get("_raw_text") or "")
+    doc_type = str(document.get("doc_type") or "")
+    if doc_type == "informe_gastos":
+        match = re.search(
+            r"EJECUCIÓN PRESUPUESTAL DE GASTOS.*?GASTOS\s+[0-9\.\,]+\s+(-?[0-9\.\,]+)\s+(-?[0-9\.\,]+)",
+            text,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        if match:
+            return abs(parse_signed_plain_amount(match.group(2)))
+    if doc_type == "gestion_presupuestal":
+        match = re.search(
+            r"modificaciones presupuestales en ingresos por valor de\s*\$\s*([0-9\.\,]+)\s+millones",
+            text,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        if match:
+            return parse_scaled_amount(match.group(1), "millones")
+    return 0
+
+
 def extract_findings(documents: list[dict[str, Any]]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     metrics: dict[str, Any] = {}
     alerts: list[dict[str, Any]] = []
 
-    by_type = {str(document.get("doc_type")): document for document in documents}
-    audit_text = str((by_type.get("auditoria_financiera_contable") or {}).get("_raw_text") or "")
-    ptep_text = str((by_type.get("seguimiento_ptep") or {}).get("_raw_text") or "")
-    treasury_text = str((by_type.get("informe_tesoreria") or {}).get("_raw_text") or "")
-    management_text = str((by_type.get("informe_gestion") or {}).get("_raw_text") or "")
+    document_years = sorted({int(document.get("year")) for document in documents if isinstance(document.get("year"), int)})
+    metrics["finance_document_year_count"] = len(document_years)
+    metrics["finance_document_years"] = document_years
+    if document_years:
+        metrics["finance_document_year_span"] = (max(document_years) - min(document_years)) + 1
+
+    audit_doc = first_document_of_type(documents, "auditoria_financiera_contable")
+    ptep_doc = first_document_of_type(documents, "seguimiento_ptep")
+    latest_treasury_doc = first_document_of_type(documents, "informe_tesoreria")
+    latest_management_doc = first_document_of_type(documents, "informe_gestion")
+    treasury_docs = [document for document in documents if str(document.get("doc_type") or "") == "informe_tesoreria"]
+    management_docs = [document for document in documents if str(document.get("doc_type") or "") == "informe_gestion"]
+    budget_docs = [
+        document
+        for document in documents
+        if str(document.get("doc_type") or "") in {"informe_gastos", "gestion_presupuestal", "informe_modificaciones_presupuestales"}
+    ]
+    signal_years: set[int] = set()
+    treasury_cdt_years: set[int] = set()
+    third_party_rule_years: set[int] = set()
+    budget_modification_by_year: dict[int, int] = {}
+
+    audit_text = str((audit_doc or {}).get("_raw_text") or "")
+    ptep_text = str((ptep_doc or {}).get("_raw_text") or "")
+    treasury_text = str((latest_treasury_doc or {}).get("_raw_text") or "")
+    management_text = str((latest_management_doc or {}).get("_raw_text") or "")
 
     if audit_text:
         cheque_match = re.search(
@@ -228,13 +320,15 @@ def extract_findings(documents: list[dict[str, Any]]) -> tuple[dict[str, Any], l
             metrics["payroll_cheque_exception_count"] = cheque_count
             metrics["payroll_cheque_exception_total"] = cheque_total
             metrics["payroll_teller_window_request_count"] = 1
+            if isinstance((audit_doc or {}).get("year"), int):
+                signal_years.add(int((audit_doc or {}).get("year")))
             alerts.append(
                 build_alert(
                     "payroll_cheque_exception",
                     "Cheques excepcionales de nómina",
                     5,
                     "La auditoría OCI detectó pagos de nómina por cheque a un solo funcionario, con solicitud posterior para levantar sellos restrictivos y reclamar por ventanilla.",
-                    str(by_type["auditoria_financiera_contable"]["source_url"]),
+                    str((audit_doc or {}).get("source_url") or ""),
                     extract_excerpt(audit_text, r"emitieron\s+\d+\s+cheques.*?ventanilla"),
                     {
                         "payroll_cheque_exception_count": cheque_count,
@@ -251,13 +345,15 @@ def extract_findings(documents: list[dict[str, Any]]) -> tuple[dict[str, Any], l
         if mismatch_match:
             mismatch_total = parse_plain_amount(mismatch_match.group(1))
             metrics["treasury_jsp7_difference_total"] = mismatch_total
+            if isinstance((audit_doc or {}).get("year"), int):
+                signal_years.add(int((audit_doc or {}).get("year")))
             alerts.append(
                 build_alert(
                     "treasury_jsp7_gap",
                     "Descuadre entre tesorería y JSP7",
                     5,
                     "La auditoría OCI reportó una diferencia entre el reporte de tesorería y el aplicativo JSP7 en los ingresos con y sin afectación presupuestal.",
-                    str(by_type["auditoria_financiera_contable"]["source_url"]),
+                    str((audit_doc or {}).get("source_url") or ""),
                     extract_excerpt(audit_text, r"diferencia de \$[0-9\.\,]+.*?JSP7"),
                     {"treasury_jsp7_difference_total": mismatch_total},
                 )
@@ -271,13 +367,15 @@ def extract_findings(documents: list[dict[str, Any]]) -> tuple[dict[str, Any], l
         if crp_match:
             metrics["deleted_crp_sequence_count"] = 1
             metrics["deleted_crp_sequences"] = [crp_match.group(1)]
+            if isinstance((audit_doc or {}).get("year"), int):
+                signal_years.add(int((audit_doc or {}).get("year")))
             alerts.append(
                 build_alert(
                     "deleted_crp_sequence",
                     "Consecutivo CRP eliminado desde JSP7",
                     4,
                     "La auditoría OCI registró la eliminación de un consecutivo presupuestal desde el perfil administrador de JSP7, con impacto sobre la integridad de la información.",
-                    str(by_type["auditoria_financiera_contable"]["source_url"]),
+                    str((audit_doc or {}).get("source_url") or ""),
                     extract_excerpt(audit_text, r"eliminó el\s+\d{6}-\d+\s+desde el administrador del aplicativo JSP7"),
                     {
                         "deleted_crp_sequence_count": 1,
@@ -290,13 +388,15 @@ def extract_findings(documents: list[dict[str, Any]]) -> tuple[dict[str, Any], l
         risk_counts = extract_ptep_finance_process_counts(ptep_text)
         if risk_counts:
             metrics.update(risk_counts)
+            if isinstance((ptep_doc or {}).get("year"), int):
+                signal_years.add(int((ptep_doc or {}).get("year")))
             alerts.append(
                 build_alert(
                     "financial_process_corruption_risk",
                     "Proceso financiero con riesgo de corrupción vigente",
                     2,
                     "El PTEP 2025 mantiene a Gestión de Información Financiera y Contable dentro del mapa de riesgos de corrupción de la entidad.",
-                    str(by_type["seguimiento_ptep"]["source_url"]),
+                    str((ptep_doc or {}).get("source_url") or ""),
                     extract_excerpt(ptep_text, r"Seguimiento de los riesgos de corrupción:.*?Gestión de Información Financiera y Contable.*?Fuente: Matriz riesgos de corrupción 2025"),
                     risk_counts,
                 )
@@ -341,13 +441,15 @@ def extract_findings(documents: list[dict[str, Any]]) -> tuple[dict[str, Any], l
 
         if re.search(r"órdenes de\s+pago masivas para contratistas", treasury_text, flags=re.IGNORECASE):
             metrics["contractor_mass_payment_order_signal"] = 1
+            if isinstance((latest_treasury_doc or {}).get("year"), int):
+                signal_years.add(int((latest_treasury_doc or {}).get("year")))
             alerts.append(
                 build_alert(
                     "mass_payment_orders",
                     "Órdenes de pago masivas para contratistas",
                     1,
                     "Tesorería reporta que en 2025 entró en operación un flujo de órdenes de pago masivas para contratistas. No es irregular por sí solo, pero aumenta la necesidad de controles transaccionales finos.",
-                    str(by_type["informe_tesoreria"]["source_url"]),
+                    str((latest_treasury_doc or {}).get("source_url") or ""),
                     extract_excerpt(treasury_text, r"órdenes de\s+pago masivas para contratistas"),
                     {"contractor_mass_payment_order_signal": 1},
                 )
@@ -367,17 +469,97 @@ def extract_findings(documents: list[dict[str, Any]]) -> tuple[dict[str, Any], l
 
         if re.search(r"solicitud de pagos a nombre de terceros", management_text, flags=re.IGNORECASE):
             metrics["third_party_non_holder_rule_signal"] = 1
+            if isinstance((latest_management_doc or {}).get("year"), int):
+                signal_years.add(int((latest_management_doc or {}).get("year")))
             alerts.append(
                 build_alert(
                     "third_party_payment_override_route",
                     "Ruta formal para pagos a terceros no titulares",
                     2,
                     "El informe de gestión recuerda que existe una vía formal para pagar a terceros no titulares del derecho con comunicación autenticada. No prueba desvío, pero sí identifica una excepción operativa sensible.",
-                    str(by_type["informe_gestion"]["source_url"]),
+                    str((latest_management_doc or {}).get("source_url") or ""),
                     extract_excerpt(management_text, r"solicitud de pagos a nombre de terceros.*?beneficiario"),
                     {"third_party_non_holder_rule_signal": 1},
                 )
             )
+
+    for document in treasury_docs:
+        year = document.get("year")
+        if not isinstance(year, int):
+            continue
+        text = str(document.get("_raw_text") or "")
+        if extract_treasury_cdt_total(text) > 0:
+            treasury_cdt_years.add(year)
+
+    for document in management_docs:
+        year = document.get("year")
+        if not isinstance(year, int):
+            continue
+        text = str(document.get("_raw_text") or "")
+        if re.search(r"solicitud de pagos a nombre de terceros", text, flags=re.IGNORECASE):
+            third_party_rule_years.add(year)
+
+    for document in budget_docs:
+        year = document.get("year")
+        if not isinstance(year, int):
+            continue
+        total = extract_budget_modification_total(document)
+        if total > 0:
+            budget_modification_by_year[year] = max(total, budget_modification_by_year.get(year, 0))
+            signal_years.add(year)
+
+    if treasury_cdt_years:
+        metrics["recurring_treasury_document_year_count"] = len(treasury_cdt_years)
+        metrics["recurring_treasury_document_years"] = sorted(treasury_cdt_years)
+    if third_party_rule_years:
+        metrics["recurring_third_party_payment_rule_year_count"] = len(third_party_rule_years)
+        metrics["recurring_third_party_payment_rule_years"] = sorted(third_party_rule_years)
+    if budget_modification_by_year:
+        metrics["recurring_budget_modification_year_count"] = len(budget_modification_by_year)
+        metrics["recurring_budget_modification_years"] = sorted(budget_modification_by_year)
+        metrics["recurring_budget_modification_total"] = sum(budget_modification_by_year.values())
+    if signal_years:
+        metrics["recurring_exception_surface_year_count"] = len(signal_years)
+        metrics["recurring_exception_surface_years"] = sorted(signal_years)
+
+    if len(signal_years) >= 2:
+        source_document = str((audit_doc or ptep_doc or latest_treasury_doc or latest_management_doc or {}).get("source_url") or "")
+        years = sorted(signal_years)
+        alerts.append(
+            build_alert(
+                "multi_period_finance_exception_surface",
+                "Persistencia interanual de señales financieras",
+                3,
+                f"Entre {years[0]} y {years[-1]} los documentos oficiales de TRANSMILENIO repiten señales en tesorería, presupuesto y control interno, lo que sugiere una zona roja recurrente y no un hallazgo aislado.",
+                source_document,
+                None,
+                {
+                    "recurring_exception_surface_year_count": len(years),
+                    "recurring_exception_surface_years": years,
+                },
+            )
+        )
+
+    if len(budget_modification_by_year) >= 2:
+        source_document = ""
+        for document in budget_docs:
+            source_document = str(document.get("source_url") or "").strip()
+            if source_document:
+                break
+        alerts.append(
+            build_alert(
+                "recurrent_budget_modifications",
+                "Modificaciones presupuestales altas en más de una vigencia",
+                2,
+                "Los anexos presupuestales oficiales muestran modificaciones agregadas de gran tamaño en más de un año, lo que vuelve prioritario revisar trazabilidad de ajustes, justificaciones y responsables.",
+                source_document,
+                None,
+                {
+                    "recurring_budget_modification_year_count": len(budget_modification_by_year),
+                    "recurring_budget_modification_total": sum(budget_modification_by_year.values()),
+                },
+            )
+        )
 
     metrics["document_count"] = len(documents)
     metrics["signal_count"] = len(alerts)
