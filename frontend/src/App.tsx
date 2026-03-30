@@ -74,9 +74,13 @@ export function App() {
       >
         <Route index element={<Landing />} />
         <Route path="casos" element={<LazyPage><Results /></LazyPage>} />
+        <Route path="casos/modalidad/:categoryId" element={<LazyPage><Results /></LazyPage>} />
         <Route path="biblioteca" element={<LazyPage><Results /></LazyPage>} />
+        <Route path="biblioteca/modalidad/:categoryId" element={<LazyPage><Results /></LazyPage>} />
         <Route path="results" element={<LazyPage><Results /></LazyPage>} />
+        <Route path="results/modalidad/:categoryId" element={<LazyPage><Results /></LazyPage>} />
         <Route path="investigations" element={<LazyPage><Results /></LazyPage>} />
+        <Route path="investigations/modalidad/:categoryId" element={<LazyPage><Results /></LazyPage>} />
         <Route path="casos/:slug" element={<LazyPage><InvestigationDossier /></LazyPage>} />
         <Route path="biblioteca/:slug" element={<LazyPage><InvestigationDossier /></LazyPage>} />
         <Route path="investigations/:slug" element={<LazyPage><InvestigationDossier /></LazyPage>} />

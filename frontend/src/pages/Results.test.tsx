@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Results } from "./Results";
@@ -414,7 +414,20 @@ describe("Results", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders a materialized real-results pack", async () => {
+  function renderResults(initialEntry: string) {
+    return render(
+      <MemoryRouter initialEntries={[initialEntry]}>
+        <Routes>
+          <Route path="/casos" element={<Results />} />
+          <Route path="/casos/modalidad/:categoryId" element={<Results />} />
+          <Route path="/biblioteca" element={<Results />} />
+          <Route path="/biblioteca/modalidad/:categoryId" element={<Results />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+  }
+
+  it("renders the category index for public cases", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify(SAMPLE_PACK), {
         status: 200,
@@ -422,40 +435,21 @@ describe("Results", () => {
       }),
     );
 
-    render(
-      <MemoryRouter>
-        <Results />
-      </MemoryRouter>,
-    );
+    renderResults("/casos");
 
     await waitFor(() => {
-      expect(screen.getByText(/Casos por modalidad/i)).toBeInTheDocument();
+      expect(screen.getByText(/Explora modalidades/i)).toBeInTheDocument();
     });
 
-    expect(screen.getAllByText("Consorcio Río Verde").length).toBeGreaterThan(0);
     expect(screen.getByText(/Directorio público/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Modalidades activas/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Elige una modalidad y mira un caso principal antes de abrir el resto/i)).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: /Buscar modalidad o actor/i })).toBeInTheDocument();
     expect(screen.getAllByText(/Elefante blanco/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Vendedor de objetos robados/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Abrir biblioteca/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Verificado/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Ver red de relaciones/i).length).toBeGreaterThan(0);
-
-    fireEvent.click(screen.getByRole("button", { name: /Riesgo político-contractual/i }));
-
-    await waitFor(() => {
-      expect(screen.getAllByText("Vivian Moreno").length).toBeGreaterThan(0);
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /Vendedor de objetos robados/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Todavía no hay casos publicados/i)).toBeInTheDocument();
-    });
+    expect(screen.getByRole("link", { name: /Abrir modalidad Elefante blanco \/ obra trabada/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Ir a biblioteca/i })).toBeInTheDocument();
   });
 
-  it("opens a proof-case graph exhibit", async () => {
+  it("renders a dedicated category page for a modality", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify(SAMPLE_PACK), {
         status: 200,
@@ -463,19 +457,35 @@ describe("Results", () => {
       }),
     );
 
-    render(
-      <MemoryRouter>
-        <Results />
-      </MemoryRouter>,
-    );
+    renderResults("/casos/modalidad/elefante_blanco");
 
     await waitFor(() => {
-      expect(screen.getAllByText(/Elefante blanco/i).length).toBeGreaterThan(0);
+      expect(screen.getByRole("heading", { name: /Elefante blanco \/ obra trabada/i })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getAllByRole("button", { name: /Ver red de relaciones/i })[0]!);
+    expect(screen.getByRole("link", { name: /Volver a modalidades/i })).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: /Buscar caso dentro de la modalidad/i })).toBeInTheDocument();
+    expect(screen.getAllByText("Consorcio Río Verde").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: /Ver biblioteca de esta modalidad/i })).toBeInTheDocument();
+  });
 
-    expect(screen.getByText(/Exhibición del caso/i)).toBeInTheDocument();
+  it("opens a proof-case graph exhibit from the category page", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify(SAMPLE_PACK), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    renderResults("/casos/modalidad/elefante_blanco");
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: /Elefante blanco \/ obra trabada/i })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /Ver evidencia/i }));
+
+    expect(screen.getByText(/Evidencia conectada/i)).toBeInTheDocument();
     expect(screen.getByTestId("graph-canvas")).toBeInTheDocument();
     expect(screen.getAllByText(/Fuentes públicas/i).length).toBeGreaterThan(0);
   });

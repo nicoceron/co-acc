@@ -1,41 +1,38 @@
 .page {
-  --editorial-serif: var(--font-display);
   min-height: 100vh;
-  padding: clamp(4.6rem, 6vw, 6rem) clamp(1rem, 3vw, 2.5rem) 4rem;
-  background: var(--bg-primary);
+  padding: clamp(4.2rem, 6vw, 5.6rem) clamp(1rem, 3vw, 2.4rem) 4.5rem;
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 10%, transparent), transparent 28%),
+    linear-gradient(180deg, color-mix(in oklab, var(--bg-primary) 94%, black 6%), var(--bg-primary));
 }
 
-.hero,
-.guideCard,
-.investigationCard,
-.proofCard,
-.practiceCard,
-.highlightCard,
-.railCard,
-.queuePanel,
+.page :global(a) {
+  color: inherit;
+}
+
+.indexHero,
+.categoryHero,
+.section,
+.stateWrap,
 .modal,
 .sourcesCard,
 .inspectorCard,
-.footerNote,
-.stateWrap {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: transparent;
-  box-shadow: none;
+.emptyPanel {
+  max-width: 1180px;
+  margin-inline: auto;
 }
 
-.hero {
-  max-width: 1200px;
-  margin: 0 auto;
+.indexHero,
+.categoryHero {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.8rem;
-  padding: clamp(1.6rem, 3vw, 2.4rem) 0 0;
-  border: 0;
-  border-top: 1px solid var(--border);
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: clamp(1.4rem, 2.4vw, 2.6rem);
+  padding-top: 0.2rem;
+  border-top: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
 }
 
-.heroCopy {
+.heroCopy,
+.heroAside {
   display: grid;
   align-content: start;
 }
@@ -45,98 +42,126 @@
 .cardEyebrow,
 .cardHead span,
 .propertyRow span,
-.stateEyebrow {
+.stateEyebrow,
+.heroAsideLabel {
   font-family: var(--font-sans);
   font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--accent) 82%, white 18%);
+  color: color-mix(in oklab, var(--accent) 78%, white 22%);
+}
+
+.heroTitle,
+.stateTitle,
+.modalTitle,
+.categoryCardTitle,
+.caseTitle,
+.inspectorTitle,
+.sectionHeader h2 {
+  font-family: var(--font-display);
+  letter-spacing: -0.05em;
+  color: var(--text-primary);
 }
 
 .heroTitle,
 .stateTitle {
-  margin-top: 0.95rem;
-  max-width: 9ch;
-  font-family: var(--editorial-serif);
-  font-size: clamp(2.8rem, 6vw, 5.1rem);
+  margin-top: 0.9rem;
+  max-width: 10ch;
+  font-size: clamp(2.9rem, 6vw, 5.1rem);
   line-height: 0.92;
-  letter-spacing: -0.05em;
 }
 
 .heroLead,
-.cardSummary,
-.stateText {
+.heroAsideText,
+.categoryCardDescription,
+.caseSummary,
+.caseReason,
+.emptyPanel p,
+.stateText,
+.modalSummary,
+.modalMeta,
+.breadcrumbCurrent,
+.caseMeta,
+.inspectorMeta,
+.queueError,
+.traceButton span {
   color: var(--text-secondary);
-  line-height: 1.68;
+  line-height: 1.65;
 }
 
 .heroLead {
-  max-width: 68ch;
+  max-width: 62ch;
   margin-top: 1rem;
 }
 
 .heroMeta,
+.heroActions,
+.categoryStats,
+.reviewRow,
 .tagRow,
-.cardActions,
-.sectionMeta {
+.caseFooter,
+.breadcrumbRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
+  gap: 0.7rem;
 }
 
 .heroMeta {
-  margin-top: 1.1rem;
+  margin-top: 1rem;
 }
 
 .heroMeta span,
-.detailButton,
-.primaryCta,
-.inlineAction,
-.moreButton,
-.closeButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
+.categoryStats span,
+.storyCount,
+.breadcrumbDivider,
+.breadcrumbCurrent {
   font-family: var(--font-sans);
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-radius: 0;
 }
 
-.heroMeta span {
-  padding: 0;
-  border: 0;
-  background: transparent;
+.heroMeta span,
+.categoryStats span,
+.storyCount {
   color: var(--text-secondary);
 }
 
-.heroMeta span + span::before {
+.heroMeta span + span::before,
+.categoryStats span + span::before {
   content: "/";
-  margin-right: 0.65rem;
+  margin-right: 0.7rem;
   color: var(--text-muted);
 }
 
-.heroCurrent {
-  display: inline-flex;
-  align-items: center;
-  color: var(--text-primary);
-  font-family: var(--editorial-serif);
-  font-size: 1.05rem;
-  line-height: 1;
+.heroAside {
+  gap: 0.8rem;
+  padding: 0.2rem 0 0 1.2rem;
+  border-left: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
 }
 
-.primaryCta,
-.inlineAction,
-.detailButton,
-.moreButton,
-.closeButton {
-  padding: 0.78rem 1rem;
+.heroActions {
+  margin-top: 0.4rem;
+}
+
+.primaryAction,
+.secondaryAction,
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 46px;
+  padding: 0.8rem 1rem;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-decoration: none;
-  cursor: pointer;
+  text-transform: uppercase;
   transition:
     transform var(--transition-fast),
     border-color var(--transition-fast),
@@ -144,499 +169,317 @@
     color var(--transition-fast);
 }
 
-.primaryCta,
-.detailButton,
-.moreButton {
-  border: 1px solid var(--text-primary);
-  background: var(--text-primary);
-  color: var(--bg-primary);
+.primaryAction {
+  border: 1px solid color-mix(in oklab, var(--accent) 26%, var(--border));
+  background: color-mix(in oklab, var(--accent) 20%, var(--bg-primary));
+  color: var(--text-primary);
 }
 
-.inlineAction,
-.closeButton {
+.secondaryAction,
+.backLink {
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-secondary);
 }
 
-.primaryCta:hover,
-.inlineAction:hover,
-.detailButton:hover,
-.moreButton:hover,
-.closeButton:hover,
-.catalogNavCard:hover,
-.practiceItem:hover,
-.traceButton:hover,
-.actorChip:hover {
+.primaryAction:hover,
+.secondaryAction:hover,
+.backLink:hover,
+.categoryCard:hover,
+.caseCard:hover,
+.traceButton:hover {
   transform: translateY(-2px);
 }
 
-.heroProof {
-  display: grid;
-  gap: 0.9rem;
-  align-content: start;
-}
-
-.heroSpotlightStack {
-  display: grid;
-  gap: 1rem;
-}
-
-.heroSpotlightEntry {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.heroSpotlightLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  color: var(--text-secondary);
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.heroSpotlightLabel::before {
-  content: "";
-  width: 1rem;
-  height: 1px;
-  background: color-mix(in oklab, var(--accent) 58%, transparent);
-}
-
-.heroProofHead,
-.proofHead,
-.cardHead {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  color: var(--text-primary);
-}
-
-.heroProofGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.8rem;
-}
-
-.heroProofStat,
-.practiceSummaryCard {
-  padding: 0.95rem;
-  border-top: 1px solid var(--border);
-  border-radius: 0;
-  background: transparent;
-}
-
-.heroProofStat strong,
-.practiceSummaryCard strong,
-.practiceHead strong {
-  display: block;
-  font-family: var(--editorial-serif);
-  font-size: 1.55rem;
-}
-
-.heroProofStat span,
-.practiceSummaryCard span,
-.cardMeta,
-.inspectorMeta,
-.signalCard p,
-.signalCard small,
-.queueError {
-  color: var(--text-secondary);
-}
-
 .section {
-  max-width: 1200px;
-  margin: 1.7rem auto 0;
-}
-
-.guideGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.glossaryGrid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.guideCard {
-  padding: 1rem 1.05rem;
-}
-
-.glossaryCard {
-  padding: 1rem 1.05rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(26, 20, 17, 0.96), rgba(13, 11, 10, 0.98)),
-    linear-gradient(135deg, rgba(255, 245, 230, 0.03), transparent 42%);
-  box-shadow: var(--shadow-md);
-}
-
-.guideCard strong {
-  display: block;
-  font-family: var(--editorial-serif);
-  font-size: 1.3rem;
-  line-height: 1.05;
-}
-
-.guideCard p {
-  margin-top: 0.7rem;
-  color: var(--text-secondary);
-  line-height: 1.65;
-}
-
-.glossaryCard strong {
-  display: block;
-  font-family: var(--editorial-serif);
-  font-size: 1.15rem;
-  line-height: 1.05;
-}
-
-.glossaryCard p {
-  margin-top: 0.7rem;
-  color: var(--text-secondary);
-  line-height: 1.65;
+  margin-top: 2rem;
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
   align-items: end;
+  gap: 1rem;
   margin-bottom: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
 }
 
 .sectionHeader h2,
 .modalTitle {
   margin-top: 0.45rem;
-  font-family: var(--editorial-serif);
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
-  line-height: 0.98;
+  font-size: clamp(1.65rem, 3vw, 2.7rem);
+  line-height: 0.96;
   max-width: 18ch;
 }
 
-.proofBadge {
-  padding: 0.55rem 0.75rem;
-  border: 1px solid color-mix(in oklab, var(--color-success) 28%, var(--border));
-  background: color-mix(in oklab, var(--color-success) 10%, transparent);
-}
-
-.investigationGrid,
-.proofGrid,
-.practiceGrid,
-.highlightGrid,
-.queueGrid {
+.searchBar {
   display: grid;
-  gap: 1rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: center;
+  min-height: 58px;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  border-radius: 24px;
+  background: color-mix(in oklab, var(--bg-primary) 86%, white 3%);
+  color: var(--text-secondary);
 }
 
-.investigationGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.proofGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.practiceGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.highlightGrid,
-.queueGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.investigationCard,
-.proofCard,
-.practiceCard,
-.highlightCard,
-.signalCard,
-.queueCard {
-  padding: 1.1rem 0 1.25rem;
-  border: 0;
-  border-top: 1px solid var(--border);
-  border-radius: 0;
-}
-
-.investigationCard h3,
-.proofCard h3,
-.practiceCard h3,
-.highlightCard h3,
-.queueCard h3 {
-  margin-top: 0.45rem;
-  font-family: var(--editorial-serif);
-  font-size: clamp(1.25rem, 2vw, 1.8rem);
-  line-height: 1.03;
-}
-
-.tagRow {
-  margin-top: 1rem;
-}
-
-.tagChip,
-.verifiedPill {
-  padding: 0.42rem 0.68rem;
-  border-radius: 0;
-}
-
-.verifiedPill {
-  border: 1px solid color-mix(in oklab, var(--color-success) 26%, var(--border));
-  background: color-mix(in oklab, var(--color-success) 10%, transparent);
-  color: var(--color-success);
-}
-
-.practiceSummary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.85rem;
-  margin-bottom: 1rem;
-}
-
-.catalogNav,
-.catalogStack {
-  display: grid;
-  gap: 1rem;
-}
-
-.catalogNav {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.catalogNavCard,
-.categorySection,
-.categoryEmpty {
-  border-top: 1px solid var(--border);
-  border-right: 0;
-  border-bottom: 0;
-  border-left: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.catalogNavCard {
-  display: grid;
-  gap: 0.45rem;
-  padding: 1rem 0 1.15rem;
-  appearance: none;
+.searchBar input {
   width: 100%;
-  text-decoration: none;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition:
-    transform var(--transition-fast),
-    border-color var(--transition-fast),
-    background var(--transition-fast);
-}
-
-.catalogNavCard:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in oklab, var(--accent) 32%, var(--border));
-}
-
-.catalogNavCard strong {
-  font-family: var(--editorial-serif);
-  font-size: 1.45rem;
-  line-height: 1;
-}
-
-.catalogNavCard span,
-.catalogNavCard small {
-  color: var(--text-secondary);
-}
-
-.catalogNavCardActive {
-  border-color: var(--accent);
-}
-
-.catalogNavCardActive strong {
-  color: var(--text-primary);
-}
-
-.categorySection {
-  padding: 1.35rem 0 0;
-  scroll-margin-top: 1rem;
-}
-
-.categoryHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  gap: 1rem;
-}
-
-.categoryHeader h2 {
-  margin-top: 0.45rem;
-  font-family: var(--editorial-serif);
-  font-size: clamp(1.7rem, 2.8vw, 2.5rem);
-  line-height: 0.98;
-}
-
-.categoryDescription {
-  max-width: 72ch;
-  margin-top: 0.65rem;
-  color: var(--text-secondary);
-  line-height: 1.68;
-}
-
-.categoryMeta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.65rem;
-}
-
-.categoryMeta span {
-  padding: 0;
   border: 0;
-  border-radius: 0;
+  outline: 0;
   background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--text-primary);
+  font: inherit;
 }
 
-.categoryMeta span + span::before {
-  content: "/";
-  margin-right: 0.65rem;
-  color: var(--text-muted);
-}
-
-.investigationCard,
-.proofCard,
-.queueCard,
-.catalogNavCard {
-  transition:
-    transform var(--transition-fast),
-    border-color var(--transition-fast),
-    background var(--transition-fast);
-}
-
-.investigationCard:hover,
-.proofCard:hover,
-.queueCard:hover,
-.catalogNavCard:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in oklab, var(--accent) 28%, var(--border));
+.searchBar input::placeholder {
+  color: color-mix(in oklab, var(--text-secondary) 80%, transparent);
 }
 
 .categoryGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: 1.25rem;
 }
 
-.categoryFocus {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-.categoryLead,
-.categoryList {
-  display: grid;
-  gap: 0;
-}
-
-.caseCard {
+.categoryCard,
+.caseCard,
+.emptyPanel,
+.traceButton,
+.sourcesCard,
+.inspectorCard {
   position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--bg-primary) 92%, white 3%), color-mix(in oklab, var(--bg-primary) 97%, black 3%)),
+    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 10%, transparent), transparent 36%);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.14);
 }
 
-.categoryLead .caseCard:first-child {
-  padding-top: 0;
-  border-top: 0;
+.categoryCard {
+  display: grid;
+  gap: 1rem;
+  padding: 1.35rem;
+  text-decoration: none;
 }
 
-.categoryLead .caseCard h3 {
-  max-width: 16ch;
-  font-size: clamp(1.9rem, 3vw, 3rem);
-}
-
-.categoryLead .cardSummary {
-  max-width: 64ch;
-}
-
-.categoryList .caseCard h3 {
-  max-width: 20ch;
-  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
-}
-
-.categoryList .tagRow {
-  margin-top: 0.8rem;
-}
-
-.categoryFooter {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.categoryEmpty {
-  padding: 1rem 0 1.2rem;
-}
-
-.categoryEmpty strong {
-  display: block;
-  font-family: var(--editorial-serif);
-  font-size: 1.3rem;
-  line-height: 1.02;
-}
-
-.categoryEmpty p {
-  margin-top: 0.7rem;
-  color: var(--text-secondary);
-  line-height: 1.65;
-}
-
-.practiceHead {
+.categoryCardHead,
+.caseTopline,
+.modalHeader,
+.cardHead {
   display: flex;
   justify-content: space-between;
+  align-items: start;
   gap: 0.8rem;
 }
 
-.practiceMeta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-top: 0.9rem;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
+.plannedPill,
+.reviewBadge,
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.7rem;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.practiceList,
-.railList,
-.metricList,
-.sourcesList,
-.evidenceList {
+.plannedPill {
+  border: 1px solid color-mix(in oklab, var(--color-warning) 32%, var(--border));
+  background: color-mix(in oklab, var(--color-warning) 12%, transparent);
+  color: var(--text-primary);
+}
+
+.categoryCardTitle {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  line-height: 0.96;
+  max-width: 14ch;
+}
+
+.categoryCardDescription {
+  max-width: 52ch;
+}
+
+.categoryPreview {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.35rem;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in oklab, var(--accent) 10%, var(--border));
 }
 
-.practiceList {
+.categoryPreview span {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.categoryPreview strong {
+  font-family: var(--font-display);
+  font-size: 1.18rem;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.categoryCardFoot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.breadcrumbRow {
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.breadcrumbDivider {
+  color: var(--text-muted);
+}
+
+.backLink {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.storyGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+
+.storyLead,
+.storyRail {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.storyLabelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.caseList {
+  display: grid;
+  gap: 1rem;
+}
+
+.caseCard {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1.25rem;
+}
+
+.caseCardFeatured {
+  min-height: 100%;
+  padding: clamp(1.35rem, 2vw, 1.9rem);
+}
+
+.reviewBadge {
+  border: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border));
+  color: var(--text-primary);
+}
+
+.reviewHigh {
+  background: color-mix(in oklab, var(--color-success) 12%, transparent);
+  border-color: color-mix(in oklab, var(--color-success) 30%, var(--border));
+}
+
+.reviewMedium {
+  background: color-mix(in oklab, var(--color-warning) 12%, transparent);
+  border-color: color-mix(in oklab, var(--color-warning) 28%, var(--border));
+}
+
+.reviewInitial {
+  background: color-mix(in oklab, var(--text-secondary) 8%, transparent);
+  color: var(--text-secondary);
+}
+
+.caseTitle {
+  margin: 0;
+  font-size: clamp(1.45rem, 2.2vw, 2.2rem);
+  line-height: 0.98;
+  max-width: 18ch;
+}
+
+.caseCardFeatured .caseTitle {
+  font-size: clamp(2rem, 3vw, 3rem);
+  max-width: 14ch;
+}
+
+.caseMeta {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.caseSummary,
+.caseReason {
+  margin: 0;
+}
+
+.caseReason {
+  padding-top: 0.9rem;
+  border-top: 1px solid color-mix(in oklab, var(--accent) 10%, var(--border));
+}
+
+.caseFooter {
+  justify-content: space-between;
+  align-items: end;
+  margin-top: auto;
+}
+
+.tagChip {
+  border: 1px solid color-mix(in oklab, var(--accent) 15%, var(--border));
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.inlineNote {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.queueError {
   margin-top: 1rem;
 }
 
-.practiceItem,
+.emptyPanel {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.2rem 1.25rem;
+  margin-top: 1rem;
+}
+
+.emptyPanel strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
 .traceButton {
-  padding: 0.9rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  border-radius: 18px;
-  background: rgba(255, 248, 240, 0.04);
+  padding: 0.95rem 1rem;
   text-align: left;
   cursor: pointer;
   transition:
@@ -645,200 +488,9 @@
     background var(--transition-fast);
 }
 
-.practiceItem strong,
 .traceButton strong {
   display: block;
   color: var(--text-primary);
-}
-
-.practiceItem span,
-.traceButton span,
-.emptyState {
-  display: block;
-  margin-top: 0.4rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
-}
-
-.editorialGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.28fr) minmax(280px, 0.72fr);
-  gap: 1rem;
-}
-
-.sideRail {
-  display: grid;
-  gap: 1rem;
-}
-
-.signalCard strong {
-  font-size: 1rem;
-}
-
-.signalCard p {
-  margin-top: 0.55rem;
-}
-
-.signalCard small {
-  display: block;
-  margin-top: 0.55rem;
-}
-
-.highlightHead,
-.queueHead,
-.modalHeader {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.9rem;
-  align-items: start;
-}
-
-.reviewRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  margin-top: 0.7rem;
-}
-
-.reviewBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.38rem 0.68rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  border-radius: 999px;
-  font-family: var(--font-sans);
-  font-size: 0.69rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.reviewHigh {
-  background: color-mix(in oklab, var(--color-success) 12%, transparent);
-  border-color: color-mix(in oklab, var(--color-success) 26%, var(--border));
-  color: var(--text-primary);
-}
-
-.reviewMedium {
-  background: color-mix(in oklab, var(--color-warning) 12%, transparent);
-  border-color: color-mix(in oklab, var(--color-warning) 26%, var(--border));
-  color: var(--text-primary);
-}
-
-.reviewInitial {
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-secondary);
-}
-
-.reviewReason {
-  margin-top: 0.55rem;
-  color: var(--text-secondary);
-  line-height: 1.65;
-}
-
-.scorePill {
-  min-width: 88px;
-  flex-direction: column;
-  padding: 0.72rem;
-  color: var(--bg-primary);
-}
-
-.scorePill span {
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
-.scoreCritical {
-  background: var(--color-danger);
-}
-
-.scoreHot {
-  background: var(--color-warning);
-}
-
-.scoreWarm {
-  background: var(--accent);
-}
-
-.metricList {
-  margin-top: 0.95rem;
-  padding-left: 1rem;
-  color: var(--text-secondary);
-}
-
-.queuePanel {
-  padding: 1rem;
-}
-
-.queueToolbar {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(220px, 280px);
-  gap: 0.85rem;
-  align-items: end;
-}
-
-.queueTabs {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-
-.queueTabActive {
-  border-color: color-mix(in oklab, var(--accent) 28%, transparent);
-  background: color-mix(in oklab, var(--accent) 14%, transparent);
-  color: var(--text-primary);
-}
-
-.queueSearch,
-.queueFilter {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.queueSearch span,
-.queueFilter span {
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
-.queueSearch input,
-.queueFilter select {
-  width: 100%;
-  min-height: 44px;
-  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  border-radius: 16px;
-  background: rgba(255, 248, 240, 0.05);
-  color: var(--text-primary);
-  padding: 0.7rem 0.85rem;
-}
-
-.queueCard {
-  display: grid;
-  gap: 0.65rem;
-}
-
-.queueFooter {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.footerNote {
-  max-width: 1200px;
-  margin: 1.7rem auto 0;
-  padding: 1rem 0 0;
-  border: 0;
-  border-top: 1px solid var(--border);
-}
-
-.footerNote p {
-  max-width: 72ch;
-  color: var(--text-secondary);
-  line-height: 1.7;
 }
 
 .modalBackdrop {
@@ -847,28 +499,25 @@
   z-index: 100;
   display: grid;
   place-items: center;
-  padding: 1.25rem;
-  background: rgba(6, 7, 7, 0.82);
+  padding: 1rem;
+  background: rgba(7, 7, 8, 0.8);
   backdrop-filter: blur(10px);
 }
 
 .modal {
-  width: min(1460px, 100%);
-  max-height: calc(100vh - 2.5rem);
-  padding: 1.2rem;
+  width: min(1440px, 100%);
+  max-height: calc(100vh - 2rem);
+  padding: 1.1rem;
   overflow: auto;
-  border-radius: 28px;
-}
-
-.modalMeta,
-.modalSummary {
-  margin-top: 0.55rem;
-  color: var(--text-secondary);
+  border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
+  border-radius: 30px;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--bg-primary) 94%, white 2%), color-mix(in oklab, var(--bg-primary) 98%, black 2%));
 }
 
 .modalLayout {
   display: grid;
-  grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.22fr);
+  grid-template-columns: minmax(320px, 0.75fr) minmax(0, 1.25fr);
   gap: 1rem;
   margin-top: 1rem;
 }
@@ -879,31 +528,35 @@
   gap: 1rem;
 }
 
+.sourcesCard,
+.inspectorCard {
+  padding: 1rem;
+}
+
 .graphStage {
   height: min(62vh, 720px);
   min-height: 420px;
-  border: 1px solid var(--border);
-  border-radius: 22px;
+  border: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
+  border-radius: 24px;
   background:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 10%, transparent), transparent 45%),
+    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 10%, transparent), transparent 42%),
     linear-gradient(180deg, rgba(12, 13, 12, 0.82), rgba(8, 8, 8, 0.96));
-}
-
-.inspectorCard,
-.sourcesCard {
-  padding: 1rem;
 }
 
 .inspectorTitle {
   margin-top: 0.9rem;
-  font-family: var(--editorial-serif);
   font-size: 1.8rem;
-  line-height: 0.98;
+  line-height: 0.96;
+}
+
+.propertyList,
+.sourcesList,
+.evidenceList {
+  display: grid;
+  gap: 0.75rem;
 }
 
 .propertyList {
-  display: grid;
-  gap: 0.7rem;
   margin-top: 1rem;
 }
 
@@ -911,7 +564,7 @@
   display: grid;
   gap: 0.2rem;
   padding-top: 0.7rem;
-  border-top: 1px solid color-mix(in oklab, var(--accent) 12%, transparent);
+  border-top: 1px solid color-mix(in oklab, var(--accent) 10%, var(--border));
 }
 
 .propertyRow strong {
@@ -920,7 +573,6 @@
 }
 
 .sourcesList {
-  margin-top: 0.9rem;
   padding-left: 1rem;
 }
 
@@ -931,78 +583,50 @@
 }
 
 .stateWrap {
-  max-width: 760px;
-  margin: 6rem auto 0;
-  padding: 2rem;
+  padding: 2rem 0;
 }
 
-.stateCode {
-  display: inline-flex;
-  margin-top: 1rem;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 24%, var(--border));
-  border-radius: 999px;
-  background: rgba(255, 248, 240, 0.04);
-}
-
-@media (max-width: 1180px) {
-  .hero,
-  .editorialGrid,
+@media (max-width: 1100px) {
+  .indexHero,
+  .categoryHero,
+  .storyGrid,
   .modalLayout {
     grid-template-columns: 1fr;
   }
 
-  .investigationGrid,
-  .proofGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .guideGrid,
-  .glossaryGrid,
-  .practiceSummary,
-  .catalogNav,
-  .categoryGrid,
-  .categoryFocus {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .heroAside {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
+    padding-top: 1rem;
   }
 }
 
-@media (max-width: 820px) {
+@media (max-width: 780px) {
   .page {
     padding-inline: 0.8rem;
   }
 
-  .hero,
-  .guideGrid,
-  .glossaryGrid,
-  .catalogNav,
-  .categoryGrid,
-  .categoryFocus,
-  .highlightGrid,
-  .queueGrid,
-  .practiceGrid,
-  .investigationGrid,
-  .proofGrid,
-  .practiceSummary,
-  .heroProofGrid,
-  .queueToolbar {
+  .categoryGrid {
     grid-template-columns: 1fr;
   }
 
   .sectionHeader,
-  .categoryHeader,
-  .highlightHead,
-  .queueHead,
-  .modalHeader {
+  .categoryCardHead,
+  .caseTopline,
+  .caseFooter,
+  .modalHeader,
+  .storyLabelRow {
     flex-direction: column;
     align-items: start;
   }
 
-  .queueTabs {
-    width: 100%;
+  .heroTitle,
+  .stateTitle {
+    max-width: none;
   }
 
   .modalBackdrop {
-    padding: 0.6rem;
+    padding: 0.65rem;
   }
 }

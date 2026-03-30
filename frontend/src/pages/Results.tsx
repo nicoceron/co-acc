@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Link2, ScrollText } from "lucide-react";
-import { Link, useLocation } from "react-router";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { ArrowLeft, ChevronRight, Link2, ScrollText, Search } from "lucide-react";
+import { Link, useLocation, useParams } from "react-router";
 
 import { GraphCanvas } from "@/components/graph/GraphCanvas";
 import { formatPropertyLabel, humanizeIdentifier } from "@/lib/display";
@@ -10,8 +10,15 @@ import {
   formatSignalLabel,
 } from "@/lib/evidence";
 import {
+  buildInvestigationBasis,
+  buildLeadRankingReason,
+  buildValidationBasis,
+  getInvestigationConfidenceBadge,
+  getLeadConfidenceBadge,
+  getValidationConfidenceBadge,
   humanizePublicText,
   isCorroboratedInvestigation,
+  type ReviewBadge,
 } from "@/lib/review";
 import type {
   MaterializedCaseDetail,
@@ -329,6 +336,133 @@ function buildValidationDrilldown(validationCase: MaterializedValidationCase): D
   };
 }
 
+function buildCategoryHref(categoryId: string, libraryMode: boolean): string {
+  return `${libraryMode ? "/biblioteca" : "/casos"}/modalidad/${categoryId}`;
+}
+
+function getCounterpartHref(categoryId: string, libraryMode: boolean): string {
+  return `${libraryMode ? "/casos" : "/biblioteca"}/modalidad/${categoryId}`;
+}
+
+function getModeRoot(libraryMode: boolean): string {
+  return libraryMode ? "/biblioteca" : "/casos";
+}
+
+function normalizeLeadAlerts(alerts: QueueEntity["alerts"]) {
+  return alerts.map((alert) => ({
+    alert_type: alert.alert_type,
+    label: formatSignalLabel(alert.alert_type),
+    reason_text: alert.reason_text,
+    confidence_tier: alert.confidence_tier,
+    severity_score: alert.severity_score,
+    source_list: alert.source_list,
+  }));
+}
+
+function getReviewBadge(item: CatalogItem): ReviewBadge {
+  if (item.kind === "investigation") return getInvestigationConfidenceBadge(item.investigation);
+  if (item.kind === "validation") return getValidationConfidenceBadge(item.validationCase);
+  return getLeadConfidenceBadge({
+    entity_type: item.queueKind === "companies" ? "company" : "person",
+    entity_id: item.row.entity_id,
+    document_id: "document_id" in item.row ? item.row.document_id : null,
+    name: item.row.name,
+    risk_score: item.row.suspicion_score,
+    signal_types: item.row.signal_types,
+    primary_reason: item.row.alerts[0]?.reason_text ?? null,
+    practice_labels: buildAlertPracticeLabels(item.row.alerts),
+    highlights: [],
+    alerts: normalizeLeadAlerts(item.row.alerts),
+    matched_validation_titles: item.corroborated ? ["matched"] : [],
+    public_sources: [],
+    patterns: [],
+  });
+}
+
+function getItemTypeLabel(item: CatalogItem): string {
+  if (item.kind === "investigation") {
+    return isCorroboratedInvestigation(item.investigation) ? "Caso corroborado" : "Pista nueva";
+  }
+  if (item.kind === "validation") return "Caso reproducido";
+  return item.corroborated ? "Pista con contraste" : "Pista nueva";
+}
+
+function getItemTitle(item: CatalogItem): string {
+  if (item.kind === "investigation") return item.investigation.title;
+  if (item.kind === "validation") return formatPublicCaseTitle(item.validationCase.title);
+  return item.row.name;
+}
+
+function getItemMeta(item: CatalogItem): string {
+  if (item.kind === "investigation") {
+    return [item.investigation.subject_name, item.investigation.subject_ref].filter(Boolean).join(" · ");
+  }
+  if (item.kind === "validation") {
+    return [item.validationCase.entity_name, item.validationCase.entity_ref].filter(Boolean).join(" · ");
+  }
+  return [
+    item.queueKind === "companies" ? "Empresa" : "Persona",
+    "document_id" in item.row ? item.row.document_id : null,
+  ].filter(Boolean).join(" · ");
+}
+
+function getItemSummary(item: CatalogItem): string {
+  if (item.kind === "investigation") return humanizePublicText(item.investigation.summary);
+  if (item.kind === "validation") return humanizePublicText(item.validationCase.summary);
+  return humanizePublicText(item.row.alerts[0]?.reason_text ?? "Cruce detectado en datos públicos.");
+}
+
+function getItemReason(item: CatalogItem): string {
+  if (item.kind === "investigation") return buildInvestigationBasis(item.investigation);
+  if (item.kind === "validation") return buildValidationBasis(item.validationCase);
+  return buildLeadRankingReason({
+    entity_type: item.queueKind === "companies" ? "company" : "person",
+    entity_id: item.row.entity_id,
+    document_id: "document_id" in item.row ? item.row.document_id : null,
+    name: item.row.name,
+    risk_score: item.row.suspicion_score,
+    signal_types: item.row.signal_types,
+    primary_reason: item.row.alerts[0]?.reason_text ?? null,
+    practice_labels: buildAlertPracticeLabels(item.row.alerts),
+    highlights: [],
+    alerts: normalizeLeadAlerts(item.row.alerts),
+    matched_validation_titles: item.corroborated ? ["matched"] : [],
+    public_sources: [],
+    patterns: [],
+  });
+}
+
+function getItemTags(item: CatalogItem): string[] {
+  if (item.kind === "investigation") {
+    return item.investigation.tags.slice(0, 2).map((tag) => formatSignalLabel(tag));
+  }
+  if (item.kind === "validation") {
+    return item.validationCase.matched_signals.slice(0, 2).map((signal) => formatSignalLabel(signal));
+  }
+  return buildAlertPracticeLabels(item.row.alerts).slice(0, 2);
+}
+
+function getItemSearchText(item: CatalogItem): string {
+  return [
+    getItemTitle(item),
+    getItemMeta(item),
+    getItemSummary(item),
+    getItemReason(item),
+    ...getItemTags(item),
+  ].join(" ").toLowerCase();
+}
+
+function matchesSearch(text: string, query: string): boolean {
+  if (!query) return true;
+  return text.includes(query);
+}
+
+function toneClassName(tone: ReviewBadge["tone"]): string {
+  if (tone === "high") return styles.reviewHigh ?? "";
+  if (tone === "medium") return styles.reviewMedium ?? "";
+  return styles.reviewInitial ?? "";
+}
+
 function SavedCaseModal({ detail, onClose }: { detail: DrilldownCase | null; onClose: () => void }) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
@@ -375,18 +509,18 @@ function SavedCaseModal({ detail, onClose }: { detail: DrilldownCase | null; onC
       <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
         <div className={styles.modalHeader}>
           <div>
-            <p className={styles.sectionEyebrow}>Exhibición del caso</p>
+            <p className={styles.sectionEyebrow}>Evidencia conectada</p>
             <h2 className={styles.modalTitle}>{detail.title}</h2>
             {detail.subtitle && <p className={styles.modalMeta}>{detail.subtitle}</p>}
             {detail.summary && <p className={styles.modalSummary}>{humanizePublicText(detail.summary)}</p>}
           </div>
-          <button type="button" className={styles.closeButton} onClick={onClose}>
+          <button type="button" className={styles.secondaryAction} onClick={onClose}>
             Cerrar
           </button>
         </div>
 
         {!graph ? (
-          <div className={styles.emptyState}>Este caso aún no tiene una red guardada de relaciones.</div>
+          <div className={styles.emptyPanel}>Este caso aún no tiene una red guardada de relaciones.</div>
         ) : (
           <div className={styles.modalLayout}>
             <section className={styles.modalNarrative}>
@@ -410,7 +544,7 @@ function SavedCaseModal({ detail, onClose }: { detail: DrilldownCase | null; onC
                     {trace.detail && <span>{trace.detail}</span>}
                   </button>
                 )) : (
-                  <div className={styles.emptyState}>Esta red todavía no trae conexiones priorizadas.</div>
+                  <div className={styles.emptyPanel}>Esta red todavía no trae conexiones priorizadas.</div>
                 )}
               </div>
 
@@ -476,7 +610,7 @@ function SavedCaseModal({ detail, onClose }: { detail: DrilldownCase | null; onC
                     </div>
                   </>
                 ) : (
-                  <div className={styles.emptyState}>Selecciona una conexión o un nodo.</div>
+                  <div className={styles.emptyPanel}>Selecciona una conexión o un nodo.</div>
                 )}
               </div>
             </section>
@@ -487,215 +621,157 @@ function SavedCaseModal({ detail, onClose }: { detail: DrilldownCase | null; onC
   );
 }
 
-function InvestigationCard({ investigation }: { investigation: MaterializedInvestigation }) {
-  const statusLabel = isCorroboratedInvestigation(investigation) ? "Verificado" : "Alerta";
-
-  return (
-    <article className={`${styles.investigationCard} ${styles.caseCard}`}>
-      <p className={styles.cardEyebrow}>{statusLabel}</p>
-      <h3>{investigation.title}</h3>
-      <p className={styles.cardMeta}>
-        {investigation.subject_name}
-        {investigation.subject_ref ? ` · ${investigation.subject_ref}` : ""}
-      </p>
-      <p className={styles.cardSummary}>{humanizePublicText(investigation.summary)}</p>
-      <div className={styles.tagRow}>
-        {investigation.tags.slice(0, 1).map((tag) => (
-          <span key={`${investigation.slug}-${tag}`} className={styles.tagChip}>{formatSignalLabel(tag)}</span>
-        ))}
-      </div>
-      <Link to={`/casos/${investigation.slug}`} className={styles.inlineAction}>
-        Abrir dossier
-      </Link>
-    </article>
-  );
-}
-
-function ProofCaseCard({
-  validationCase,
-  onOpen,
-}: {
-  validationCase: MaterializedValidationCase;
-  onOpen: () => void;
-}) {
-  return (
-    <article className={`${styles.proofCard} ${styles.caseCard}`}>
-      <div className={styles.proofHead}>
-        <span className={styles.verifiedPill}>Verificado</span>
-      </div>
-      <h3>{formatPublicCaseTitle(validationCase.title)}</h3>
-      <p className={styles.cardMeta}>{validationCase.entity_name} · {validationCase.entity_ref}</p>
-      <p className={styles.cardSummary}>{humanizePublicText(validationCase.summary)}</p>
-      <div className={styles.tagRow}>
-        {validationCase.matched_signals.slice(0, 1).map((signal) => (
-          <span key={`${validationCase.case_id}-${signal}`} className={styles.tagChip}>{formatSignalLabel(signal)}</span>
-        ))}
-      </div>
-      <div className={styles.cardActions}>
-        <button type="button" className={styles.detailButton} onClick={onOpen}>
-          Ver red de relaciones
-        </button>
-      </div>
-    </article>
-  );
-}
-
-function QueueLeadCard({
-  row,
-  queueKind,
-  corroborated,
-  canOpen,
-  loading,
-  onOpen,
-}: {
-  row: QueueEntity;
-  queueKind: QueueKind;
-  corroborated: boolean;
-  canOpen: boolean;
-  loading: boolean;
-  onOpen: () => void;
-}) {
-  const practices = buildAlertPracticeLabels(row.alerts).slice(0, 3);
-  const primaryReason = row.alerts[0]?.reason_text ?? "Cruce detectado en datos públicos.";
-
-  return (
-    <article className={`${styles.queueCard} ${styles.caseCard}`}>
-      <div className={styles.queueHead}>
-        <div>
-          <p className={styles.cardEyebrow}>
-            {queueKind === "companies" ? "Empresa" : "Persona"}
-            {"document_id" in row && row.document_id ? ` · ${row.document_id}` : ""}
-          </p>
-          <h3>{row.name}</h3>
-        </div>
-      </div>
-      <p className={styles.cardSummary}>{primaryReason}</p>
-
-      <div className={styles.tagRow}>
-        {practices.slice(0, 1).map((practice) => (
-          <span key={`${row.entity_id}-${practice}`} className={styles.tagChip}>{practice}</span>
-        ))}
-        <span className={styles.tagChip}>{corroborated ? "Con contraste externo" : "Pista abierta"}</span>
-      </div>
-
-      {canOpen ? (
-        <div className={styles.cardActions}>
-          <button type="button" className={styles.detailButton} onClick={onOpen} disabled={loading}>
-            {loading ? "Abriendo…" : "Ver caso"}
-          </button>
-        </div>
-      ) : null}
-    </article>
-  );
-}
-
-function CategoryShelf({
+function CategoryIndexCard({
   section,
   libraryMode,
-  expanded,
-  onToggle,
-  onOpenValidation,
-  onOpenEntity,
-  resolveLeadState,
 }: {
   section: CatalogSection;
   libraryMode: boolean;
-  expanded: boolean;
-  onToggle: () => void;
+}) {
+  const openCount = section.items.filter(isFreshCatalogItem).length;
+  const previewItem = section.items[0] ?? null;
+
+  return (
+    <Link
+      to={buildCategoryHref(section.definition.id, libraryMode)}
+      className={styles.categoryCard}
+      aria-label={`Abrir modalidad ${section.definition.title}`}
+    >
+      <div className={styles.categoryCardHead}>
+        <p className={styles.cardEyebrow}>{libraryMode ? "Modalidad documentada" : "Modalidad activa"}</p>
+        {section.definition.planned ? <span className={styles.plannedPill}>En construcción</span> : null}
+      </div>
+
+      <h2 className={styles.categoryCardTitle}>{section.definition.title}</h2>
+      <p className={styles.categoryCardDescription}>{section.definition.description}</p>
+
+      <div className={styles.categoryStats}>
+        {!libraryMode ? <span>{openCount} abiertas</span> : null}
+        <span>{section.corroboratedCount} verificadas</span>
+      </div>
+
+      {previewItem ? (
+        <div className={styles.categoryPreview}>
+          <span>{libraryMode ? "Caso destacado" : "Ahora mismo"}</span>
+          <strong>{getItemTitle(previewItem)}</strong>
+        </div>
+      ) : (
+        <div className={styles.categoryPreview}>
+          <span>Estado</span>
+          <strong>Todavía sin casos publicados</strong>
+        </div>
+      )}
+
+      <div className={styles.categoryCardFoot}>
+        <span>{libraryMode ? "Abrir biblioteca de esta modalidad" : "Abrir modalidad"}</span>
+        <ChevronRight size={16} />
+      </div>
+    </Link>
+  );
+}
+
+function CaseCard({
+  item,
+  featured = false,
+  libraryMode,
+  loading,
+  canOpen,
+  onOpenValidation,
+  onOpenEntity,
+}: {
+  item: CatalogItem;
+  featured?: boolean;
+  libraryMode: boolean;
+  loading: boolean;
+  canOpen: boolean;
   onOpenValidation: (validationCase: MaterializedValidationCase) => void;
   onOpenEntity: (entityId: string) => void;
-  resolveLeadState: (entityId: string) => { canOpen: boolean; loading: boolean };
 }) {
-  const visibleItems = expanded ? section.items : section.items.slice(0, 4);
-  const freshCount = section.items.filter(isFreshCatalogItem).length;
-  const featuredItem = visibleItems[0] ?? null;
-  const remainingItems = visibleItems.slice(1);
+  const badge = getReviewBadge(item);
+  const tags = getItemTags(item);
+  const title = getItemTitle(item);
+  const meta = getItemMeta(item);
+  const summary = getItemSummary(item);
+  const reason = getItemReason(item);
+  const typeLabel = getItemTypeLabel(item);
+  const cardClassName = featured ? `${styles.caseCard} ${styles.caseCardFeatured}` : styles.caseCard;
 
-  function renderItem(item: CatalogItem) {
-    if (item.kind === "investigation") {
-      return <InvestigationCard key={item.key} investigation={item.investigation} />;
-    }
-    if (item.kind === "validation") {
-      return (
-        <ProofCaseCard
-          key={item.key}
-          validationCase={item.validationCase}
-          onOpen={() => onOpenValidation(item.validationCase)}
-        />
-      );
-    }
-    const leadState = resolveLeadState(item.row.entity_id);
-    return (
-      <QueueLeadCard
-        key={item.key}
-        row={item.row}
-        queueKind={item.queueKind}
-        corroborated={item.corroborated}
-        canOpen={leadState.canOpen}
-        loading={leadState.loading}
-        onOpen={() => { void onOpenEntity(item.row.entity_id); }}
-      />
+  let action: ReactNode = null;
+  if (item.kind === "investigation") {
+    action = (
+      <Link
+        to={`${getModeRoot(libraryMode)}/${item.investigation.slug}`}
+        className={styles.primaryAction}
+      >
+        Abrir dossier
+      </Link>
     );
+  } else if (item.kind === "validation") {
+    action = (
+      <button type="button" className={styles.primaryAction} onClick={() => onOpenValidation(item.validationCase)}>
+        Ver evidencia
+      </button>
+    );
+  } else if (canOpen) {
+    action = (
+      <button
+        type="button"
+        className={styles.primaryAction}
+        onClick={() => onOpenEntity(item.row.entity_id)}
+        disabled={loading}
+      >
+        {loading ? "Abriendo…" : "Ver subgrafo"}
+      </button>
+    );
+  } else {
+    action = <span className={styles.inlineNote}>Sin subgrafo guardado</span>;
   }
 
   return (
-    <section id={`category-${section.definition.id}`} className={styles.categorySection}>
-      <div className={styles.categoryHeader}>
+    <article className={cardClassName}>
+      <div className={styles.caseTopline}>
         <div>
-          <p className={styles.sectionEyebrow}>{libraryMode ? "Archivo" : "Modalidad"}</p>
-          <h2>{section.definition.title}</h2>
-          <p className={styles.categoryDescription}>{section.definition.description}</p>
-        </div>
-        <div className={styles.categoryMeta}>
-          {!libraryMode ? <span>{freshCount} abiertos</span> : null}
-          <span>{section.corroboratedCount} verificados</span>
-          {section.definition.planned ? <span>En construcción</span> : null}
+          <p className={styles.cardEyebrow}>{typeLabel}</p>
+          <div className={styles.reviewRow}>
+            <span className={`${styles.reviewBadge} ${toneClassName(badge.tone)}`}>{badge.label}</span>
+          </div>
         </div>
       </div>
 
-      {section.items.length === 0 ? (
-        <div className={styles.categoryEmpty}>
-          <strong>Todavía no hay casos publicados.</strong>
-          <p>La línea ya existe, pero aún no tiene hallazgos con cierre público suficiente para entrar a portada.</p>
-        </div>
-      ) : (
-        <>
-          {featuredItem ? (
-            <div className={styles.categoryFocus}>
-              <div className={styles.categoryLead}>
-                {renderItem(featuredItem)}
-              </div>
-              {remainingItems.length > 0 ? (
-                <div className={styles.categoryList}>
-                  {remainingItems.map((item) => renderItem(item))}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+      <h3 className={styles.caseTitle}>{title}</h3>
+      {meta ? <p className={styles.caseMeta}>{meta}</p> : null}
+      <p className={styles.caseSummary}>{summary}</p>
+      <p className={styles.caseReason}>{reason}</p>
 
-          {section.items.length > 4 && (
-            <div className={styles.categoryFooter}>
-              <button type="button" className={styles.moreButton} onClick={onToggle}>
-                {expanded ? "Ocultar relacionados" : `Ver relacionados (${section.items.length - 1})`}
-              </button>
-            </div>
-          )}
-        </>
-      )}
-    </section>
+      <div className={styles.caseFooter}>
+        {tags.length > 0 ? (
+          <div className={styles.tagRow}>
+            {tags.slice(0, featured ? 2 : 1).map((tag) => (
+              <span key={`${item.key}-${tag}`} className={styles.tagChip}>{tag}</span>
+            ))}
+          </div>
+        ) : <span />}
+        {action}
+      </div>
+    </article>
   );
 }
 
 export function Results() {
   const location = useLocation();
+  const { categoryId } = useParams();
+
   const [pack, setPack] = useState<MaterializedResultsPack | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeCase, setActiveCase] = useState<DrilldownCase | null>(null);
   const [caseLoadError, setCaseLoadError] = useState<string | null>(null);
   const [loadingCaseId, setLoadingCaseId] = useState<string | null>(null);
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery.trim().toLowerCase());
   const caseCacheRef = useRef(new Map<string, DrilldownCase>());
+
+  const isLibraryMode = location.pathname.startsWith("/biblioteca")
+    || location.pathname.startsWith("/investigations");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -704,6 +780,11 @@ export function Results() {
       .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "No fue posible cargar el lote materializado."));
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    setSearchQuery("");
+    setCaseLoadError(null);
+  }, [categoryId, isLibraryMode]);
 
   const matchedValidationCases = useMemo(
     () => pack?.validation.cases.filter((validationCase) => validationCase.matched) ?? [],
@@ -778,11 +859,10 @@ export function Results() {
       return created;
     }
 
-    function registerKeys(sectionId: string, entityId?: string | null, documentId?: string | null): string[] {
+    function registerKeys(sectionId: string, entityId?: string | null, documentId?: string | null): void {
       const keys = buildIdentityKeys(entityId, documentId);
       const bucket = seenKeys(sectionId);
       for (const key of keys) bucket.add(key);
-      return keys;
     }
 
     function isCovered(sectionId: string, entityId?: string | null, documentId?: string | null): boolean {
@@ -904,7 +984,6 @@ export function Results() {
     () => catalogSections.filter((section) => section.items.length > 0 || section.definition.planned),
     [catalogSections],
   );
-  const isLibraryMode = location.pathname === "/investigations" || location.pathname === "/biblioteca";
 
   const frontlineCatalogSections = useMemo(
     () => visibleCatalogSections
@@ -926,6 +1005,7 @@ export function Results() {
     () => visibleCatalogSections.reduce((total, section) => total + section.corroboratedCount, 0),
     [visibleCatalogSections],
   );
+
   const libraryCatalogSections = useMemo(
     () => visibleCatalogSections
       .map((section) => ({
@@ -936,6 +1016,14 @@ export function Results() {
     [visibleCatalogSections],
   );
 
+  const pageSections = isLibraryMode ? libraryCatalogSections : frontlineCatalogSections;
+  const pageSectionsById = useMemo(
+    () => new Map(pageSections.map((section) => [section.definition.id, section])),
+    [pageSections],
+  );
+
+  const currentSection = categoryId ? pageSectionsById.get(categoryId) ?? null : null;
+
   const catalogSummary = useMemo(() => {
     const newItems = frontlineCatalogSections.reduce(
       (total, section) => total + section.items.filter(isFreshCatalogItem).length,
@@ -944,38 +1032,34 @@ export function Results() {
     const activeCategories = frontlineCatalogSections.filter((section) => section.items.some(isFreshCatalogItem)).length;
     return { newItems, activeCategories };
   }, [frontlineCatalogSections]);
+
   const librarySummary = useMemo(() => {
     const corroboratedItems = libraryCatalogSections.reduce((total, section) => total + section.items.length, 0);
     const activeCategories = libraryCatalogSections.length;
     return { corroboratedItems, activeCategories };
   }, [libraryCatalogSections]);
-  const pageSections = isLibraryMode ? libraryCatalogSections : frontlineCatalogSections;
-  const requestedCategoryId = location.hash.startsWith("#category-")
-    ? location.hash.replace("#category-", "")
-    : null;
 
-  useEffect(() => {
-    if (pageSections.length === 0) {
-      setActiveCategoryId(null);
-      return;
-    }
+  const filteredIndexSections = useMemo(() => {
+    return pageSections.filter((section) => {
+      if (!deferredSearchQuery) return true;
+      const tokens = [
+        section.definition.title,
+        section.definition.description,
+        ...section.items.slice(0, 3).map((item) => getItemTitle(item)),
+      ].join(" ").toLowerCase();
+      return matchesSearch(tokens, deferredSearchQuery);
+    });
+  }, [deferredSearchQuery, pageSections]);
 
-    if (requestedCategoryId && pageSections.some((section) => section.definition.id === requestedCategoryId)) {
-      setActiveCategoryId(requestedCategoryId);
-      return;
-    }
-
-    setActiveCategoryId((current) => (
-      current && pageSections.some((section) => section.definition.id === current)
-        ? current
-        : pageSections[0]!.definition.id
+  const filteredCategoryItems = useMemo(() => {
+    if (!currentSection) return [];
+    return currentSection.items.filter((item) => (
+      matchesSearch(getItemSearchText(item), deferredSearchQuery)
     ));
-  }, [pageSections, requestedCategoryId]);
+  }, [currentSection, deferredSearchQuery]);
 
-  const activeSection = useMemo(
-    () => pageSections.find((section) => section.definition.id === activeCategoryId) ?? pageSections[0] ?? null,
-    [activeCategoryId, pageSections],
-  );
+  const featuredCategoryItem = filteredCategoryItems[0] ?? null;
+  const remainingCategoryItems = filteredCategoryItems.slice(1);
 
   async function openEntityCase(entityId: string): Promise<void> {
     const existing = drilldownIndex.get(entityId) ?? caseCacheRef.current.get(entityId);
@@ -987,7 +1071,7 @@ export function Results() {
 
     const caseFile = watchlistCaseIndex.get(entityId)?.case_file;
     if (!caseFile) {
-      setCaseLoadError("Este caso aún no tiene un subgrafo materializado.");
+      setCaseLoadError("Este caso todavía no tiene un subgrafo materializado para mostrar.");
       return;
     }
 
@@ -1023,33 +1107,146 @@ export function Results() {
     );
   }
 
+  if (categoryId && !currentSection) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.stateWrap}>
+          <p className={styles.stateEyebrow}>Modalidad no encontrada</p>
+          <h1 className={styles.stateTitle}>Esta modalidad no está publicada en esta vista.</h1>
+          <p className={styles.stateText}>
+            Puede que todavía no tenga casos suficientes en esta sección o que la ruta ya no exista.
+          </p>
+          <div className={styles.heroActions}>
+            <Link to={getModeRoot(isLibraryMode)} className={styles.primaryAction}>
+              Volver a modalidades
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentSection) {
+    return (
+      <div className={styles.page}>
+        <header className={styles.indexHero}>
+          <div className={styles.heroCopy}>
+            <p className={styles.heroEyebrow}>{isLibraryMode ? "Biblioteca pública" : "Directorio público"}</p>
+            <h1 className={styles.heroTitle}>
+              {isLibraryMode ? "Biblioteca por modalidad." : "Explora modalidades."}
+            </h1>
+            <p className={styles.heroLead}>
+              {isLibraryMode
+                ? "Casos ya corroborados, agrupados por modalidad para navegar sin perderse en el archivo."
+                : "Cada modalidad abre una página propia. Primero eliges el tipo de hallazgo; después entras a sus casos."}
+            </p>
+            <div className={styles.heroMeta}>
+              <span>Actualizado {formatDate(pack.generated_at_utc)}</span>
+              {isLibraryMode ? (
+                <>
+                  <span>{librarySummary.corroboratedItems} casos verificados</span>
+                  <span>{librarySummary.activeCategories} modalidades</span>
+                </>
+              ) : (
+                <>
+                  <span>{catalogSummary.newItems} pistas abiertas</span>
+                  <span>{catalogSummary.activeCategories} modalidades activas</span>
+                  <span>{corroboratedLibraryCount} casos verificados</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.heroAside}>
+            <p className={styles.heroAsideLabel}>Navegación</p>
+            <p className={styles.heroAsideText}>
+              Entra por modalidad, no por tablero. Cada página reúne un caso principal y sus hallazgos relacionados.
+            </p>
+            <div className={styles.heroActions}>
+              <Link to={isLibraryMode ? "/casos" : "/biblioteca"} className={styles.secondaryAction}>
+                {isLibraryMode ? "Ir a pistas nuevas" : "Ir a biblioteca"}
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <p className={styles.sectionEyebrow}>{isLibraryMode ? "Explorar archivo" : "Explorar hallazgos"}</p>
+              <h2>{isLibraryMode ? "Busca una modalidad ya corroborada." : "Busca una modalidad o un actor."}</h2>
+            </div>
+          </div>
+
+          <label className={styles.searchBar}>
+            <Search size={18} />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder={isLibraryMode ? "Ejemplo: proveedor sancionado, FONDECUN" : "Ejemplo: elefante blanco, TransMilenio, supervisión"}
+              aria-label={isLibraryMode ? "Buscar modalidad verificada" : "Buscar modalidad o actor"}
+            />
+          </label>
+
+          {filteredIndexSections.length > 0 ? (
+            <div className={styles.categoryGrid}>
+              {filteredIndexSections.map((section) => (
+                <CategoryIndexCard
+                  key={section.definition.id}
+                  section={section}
+                  libraryMode={isLibraryMode}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className={styles.emptyPanel}>
+              <strong>No encontramos una modalidad con ese filtro.</strong>
+              <p>Prueba con una señal, un actor o una palabra más general.</p>
+            </div>
+          )}
+        </section>
+
+        <SavedCaseModal detail={activeCase} onClose={() => setActiveCase(null)} />
+      </div>
+    );
+  }
+
+  const currentOpenCount = currentSection.items.filter(isFreshCatalogItem).length;
+
   return (
     <div className={styles.page}>
-      <header className={styles.hero}>
+      <header className={styles.categoryHero}>
+        <div className={styles.breadcrumbRow}>
+          <Link to={getModeRoot(isLibraryMode)} className={styles.backLink}>
+            <ArrowLeft size={16} />
+            Volver a modalidades
+          </Link>
+          <span className={styles.breadcrumbDivider}>/</span>
+          <span className={styles.breadcrumbCurrent}>{currentSection.definition.title}</span>
+        </div>
+
         <div className={styles.heroCopy}>
-          <p className={styles.heroEyebrow}>{isLibraryMode ? "Biblioteca pública" : "Directorio público"}</p>
-          <h1 className={styles.heroTitle}>
-            {isLibraryMode ? "Biblioteca corroborada." : "Casos por modalidad."}
-          </h1>
+          <p className={styles.heroEyebrow}>{isLibraryMode ? "Biblioteca por modalidad" : "Modalidad investigada"}</p>
+          <h1 className={styles.heroTitle}>{currentSection.definition.title}</h1>
+          <p className={styles.heroLead}>{currentSection.definition.description}</p>
           <div className={styles.heroMeta}>
-            <span>Generado {formatDate(pack.generated_at_utc)}</span>
-            {isLibraryMode ? (
-              <>
-                <span>{librarySummary.corroboratedItems} casos verificados</span>
-                <span>{librarySummary.activeCategories} prácticas</span>
-              </>
-            ) : (
-              <>
-                <span>{catalogSummary.newItems} alertas abiertas</span>
-                <span>{catalogSummary.activeCategories} prácticas activas</span>
-                <span>{corroboratedLibraryCount} casos ya verificados</span>
-              </>
-            )}
+            {!isLibraryMode ? <span>{currentOpenCount} abiertas</span> : null}
+            <span>{currentSection.corroboratedCount} verificadas</span>
+            <span>Actualizado {formatDate(pack.generated_at_utc)}</span>
           </div>
-          <div className={styles.cardActions}>
-            {activeSection ? <span className={styles.heroCurrent}>{activeSection.definition.title}</span> : null}
-            <Link to={isLibraryMode ? "/casos" : "/biblioteca"} className={styles.inlineAction}>
-              {isLibraryMode ? "Volver a alertas" : "Abrir biblioteca"}
+        </div>
+
+        <div className={styles.heroAside}>
+          <p className={styles.heroAsideLabel}>Vista alterna</p>
+          <p className={styles.heroAsideText}>
+            {isLibraryMode
+              ? "Cambia a pistas nuevas para ver qué sigue abierto en esta modalidad."
+              : "Cambia a biblioteca para ver sólo los casos ya corroborados de esta modalidad."}
+          </p>
+          <div className={styles.heroActions}>
+            <Link to={getCounterpartHref(currentSection.definition.id, isLibraryMode)} className={styles.secondaryAction}>
+              {isLibraryMode ? "Ver pistas nuevas" : "Ver biblioteca de esta modalidad"}
             </Link>
           </div>
         </div>
@@ -1058,71 +1255,93 @@ export function Results() {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <div>
-            <p className={styles.sectionEyebrow}>{isLibraryMode ? "Modalidades documentadas" : "Modalidades activas"}</p>
-            <h2>
-              {isLibraryMode
-                ? "Elige una modalidad y revisa sólo los casos ya corroborados."
-                : "Elige una modalidad y mira un caso principal antes de abrir el resto."}
-            </h2>
+            <p className={styles.sectionEyebrow}>Dentro de esta modalidad</p>
+            <h2>{isLibraryMode ? "Filtra los casos ya corroborados." : "Filtra los casos y pistas publicados."}</h2>
           </div>
         </div>
-        <div className={styles.catalogNav}>
-          {pageSections.map((section) => (
-            <button
-              key={section.definition.id}
-              type="button"
-              className={`${styles.catalogNavCard} ${activeSection?.definition.id === section.definition.id ? styles.catalogNavCardActive : ""}`}
-              onClick={() => setActiveCategoryId(section.definition.id)}
-            >
-              <strong>{section.definition.title}</strong>
-              <span>
-                {isLibraryMode
-                  ? `${section.items.length} verificados`
-                  : `${section.items.filter(isFreshCatalogItem).length} alertas`}
-              </span>
-              <small>
-                {isLibraryMode ? "listos para contraste" : section.definition.description}
-              </small>
-            </button>
-          ))}
-        </div>
-      </section>
 
-      <section className={styles.section}>
-        {caseLoadError && <p className={styles.queueError}>{caseLoadError}</p>}
-        <div className={styles.catalogStack}>
-          {activeSection ? (
-            <CategoryShelf
-              key={activeSection.definition.id}
-              section={activeSection}
-              libraryMode={isLibraryMode}
-              expanded={Boolean(expandedCategories[activeSection.definition.id])}
-              onToggle={() => setExpandedCategories((current) => ({
-                ...current,
-                [activeSection.definition.id]: !current[activeSection.definition.id],
-              }))}
-              onOpenValidation={(validationCase) => {
-                const detail = buildValidationDrilldown(validationCase);
-                if (detail) setActiveCase(detail);
-              }}
-              onOpenEntity={(entityId) => {
-                void openEntityCase(entityId);
-              }}
-              resolveLeadState={(entityId) => ({
-                canOpen: Boolean(drilldownIndex.get(entityId) || watchlistCaseIndex.get(entityId)?.case_file),
-                loading: loadingCaseId === entityId,
-              })}
-            />
-          ) : null}
-        </div>
-      </section>
+        <label className={styles.searchBar}>
+          <Search size={18} />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Busca por actor, resumen o señal"
+            aria-label="Buscar caso dentro de la modalidad"
+          />
+        </label>
 
-      <section className={styles.footerNote}>
-        <p>
-          {isLibraryMode
-            ? "La biblioteca guarda los casos con mejor cierre documental."
-            : "Este directorio abre una modalidad a la vez para que la lectura empiece en el caso y no en el tablero."}
-        </p>
+        {caseLoadError ? <p className={styles.queueError}>{caseLoadError}</p> : null}
+
+        {filteredCategoryItems.length === 0 ? (
+          <div className={styles.emptyPanel}>
+            <strong>No encontramos casos con ese filtro.</strong>
+            <p>Prueba con menos palabras o vuelve a la modalidad completa.</p>
+          </div>
+        ) : (
+          <div className={styles.storyGrid}>
+            {featuredCategoryItem ? (
+              <div className={styles.storyLead}>
+                <div className={styles.storyLabelRow}>
+                  <p className={styles.sectionEyebrow}>Caso principal</p>
+                </div>
+                <CaseCard
+                  item={featuredCategoryItem}
+                  featured
+                  libraryMode={isLibraryMode}
+                  loading={featuredCategoryItem.kind === "lead" && loadingCaseId === featuredCategoryItem.row.entity_id}
+                  canOpen={featuredCategoryItem.kind !== "lead" || Boolean(
+                    drilldownIndex.get(featuredCategoryItem.row.entity_id)
+                    || watchlistCaseIndex.get(featuredCategoryItem.row.entity_id)?.case_file
+                  )}
+                  onOpenValidation={(validationCase) => {
+                    const detail = buildValidationDrilldown(validationCase);
+                    if (detail) setActiveCase(detail);
+                  }}
+                  onOpenEntity={(entityId) => {
+                    void openEntityCase(entityId);
+                  }}
+                />
+              </div>
+            ) : null}
+
+            <div className={styles.storyRail}>
+              <div className={styles.storyLabelRow}>
+                <p className={styles.sectionEyebrow}>Relacionados</p>
+                <span className={styles.storyCount}>{remainingCategoryItems.length} más</span>
+              </div>
+
+              {remainingCategoryItems.length > 0 ? (
+                <div className={styles.caseList}>
+                  {remainingCategoryItems.map((item) => (
+                    <CaseCard
+                      key={item.key}
+                      item={item}
+                      libraryMode={isLibraryMode}
+                      loading={item.kind === "lead" && loadingCaseId === item.row.entity_id}
+                      canOpen={item.kind !== "lead" || Boolean(
+                        drilldownIndex.get(item.row.entity_id)
+                        || watchlistCaseIndex.get(item.row.entity_id)?.case_file
+                      )}
+                      onOpenValidation={(validationCase) => {
+                        const detail = buildValidationDrilldown(validationCase);
+                        if (detail) setActiveCase(detail);
+                      }}
+                      onOpenEntity={(entityId) => {
+                        void openEntityCase(entityId);
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.emptyPanel}>
+                  <strong>No hay más casos en esta modalidad.</strong>
+                  <p>Por ahora esta línea sólo tiene un caso publicado.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       <SavedCaseModal detail={activeCase} onClose={() => setActiveCase(null)} />
