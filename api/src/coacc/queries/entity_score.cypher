@@ -5,7 +5,7 @@ WHERE elementId(e) = $entity_id
   AND (e:Person OR e:Company OR e:Contract OR e:Sanction OR e:Election
        OR e:Amendment OR e:Finance OR e:Embargo OR e:Health OR e:Education
        OR e:Convenio OR e:LaborStats OR e:PublicOffice OR e:Bid OR e:DeclaredAsset
-       OR e:Inquiry)
+       OR e:Inquiry OR e:SourceDocument)
 WITH e, labels(e) AS lbls
 // Collect equivalent nodes: self + SAME_AS neighbors (up to 2 hops for chains)
 OPTIONAL MATCH (e)-[:SAME_AS*1..2]-(other)
@@ -69,5 +69,5 @@ RETURN
   connection_count,
   size(source_list) AS source_count,
   contract_volume + donation_volume + debt_loan_volume AS financial_volume,
-  e.cnae_principal AS cnae_principal,
+  coalesce(e.primary_ciiu_code, e.ciiu4, e.secondary_ciiu_code) AS sector_code,
   e.role AS role

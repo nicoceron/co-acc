@@ -62,6 +62,12 @@ def test_default_analysis_pattern_subset_stays_within_declared_patterns() -> Non
     )
 
 
+def test_default_analysis_pattern_subset_includes_procurement_risk_patterns() -> None:
+    assert "contract_concentration" in provider_module.COMMUNITY_ANALYSIS_PATTERN_IDS
+    assert "inexigibility_recurrence" in provider_module.COMMUNITY_ANALYSIS_PATTERN_IDS
+    assert "amendment_beneficiary_contracts" in provider_module.COMMUNITY_ANALYSIS_PATTERN_IDS
+
+
 def test_community_patterns_have_query_files() -> None:
     from coacc.services.neo4j_service import CypherLoader
 

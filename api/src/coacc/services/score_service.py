@@ -64,13 +64,13 @@ async def compute_exposure(
     source_count = int(record["source_count"])
     financial_volume = float(record["financial_volume"])
     entity_labels: list[str] = record["entity_labels"]
-    cnae = record["cnae_principal"]
+    sector_code = record["sector_code"]
 
     is_company = "Company" in entity_labels
 
     # Determine peer group label
-    if is_company and cnae:
-        peer_group = f"CNAE {cnae}"
+    if is_company and sector_code:
+        peer_group = f"CIIU {sector_code}"
     elif is_company:
         peer_group = "Company (all)"
     else:

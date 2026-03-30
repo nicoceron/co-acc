@@ -54,6 +54,8 @@ class OfficialCaseBulletinsPipeline(Pipeline):
         self.company_placeholders: list[dict[str, Any]] = []
         self.person_rels: list[dict[str, Any]] = []
         self.company_rels: list[dict[str, Any]] = []
+        self.documents: list[dict[str, Any]] = []
+        self.inquiry_doc_rels: list[dict[str, Any]] = []
 
     def extract(self) -> None:
         path = (
@@ -85,6 +87,8 @@ class OfficialCaseBulletinsPipeline(Pipeline):
         company_placeholders: list[dict[str, Any]] = []
         person_rels: list[dict[str, Any]] = []
         company_rels: list[dict[str, Any]] = []
+        documents: list[dict[str, Any]] = []
+        inquiry_doc_rels: list[dict[str, Any]] = []
 
         for case in self._raw:
             title = clean_text(case.get("title"))
@@ -112,6 +116,36 @@ class OfficialCaseBulletinsPipeline(Pipeline):
                     "issuing_entity": clean_text(case.get("issuing_entity")),
                     "source": "official_case_bulletins",
                     "country": "CO",
+                }
+            )
+            document_id = stable_id(
+                "official_case_bulletin_doc",
+                title,
+                case.get("event_date"),
+                source_url,
+            )
+            documents.append(
+                {
+                    "doc_id": document_id,
+                    "title": title,
+                    "name": title,
+                    "summary": clean_text(case.get("summary")),
+                    "source_url": source_url,
+                    "publication_date": parse_iso_date(case.get("event_date")),
+                    "document_kind": "official_case_bulletin",
+                    "issuing_entity": clean_text(case.get("issuing_entity")),
+                    "case_category": clean_text(case.get("case_category")),
+                    "case_domain": clean_text(case.get("case_domain")),
+                    "source_id": self.source_id,
+                    "source": self.source_id,
+                    "country": "CO",
+                }
+            )
+            inquiry_doc_rels.append(
+                {
+                    "source_key": inquiry_id,
+                    "target_key": document_id,
+                    "source": self.source_id,
                 }
             )
 
@@ -235,6 +269,8 @@ class OfficialCaseBulletinsPipeline(Pipeline):
         self.company_placeholders = deduplicate_rows(company_placeholders, ["case_company_id"])
         self.person_rels = deduplicate_rows(person_rels, ["source_key", "target_key"])
         self.company_rels = deduplicate_rows(company_rels, ["source_key", "target_key"])
+        self.documents = deduplicate_rows(documents, ["doc_id"])
+        self.inquiry_doc_rels = deduplicate_rows(inquiry_doc_rels, ["source_key", "target_key"])
 
     def load(self) -> None:
         loader = Neo4jBatchLoader(self.driver)
@@ -242,6 +278,8 @@ class OfficialCaseBulletinsPipeline(Pipeline):
 
         if self.inquiries:
             loaded += loader.load_nodes("Inquiry", self.inquiries, key_field="inquiry_id")
+        if self.documents:
+            loaded += loader.load_nodes("SourceDocument", self.documents, key_field="doc_id")
 
         if self.people_with_document:
             person_query = """
@@ -321,6 +359,16 @@ class OfficialCaseBulletinsPipeline(Pipeline):
                     r.subject_match = row.subject_match
             """
             loaded += loader.run_query(company_rel_query, self.company_rels)
+
+        if self.inquiry_doc_rels:
+            inquiry_doc_query = """
+                UNWIND $rows AS row
+                MATCH (i:Inquiry {inquiry_id: row.source_key})
+                MATCH (d:SourceDocument {doc_id: row.target_key})
+                MERGE (i)-[r:REFERENTE_A]->(d)
+                SET r.source = row.source
+            """
+            loaded += loader.run_query(inquiry_doc_query, self.inquiry_doc_rels)
 
         probable_person_query = """
             MATCH (case_person:Person)

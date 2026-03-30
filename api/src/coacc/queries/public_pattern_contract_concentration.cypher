@@ -9,24 +9,25 @@ WHERE coalesce(award.buyer_name, buyer.razon_social, buyer.name) IS NOT NULL
   AND trim(coalesce(award.buyer_name, buyer.razon_social, buyer.name)) <> ''
   AND award.total_value IS NOT NULL
 WITH c,
+     buyer,
      coalesce(award.buyer_name, buyer.razon_social, buyer.name) AS contracting_org,
      sum(coalesce(award.total_value, 0.0)) AS company_org_total
 CALL {
-  WITH contracting_org
-  MATCH (org:Company)-[org_award:CONTRATOU]->(:Company)
-  WHERE coalesce(org_award.buyer_name, org.razon_social, org.name) = contracting_org
-    AND org_award.total_value IS NOT NULL
+  WITH buyer
+  MATCH (buyer)-[org_award:CONTRATOU]->(:Company)
+  WHERE org_award.total_value IS NOT NULL
   RETURN sum(coalesce(org_award.total_value, 0.0)) AS org_total
 }
-WITH c, contracting_org, company_org_total, org_total
+WITH c, buyer, contracting_org, company_org_total, org_total
 WHERE org_total > 0
   AND (company_org_total / org_total) >= toFloat($pattern_share_threshold)
-WITH c, collect(DISTINCT contracting_org) AS risky_orgs
+WITH c,
+     collect(DISTINCT contracting_org) AS risky_orgs,
+     collect(DISTINCT coalesce(buyer.document_id, buyer.nit, elementId(buyer))) AS risky_org_ids
 WHERE size(risky_orgs) > 0
 MATCH (buyer:Company)-[risk_award:CONTRATOU]->(c)
-WHERE coalesce(risk_award.buyer_name, buyer.razon_social, buyer.name) IN risky_orgs
-WITH c,
-     risky_orgs,
+WHERE coalesce(buyer.document_id, buyer.nit, elementId(buyer)) IN risky_org_ids
+WITH c, risky_orgs,
      reduce(
        refs = [],
        ref_list IN collect(coalesce(risk_award.evidence_refs, [risk_award.summary_id])) |

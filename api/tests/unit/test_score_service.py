@@ -67,7 +67,7 @@ async def test_compute_exposure_returns_response() -> None:
         "connection_count": 10,
         "source_count": 3,
         "financial_volume": 50000.0,
-        "cnae_principal": "4711-3/02",
+        "sector_code": "6201",
         "role": None,
     }[key]
 
@@ -83,7 +83,7 @@ async def test_compute_exposure_returns_response() -> None:
     assert response.entity_id == "4:abc:1"
     assert 0.0 <= response.exposure_index <= 100.0
     assert len(response.factors) == 5
-    assert response.peer_group == "CNAE 4711-3/02"
+    assert response.peer_group == "CIIU 6201"
     assert len(response.sources) > 0
 
 
@@ -116,7 +116,7 @@ async def test_compute_exposure_person_peer_group() -> None:
         "connection_count": 5,
         "source_count": 2,
         "financial_volume": 0.0,
-        "cnae_principal": None,
+        "sector_code": None,
         "role": "official",
     }[key]
 
@@ -143,7 +143,7 @@ async def test_compute_exposure_source_attribution() -> None:
         "connection_count": 0,
         "source_count": 1,
         "financial_volume": 0.0,
-        "cnae_principal": None,
+        "sector_code": None,
         "role": None,
     }[key]
 
@@ -203,6 +203,7 @@ def test_graph_expand_query_includes_same_as() -> None:
     CypherLoader.clear_cache()
     cypher = CypherLoader.load("graph_expand")
     assert "SAME_AS" in cypher
+    assert "SourceDocument" in cypher
 
 
 def test_entity_connections_query_includes_same_as() -> None:
@@ -212,6 +213,13 @@ def test_entity_connections_query_includes_same_as() -> None:
     assert "SAME_AS" in cypher
     assert "POSSIBLE_SAME_AS" in cypher
     assert "$include_probable" in cypher
+
+
+def test_baseline_sector_query_uses_colombian_ciiu_fields() -> None:
+    CypherLoader.clear_cache()
+    cypher = CypherLoader.load("baseline_sector")
+    assert "primary_ciiu_code" in cypher
+    assert "sector_ciiu" in cypher
 
 
 @pytest.mark.anyio
@@ -228,7 +236,7 @@ async def test_compute_exposure_aggregated_same_as_data() -> None:
         "connection_count": 85,
         "source_count": 5,
         "financial_volume": 2_500_000.0,
-        "cnae_principal": None,
+        "sector_code": None,
         "role": "official",
     }[key]
 

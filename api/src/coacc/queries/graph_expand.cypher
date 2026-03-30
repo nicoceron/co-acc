@@ -1,10 +1,16 @@
 MATCH (center)
-WHERE elementId(center) = $entity_id
+WHERE (
+    elementId(center) = $entity_id
+    OR replace(coalesce(center.document_id, ''), '-', '') = replace(trim(coalesce($entity_id, '')), '-', '')
+    OR replace(coalesce(center.nit, ''), '-', '') = replace(trim(coalesce($entity_id, '')), '-', '')
+    OR coalesce(center.bid_id, '') = trim(coalesce($entity_id, ''))
+    OR coalesce(center.doc_id, '') = trim(coalesce($entity_id, ''))
+  )
   AND (
     center:Person OR center:Company OR center:Contract OR center:Sanction OR center:Election
     OR center:Amendment OR center:Finance OR center:Embargo OR center:Health OR center:Education
     OR center:Convenio OR center:LaborStats OR center:PublicOffice OR center:Bid
-    OR center:DeclaredAsset OR center:Inquiry OR center:Finding
+    OR center:DeclaredAsset OR center:Inquiry OR center:Finding OR center:SourceDocument
     OR center:OffshoreEntity OR center:OffshoreOfficer OR center:GlobalPEP
     OR center:CVMProceeding OR center:Expense
   )

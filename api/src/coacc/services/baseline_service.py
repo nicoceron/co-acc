@@ -15,9 +15,7 @@ BASELINE_QUERIES: dict[str, str] = {
 def _record_to_metrics(
     record: Record, dimension: str, key_field: str,
 ) -> BaselineMetrics:
-    data: dict[str, Any] = {}
-    for key in record:
-        data[key] = record[key]
+    data: dict[str, Any] = record.data()
 
     return BaselineMetrics(
         company_name=data.get("company_name", ""),
@@ -47,7 +45,7 @@ async def run_baseline(
     query_name = BASELINE_QUERIES[dimension]
     records = await execute_query(session, query_name, {"entity_id": entity_id})
 
-    key_field = "sector_cnae" if dimension == "sector" else "region"
+    key_field = "sector_ciiu" if dimension == "sector" else "region"
 
     return [
         _record_to_metrics(record, dimension, key_field)

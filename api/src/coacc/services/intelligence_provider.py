@@ -52,7 +52,10 @@ COMMUNITY_PATTERN_IDS = COMMUNITY_COMPANY_PATTERN_IDS + COMMUNITY_PERSON_PATTERN
 COMMUNITY_ANALYSIS_PATTERN_IDS = (
     "sanctioned_supplier_record",
     "sanctioned_still_receiving",
+    "amendment_beneficiary_contracts",
     "split_contracts_below_threshold",
+    "contract_concentration",
+    "inexigibility_recurrence",
     "public_official_supplier_overlap",
     "sensitive_public_official_supplier_overlap",
     "low_competition_bidding",

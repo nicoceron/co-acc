@@ -29,6 +29,9 @@ _GRAPH_PROPS = {
     "type", "uf", "cargo", "partido", "org", "role_name", "office_id", "bid_id", "asset_id",
     "finance_id", "finding_id", "radicado", "status", "amount", "audited_year", "report_date",
     "process_name", "description", "observations", "publication_date", "start_date", "reference",
+    "doc_id", "title", "summary", "source_url", "document_url", "document_kind",
+    "archive_label", "archive_name", "uploaded_at", "process_id", "contract_reference",
+    "issuing_entity", "case_category", "case_domain", "event_date",
     "cdp_request_count", "cdp_balance_total", "cdp_commit_available_total", "cdp_used_value_total",
     "latest_siif_status", "latest_spending_destination", "registered_in_siif", "bpin_code",
     "execution_location_count", "execution_locations",
@@ -62,6 +65,7 @@ _LABEL_MAP: dict[str, str] = {
     "declaredAsset": "DeclaredAsset",
     "finding": "Finding",
     "cpi": "Inquiry",
+    "sourceDocument": "SourceDocument",
 }
 
 
@@ -93,6 +97,18 @@ def _extract_label(node: Any, labels: list[str]) -> str:
         return str(props.get("name", props.get("form_id", props.get("asset_id", "Declared Asset"))))
     if entity_type == "finding":
         return str(props.get("name", props.get("radicado", props.get("finding_id", "Finding"))))
+    if entity_type == "cpi":
+        return str(props.get("title", props.get("summary", props.get("inquiry_id", "Caso"))))
+    if entity_type == "sourceDocument":
+        return str(
+            props.get(
+                "title",
+                props.get(
+                    "archive_label",
+                    props.get("archive_name", props.get("doc_id", "Documento")),
+                ),
+            )
+        )
     return str(props.get("name", str(props.get("id", ""))))
 
 
@@ -222,6 +238,7 @@ async def get_graph(
             or props.get("asset_id")
             or props.get("office_id")
             or props.get("election_id")
+            or props.get("doc_id")
         )
         document_id = str(doc_id) if doc_id else None
 

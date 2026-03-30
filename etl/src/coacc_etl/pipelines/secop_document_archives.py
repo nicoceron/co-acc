@@ -23,6 +23,7 @@ from coacc_etl.pipelines.colombia_shared import (
     extract_url,
     parse_iso_date,
     read_csv_normalized,
+    stable_id,
 )
 from coacc_etl.streaming import iter_csv_chunks
 from coacc_etl.transforms import deduplicate_rows
@@ -50,6 +51,11 @@ def _archive_type_flags(*values: object) -> dict[str, bool]:
     }
 
 
+def _archive_document_kind(flags: dict[str, bool]) -> str:
+    kinds = [name for name, enabled in flags.items() if enabled]
+    return ",".join(sorted(kinds)) if kinds else "supporting_document"
+
+
 class SecopDocumentArchivesPipeline(Pipeline):
     """Aggregate SECOP II public document-index rows onto contract summaries."""
 
@@ -67,6 +73,10 @@ class SecopDocumentArchivesPipeline(Pipeline):
         super().__init__(driver, data_dir, limit=limit, chunk_size=chunk_size, **kwargs)
         self._raw: pd.DataFrame = pd.DataFrame()
         self.procurements: list[dict[str, Any]] = []
+        self.bids: list[dict[str, Any]] = []
+        self.documents: list[dict[str, Any]] = []
+        self.bid_company_links: list[dict[str, Any]] = []
+        self.bid_document_links: list[dict[str, Any]] = []
 
     def _csv_path(self) -> Path:
         return Path(self.data_dir) / "secop_document_archives" / "secop_document_archives.csv"
@@ -242,6 +252,110 @@ class SecopDocumentArchivesPipeline(Pipeline):
 
         return deduplicate_rows(list(procurement_map.values()), ["summary_id"])
 
+    def _document_rows(
+        self,
+        frame: pd.DataFrame,
+        process_summary_lookup: dict[str, list[str]],
+    ) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+
+        for row in frame.to_dict(orient="records"):
+            process_id = clean_text(row.get("proceso"))
+            if not process_id:
+                continue
+            summary_ids = process_summary_lookup.get(process_id)
+            if not summary_ids:
+                continue
+
+            archive_label = _archive_label(row)
+            archive_name = clean_text(row.get("nombre_archivo"))
+            archive_url = extract_url(row.get("url_descarga_documento"))
+            archive_extension = clean_text(row.get("extensi_n")).lower()
+            archive_uploaded_at = parse_iso_date(row.get("fecha_carga"))
+            archive_document_id = clean_text(row.get("id_documento"))
+            contract_ref = clean_text(row.get("n_mero_de_contrato"))
+            archive_flags = _archive_type_flags(archive_label, archive_name, contract_ref)
+            document_kind = _archive_document_kind(archive_flags)
+
+            doc_id = stable_id(
+                "secop_archive_doc",
+                process_id,
+                archive_document_id or archive_url or archive_name or contract_ref,
+            )
+            rows.append(
+                {
+                    "doc_id": doc_id,
+                    "bid_id": process_id,
+                    "title": archive_label or archive_name or contract_ref or doc_id,
+                    "name": archive_name or archive_label or doc_id,
+                    "archive_label": archive_label,
+                    "archive_name": archive_name,
+                    "document_url": archive_url,
+                    "uploaded_at": archive_uploaded_at,
+                    "document_extension": archive_extension,
+                    "archive_document_ref": archive_document_id,
+                    "contract_reference": contract_ref,
+                    "process_id": process_id,
+                    "document_kind": document_kind,
+                    "source_id": self.source_id,
+                    "source": self.source_id,
+                    "country": "CO",
+                }
+            )
+
+        return deduplicate_rows(rows, ["doc_id"])
+
+    def _bid_rows(self, frame: pd.DataFrame) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for row in frame.to_dict(orient="records"):
+            process_id = clean_text(row.get("proceso"))
+            if not process_id:
+                continue
+            archive_label = _archive_label(row)
+            archive_name = clean_text(row.get("nombre_archivo"))
+            contract_ref = clean_text(row.get("n_mero_de_contrato"))
+            rows.append(
+                {
+                    "bid_id": process_id,
+                    "name": archive_label or archive_name or contract_ref or process_id,
+                    "reference": contract_ref or process_id,
+                    "procedure_description": archive_label or archive_name or contract_ref,
+                    "source": self.source_id,
+                    "country": "CO",
+                }
+            )
+        return deduplicate_rows(rows, ["bid_id"])
+
+    def _bid_company_rows(
+        self,
+        process_summary_lookup: dict[str, list[str]],
+    ) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for process_id, summary_ids in process_summary_lookup.items():
+            for summary_id in summary_ids:
+                rows.append(
+                    {
+                        "bid_id": process_id,
+                        "summary_id": summary_id,
+                        "source": self.source_id,
+                        "country": "CO",
+                    }
+                )
+        return deduplicate_rows(rows, ["bid_id", "summary_id"])
+
+    def _bid_document_rows(self, documents: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        rows = [
+            {
+                "bid_id": row["bid_id"],
+                "doc_id": row["doc_id"],
+                "source": row["source"],
+                "document_kind": row["document_kind"],
+            }
+            for row in documents
+            if row.get("bid_id") and row.get("doc_id")
+        ]
+        return deduplicate_rows(rows, ["bid_id", "doc_id"])
+
     def transform(self) -> None:
         process_ids = {
             clean_text(value)
@@ -250,6 +364,10 @@ class SecopDocumentArchivesPipeline(Pipeline):
         }
         if not process_ids:
             self.procurements = []
+            self.bids = []
+            self.documents = []
+            self.bid_company_links = []
+            self.bid_document_links = []
             return
 
         try:
@@ -257,9 +375,17 @@ class SecopDocumentArchivesPipeline(Pipeline):
         except FileNotFoundError:
             logger.warning("[%s] secop_ii_contracts source file not found; skipping", self.name)
             self.procurements = []
+            self.bids = []
+            self.documents = []
+            self.bid_company_links = []
+            self.bid_document_links = []
             return
 
         self.procurements = self._aggregate_frame(self._raw, lookup)
+        self.bids = self._bid_rows(self._raw)
+        self.documents = self._document_rows(self._raw, lookup)
+        self.bid_company_links = self._bid_company_rows(lookup)
+        self.bid_document_links = self._bid_document_rows(self.documents)
 
     def _load_query(self) -> str:
         return """
@@ -281,4 +407,66 @@ class SecopDocumentArchivesPipeline(Pipeline):
 
     def load(self) -> None:
         loader = Neo4jBatchLoader(self.driver)
-        self.rows_loaded = loader.run_query(self._load_query(), self.procurements)
+        document_loader = Neo4jBatchLoader(self.driver, batch_size=500)
+        loaded = 0
+        if self.procurements:
+            loaded += loader.run_query(self._load_query(), self.procurements)
+        if self.bids:
+            loaded += document_loader.run_query_with_retry(
+                """
+                    UNWIND $rows AS row
+                    MERGE (b:Bid {bid_id: row.bid_id})
+                    SET b.source = coalesce(b.source, row.source),
+                        b.country = coalesce(b.country, row.country),
+                        b.name = CASE
+                            WHEN coalesce(b.name, '') = '' AND row.name <> '' THEN row.name
+                            ELSE b.name
+                        END,
+                        b.reference = CASE
+                            WHEN coalesce(b.reference, '') = '' AND row.reference <> '' THEN row.reference
+                            ELSE b.reference
+                        END,
+                        b.procedure_description = CASE
+                            WHEN coalesce(b.procedure_description, '') = '' AND row.procedure_description <> ''
+                            THEN row.procedure_description
+                            ELSE b.procedure_description
+                        END
+                """,
+                self.bids,
+            )
+        if self.bid_company_links:
+            loaded += document_loader.run_query_with_retry(
+                """
+                    UNWIND $rows AS row
+                    MATCH (buyer:Company)-[award:CONTRATOU {summary_id: row.summary_id}]->(supplier:Company)
+                    MERGE (bid:Bid {bid_id: row.bid_id})
+                    MERGE (buyer)-[rb:LICITO]->(bid)
+                    SET rb.source = row.source,
+                        rb.country = row.country,
+                        rb.summary_id = row.summary_id,
+                        rb.buyer_document_id = coalesce(award.buyer_document_id, rb.buyer_document_id),
+                        rb.buyer_name = coalesce(award.buyer_name, rb.buyer_name)
+                    MERGE (supplier)-[rs:GANO]->(bid)
+                    SET rs.source = row.source,
+                        rs.country = row.country,
+                        rs.summary_id = row.summary_id,
+                        rs.supplier_document_id = coalesce(award.supplier_document_id, rs.supplier_document_id),
+                        rs.supplier_name = coalesce(award.supplier_name, rs.supplier_name)
+                """,
+                self.bid_company_links,
+            )
+        if self.documents:
+            loaded += document_loader.load_nodes("SourceDocument", self.documents, key_field="doc_id")
+        if self.bid_document_links:
+            loaded += document_loader.run_query_with_retry(
+                """
+                    UNWIND $rows AS row
+                    MATCH (bid:Bid {bid_id: row.bid_id})
+                    MATCH (doc:SourceDocument {doc_id: row.doc_id})
+                    MERGE (bid)-[r:REFERENTE_A]->(doc)
+                    SET r.source = row.source,
+                        r.document_kind = row.document_kind
+                """,
+                self.bid_document_links,
+            )
+        self.rows_loaded = loaded

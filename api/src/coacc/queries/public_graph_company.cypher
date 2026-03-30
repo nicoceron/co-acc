@@ -8,7 +8,7 @@ CALL apoc.path.expandConfig(
   center,
   {
     relationshipFilter: "SOCIO_DE|GANO|CONTRATOU|ADJUDICOU_A|SANCIONADA|TIENE_HALLAZGO|DEVE|RECEBEU_EMPRESTIMO|BENEFICIO|GENERO_CONVENIO|CELEBRO_CONVENIO_INTERADMIN|MUNICIPAL_GANO|MUNICIPAL_LICITO|LICITO|SUMINISTRO_LICITACAO|REFERENTE_A|ADMINISTRA",
-    labelFilter: "+Company|+Contract|+Sanction|+Finding|+Finance|+Amendment|+Convenio|+Bid|+MunicipalContract|+MunicipalBid|-Person|-Partner|-User|-Investigation|-Annotation|-Tag",
+    labelFilter: "+Company|+Contract|+Sanction|+Finding|+Finance|+Amendment|+Convenio|+Bid|+Inquiry|+SourceDocument|+MunicipalContract|+MunicipalBid|-Person|-Partner|-User|-Investigation|-Annotation|-Tag",
     maxLevel: toInteger($depth),
     bfs: true,
     uniqueness: "RELATIONSHIP_PATH",
