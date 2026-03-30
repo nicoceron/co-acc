@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BadgeCheck, BookOpenText, FileSearch, Link2, Network, ScrollText } from "lucide-react";
-import { Link, useParams } from "react-router";
+import { Link, useLocation, useParams } from "react-router";
 
 import { GraphCanvas } from "@/components/graph/GraphCanvas";
 import { formatPropertyLabel, humanizeIdentifier } from "@/lib/display";
@@ -22,11 +22,41 @@ function statusLabel(investigation: MaterializedInvestigation): string {
   return isCorroboratedInvestigation(investigation) ? "Verificado" : "Alerta";
 }
 
-function collectionMeta(investigation?: MaterializedInvestigation | null): { href: string; label: string } {
-  if (investigation && isCorroboratedInvestigation(investigation)) {
-    return { href: "/biblioteca", label: "Volver a biblioteca" };
+const CATEGORY_TITLES: Record<string, string> = {
+  elefante_blanco: "Elefante blanco / obra trabada",
+  microdesfalco_contable: "Microdesfalco contable",
+  vendedor_objetos_robados: "Vendedor de objetos robados",
+  proveedor_sancionado: "Proveedor sancionado",
+  captura_contractual: "Proveedor con vínculo oficial",
+  riesgo_politico_contractual: "Riesgo político-contractual",
+  supervision: "Supervisión e interventoría",
+  captura_educativa: "Captura educativa",
+  direccionamiento_contractual: "Direccionamiento contractual",
+  dadivas_intermediacion: "Dádivas e intermediación política",
+  conflictos_societarios: "Conflictos y referencias societarias",
+  capacidad_financiera: "Capacidad financiera insuficiente",
+};
+
+function categoryTitle(category: string): string {
+  return CATEGORY_TITLES[category] ?? categoryLabel(category);
+}
+
+function collectionMeta(
+  pathname: string,
+  investigation?: MaterializedInvestigation | null,
+): { href: string; label: string } {
+  const isLibraryPath = pathname.startsWith("/biblioteca") || pathname.startsWith("/investigations");
+  const root = isLibraryPath ? "/biblioteca" : "/casos";
+  if (investigation?.category) {
+    return {
+      href: `${root}/modalidad/${investigation.category}`,
+      label: `Volver a ${categoryTitle(investigation.category)}`,
+    };
   }
-  return { href: "/casos", label: "Volver a casos" };
+  return {
+    href: root,
+    label: isLibraryPath ? "Volver a biblioteca" : "Volver a casos",
+  };
 }
 
 function categoryLabel(category: string): string {
@@ -65,6 +95,7 @@ function splitBoardItem(item: string): { label: string | null; body: string } {
 
 export function InvestigationDossier() {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
   const [investigation, setInvestigation] = useState<MaterializedInvestigation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,7 +173,10 @@ export function InvestigationDossier() {
       })
       .slice(0, 10);
   }, [graph]);
-  const backNavigation = useMemo(() => collectionMeta(investigation), [investigation]);
+  const backNavigation = useMemo(
+    () => collectionMeta(location.pathname, investigation),
+    [investigation, location.pathname],
+  );
 
   if (loading) {
     return (

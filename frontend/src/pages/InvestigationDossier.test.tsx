@@ -120,7 +120,7 @@ describe("InvestigationDossier", () => {
     expect(screen.getByText(/Por qué vale la pena mirar esto/i)).toBeInTheDocument();
     expect(screen.getByText(/^Glosario$/i)).toBeInTheDocument();
     expect(screen.getByText(/^Verificado$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Volver a biblioteca/i)).toBeInTheDocument();
+    expect(screen.getByText(/Volver a Captura educativa/i)).toBeInTheDocument();
     expect(screen.getByText(/Señal automática basada en alias coincidencia de identidad y boletines oficiales/i)).toBeInTheDocument();
     expect(screen.getByText(/Hay un alias coincidencia de identidad contractual/i)).toBeInTheDocument();
     expect(screen.getByText(/^boletines oficiales$/i)).toBeInTheDocument();
@@ -155,6 +155,6 @@ describe("InvestigationDossier", () => {
     });
 
     expect(screen.getByText(/^Alerta$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Volver a casos/i)).toBeInTheDocument();
+    expect(screen.getByText(/Volver a Elefante blanco \/ obra trabada/i)).toBeInTheDocument();
   });
 });

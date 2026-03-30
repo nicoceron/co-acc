@@ -248,7 +248,10 @@ const SAMPLE_PACK = {
         commitment_gap_contract_count: 0,
         commitment_gap_total: 0,
         official_names: ["Directivo de prueba"],
-        alerts: [{ reason_text: "Coincide con directivo en cargo público.", alert_type: "public_official_supplier_overlap" }],
+        alerts: [
+          { reason_text: "Coincide con directivo en cargo público.", alert_type: "public_official_supplier_overlap" },
+          { reason_text: "Pagos y ejecución no están cerrando bien.", alert_type: "budget_execution_discrepancy" },
+        ],
       },
       {
         entity_id: "company-3",
@@ -466,6 +469,7 @@ describe("Results", () => {
     expect(screen.getByRole("link", { name: /Volver a modalidades/i })).toBeInTheDocument();
     expect(screen.getByRole("searchbox", { name: /Buscar caso dentro de la modalidad/i })).toBeInTheDocument();
     expect(screen.getAllByText("Consorcio Río Verde").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Fondo Metropolitano de Obras").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: /Ver biblioteca de esta modalidad/i })).toBeInTheDocument();
   });
 

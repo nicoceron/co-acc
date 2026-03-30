@@ -237,23 +237,27 @@ function createFallbackCategory(seed: string): CatalogDefinition {
   };
 }
 
-function resolveCategoryDefinition(
+function resolveCategoryDefinitions(
   seeds: Array<string | null | undefined>,
   catalog: CatalogDefinition[],
-): CatalogDefinition {
+): CatalogDefinition[] {
   const normalizedSeeds = seeds
     .map((seed) => String(seed ?? "").trim())
     .filter(Boolean)
     .map((seed) => ({ raw: seed, normalized: normalizeCatalogToken(seed) }));
 
+  const matches = new Map<string, CatalogDefinition>();
   for (const seed of normalizedSeeds) {
-    const found = catalog.find((definition) => (
-      definition.aliases.some((alias) => normalizeCatalogToken(alias) === seed.normalized)
-    ));
-    if (found) return found;
+    for (const definition of catalog) {
+      if (definition.aliases.some((alias) => normalizeCatalogToken(alias) === seed.normalized)) {
+        matches.set(definition.id, definition);
+      }
+    }
   }
 
-  return createFallbackCategory(normalizedSeeds[0]?.raw ?? "Sin clasificar");
+  if (matches.size > 0) return [...matches.values()];
+
+  return [createFallbackCategory(normalizedSeeds[0]?.raw ?? "Sin clasificar")];
 }
 
 function deriveInvestigationRiskScore(
@@ -841,14 +845,15 @@ export function Results() {
       }
     }
 
-    function ensureSection(seeds: Array<string | null | undefined>): CatalogSection {
-      const definition = resolveCategoryDefinition(seeds, [...definitions.values()]);
-      if (!definitions.has(definition.id)) definitions.set(definition.id, definition);
-      const existing = sections.get(definition.id);
-      if (existing) return existing;
-      const created: CatalogSection = { definition, items: [], corroboratedCount: 0 };
-      sections.set(definition.id, created);
-      return created;
+    function ensureSections(seeds: Array<string | null | undefined>): CatalogSection[] {
+      return resolveCategoryDefinitions(seeds, [...definitions.values()]).map((definition) => {
+        if (!definitions.has(definition.id)) definitions.set(definition.id, definition);
+        const existing = sections.get(definition.id);
+        if (existing) return existing;
+        const created: CatalogSection = { definition, items: [], corroboratedCount: 0 };
+        sections.set(definition.id, created);
+        return created;
+      });
     }
 
     function seenKeys(sectionId: string): Set<string> {
@@ -897,61 +902,64 @@ export function Results() {
     }
 
     for (const investigation of investigations) {
-      const section = ensureSection([investigation.category, ...investigation.tags]);
-      section.items.push({
-        kind: "investigation",
-        key: `investigation:${investigation.slug}`,
-        categoryId: section.definition.id,
-        riskScore: deriveInvestigationRiskScore(
+      for (const section of ensureSections([investigation.category, ...investigation.tags])) {
+        section.items.push({
+          kind: "investigation",
+          key: `investigation:${investigation.slug}`,
+          categoryId: section.definition.id,
+          riskScore: deriveInvestigationRiskScore(
+            investigation,
+            lookupRisk(investigation.entity_id, investigation.subject_ref),
+          ),
+          corroborated: isCorroboratedInvestigation(investigation),
           investigation,
-          lookupRisk(investigation.entity_id, investigation.subject_ref),
-        ),
-        corroborated: isCorroboratedInvestigation(investigation),
-        investigation,
-      });
-      registerKeys(section.definition.id, investigation.entity_id, investigation.subject_ref);
+        });
+        registerKeys(section.definition.id, investigation.entity_id, investigation.subject_ref);
+      }
     }
 
     for (const validationCase of matchedValidationCases) {
-      const section = ensureSection([
+      for (const section of ensureSections([
         validationCase.category,
         ...validationCase.matched_signals,
         ...validationCase.observed_signals,
-      ]);
-      if (isCovered(section.definition.id, validationCase.entity_id, validationCase.entity_ref)) continue;
-      section.items.push({
-        kind: "validation",
-        key: `validation:${validationCase.case_id}`,
-        categoryId: section.definition.id,
-        riskScore:
-          lookupRisk(validationCase.entity_id, validationCase.entity_ref)
-          ?? (18 + Math.min(validationCase.matched_signals.length, 4)),
-        corroborated: true,
-        validationCase,
-      });
-      registerKeys(section.definition.id, validationCase.entity_id, validationCase.entity_ref);
+      ])) {
+        if (isCovered(section.definition.id, validationCase.entity_id, validationCase.entity_ref)) continue;
+        section.items.push({
+          kind: "validation",
+          key: `validation:${validationCase.case_id}`,
+          categoryId: section.definition.id,
+          riskScore:
+            lookupRisk(validationCase.entity_id, validationCase.entity_ref)
+            ?? (18 + Math.min(validationCase.matched_signals.length, 4)),
+          corroborated: true,
+          validationCase,
+        });
+        registerKeys(section.definition.id, validationCase.entity_id, validationCase.entity_ref);
+      }
     }
 
     for (const { queueKind, row } of watchlistRows) {
       const featuredLead = featuredLeadIndex.get(row.entity_id);
       const seeds = buildLeadCategorySeeds(row, featuredLead);
       if (seeds.length === 0) continue;
-      const section = ensureSection(seeds);
       const rowDocumentId = "document_id" in row ? row.document_id : null;
-      if (isCovered(section.definition.id, row.entity_id, rowDocumentId)) continue;
       const corroborated =
         buildIdentityKeys(row.entity_id, rowDocumentId).some((key) => corroboratedKeys.has(key))
         || Boolean(featuredLead?.matched_validation_titles.length);
-      section.items.push({
-        kind: "lead",
-        key: `${queueKind}:${row.entity_id}`,
-        categoryId: section.definition.id,
-        riskScore: row.suspicion_score,
-        corroborated,
-        queueKind,
-        row,
-      });
-      registerKeys(section.definition.id, row.entity_id, rowDocumentId);
+      for (const section of ensureSections(seeds)) {
+        if (isCovered(section.definition.id, row.entity_id, rowDocumentId)) continue;
+        section.items.push({
+          kind: "lead",
+          key: `${queueKind}:${row.entity_id}`,
+          categoryId: section.definition.id,
+          riskScore: row.suspicion_score,
+          corroborated,
+          queueKind,
+          row,
+        });
+        registerKeys(section.definition.id, row.entity_id, rowDocumentId);
+      }
     }
 
     const baseOrder = new Map(BASE_CATALOG.map((definition, index) => [definition.id, index]));
