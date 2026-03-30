@@ -1074,14 +1074,14 @@ export function Results() {
     <div className={styles.page}>
       <header className={styles.hero}>
         <div className={styles.heroCopy}>
-          <p className={styles.heroEyebrow}>Biblioteca pública de investigaciones</p>
+          <p className={styles.heroEyebrow}>{isLibraryMode ? "Biblioteca pública" : "Portada de descubrimiento"}</p>
           <h1 className={styles.heroTitle}>
-            {isLibraryMode ? "Biblioteca corroborada para contrastar y citar." : "Casos ordenados por práctica, no por ruido."}
+            {isLibraryMode ? "Biblioteca para contrastar y citar." : "Pistas ordenadas por práctica, no por ruido."}
           </h1>
           <p className={styles.heroLead}>
             {isLibraryMode
-              ? "Aquí quedan los casos que ya tienen mejor cierre público: dossiers, casos reproducidos y hallazgos con respaldo externo. Sirve para contrastar, citar y comparar contra las pistas nuevas."
-              : "La portada está hecha para encontrar cosas nuevas. Por eso aquí salen primero las pistas abiertas de mayor riesgo por práctica; los casos ya corroborados quedan como respaldo y control, no como portada."}
+              ? "Aquí quedan los casos con mejor cierre público. Sirven para contrastar, citar y comparar contra las pistas nuevas."
+              : "Aquí salen primero las pistas abiertas de mayor riesgo por práctica. Lo corroborado queda aparte como control, no como portada."}
           </p>
           <div className={styles.heroMeta}>
             <span>Generado {formatDate(pack.generated_at_utc)}</span>
@@ -1100,11 +1100,11 @@ export function Results() {
           <div className={styles.cardActions}>
             {pageSections[0] ? (
               <a href={`#category-${pageSections[0].definition.id}`} className={styles.primaryCta}>
-                Explorar categorías
+                Bajar a categorías
               </a>
             ) : null}
             <Link to={isLibraryMode ? "/results" : "/investigations"} className={styles.inlineAction}>
-              {isLibraryMode ? "Volver a nuevas pistas" : "Ver biblioteca corroborada"}
+              {isLibraryMode ? "Volver a descubrir" : "Abrir biblioteca"}
             </Link>
           </div>
         </div>
@@ -1138,11 +1138,11 @@ export function Results() {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <div>
-            <p className={styles.sectionEyebrow}>Cómo navegar</p>
+            <p className={styles.sectionEyebrow}>Uso rápido</p>
             <h2>
               {isLibraryMode
-                ? "Primero eliges la práctica. Después comparas qué ya quedó documentado."
-                : "Primero eliges la práctica. Después miras si el caso ya está corroborado."}
+                ? "Elige una práctica y revisa qué ya quedó documentado."
+                : "Elige una práctica y mira si la pista ya tiene respaldo."}
             </h2>
           </div>
         </div>
@@ -1152,24 +1152,24 @@ export function Results() {
             <strong>{isLibraryMode ? "1. Escoge una práctica documentada" : "1. Escoge una categoría"}</strong>
             <p>
               {isLibraryMode
-                ? "Aquí sólo quedan categorías con material corroborado que ya puedes revisar o citar con más seguridad."
-                : "Elefante blanco, proveedor sancionado, supervisión y las demás prácticas con pistas nuevas visibles."}
+                ? "Aquí sólo quedan prácticas con material ya contrastable."
+                : "Elefante blanco, microdesfalco contable, supervisión y otras prácticas con pistas visibles."}
             </p>
           </article>
           <article className={styles.guideCard}>
             <strong>{isLibraryMode ? "2. Usa esto como control" : "2. Mira qué tan nuevo es"}</strong>
             <p>
               {isLibraryMode
-                ? "Esta biblioteca sirve para contrastar si una pista nueva ya tiene soporte público suficiente o si todavía está verde."
-                : "La portada prioriza pistas iniciales. Si algo ya está corroborado, queda marcado pero no manda la pantalla."}
+                ? "Úsala para comparar si una pista nueva ya tiene cierre suficiente o sigue verde."
+                : "Si algo ya está corroborado, queda marcado, pero no manda la pantalla."}
             </p>
           </article>
           <article className={styles.guideCard}>
             <strong>{isLibraryMode ? "3. Vuelve a descubrir" : "3. Usa lo corroborado como control"}</strong>
             <p>
               {isLibraryMode
-                ? "Si quieres encontrar cosas nuevas en vez de revisar benchmark, vuelve a la portada de nuevas pistas."
-                : "La biblioteca corroborada sigue disponible, pero la portada está hecha para descubrir, no para repetir benchmark."}
+                ? "Si quieres encontrar algo nuevo, vuelve a la portada de descubrimiento."
+                : "La biblioteca sigue disponible, pero esta portada existe para descubrir, no para repetir benchmark."}
             </p>
           </article>
         </div>
@@ -1178,7 +1178,7 @@ export function Results() {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <div>
-            <p className={styles.sectionEyebrow}>Glosario rápido</p>
+            <p className={styles.sectionEyebrow}>Glosario</p>
             <h2>Términos mínimos para leer un caso sin saber contratación pública</h2>
           </div>
         </div>
@@ -1198,8 +1198,8 @@ export function Results() {
             <p className={styles.sectionEyebrow}>Explorar por categoría</p>
             <h2>
               {isLibraryMode
-                ? "Esta biblioteca está organizada por práctica para revisar rápido lo ya documentado."
-                : "Estas categorías tienen pistas nuevas arriba. Lo corroborado queda atrás como referencia."}
+                ? "La biblioteca está organizada por práctica para revisar rápido lo ya documentado."
+                : "Cada práctica muestra primero lo nuevo. Lo corroborado queda al fondo como referencia."}
             </h2>
           </div>
         </div>
@@ -1251,8 +1251,8 @@ export function Results() {
       <section className={styles.footerNote}>
         <p>
           {isLibraryMode
-            ? "Esta biblioteca existe para contrastar, citar y revisar el material que ya alcanzó un cierre público más alto."
-            : "La portada ahora sirve para cazar nuevas pistas. Los casos ya corroborados siguen existiendo, pero quedaron relegados a la biblioteca para que no tapen los hallazgos nuevos."}
+            ? "Esta biblioteca existe para contrastar, citar y revisar material con cierre público más alto."
+            : "La portada sirve para cazar pistas nuevas. Lo corroborado sigue disponible, pero ya no tapa lo nuevo."}
         </p>
       </section>
 

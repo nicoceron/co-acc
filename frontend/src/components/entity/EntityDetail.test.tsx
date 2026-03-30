@@ -69,7 +69,7 @@ describe("EntityDetail", () => {
     await waitFor(() => {
       expect(screen.getByText("Role")).toBeInTheDocument();
       expect(screen.getByText("Directora")).toBeInTheDocument();
-      expect(screen.getByText("City")).toBeInTheDocument();
+      expect(screen.getByText("Ciudad")).toBeInTheDocument();
       expect(screen.getByText("Bogota")).toBeInTheDocument();
     });
   });

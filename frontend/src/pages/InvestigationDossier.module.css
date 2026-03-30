@@ -1,13 +1,13 @@
 .page {
   --paper: color-mix(in oklab, var(--bg-secondary) 80%, #221c12 20%);
   --paper-strong: color-mix(in oklab, var(--bg-primary) 70%, #120e09 30%);
-  --editorial-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --editorial-serif: var(--font-display);
   min-height: 100vh;
   padding: clamp(5rem, 7vw, 6.5rem) clamp(1.1rem, 3vw, 2.6rem) 4rem;
   background:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--color-warning) 12%, transparent) 0, transparent 34%),
-    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 16%, transparent) 0, transparent 28%),
-    linear-gradient(180deg, #13110f 0%, #090a09 100%);
+    radial-gradient(circle at top left, color-mix(in oklab, var(--color-warning) 14%, transparent) 0, transparent 34%),
+    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 18%, transparent) 0, transparent 28%),
+    linear-gradient(180deg, #15110f 0%, #0c0a09 58%, #090807 100%);
 }
 
 .frame {
@@ -32,15 +32,10 @@
 .sourcesCard,
 .stateWrap {
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  border-radius: 24px;
   background:
-    linear-gradient(180deg, rgba(19, 17, 14, 0.95), rgba(12, 12, 11, 0.98)),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0,
-      transparent 31px,
-      rgba(255, 255, 255, 0.02) 31px,
-      rgba(255, 255, 255, 0.02) 32px
-    );
+    linear-gradient(180deg, rgba(26, 20, 17, 0.96), rgba(13, 11, 10, 0.98)),
+    linear-gradient(135deg, rgba(255, 245, 230, 0.03), transparent 42%);
   box-shadow: var(--shadow-md);
 }
 
@@ -58,9 +53,10 @@
   gap: 0.5rem;
   color: var(--text-primary);
   text-decoration: none;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.82rem;
   letter-spacing: 0.08em;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -70,11 +66,13 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.45rem 0.75rem;
+  padding: 0.48rem 0.82rem;
   border: 1px solid color-mix(in oklab, var(--accent) 24%, var(--border));
-  font-family: var(--font-mono);
+  border-radius: 999px;
+  font-family: var(--font-sans);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -99,11 +97,12 @@
 .sectionHead span,
 .propertyRow span,
 .actorChip small {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
+  font-weight: 600;
   text-transform: uppercase;
-  color: var(--accent);
+  color: color-mix(in oklab, var(--accent) 82%, white 18%);
 }
 
 .title {
@@ -118,8 +117,9 @@
 .subjectLine {
   margin-top: 1rem;
   color: var(--text-muted);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.82rem;
+  letter-spacing: 0.03em;
 }
 
 .summary {
@@ -132,16 +132,19 @@
 
 .whyBlock {
   margin-top: 1.2rem;
-  padding-left: 1rem;
-  border-left: 2px solid color-mix(in oklab, var(--color-warning) 46%, transparent);
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in oklab, var(--color-warning) 24%, var(--border));
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(194, 141, 71, 0.08), rgba(255, 255, 255, 0.02));
 }
 
 .whyBlock strong {
   display: block;
   margin-bottom: 0.4rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.74rem;
   letter-spacing: 0.16em;
+  font-weight: 700;
   text-transform: uppercase;
   color: var(--color-warning);
 }
@@ -160,7 +163,7 @@
 }
 
 .metaPill {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 248, 240, 0.04);
 }
 
 .tagChip {
@@ -183,23 +186,19 @@
 .glossaryCard {
   padding: 1rem 1.05rem;
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  border-radius: 22px;
   background:
-    linear-gradient(180deg, rgba(19, 17, 14, 0.95), rgba(12, 12, 11, 0.98)),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0,
-      transparent 31px,
-      rgba(255, 255, 255, 0.02) 31px,
-      rgba(255, 255, 255, 0.02) 32px
-    );
+    linear-gradient(180deg, rgba(26, 20, 17, 0.96), rgba(13, 11, 10, 0.98)),
+    linear-gradient(135deg, rgba(255, 245, 230, 0.03), transparent 42%);
   box-shadow: var(--shadow-md);
 }
 
 .reviewLabel {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.68rem;
   letter-spacing: 0.16em;
+  font-weight: 700;
   text-transform: uppercase;
   color: var(--accent);
 }
@@ -210,9 +209,11 @@
   margin-top: 0.7rem;
   padding: 0.42rem 0.72rem;
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  font-family: var(--font-mono);
+  border-radius: 999px;
+  font-family: var(--font-sans);
   font-size: 0.69rem;
   letter-spacing: 0.08em;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -256,7 +257,8 @@
 .statCard {
   padding: 1rem;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 246, 236, 0.05), rgba(255, 255, 255, 0.02));
 }
 
 .statCard span {
@@ -291,6 +293,7 @@
 .verificationCard {
   padding: 1.15rem 1.2rem 1.25rem;
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  border-radius: 22px;
   background:
     linear-gradient(180deg, rgba(19, 17, 14, 0.96), rgba(10, 10, 9, 0.98)),
     linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 45%);
@@ -341,7 +344,8 @@
   gap: 0.38rem;
   padding: 0.9rem 0.95rem;
   border: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
-  background: rgba(255, 255, 255, 0.025);
+  border-radius: 16px;
+  background: rgba(255, 248, 240, 0.035);
 }
 
 .boardListItem span {
@@ -350,9 +354,10 @@
 }
 
 .boardItemLabel {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.68rem;
   letter-spacing: 0.14em;
+  font-weight: 700;
   text-transform: uppercase;
   color: var(--text-primary);
 }
@@ -426,7 +431,8 @@
 .evidenceCard {
   padding: 0.9rem;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  background: rgba(255, 248, 240, 0.04);
   display: grid;
   gap: 0.28rem;
 }
@@ -444,7 +450,7 @@
 
 .evidenceCard small {
   color: var(--text-muted);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.72rem;
 }
 
@@ -459,10 +465,15 @@
   min-width: 140px;
   padding: 0.8rem 0.9rem;
   border: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border));
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  background: rgba(255, 248, 240, 0.04);
   text-align: left;
   color: var(--text-primary);
   cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .actorChip span {
@@ -484,9 +495,20 @@
 .traceButton {
   padding: 0.9rem 1rem;
   border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  background: rgba(255, 248, 240, 0.04);
   text-align: left;
   cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.actorChip:hover,
+.traceButton:hover,
+.backLink:hover {
+  transform: translateY(-2px);
 }
 
 .traceButton strong {
@@ -507,9 +529,10 @@
   min-height: 440px;
   margin-top: 1rem;
   border: 1px solid var(--border);
+  border-radius: 22px;
   background:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 8%, transparent), transparent 45%),
-    linear-gradient(180deg, rgba(9, 11, 10, 0.8), rgba(7, 9, 8, 0.95));
+    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 10%, transparent), transparent 45%),
+    linear-gradient(180deg, rgba(12, 13, 12, 0.82), rgba(8, 8, 8, 0.96));
 }
 
 .inspectorTitle {
@@ -522,8 +545,9 @@
 .inspectorMeta {
   margin-top: 0.55rem;
   color: var(--text-muted);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.78rem;
+  letter-spacing: 0.03em;
 }
 
 .propertyList {
@@ -565,9 +589,10 @@
 }
 
 .stateEyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.72rem;
   letter-spacing: 0.18em;
+  font-weight: 700;
   text-transform: uppercase;
   color: var(--accent);
 }

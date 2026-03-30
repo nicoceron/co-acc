@@ -5,20 +5,24 @@ import { AppShell } from "./components/common/AppShell";
 import { PublicShell } from "./components/common/PublicShell";
 import { Spinner } from "./components/common/Spinner";
 import { IS_PATTERNS_ENABLED, IS_PUBLIC_MODE } from "./config/runtime";
-import { Baseline } from "./pages/Baseline";
-import { Dashboard } from "./pages/Dashboard";
-import { Investigations } from "./pages/Investigations";
-import { InvestigationDossier } from "./pages/InvestigationDossier";
 import { Landing } from "./pages/Landing";
-import { Login } from "./pages/Login";
-import { Patterns } from "./pages/Patterns";
-import { Register } from "./pages/Register";
-import { Results } from "./pages/Results";
-import { Search } from "./pages/Search";
-import { SharedInvestigation } from "./pages/SharedInvestigation";
 import { useAuthStore } from "./stores/auth";
 
 const EntityAnalysis = lazy(() => import("./pages/EntityAnalysis").then((m) => ({ default: m.EntityAnalysis })));
+const Baseline = lazy(() => import("./pages/Baseline").then((m) => ({ default: m.Baseline })));
+const Dashboard = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })));
+const Investigations = lazy(() => import("./pages/Investigations").then((m) => ({ default: m.Investigations })));
+const InvestigationDossier = lazy(() => import("./pages/InvestigationDossier").then((m) => ({ default: m.InvestigationDossier })));
+const Login = lazy(() => import("./pages/Login").then((m) => ({ default: m.Login })));
+const Patterns = lazy(() => import("./pages/Patterns").then((m) => ({ default: m.Patterns })));
+const Register = lazy(() => import("./pages/Register").then((m) => ({ default: m.Register })));
+const Results = lazy(() => import("./pages/Results").then((m) => ({ default: m.Results })));
+const Search = lazy(() => import("./pages/Search").then((m) => ({ default: m.Search })));
+const SharedInvestigation = lazy(() => import("./pages/SharedInvestigation").then((m) => ({ default: m.SharedInvestigation })));
+
+function LazyPage({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<Spinner />}>{children}</Suspense>;
+}
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
@@ -67,15 +71,15 @@ export function App() {
         )}
       >
         <Route index element={<Landing />} />
-        <Route path="results" element={<Results />} />
-        <Route path="investigations" element={<Results />} />
-        <Route path="investigations/:slug" element={<InvestigationDossier />} />
-        {!IS_PUBLIC_MODE && <Route path="login" element={<Login />} />}
-        {!IS_PUBLIC_MODE && <Route path="register" element={<Register />} />}
+        <Route path="results" element={<LazyPage><Results /></LazyPage>} />
+        <Route path="investigations" element={<LazyPage><Results /></LazyPage>} />
+        <Route path="investigations/:slug" element={<LazyPage><InvestigationDossier /></LazyPage>} />
+        {!IS_PUBLIC_MODE && <Route path="login" element={<LazyPage><Login /></LazyPage>} />}
+        {!IS_PUBLIC_MODE && <Route path="register" element={<LazyPage><Register /></LazyPage>} />}
       </Route>
 
       {/* Public — shared investigation (no auth, no shell) */}
-      <Route path="shared/:token" element={<SharedInvestigation />} />
+      <Route path="shared/:token" element={<LazyPage><SharedInvestigation /></LazyPage>} />
 
       {/* Authenticated shell — the intelligence workspace */}
       <Route
@@ -86,15 +90,15 @@ export function App() {
           </RequireAuth>
         )}
       >
-        <Route index element={<Dashboard />} />
-        <Route path="search" element={<Search />} />
-        <Route path="analysis/:entityId" element={<Suspense fallback={<Spinner />}><EntityAnalysis /></Suspense>} />
+        <Route index element={<LazyPage><Dashboard /></LazyPage>} />
+        <Route path="search" element={<LazyPage><Search /></LazyPage>} />
+        <Route path="analysis/:entityId" element={<LazyPage><EntityAnalysis /></LazyPage>} />
         <Route path="graph/:entityId" element={<GraphRedirect />} />
-        {IS_PATTERNS_ENABLED && <Route path="patterns" element={<Patterns />} />}
-        {IS_PATTERNS_ENABLED && <Route path="patterns/:entityId" element={<Patterns />} />}
-        <Route path="baseline/:entityId" element={<Baseline />} />
-        {!IS_PUBLIC_MODE && <Route path="investigations" element={<Investigations />} />}
-        {!IS_PUBLIC_MODE && <Route path="investigations/:investigationId" element={<Investigations />} />}
+        {IS_PATTERNS_ENABLED && <Route path="patterns" element={<LazyPage><Patterns /></LazyPage>} />}
+        {IS_PATTERNS_ENABLED && <Route path="patterns/:entityId" element={<LazyPage><Patterns /></LazyPage>} />}
+        <Route path="baseline/:entityId" element={<LazyPage><Baseline /></LazyPage>} />
+        {!IS_PUBLIC_MODE && <Route path="investigations" element={<LazyPage><Investigations /></LazyPage>} />}
+        {!IS_PUBLIC_MODE && <Route path="investigations/:investigationId" element={<LazyPage><Investigations /></LazyPage>} />}
       </Route>
 
       {/* Catch-all */}

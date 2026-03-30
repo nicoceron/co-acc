@@ -1,10 +1,10 @@
 .page {
-  --editorial-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --editorial-serif: var(--font-display);
   padding: clamp(4.5rem, 6vw, 6rem) clamp(1rem, 3vw, 2.4rem) 4rem;
   background:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--color-warning) 10%, transparent) 0, transparent 28%),
-    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 10%, transparent) 0, transparent 24%),
-    linear-gradient(180deg, #100f0d 0%, #090908 100%);
+    radial-gradient(circle at top left, color-mix(in oklab, var(--color-danger) 12%, transparent) 0, transparent 28%),
+    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 11%, transparent) 0, transparent 22%),
+    linear-gradient(180deg, #151012 0%, #0c090b 100%);
 }
 
 .hero,
@@ -13,15 +13,7 @@
 .methodCard,
 .sourceCard {
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  background:
-    linear-gradient(180deg, rgba(18, 16, 13, 0.94), rgba(10, 10, 10, 0.98)),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0,
-      transparent 28px,
-      rgba(255, 255, 255, 0.02) 28px,
-      rgba(255, 255, 255, 0.02) 29px
-    );
+  background: linear-gradient(180deg, rgba(28, 20, 23, 0.92), rgba(15, 11, 13, 0.98));
   box-shadow: var(--shadow-md);
 }
 
@@ -47,26 +39,26 @@
   gap: 0.4rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--accent);
 }
 
 .title {
   margin-top: 1rem;
-  max-width: 11ch;
+  max-width: 10ch;
   font-family: var(--editorial-serif);
   font-size: clamp(3rem, 6vw, 5.4rem);
-  line-height: 0.92;
+  line-height: 0.9;
   letter-spacing: -0.05em;
 }
 
 .subtitle {
-  max-width: 66ch;
+  max-width: 56ch;
   margin-top: 1rem;
   color: var(--text-primary);
   font-size: clamp(1rem, 1.65vw, 1.16rem);
-  line-height: 1.75;
+  line-height: 1.6;
 }
 
 .heroActions {
@@ -83,11 +75,11 @@
   align-items: center;
   justify-content: center;
   padding: 0.75rem 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  letter-spacing: 0.01em;
   text-decoration: none;
+  border-radius: 999px;
   transition:
     border-color var(--transition-fast),
     background var(--transition-fast),
@@ -96,7 +88,7 @@
 
 .primaryCta {
   border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
-  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 26%, transparent), color-mix(in oklab, var(--accent) 16%, transparent));
+  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 18%, transparent), color-mix(in oklab, var(--color-danger) 14%, transparent));
   color: var(--text-primary);
 }
 
@@ -104,7 +96,7 @@
 .inlineAction {
   border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
   color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 248, 236, 0.03);
 }
 
 .disclaimer {
@@ -125,7 +117,8 @@
 .metricCard {
   padding: 1rem;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 248, 236, 0.04);
+  border-radius: var(--radius-md);
 }
 
 .metricCard span {
@@ -171,8 +164,8 @@
   margin-top: 0.5rem;
   font-family: var(--editorial-serif);
   font-size: clamp(1.8rem, 3vw, 2.8rem);
-  line-height: 0.98;
-  max-width: 18ch;
+  line-height: 0.96;
+  max-width: 16ch;
 }
 
 .proofBadge {
@@ -182,10 +175,10 @@
   padding: 0.55rem 0.75rem;
   border: 1px solid color-mix(in oklab, var(--color-success) 28%, var(--border));
   background: color-mix(in oklab, var(--color-success) 10%, transparent);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
+  border-radius: 999px;
 }
 
 .frontPageGrid {
@@ -222,7 +215,7 @@
 .cardMeta {
   margin-top: 0.45rem;
   color: var(--text-muted);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.8rem;
 }
 
@@ -246,10 +239,11 @@
   align-items: center;
   padding: 0.42rem 0.7rem;
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 248, 236, 0.03);
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 0.72rem;
+  border-radius: 999px;
 }
 
 .proofGrid,

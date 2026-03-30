@@ -130,19 +130,19 @@ export function Landing() {
         <div className={styles.heroCopy}>
           <p className={styles.badge}>Investigación pública con fuentes verificables</p>
           <h1 className={styles.title}>
-            Primero descubrir. Después corroborar. No al revés.
+            Descubre primero. Corrobora después.
           </h1>
           <p className={styles.subtitle}>
             CO-ACC cruza contratación, sanciones, cargos públicos, financiación política, educación y otras fuentes
-            oficiales para producir hallazgos verificables. La lectura pública ahora separa dos flujos: portada para
-            encontrar pistas nuevas y biblioteca aparte para revisar lo ya corroborado.
+            oficiales para publicar dos cosas distintas: pistas nuevas para investigar y una biblioteca aparte para
+            contrastar lo ya corroborado.
           </p>
           <div className={styles.heroActions}>
             <Link to="/results" className={styles.primaryCta}>
-              Ver pistas nuevas
+              Descubrir pistas
             </Link>
             <Link to="/investigations" className={styles.secondaryCta}>
-              Biblioteca corroborada
+              Abrir biblioteca
             </Link>
           </div>
           <p className={styles.disclaimer}>
@@ -175,10 +175,10 @@ export function Landing() {
         <div className={styles.sectionHead}>
           <div>
             <p className={styles.sectionEyebrow}>Portada</p>
-            <h2>La portada pública ya no empieza por casos viejos: empieza por hallazgos nuevos.</h2>
+            <h2>La portada empieza por hallazgos nuevos, no por benchmark viejo.</h2>
           </div>
           <Link to="/results" className={styles.inlineAction}>
-            Ir a pistas nuevas
+            Ver portada
           </Link>
         </div>
 
@@ -190,13 +190,13 @@ export function Landing() {
           ) : (
             <article className={`${styles.investigationCard} ${styles.investigationCardFeatured}`}>
               <p className={styles.cardEyebrow}>Portada de descubrimiento</p>
-              <h3>Este lote todavía no trae una pista nueva publicada con cierre suficiente.</h3>
+              <h3>Todavía no hay una pista nueva con cierre público suficiente para ocupar la portada.</h3>
               <p className={styles.cardSummary}>
-                La portada sigue reservada para descubrimiento. Cuando un hallazgo nuevo pase el umbral mínimo de
-                legibilidad pública, aparecerá aquí antes que los casos corroborados.
+                La portada queda reservada para descubrimiento. Cuando un hallazgo nuevo supere el umbral mínimo de
+                legibilidad pública, aparece aquí antes que la biblioteca.
               </p>
               <Link to="/results" className={styles.inlineAction}>
-                Ir a pistas nuevas
+                Ver pistas
               </Link>
             </article>
           )}
@@ -215,7 +215,7 @@ export function Landing() {
         <div className={styles.sectionHead}>
           <div>
             <p className={styles.sectionEyebrow}>Biblioteca corroborada</p>
-            <h2>Lo corroborado queda aparte para contrastar, citar y medir si las pistas nuevas van bien encaminadas.</h2>
+            <h2>Lo corroborado queda aparte para contrastar, citar y medir si las pistas nuevas van bien.</h2>
           </div>
           <div className={styles.proofBadge}>
             <BadgeCheck size={16} />
@@ -254,22 +254,22 @@ export function Landing() {
           <article className={styles.methodCard}>
             <Network size={18} />
             <h3>1. Normalización</h3>
-            <p>Unificamos cédulas, NIT, BPIN, contratos, convenios, geografía y control fiscal para que el grafo conecte actores que los portales publican por separado.</p>
+            <p>Unificamos cédulas, NIT, contratos, convenios y geografía para que el grafo conecte lo que los portales publican por separado.</p>
           </article>
           <article className={styles.methodCard}>
             <Link2 size={18} />
             <h3>2. Cruces y patrones</h3>
-            <p>Cruzamos contratación, sanciones, financiación política, educación, cargos públicos y ejecución contractual para detectar patrones que se repiten.</p>
+            <p>Cruzamos contratación, sanciones, financiación política, educación, cargos públicos y ejecución para detectar patrones repetidos.</p>
           </article>
           <article className={styles.methodCard}>
             <ShieldCheck size={18} />
             <h3>3. Validación</h3>
-            <p>Contrastamos el sistema con casos públicos conocidos para comprobar que las conexiones reproducen hechos verificables antes de publicarlas como evidencia útil.</p>
+            <p>Contrastamos el sistema con casos públicos conocidos antes de tratar un hallazgo como evidencia útil.</p>
           </article>
           <article className={styles.methodCard}>
             <BookOpenText size={18} />
             <h3>4. Dossiers</h3>
-            <p>El resultado no se deja como lista cruda. Cada caso destacado se sirve como dossier con hallazgos, evidencia, nodos y fuentes públicas citables.</p>
+            <p>El resultado no se deja como lista cruda. Cada caso fuerte se publica como dossier con hallazgos, evidencia y fuentes citables.</p>
           </article>
         </div>
       </section>
@@ -278,7 +278,7 @@ export function Landing() {
         <div className={styles.sectionHead}>
           <div>
             <p className={styles.sectionEyebrow}>Registro de fuentes</p>
-            <h2>Fuentes oficiales activas en esta publicación</h2>
+            <h2>Fuentes activas en esta publicación</h2>
           </div>
         </div>
 

@@ -170,7 +170,7 @@ describe("Landing", () => {
     await act(async () => {
       renderLanding();
     });
-    expect(screen.getByText("Primero descubrir. Después corroborar. No al revés.")).toBeInTheDocument();
+    expect(screen.getByText("Descubre primero. Corrobora después.")).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getAllByText("3.0M").length).toBeGreaterThan(0);
     });
@@ -180,9 +180,9 @@ describe("Landing", () => {
     await act(async () => {
       renderLanding();
     });
-    expect(screen.getByText("Primero descubrir. Después corroborar. No al revés.")).toBeInTheDocument();
-    expect(screen.getByText("Ver pistas nuevas")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Biblioteca corroborada" })).toBeInTheDocument();
+    expect(screen.getByText("Descubre primero. Corrobora después.")).toBeInTheDocument();
+    expect(screen.getByText("Descubrir pistas")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Abrir biblioteca" })).toBeInTheDocument();
     expect(screen.getByText("Pista nueva")).toBeInTheDocument();
     expect(screen.getByText("Caso corroborado")).toBeInTheDocument();
     await waitFor(() => {

@@ -1,49 +1,46 @@
-/* === Intelligence / Surveillance Design System === */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&display=swap");
+
+/* === Editorial Investigation Design System === */
 
 :root {
-  /* === Refined Tactical Palette (OKLCH) === */
-  --bg-primary: oklch(14% 0.005 160);   /* Deep, matte charcoal with a hint of forest */
-  --bg-secondary: oklch(16% 0.008 160);
-  --bg-tertiary: oklch(19% 0.01 160);
-  --bg-elevated: oklch(22% 0.012 160);
+  /* === Warm editorial palette === */
+  --bg-primary: oklch(15% 0.02 28);
+  --bg-secondary: oklch(18% 0.022 28);
+  --bg-tertiary: oklch(22% 0.024 28);
+  --bg-elevated: oklch(26% 0.028 28);
   --bg-surface: var(--bg-primary);
-  --bg-overlay: rgba(5, 7, 6, 0.95);
+  --bg-overlay: rgba(15, 11, 12, 0.92);
 
-  /* === Text - Refined Phosphor === */
-  --text-primary: oklch(92% 0.005 160);
-  --text-secondary: oklch(75% 0.01 160);
-  --text-muted: oklch(45% 0.015 160);
+  --text-primary: oklch(95% 0.01 68);
+  --text-secondary: oklch(82% 0.014 68);
+  --text-muted: oklch(62% 0.02 50);
 
-  /* === Security Accents - Sophisticated Teal-Green === */
-  --accent: oklch(72% 0.11 165);        /* More professional, less neon */
-  --accent-hover: oklch(78% 0.13 165);
-  --accent-dim: oklch(72% 0.11 165 / 10%);
+  /* === Accents === */
+  --accent: oklch(78% 0.11 78);
+  --accent-hover: oklch(84% 0.13 78);
+  --accent-dim: oklch(78% 0.11 78 / 12%);
 
-  /* === Semantic Alerts === */
-  --color-success: oklch(70% 0.12 150);
+  --color-success: oklch(72% 0.11 145);
   --color-warning: oklch(75% 0.15 70);
-  --color-danger: oklch(65% 0.18 25);   /* Integrity / Risk Red - slightly muted */
-  --color-info: oklch(75% 0.1 220);
+  --color-danger: oklch(64% 0.2 28);
+  --color-info: oklch(74% 0.08 245);
 
-  /* === Data categorical - Harmonized === */
-  --data-person: oklch(75% 0.1 210);
-  --data-company: oklch(72% 0.12 60);
+  --data-person: oklch(76% 0.08 250);
+  --data-company: oklch(79% 0.12 82);
   --data-election: oklch(70% 0.12 150);
-  --data-contract: oklch(90% 0.01 160);
-  --data-sanction: oklch(65% 0.18 25);
-  --data-amendment: oklch(75% 0.01 160);
+  --data-contract: oklch(92% 0.015 70);
+  --data-sanction: oklch(64% 0.2 28);
+  --data-amendment: oklch(84% 0.03 62);
 
-  /* === Borders - Precision === */
-  --border: oklch(20% 0.015 160);
-  --border-subtle: oklch(17% 0.01 160);
-  --border-hover: oklch(25% 0.02 160);
+  --border: oklch(28% 0.03 32);
+  --border-subtle: oklch(22% 0.025 32);
+  --border-hover: oklch(36% 0.04 32);
   --border-active: var(--accent);
 
-  /* === Shadows === */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.8);
-  --shadow-glow: 0 0 15px oklch(72% 0.11 165 / 10%);
+  --shadow-sm: 0 8px 18px rgba(3, 2, 3, 0.18);
+  --shadow-md: 0 18px 48px rgba(3, 2, 3, 0.28);
+  --shadow-lg: 0 26px 72px rgba(3, 2, 3, 0.4);
+  --shadow-glow: 0 0 24px oklch(78% 0.11 78 / 0.08);
 
   /* === Spacing === */
   --space-2xs: 2px;
@@ -55,8 +52,8 @@
   --space-2xl: 48px;
 
   /* === Typography === */
-  --font-display: "IBM Plex Mono", monospace;
-  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-display: "Newsreader", serif;
+  --font-sans: "Instrument Sans", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
   
   --font-size-2xs: 0.7rem;
@@ -68,10 +65,10 @@
   --font-size-2xl: 1.8rem;
   --font-size-3xl: 2.4rem;
 
-  /* === Radius - Precision Square === */
-  --radius-sm: 2px;
-  --radius-md: 3px;
-  --radius-lg: 4px;
+  /* === Radius === */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
 
   /* === Transitions === */
   --transition-fast: 120ms ease-out;
@@ -92,11 +89,14 @@
 }
 
 html, body {
-  background: var(--bg-primary);
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 12%, transparent) 0, transparent 28%),
+    radial-gradient(circle at top right, color-mix(in oklab, var(--color-danger) 10%, transparent) 0, transparent 26%),
+    linear-gradient(180deg, #151012 0%, #0c090b 100%);
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -104,9 +104,9 @@ html, body {
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: -0.02em;
   color: var(--text-primary);
 }
 
@@ -127,10 +127,8 @@ a:hover {
 }
 
 button {
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 500;
+  font-family: var(--font-sans);
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -138,9 +136,9 @@ input, select, textarea {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   color: var(--text-primary);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   padding: var(--space-sm);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
 }
 
 input:focus {

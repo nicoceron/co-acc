@@ -117,18 +117,18 @@ describe("InvestigationDossier", () => {
     });
 
     expect(screen.getByText(/Red de relaciones/i)).toBeInTheDocument();
-    expect(screen.getByText(/Por qué importa/i)).toBeInTheDocument();
+    expect(screen.getByText(/Por qué vale la pena mirar esto/i)).toBeInTheDocument();
     expect(screen.getByText(/Estado del caso/i)).toBeInTheDocument();
-    expect(screen.getByText(/Glosario rápido/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Glosario$/i)).toBeInTheDocument();
     expect(screen.getByText(/^Caso corroborado$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Volver a biblioteca corroborada/i)).toBeInTheDocument();
+    expect(screen.getByText(/Volver a biblioteca/i)).toBeInTheDocument();
     expect(screen.getByText(/Señal automática basada en alias coincidencia de identidad y boletines oficiales/i)).toBeInTheDocument();
     expect(screen.getByText(/Hay un alias coincidencia de identidad contractual/i)).toBeInTheDocument();
     expect(screen.getByText(/^boletines oficiales$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Pistas tomadas de reportajes y denuncias/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Reportado afuera$/i)).toBeInTheDocument();
     expect(screen.getByText(/Confirmado por registros abiertos y documentos públicos/i)).toBeInTheDocument();
     expect(screen.getByText(/Vacíos documentales que siguen abiertos/i)).toBeInTheDocument();
-    expect(screen.getByText(/Fuentes periodísticas usadas para estas hipótesis/i)).toBeInTheDocument();
+    expect(screen.getByText(/Fuentes externas usadas en esta sección/i)).toBeInTheDocument();
     expect(screen.getByTestId("graph-canvas")).toBeInTheDocument();
   });
 
@@ -155,6 +155,6 @@ describe("InvestigationDossier", () => {
     });
 
     expect(screen.getByText(/^Pista nueva$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Volver a pistas nuevas/i)).toBeInTheDocument();
+    expect(screen.getByText(/Volver a descubrir/i)).toBeInTheDocument();
   });
 });

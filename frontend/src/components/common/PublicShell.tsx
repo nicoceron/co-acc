@@ -13,9 +13,9 @@ export function PublicShell() {
       <header className={styles.header}>
         <div className={styles.brandBlock}>
           <Link to="/" className={styles.logo}>
-            CO-ACC
+            CO·ACC
           </Link>
-          <span className={styles.brandNote}>investigaciones públicas con datos reales de Colombia</span>
+          <span className={styles.brandNote}>hallazgos públicos con datos reales de Colombia</span>
         </div>
 
         <nav className={styles.nav}>
@@ -23,20 +23,20 @@ export function PublicShell() {
             Inicio
           </Link>
           <Link to="/results" className={styles.navLink}>
-            Pistas nuevas
+            Descubrir
           </Link>
           <Link to="/investigations" className={styles.navLink}>
-            Biblioteca corroborada
+            Biblioteca
           </Link>
           <Link to="/#metodologia" className={styles.navLink}>
-            Metodología
+            Método
           </Link>
         </nav>
 
         <div className={styles.actions}>
           {IS_PUBLIC_MODE ? (
             <Link to="/app/search" className={styles.primaryLink}>
-              Explorar grafo
+              Abrir grafo
             </Link>
           ) : !token && (
             <>

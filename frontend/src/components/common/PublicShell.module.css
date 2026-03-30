@@ -1,8 +1,9 @@
 .shell {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 10%, transparent) 0, transparent 24%),
-    linear-gradient(180deg, #100f0d 0%, #090908 100%);
+    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 11%, transparent) 0, transparent 24%),
+    radial-gradient(circle at top left, color-mix(in oklab, var(--color-danger) 10%, transparent) 0, transparent 22%),
+    linear-gradient(180deg, #151012 0%, #0c090b 100%);
 }
 
 .header {
@@ -13,11 +14,11 @@
   grid-template-columns: auto 1fr auto;
   gap: 1rem;
   align-items: center;
-  padding: 0.95rem clamp(1rem, 3vw, 2rem);
-  border-bottom: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
-  background: rgba(12, 11, 9, 0.88);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  padding: 1rem clamp(1rem, 3vw, 2rem);
+  border-bottom: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border));
+  background: rgba(17, 12, 14, 0.72);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
 }
 
 .brandBlock {
@@ -26,18 +27,17 @@
 }
 
 .logo {
-  font-family: var(--font-mono);
-  font-size: 1rem;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
   font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
   text-decoration: none;
 }
 
 .brandNote {
   color: var(--text-muted);
-  font-size: 0.74rem;
+  font-size: 0.78rem;
 }
 
 .nav {
@@ -53,28 +53,29 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0.85rem;
+  padding: 0.58rem 0.9rem;
   text-decoration: none;
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
   transition:
     border-color var(--transition-fast),
     background var(--transition-fast),
     color var(--transition-fast);
+  border-radius: 999px;
 }
 
 .navLink,
 .secondaryLink {
-  border: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
+  border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
   color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 248, 236, 0.03);
 }
 
 .navLink:hover,
 .secondaryLink:hover {
-  border-color: color-mix(in oklab, var(--accent) 24%, var(--border-hover));
+  border-color: color-mix(in oklab, var(--accent) 36%, var(--border-hover));
+  background: rgba(255, 248, 236, 0.06);
   color: var(--text-primary);
 }
 
@@ -86,13 +87,13 @@
 }
 
 .primaryLink {
-  border: 1px solid color-mix(in oklab, var(--accent) 28%, transparent);
-  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 26%, transparent), color-mix(in oklab, var(--accent) 16%, transparent));
+  border: 1px solid color-mix(in oklab, var(--accent) 34%, transparent);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 22%, transparent), color-mix(in oklab, var(--color-danger) 14%, transparent));
   color: var(--text-primary);
 }
 
 .primaryLink:hover {
-  border-color: color-mix(in oklab, var(--accent) 44%, transparent);
+  border-color: color-mix(in oklab, var(--accent) 50%, transparent);
 }
 
 .content {

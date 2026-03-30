@@ -24,9 +24,9 @@ function statusLabel(investigation: MaterializedInvestigation): string {
 
 function collectionMeta(investigation?: MaterializedInvestigation | null): { href: string; label: string } {
   if (investigation && isCorroboratedInvestigation(investigation)) {
-    return { href: "/investigations", label: "Volver a biblioteca corroborada" };
+    return { href: "/investigations", label: "Volver a biblioteca" };
   }
-  return { href: "/results", label: "Volver a pistas nuevas" };
+  return { href: "/results", label: "Volver a descubrir" };
 }
 
 function categoryLabel(category: string): string {
@@ -180,7 +180,7 @@ export function InvestigationDossier() {
 
         <header className={styles.hero}>
           <div className={styles.heroMain}>
-            <p className={styles.eyebrow}>Investigación individual</p>
+            <p className={styles.eyebrow}>Dossier público</p>
             <h1 className={styles.title}>{investigation.title}</h1>
             <p className={styles.subjectLine}>
               {investigation.subject_name}
@@ -189,7 +189,7 @@ export function InvestigationDossier() {
             <p className={styles.summary}>{humanizePublicText(investigation.summary)}</p>
             {investigation.why_it_matters && (
               <div className={styles.whyBlock}>
-                <strong>Por qué importa</strong>
+                <strong>Por qué vale la pena mirar esto</strong>
                 <p>{humanizePublicText(investigation.why_it_matters)}</p>
               </div>
             )}
@@ -247,7 +247,7 @@ export function InvestigationDossier() {
         <section className={styles.glossaryStrip}>
           <div className={styles.sectionHead}>
             <BookOpenText size={16} />
-            <span>Glosario rápido</span>
+            <span>Glosario</span>
           </div>
           <div className={styles.glossaryGrid}>
             {QUICK_GLOSSARY.map((item) => (
@@ -279,9 +279,9 @@ export function InvestigationDossier() {
               <article className={`${styles.verificationCard} ${styles.claimsCard}`}>
                 <div className={styles.sectionHead}>
                   <Link2 size={16} />
-                  <span>Lo que dijeron reportajes y denuncias</span>
+                  <span>Reportado afuera</span>
                 </div>
-                <p className={styles.boardTitle}>Pistas tomadas de reportajes y denuncias</p>
+                <p className={styles.boardTitle}>Lo que ya aparece en reportajes, denuncias o seguimiento externo</p>
                 <ul className={styles.boardList}>
                   {investigation.reported_claims.map((item) => {
                     const parsed = splitBoardItem(item);
@@ -295,7 +295,7 @@ export function InvestigationDossier() {
                 </ul>
                 {investigation.reported_sources?.length ? (
                   <div className={styles.boardSources}>
-                    <p className={styles.boardSourcesTitle}>Fuentes periodísticas usadas para estas hipótesis</p>
+                    <p className={styles.boardSourcesTitle}>Fuentes externas usadas en esta sección</p>
                     <ol className={styles.boardSourceList}>
                       {investigation.reported_sources.map((source) => (
                         <li key={`${investigation.slug}-reported-source-${source}`}>
@@ -314,7 +314,7 @@ export function InvestigationDossier() {
               <article className={`${styles.verificationCard} ${styles.verifiedCard}`}>
                 <div className={styles.sectionHead}>
                   <BadgeCheck size={16} />
-                  <span>Lo que verificamos</span>
+                  <span>Verificado</span>
                 </div>
                 <p className={styles.boardTitle}>Confirmado por registros abiertos y documentos públicos</p>
                 <ul className={styles.boardList}>
@@ -335,7 +335,7 @@ export function InvestigationDossier() {
               <article className={`${styles.verificationCard} ${styles.openCard}`}>
                 <div className={styles.sectionHead}>
                   <BookOpenText size={16} />
-                  <span>Lo que todavía no está probado</span>
+                  <span>Falta cierre</span>
                 </div>
                 <p className={styles.boardTitle}>Vacíos documentales que siguen abiertos</p>
                 <ul className={styles.boardList}>
@@ -399,7 +399,7 @@ export function InvestigationDossier() {
               <span>Red de relaciones</span>
             </div>
             <p className={styles.exhibitLead}>
-              Esta red acompaña la lectura. Úsala para ubicar actores y seguir las conexiones guardadas del caso.
+              Esta red acompaña la lectura. Sirve para ubicar actores y seguir las conexiones guardadas del caso.
             </p>
 
             {graph ? (

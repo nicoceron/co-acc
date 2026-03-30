@@ -1,11 +1,11 @@
 .page {
-  --editorial-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --editorial-serif: var(--font-display);
   min-height: 100vh;
   padding: clamp(4.6rem, 6vw, 6rem) clamp(1rem, 3vw, 2.5rem) 4rem;
   background:
-    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 10%, transparent) 0, transparent 26%),
-    radial-gradient(circle at top left, color-mix(in oklab, var(--color-warning) 12%, transparent) 0, transparent 24%),
-    linear-gradient(180deg, #100f0d 0%, #090908 100%);
+    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 14%, transparent) 0, transparent 28%),
+    radial-gradient(circle at top left, color-mix(in oklab, var(--color-warning) 16%, transparent) 0, transparent 30%),
+    linear-gradient(180deg, #140f0e 0%, #0c0a09 58%, #090807 100%);
 }
 
 .hero,
@@ -22,15 +22,10 @@
 .footerNote,
 .stateWrap {
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  border-radius: 24px;
   background:
-    linear-gradient(180deg, rgba(18, 16, 13, 0.94), rgba(10, 10, 10, 0.98)),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0,
-      transparent 30px,
-      rgba(255, 255, 255, 0.02) 30px,
-      rgba(255, 255, 255, 0.02) 31px
-    );
+    linear-gradient(180deg, rgba(26, 20, 17, 0.96), rgba(13, 11, 10, 0.98)),
+    linear-gradient(135deg, rgba(255, 245, 230, 0.03), transparent 42%);
   box-shadow: var(--shadow-md);
 }
 
@@ -54,11 +49,12 @@
 .cardHead span,
 .propertyRow span,
 .stateEyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: color-mix(in oklab, var(--accent) 82%, white 18%);
 }
 
 .heroTitle,
@@ -74,8 +70,8 @@
 .heroLead,
 .cardSummary,
 .stateText {
-  color: var(--text-primary);
-  line-height: 1.72;
+  color: var(--text-secondary);
+  line-height: 1.68;
 }
 
 .heroLead {
@@ -111,18 +107,20 @@
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.74rem;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  border-radius: 999px;
 }
 
 .heroMeta span,
 .tagChip,
 .queueTab {
-  padding: 0.42rem 0.7rem;
+  padding: 0.48rem 0.82rem;
   border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 248, 240, 0.04);
   color: var(--text-secondary);
 }
 
@@ -131,10 +129,11 @@
 .detailButton,
 .moreButton,
 .closeButton {
-  padding: 0.72rem 0.95rem;
+  padding: 0.78rem 1rem;
   text-decoration: none;
   cursor: pointer;
   transition:
+    transform var(--transition-fast),
     border-color var(--transition-fast),
     background var(--transition-fast),
     color var(--transition-fast);
@@ -144,15 +143,27 @@
 .detailButton,
 .moreButton {
   border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
-  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 24%, transparent), color-mix(in oklab, var(--accent) 14%, transparent));
+  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 28%, transparent), color-mix(in oklab, var(--accent) 16%, transparent));
   color: var(--text-primary);
 }
 
 .inlineAction,
 .closeButton {
   border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 248, 240, 0.04);
   color: var(--text-secondary);
+}
+
+.primaryCta:hover,
+.inlineAction:hover,
+.detailButton:hover,
+.moreButton:hover,
+.closeButton:hover,
+.catalogNavCard:hover,
+.practiceItem:hover,
+.traceButton:hover,
+.actorChip:hover {
+  transform: translateY(-2px);
 }
 
 .heroProof {
@@ -180,7 +191,8 @@
 .practiceSummaryCard {
   padding: 0.95rem;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 246, 236, 0.05), rgba(255, 255, 255, 0.02));
 }
 
 .heroProofStat strong,
@@ -225,15 +237,10 @@
 .glossaryCard {
   padding: 1rem 1.05rem;
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  border-radius: 22px;
   background:
-    linear-gradient(180deg, rgba(18, 16, 13, 0.94), rgba(10, 10, 10, 0.98)),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0,
-      transparent 30px,
-      rgba(255, 255, 255, 0.02) 30px,
-      rgba(255, 255, 255, 0.02) 31px
-    );
+    linear-gradient(180deg, rgba(26, 20, 17, 0.96), rgba(13, 11, 10, 0.98)),
+    linear-gradient(135deg, rgba(255, 245, 230, 0.03), transparent 42%);
   box-shadow: var(--shadow-md);
 }
 
@@ -368,15 +375,10 @@
 .categorySection,
 .categoryEmpty {
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+  border-radius: 24px;
   background:
-    linear-gradient(180deg, rgba(18, 16, 13, 0.94), rgba(10, 10, 10, 0.98)),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0,
-      transparent 30px,
-      rgba(255, 255, 255, 0.02) 30px,
-      rgba(255, 255, 255, 0.02) 31px
-    );
+    linear-gradient(180deg, rgba(26, 20, 17, 0.96), rgba(13, 11, 10, 0.98)),
+    linear-gradient(135deg, rgba(255, 245, 230, 0.03), transparent 42%);
   box-shadow: var(--shadow-md);
 }
 
@@ -442,13 +444,15 @@
 }
 
 .categoryMeta span {
-  padding: 0.42rem 0.7rem;
+  padding: 0.48rem 0.82rem;
   border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 999px;
+  background: rgba(255, 248, 240, 0.04);
   color: var(--text-secondary);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.72rem;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -514,9 +518,14 @@
 .traceButton {
   padding: 0.9rem;
   border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  background: rgba(255, 248, 240, 0.04);
   text-align: left;
   cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .practiceItem strong,
@@ -579,8 +588,10 @@
   align-items: center;
   padding: 0.38rem 0.68rem;
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  font-family: var(--font-mono);
+  border-radius: 999px;
+  font-family: var(--font-sans);
   font-size: 0.69rem;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -669,8 +680,9 @@
 
 .queueSearch span,
 .queueFilter span {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.72rem;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-secondary);
@@ -681,7 +693,8 @@
   width: 100%;
   min-height: 44px;
   border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  background: rgba(255, 248, 240, 0.05);
   color: var(--text-primary);
   padding: 0.7rem 0.85rem;
 }
@@ -725,6 +738,7 @@
   max-height: calc(100vh - 2.5rem);
   padding: 1.2rem;
   overflow: auto;
+  border-radius: 28px;
 }
 
 .modalMeta,
@@ -750,9 +764,10 @@
   height: min(62vh, 720px);
   min-height: 420px;
   border: 1px solid var(--border);
+  border-radius: 22px;
   background:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 8%, transparent), transparent 45%),
-    linear-gradient(180deg, rgba(9, 11, 10, 0.8), rgba(7, 9, 8, 0.95));
+    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 10%, transparent), transparent 45%),
+    linear-gradient(180deg, rgba(12, 13, 12, 0.82), rgba(8, 8, 8, 0.96));
 }
 
 .inspectorCard,
@@ -807,7 +822,8 @@
   margin-top: 1rem;
   padding: 0.4rem 0.6rem;
   border: 1px solid color-mix(in oklab, var(--accent) 24%, var(--border));
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 999px;
+  background: rgba(255, 248, 240, 0.04);
 }
 
 @media (max-width: 1180px) {

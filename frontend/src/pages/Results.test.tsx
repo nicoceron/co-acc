@@ -429,7 +429,7 @@ describe("Results", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Casos ordenados por práctica, no por ruido/i)).toBeInTheDocument();
+      expect(screen.getByText(/Pistas ordenadas por práctica, no por ruido/i)).toBeInTheDocument();
     });
 
     expect(screen.getAllByText("FONDECUN validado").length).toBeGreaterThan(0);
@@ -440,12 +440,12 @@ describe("Results", () => {
     expect(screen.getByText(/Explorar por categoría/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Elefante blanco/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Vendedor de objetos robados/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Primero eliges la práctica/i)).toBeInTheDocument();
-    expect(screen.getByText(/Glosario rápido/i)).toBeInTheDocument();
+    expect(screen.getByText(/1\. Escoge una categoría/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Glosario$/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Prioridad alta/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Sube por/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Ver biblioteca corroborada/i)).toBeInTheDocument();
-    expect(screen.getByText(/La portada está hecha para encontrar cosas nuevas/i)).toBeInTheDocument();
+    expect(screen.getByText(/Abrir biblioteca/i)).toBeInTheDocument();
+    expect(screen.getByText(/Aquí salen primero las pistas abiertas/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Corroborado/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Sin corroboración externa/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Ver biblioteca \(4\)/i)).toBeInTheDocument();
