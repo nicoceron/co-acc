@@ -1,40 +1,30 @@
 .page {
-  --paper: color-mix(in oklab, var(--bg-secondary) 80%, #221c12 20%);
-  --paper-strong: color-mix(in oklab, var(--bg-primary) 70%, #120e09 30%);
-  --editorial-serif: var(--font-display);
   min-height: 100vh;
-  padding: clamp(5rem, 7vw, 6.5rem) clamp(1.1rem, 3vw, 2.6rem) 4rem;
-  background: var(--bg-primary);
+  padding: clamp(4.5rem, 7vw, 6rem) clamp(1rem, 3vw, 2.4rem) 4rem;
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 12%, transparent) 0, transparent 38%),
+    linear-gradient(180deg, color-mix(in oklab, var(--bg-primary) 92%, #2c2116 8%), var(--bg-primary));
 }
 
 .frame {
   max-width: 1180px;
   margin: 0 auto;
   display: grid;
-  gap: 1.25rem;
-}
-
-.reviewStrip,
-.glossaryStrip {
-  display: grid;
-  gap: 1rem;
+  gap: 1.35rem;
 }
 
 .topBar,
 .hero,
+.documentStage,
 .storyCard,
+.verificationBoard,
 .railCard,
 .exhibitCard,
-.inspectorCard,
 .sourcesCard,
+.glossaryStrip,
 .stateWrap {
-  border-top: 1px solid var(--border);
-  border-right: 0;
-  border-bottom: 0;
-  border-left: 0;
-  border-radius: 0;
+  border-top: 1px solid color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
   background: transparent;
-  box-shadow: none;
 }
 
 .topBar {
@@ -42,7 +32,7 @@
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
-  padding: 0.9rem 0 0;
+  padding-top: 0.95rem;
 }
 
 .backLink {
@@ -52,38 +42,39 @@
   color: var(--text-primary);
   text-decoration: none;
   font-family: var(--font-sans);
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
-  font-weight: 600;
+  font-size: 0.79rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
 .statusPill,
 .metaPill,
-.tagChip {
+.tagChip,
+.bundleType,
+.kindChip {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.36rem 0.58rem;
+  padding: 0.36rem 0.6rem;
   border: 1px solid color-mix(in oklab, var(--accent) 24%, var(--border));
-  border-radius: 0;
   font-family: var(--font-sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
 .statusPill {
-  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
   color: var(--text-primary);
 }
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.75fr);
-  gap: 1.2rem;
-  padding: clamp(1.4rem, 2.8vw, 2rem) 0 0;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.72fr);
+  gap: 1.25rem;
+  padding-top: clamp(1.5rem, 2.8vw, 2.2rem);
 }
 
 .heroMain {
@@ -93,82 +84,127 @@
 
 .eyebrow,
 .sectionHead span,
+.subsectionLabel,
 .propertyRow span,
-.actorChip small {
+.actorChip small,
+.partyChip span {
   font-family: var(--font-sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  font-weight: 700;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--accent) 82%, white 18%);
+  color: color-mix(in oklab, var(--accent) 84%, white 16%);
 }
 
 .title {
-  margin-top: 0.8rem;
-  font-family: var(--editorial-serif);
-  font-size: clamp(2.5rem, 5vw, 4.7rem);
-  line-height: 0.94;
-  letter-spacing: -0.04em;
+  margin-top: 0.75rem;
   max-width: 12ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 5vw, 4.8rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
 }
 
 .subjectLine {
   margin-top: 1rem;
   color: var(--text-muted);
   font-family: var(--font-sans);
-  font-size: 0.82rem;
-  letter-spacing: 0.03em;
+  font-size: 0.84rem;
+  letter-spacing: 0.04em;
 }
 
 .summary {
-  max-width: 68ch;
+  max-width: 66ch;
   margin-top: 1rem;
   color: var(--text-primary);
-  font-size: clamp(1rem, 1.6vw, 1.18rem);
-  line-height: 1.7;
+  font-size: clamp(1.02rem, 1.6vw, 1.18rem);
+  line-height: 1.72;
 }
 
 .whyBlock {
-  margin-top: 1.2rem;
-  padding: 0.95rem 0 0 1rem;
-  border-top: 0;
-  border-right: 0;
-  border-bottom: 0;
+  margin-top: 1.15rem;
+  padding-left: 1rem;
   border-left: 2px solid color-mix(in oklab, var(--color-warning) 48%, var(--border));
-  border-radius: 0;
-  background: transparent;
 }
 
 .whyBlock strong {
   display: block;
   margin-bottom: 0.4rem;
+  color: var(--color-warning);
   font-family: var(--font-sans);
   font-size: 0.74rem;
   letter-spacing: 0.16em;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  color: var(--color-warning);
 }
 
 .whyBlock p,
-.exhibitLead,
 .stateText {
   color: var(--text-secondary);
+  line-height: 1.65;
 }
 
-.tagRow {
+.reviewRow {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
-  margin-top: 1.2rem;
+  margin-top: 1rem;
 }
 
-.metaPill {
+.reviewBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.74rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border));
+  font-family: var(--font-sans);
+  font-size: 0.69rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.reviewHigh {
+  background: color-mix(in oklab, var(--color-success) 12%, transparent);
+  border-color: color-mix(in oklab, var(--color-success) 28%, var(--border));
+}
+
+.reviewMedium {
+  background: color-mix(in oklab, var(--color-warning) 12%, transparent);
+  border-color: color-mix(in oklab, var(--color-warning) 28%, var(--border));
+}
+
+.reviewInitial {
+  color: var(--text-secondary);
+}
+
+.reviewReason {
+  max-width: 64ch;
+  margin-top: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.tagRow,
+.bundleTags,
+.actorList,
+.partyList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.tagRow {
+  margin-top: 1rem;
+}
+
+.metaPill,
+.tagChip {
   background: transparent;
 }
 
 .tagChip {
-  background: transparent;
   color: var(--text-secondary);
 }
 
@@ -179,216 +215,35 @@
   align-content: start;
 }
 
-.reviewStrip {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.reviewCard,
-.glossaryCard {
-  padding: 1rem 1.05rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: transparent;
-  box-shadow: none;
-}
-
-.reviewLabel {
-  display: block;
-  font-family: var(--font-sans);
-  font-size: 0.68rem;
-  letter-spacing: 0.16em;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.reviewBadge {
-  display: inline-flex;
-  align-items: center;
-  margin-top: 0.7rem;
-  padding: 0.42rem 0.72rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  border-radius: 999px;
-  font-family: var(--font-sans);
-  font-size: 0.69rem;
-  letter-spacing: 0.08em;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.reviewHigh {
-  background: color-mix(in oklab, var(--color-success) 12%, transparent);
-  border-color: color-mix(in oklab, var(--color-success) 26%, var(--border));
-  color: var(--text-primary);
-}
-
-.reviewMedium {
-  background: color-mix(in oklab, var(--color-warning) 12%, transparent);
-  border-color: color-mix(in oklab, var(--color-warning) 26%, var(--border));
-  color: var(--text-primary);
-}
-
-.reviewInitial {
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-secondary);
-}
-
-.reviewCard p,
-.glossaryCard p {
-  margin-top: 0.7rem;
-  color: var(--text-secondary);
-  line-height: 1.65;
-}
-
-.glossaryGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.glossaryCard strong {
-  display: block;
-  font-family: var(--editorial-serif);
-  font-size: 1.1rem;
-  line-height: 1.05;
-}
-
 .statCard {
   padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 246, 236, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px solid color-mix(in oklab, var(--border) 80%, var(--accent) 20%);
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--bg-secondary) 84%, transparent), transparent),
+    color-mix(in oklab, var(--bg-primary) 92%, #20150d 8%);
 }
 
 .statCard span {
   display: block;
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
 }
 
 .statCard strong {
   display: block;
   margin-top: 0.4rem;
-  font-family: var(--editorial-serif);
-  font-size: 1.7rem;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  line-height: 0.95;
 }
 
-.bodyGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.72fr);
-  gap: 1.1rem;
-  align-items: start;
-}
-
-.verificationBoard {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    "reported"
-    "verified"
-    "open";
-  gap: 1rem;
-}
-
-.verificationCard {
-  padding: 1.15rem 1.2rem 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: transparent;
-  box-shadow: none;
-}
-
-.claimsCard {
-  grid-area: reported;
-  border-color: color-mix(in oklab, var(--color-warning) 28%, var(--border));
-}
-
-.verifiedCard {
-  grid-area: verified;
-  border-color: color-mix(in oklab, var(--accent) 28%, var(--border));
-}
-
-.openCard {
-  grid-area: open;
-}
-
-.boardTitle {
-  margin-top: 0.9rem;
-  font-family: var(--editorial-serif);
-  font-size: clamp(1.15rem, 2vw, 1.55rem);
-  line-height: 1.05;
-  max-width: 18ch;
-}
-
-.boardList {
-  margin-top: 1rem;
-  padding-left: 0;
-  display: grid;
-  gap: 0.78rem;
-  list-style: none;
-}
-
-.boardListItem {
-  display: grid;
-  gap: 0.38rem;
-  padding: 0.9rem 0.95rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
-  border-radius: 16px;
-  background: rgba(255, 248, 240, 0.035);
-}
-
-.boardListItem span {
-  line-height: 1.6;
-  color: var(--text-secondary);
-}
-
-.boardItemLabel {
-  font-family: var(--font-sans);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--text-primary);
-}
-
-.boardSources {
-  margin-top: 1.1rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid color-mix(in oklab, var(--accent) 16%, transparent);
-}
-
-.boardSourcesTitle {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.boardSourceList {
-  margin-top: 0.7rem;
-  padding-left: 1rem;
-  display: grid;
-  gap: 0.55rem;
-}
-
-.boardSourceList a {
-  color: var(--text-primary);
-  text-decoration-color: color-mix(in oklab, var(--accent) 35%, transparent);
-  word-break: break-word;
-}
-
+.documentStage,
 .storyCard,
-.exhibitCard,
-.inspectorCard,
 .railCard,
-.sourcesCard {
-  padding: 1.2rem 0 0;
-}
-
-.evidenceRail {
-  display: grid;
-  gap: 1rem;
+.exhibitCard,
+.sourcesCard,
+.glossaryStrip {
+  padding-top: 1.2rem;
 }
 
 .sectionHead {
@@ -396,6 +251,179 @@
   align-items: center;
   gap: 0.55rem;
   color: var(--text-primary);
+}
+
+.sectionLead {
+  max-width: 72ch;
+  margin-top: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.bundleList {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.bundleCard {
+  padding: 1rem 0 0;
+  border-top: 1px solid color-mix(in oklab, var(--border) 78%, var(--accent) 22%);
+}
+
+.bundleHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+}
+
+.bundleMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bundleType {
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
+}
+
+.bundleRelation {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.bundleTitle {
+  margin-top: 0.6rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.bundleReference,
+.bundleVia {
+  margin-top: 0.4rem;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+}
+
+.bundleDescription {
+  max-width: 64ch;
+  margin-top: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.bundleCount {
+  min-width: 92px;
+  padding-top: 0.15rem;
+  text-align: right;
+}
+
+.bundleCount strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 0.92;
+}
+
+.bundleCount span {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.bundleTags,
+.partyList,
+.documentList {
+  margin-top: 0.85rem;
+}
+
+.kindChip {
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.partyChip {
+  min-width: 156px;
+  padding: 0.72rem 0.82rem;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, var(--accent) 20%);
+  background: color-mix(in oklab, var(--bg-secondary) 76%, transparent);
+  display: grid;
+  gap: 0.2rem;
+}
+
+.partyChip strong {
+  color: var(--text-primary);
+  font-size: 0.94rem;
+  line-height: 1.3;
+}
+
+.partyChip small {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.documentList {
+  padding-left: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.documentRow {
+  display: grid;
+  gap: 0.24rem;
+  padding: 0.78rem 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
+  background: color-mix(in oklab, var(--bg-primary) 94%, #1f1610 6%);
+}
+
+.documentLink {
+  color: var(--text-primary);
+  font-size: 0.96rem;
+  font-weight: 600;
+  text-decoration-color: color-mix(in oklab, var(--accent) 45%, transparent);
+  word-break: break-word;
+}
+
+.documentMeta,
+.emptyState {
+  color: var(--text-secondary);
+}
+
+.documentMeta {
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.emptyEvidence {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
+  background: color-mix(in oklab, var(--bg-secondary) 78%, transparent);
+}
+
+.emptyEvidence strong {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+.emptyEvidence p {
+  color: var(--text-secondary);
+  line-height: 1.65;
 }
 
 .findingsList {
@@ -407,60 +435,145 @@
 }
 
 .findingsList li {
-  line-height: 1.65;
+  line-height: 1.68;
+}
+
+.verificationBoard {
+  display: grid;
+  gap: 1rem;
+}
+
+.verificationCard {
+  padding: 1rem 0 0;
+  border-top: 1px solid color-mix(in oklab, var(--border) 80%, var(--accent) 20%);
+}
+
+.claimsCard {
+  border-color: color-mix(in oklab, var(--color-warning) 34%, var(--border));
+}
+
+.verifiedCard {
+  border-color: color-mix(in oklab, var(--accent) 34%, var(--border));
+}
+
+.openCard {
+  border-color: color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
+}
+
+.boardTitle {
+  margin-top: 0.8rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  line-height: 1.05;
+}
+
+.boardList {
+  margin-top: 0.9rem;
+  padding-left: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.72rem;
+}
+
+.boardListItem {
+  display: grid;
+  gap: 0.32rem;
+  padding-left: 0.9rem;
+  border-left: 1px solid color-mix(in oklab, var(--accent) 24%, var(--border));
+}
+
+.boardListItem span {
+  color: var(--text-secondary);
+  line-height: 1.62;
+}
+
+.boardItemLabel {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.boardSources {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid color-mix(in oklab, var(--border) 86%, transparent);
+}
+
+.boardSourcesTitle {
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.boardSourceList {
+  margin-top: 0.65rem;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.boardSourceList a,
+.sourceList a {
+  color: var(--text-primary);
+  text-decoration-color: color-mix(in oklab, var(--accent) 40%, transparent);
+  word-break: break-word;
 }
 
 .evidenceGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
   margin-top: 1rem;
 }
 
 .evidenceCard {
-  padding: 0.9rem;
-  border-top: 1px solid var(--border);
-  border-right: 0;
-  border-bottom: 0;
-  border-left: 0;
-  border-radius: 0;
-  background: transparent;
+  padding: 0.9rem 0 0;
+  border-top: 1px solid color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
   display: grid;
   gap: 0.28rem;
 }
 
 .evidenceCard span,
-.traceButton span,
-.emptyState {
+.traceButton span {
   color: var(--text-secondary);
 }
 
 .evidenceCard strong {
-  font-size: 1.15rem;
-  line-height: 1.1;
+  font-family: var(--font-display);
+  font-size: 1.24rem;
+  line-height: 1.02;
 }
 
 .evidenceCard small {
   color: var(--text-muted);
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
 }
 
-.actorList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
+.exhibitLayout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.56fr) minmax(0, 1fr);
+  gap: 1rem;
   margin-top: 1rem;
 }
 
+.actorRail {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
+.subsectionLabel {
+  color: color-mix(in oklab, var(--accent) 82%, white 18%);
+}
+
 .actorChip {
-  min-width: 140px;
-  padding: 0.8rem 0.9rem;
-  border-top: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border));
-  border-right: 0;
-  border-bottom: 0;
-  border-left: 0;
-  border-radius: 0;
+  min-width: 148px;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
   background: transparent;
   text-align: left;
   color: var(--text-primary);
@@ -473,73 +586,24 @@
 
 .actorChip span {
   display: block;
-  font-size: 0.95rem;
+  font-size: 0.94rem;
+  line-height: 1.35;
 }
 
-.exhibitLead {
-  margin-top: 0.75rem;
-  max-width: 70ch;
-}
-
-.traceList {
-  display: grid;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.traceButton {
-  padding: 0.9rem 1rem;
-  border-top: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  border-right: 0;
-  border-bottom: 0;
-  border-left: 0;
-  border-radius: 0;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  transition:
-    transform var(--transition-fast),
-    border-color var(--transition-fast),
-    background var(--transition-fast);
-}
-
-.actorChip:hover,
-.traceButton:hover,
-.backLink:hover {
-  transform: translateY(-2px);
-}
-
-.traceButton strong {
-  display: block;
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  line-height: 1.45;
-}
-
-.traceButton span {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 0.84rem;
-}
-
-.graphStage {
-  height: min(68vh, 720px);
-  min-height: 440px;
-  margin-top: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 0;
-  background: #080808;
+.inspectorCard {
+  padding-top: 0.25rem;
+  border-top: 1px solid color-mix(in oklab, var(--border) 80%, var(--accent) 20%);
 }
 
 .inspectorTitle {
-  margin-top: 1rem;
-  font-family: var(--editorial-serif);
-  font-size: 2rem;
+  margin-top: 0.8rem;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
   line-height: 0.98;
 }
 
 .inspectorMeta {
-  margin-top: 0.55rem;
+  margin-top: 0.5rem;
   color: var(--text-muted);
   font-family: var(--font-sans);
   font-size: 0.78rem;
@@ -554,9 +618,9 @@
 
 .propertyRow {
   display: grid;
-  gap: 0.2rem;
+  gap: 0.22rem;
   padding-top: 0.7rem;
-  border-top: 1px solid color-mix(in oklab, var(--accent) 12%, transparent);
+  border-top: 1px solid color-mix(in oklab, var(--accent) 14%, transparent);
 }
 
 .propertyRow strong {
@@ -565,17 +629,84 @@
   word-break: break-word;
 }
 
+.exhibitMain {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.traceList {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.traceButton {
+  padding: 0.82rem 0.9rem;
+  border: 1px solid color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
+  background: color-mix(in oklab, var(--bg-secondary) 82%, transparent);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.traceButton strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.traceButton span {
+  display: block;
+  margin-top: 0.34rem;
+  font-size: 0.82rem;
+}
+
+.actorChip:hover,
+.traceButton:hover,
+.backLink:hover {
+  transform: translateY(-1px);
+}
+
+.graphStage {
+  height: min(68vh, 720px);
+  min-height: 440px;
+  border: 1px solid color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
+  background: #080808;
+}
+
 .sourceList {
   margin-top: 0.9rem;
   padding-left: 1rem;
   display: grid;
-  gap: 0.65rem;
+  gap: 0.6rem;
 }
 
-.sourceList a {
-  color: var(--text-primary);
-  text-decoration-color: color-mix(in oklab, var(--accent) 40%, transparent);
-  word-break: break-word;
+.glossaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.glossaryCard {
+  padding: 0.95rem 0 0;
+  border-top: 1px solid color-mix(in oklab, var(--border) 82%, var(--accent) 18%);
+}
+
+.glossaryCard strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  line-height: 1.04;
+}
+
+.glossaryCard p {
+  margin-top: 0.55rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
 .stateWrap {
@@ -595,24 +726,15 @@
 
 .stateTitle {
   margin-top: 0.9rem;
-  font-family: var(--editorial-serif);
+  font-family: var(--font-display);
   font-size: clamp(2.2rem, 5vw, 4rem);
   line-height: 0.96;
 }
 
 @media (max-width: 1040px) {
   .hero,
-  .bodyGrid,
-  .reviewStrip {
+  .exhibitLayout {
     grid-template-columns: 1fr;
-  }
-
-  .verificationBoard {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "reported"
-      "verified"
-      "open";
   }
 
   .heroSide,
@@ -627,15 +749,25 @@
     padding-inline: 0.8rem;
   }
 
-  .topBar {
+  .topBar,
+  .bundleHeader {
+    grid-template-columns: 1fr;
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .topBar {
+    display: flex;
   }
 
   .heroSide,
   .evidenceGrid,
   .glossaryGrid {
     grid-template-columns: 1fr;
+  }
+
+  .bundleCount {
+    text-align: left;
   }
 
   .graphStage {

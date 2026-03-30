@@ -331,6 +331,46 @@ export interface PatternResponse {
   total: number;
 }
 
+export interface EvidenceTrailDocument {
+  id: string;
+  title: string;
+  url?: string | null;
+  kind?: string | null;
+  extension?: string | null;
+  uploaded_at?: string | null;
+  source?: string | null;
+}
+
+export interface EvidenceTrailParty {
+  role: string;
+  name: string;
+  document_id?: string | null;
+  entity_id?: string | null;
+}
+
+export interface EvidenceTrailBundle {
+  id: string;
+  bundle_type: string;
+  title: string;
+  reference?: string | null;
+  description?: string | null;
+  relation_summary: string;
+  via_entity_name?: string | null;
+  via_entity_ref?: string | null;
+  document_count: number;
+  document_kinds: string[];
+  documents: EvidenceTrailDocument[];
+  parties: EvidenceTrailParty[];
+  source?: string | null;
+}
+
+export interface EntityEvidenceTrailResponse {
+  entity_id: string;
+  bundles: EvidenceTrailBundle[];
+  total_bundles: number;
+  total_documents: number;
+}
+
 export function listPatterns(): Promise<PatternListResponse> {
   return apiFetch<PatternListResponse>("/api/v1/patterns/");
 }
@@ -342,6 +382,16 @@ export function getEntityPatterns(
   const params = new URLSearchParams({ lang });
   return apiFetch<PatternResponse>(
     `/api/v1/patterns/${encodeURIComponent(entityId)}?${params}`,
+  );
+}
+
+export function getEntityEvidenceTrail(
+  entityId: string,
+  limit = 12,
+): Promise<EntityEvidenceTrailResponse> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  return apiFetch<EntityEvidenceTrailResponse>(
+    `/api/v1/entity/${encodeURIComponent(entityId)}/evidence-trail?${params}`,
   );
 }
 

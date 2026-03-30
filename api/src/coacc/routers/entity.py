@@ -8,8 +8,12 @@ from coacc.constants import PEP_ROLES
 from coacc.dependencies import get_intelligence_provider, get_session
 from coacc.models.entity import (
     ConnectionResponse,
+    EntityEvidenceTrailResponse,
     EntityResponse,
     EntityWithConnections,
+    EvidenceTrailBundle,
+    EvidenceTrailDocument,
+    EvidenceTrailParty,
     ExposureResponse,
     SourceAttribution,
     TimelineEvent,
@@ -89,6 +93,21 @@ def _node_to_entity(
         is_pep=_is_pep(props),
         exposure_tier=infer_exposure_tier(labels),
     )
+
+
+async def _lookup_entity_record(
+    session: AsyncSession,
+    identifier: str,
+) -> Any | None:
+    record = await execute_query_single(session, "entity_by_id", {"id": identifier})
+    if record is not None:
+        return record
+
+    clean_identifier = _clean_identifier(identifier)
+    if clean_identifier != identifier:
+        return await execute_query_single(session, "entity_by_id", {"id": clean_identifier})
+
+    return None
 
 
 @router.get("/{identifier}", response_model=EntityResponse)
@@ -183,6 +202,119 @@ async def get_entity_timeline(
         events=events,
         total=len(events),
         next_cursor=next_cursor,
+    )
+
+
+@router.get("/{entity_id}/evidence-trail", response_model=EntityEvidenceTrailResponse)
+async def get_entity_evidence_trail(
+    entity_id: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    limit: Annotated[int, Query(ge=1, le=24)] = 12,
+) -> EntityEvidenceTrailResponse:
+    enforce_entity_lookup_enabled()
+    record = await _lookup_entity_record(session, entity_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
+
+    entity_labels = record["entity_labels"]
+    enforce_person_access_policy(entity_labels)
+
+    records = await execute_query(
+        session,
+        "entity_evidence_trail",
+        {
+            "entity_id": entity_id,
+            "entity_id_formatted": _clean_identifier(entity_id),
+            "limit": limit,
+        },
+    )
+
+    bundle_index: dict[str, EvidenceTrailBundle] = {}
+    for row in records:
+        documents = [
+            EvidenceTrailDocument(
+                id=str(item["id"]),
+                title=str(item["title"]),
+                url=item.get("url"),
+                kind=item.get("kind"),
+                extension=item.get("extension"),
+                uploaded_at=item.get("uploaded_at"),
+                source=item.get("source"),
+            )
+            for item in (row.get("documents") or [])
+            if item and item.get("id") and item.get("title")
+        ]
+        parties = [
+            EvidenceTrailParty(
+                role=str(item["role"]),
+                name=str(item["name"]),
+                document_id=item.get("document_id"),
+                entity_id=item.get("entity_id"),
+            )
+            for item in (row.get("parties") or [])
+            if item and item.get("role") and item.get("name")
+        ]
+
+        bundle_id = str(row["bundle_id"])
+        document_count = int(row.get("document_count") or 0)
+
+        current = bundle_index.get(bundle_id)
+        if current is None:
+            bundle_index[bundle_id] = EvidenceTrailBundle(
+                id=str(row["bundle_id"]),
+                bundle_type=str(row["bundle_type"]),
+                title=str(row["title"]),
+                reference=row.get("reference"),
+                description=row.get("description"),
+                relation_summary=str(row["relation_summary"]),
+                via_entity_name=row.get("via_entity_name"),
+                via_entity_ref=row.get("via_entity_ref"),
+                document_count=document_count,
+                document_kinds=[
+                    str(kind)
+                    for kind in (row.get("document_kinds") or [])
+                    if kind
+                ],
+                documents=documents,
+                parties=parties,
+                source=row.get("source"),
+            )
+            continue
+
+        current.document_count = max(current.document_count, document_count)
+        if not current.via_entity_name:
+            current.via_entity_name = row.get("via_entity_name")
+        if not current.via_entity_ref:
+            current.via_entity_ref = row.get("via_entity_ref")
+
+        seen_doc_ids = {document.id for document in current.documents}
+        for document in documents:
+            if document.id not in seen_doc_ids:
+                current.documents.append(document)
+                seen_doc_ids.add(document.id)
+
+        seen_parties = {
+            (party.role, party.name, party.document_id or "", party.entity_id or "")
+            for party in current.parties
+        }
+        for party in parties:
+            key = (party.role, party.name, party.document_id or "", party.entity_id or "")
+            if key not in seen_parties:
+                current.parties.append(party)
+                seen_parties.add(key)
+
+        for kind in [str(kind) for kind in (row.get("document_kinds") or []) if kind]:
+            if kind not in current.document_kinds:
+                current.document_kinds.append(kind)
+
+    bundles = list(bundle_index.values())
+    total_documents = sum(bundle.document_count for bundle in bundles)
+
+    return EntityEvidenceTrailResponse(
+        entity_id=entity_id,
+        bundles=bundles,
+        total_bundles=len(bundles),
+        total_documents=total_documents,
     )
 
 

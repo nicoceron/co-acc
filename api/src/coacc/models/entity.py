@@ -68,3 +68,43 @@ class TimelineResponse(BaseModel):
     events: list[TimelineEvent]
     total: int
     next_cursor: str | None
+
+
+class EvidenceTrailDocument(BaseModel):
+    id: str
+    title: str
+    url: str | None = None
+    kind: str | None = None
+    extension: str | None = None
+    uploaded_at: str | None = None
+    source: str | None = None
+
+
+class EvidenceTrailParty(BaseModel):
+    role: str
+    name: str
+    document_id: str | None = None
+    entity_id: str | None = None
+
+
+class EvidenceTrailBundle(BaseModel):
+    id: str
+    bundle_type: str
+    title: str
+    reference: str | None = None
+    description: str | None = None
+    relation_summary: str
+    via_entity_name: str | None = None
+    via_entity_ref: str | None = None
+    document_count: int
+    document_kinds: list[str]
+    documents: list[EvidenceTrailDocument]
+    parties: list[EvidenceTrailParty]
+    source: str | None = None
+
+
+class EntityEvidenceTrailResponse(BaseModel):
+    entity_id: str
+    bundles: list[EvidenceTrailBundle]
+    total_bundles: int
+    total_documents: int

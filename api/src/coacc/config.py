@@ -21,7 +21,12 @@ class Settings(BaseSettings):
     rate_limit_anon: str = "60/minute"
     rate_limit_auth: str = "300/minute"
     invite_code: str = ""
-    cors_origins: str = "http://localhost:3000,http://localhost:3100"
+    cors_origins: str = (
+        "http://localhost:3000,"
+        "http://localhost:3100,"
+        "http://127.0.0.1:3000,"
+        "http://127.0.0.1:3100"
+    )
     auth_cookie_name: str = "coacc_session"
     auth_cookie_secure: bool = False
     auth_cookie_samesite: Literal["lax", "strict", "none"] = "lax"

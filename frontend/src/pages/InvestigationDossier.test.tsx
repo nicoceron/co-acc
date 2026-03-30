@@ -91,18 +91,80 @@ const SAMPLE_PACK = {
   ],
 };
 
+const SAMPLE_EVIDENCE_TRAIL = {
+  entity_id: "company-1",
+  total_bundles: 1,
+  total_documents: 2,
+  bundles: [
+    {
+      id: "bundle-1",
+      bundle_type: "proceso_secop",
+      title: "Proceso SECOP de ejemplo",
+      reference: "SECOP-123",
+      description: "Proceso con documentos indexados",
+      relation_summary: "Aparece como proveedor adjudicado",
+      via_entity_name: null,
+      via_entity_ref: null,
+      document_count: 2,
+      document_kinds: ["payment", "report"],
+      source: "secop_document_archives",
+      parties: [
+        { role: "Comprador", name: "Gobernación ejemplo", document_id: "800100200", entity_id: "buyer-1" },
+        { role: "Proveedor", name: "FESSANJOSE", document_id: "8605242195", entity_id: "company-1" },
+      ],
+      documents: [
+        {
+          id: "doc-1",
+          title: "Cuenta de cobro 01",
+          url: "https://example.com/doc-1.pdf",
+          kind: "payment",
+          extension: "pdf",
+          uploaded_at: "2025-01-01",
+          source: "secop_document_archives",
+        },
+        {
+          id: "doc-2",
+          title: "Informe de supervisión",
+          url: "https://example.com/doc-2.pdf",
+          kind: "report",
+          extension: "pdf",
+          uploaded_at: "2025-01-02",
+          source: "secop_document_archives",
+        },
+      ],
+    },
+  ],
+};
+
+function mockDossierFetches() {
+  vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : String(input.url);
+
+    if (url.includes("/evidence-trail")) {
+      return Promise.resolve(
+        new Response(JSON.stringify(SAMPLE_EVIDENCE_TRAIL), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    }
+
+    return Promise.resolve(
+      new Response(JSON.stringify(SAMPLE_PACK), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+  });
+}
+
 describe("InvestigationDossier", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   it("renders a materialized investigation dossier with graph exhibit", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify(SAMPLE_PACK), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
+    mockDossierFetches();
 
     render(
       <MemoryRouter initialEntries={["/investigations/san-jose-icaft-network"]}>
@@ -115,30 +177,29 @@ describe("InvestigationDossier", () => {
     await waitFor(() => {
       expect(screen.getByText(/Fundación San José \/ ICAFT/i)).toBeInTheDocument();
     });
+    await waitFor(() => {
+      expect(screen.getByText(/Proceso SECOP de ejemplo/i)).toBeInTheDocument();
+    });
 
-    expect(screen.getByText(/Red de relaciones/i)).toBeInTheDocument();
-    expect(screen.getByText(/Por qué vale la pena mirar esto/i)).toBeInTheDocument();
+    expect(screen.getByText(/Red y actores/i)).toBeInTheDocument();
+    expect(screen.getByText(/Por qué importa/i)).toBeInTheDocument();
     expect(screen.getByText(/^Glosario$/i)).toBeInTheDocument();
-    expect(screen.getByText(/^Verificado$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Caso corroborado$/i)).toBeInTheDocument();
     expect(screen.getByText(/Volver a Captura educativa/i)).toBeInTheDocument();
     expect(screen.getByText(/Señal automática basada en alias coincidencia de identidad y boletines oficiales/i)).toBeInTheDocument();
     expect(screen.getByText(/Hay un alias coincidencia de identidad contractual/i)).toBeInTheDocument();
-    expect(screen.getByText(/^boletines oficiales$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Indicadores clave$/i)).toBeInTheDocument();
     expect(screen.getByText(/^Ya reportado$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Confirmado por documentos y datos públicos/i)).toBeInTheDocument();
-    expect(screen.getByText(/Huecos documentales que siguen abiertos/i)).toBeInTheDocument();
-    expect(screen.getByText(/^Los documentos$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Fuentes externas usadas en esta sección/i)).toBeInTheDocument();
+    expect(screen.getByText(/Lo que sí cierran los datos públicos/i)).toBeInTheDocument();
+    expect(screen.getByText(/Qué todavía no está cerrado/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Expedientes y documentos$/i)).toBeInTheDocument();
+    expect(screen.getByText(/Cuenta de cobro 01/i)).toBeInTheDocument();
+    expect(screen.getByText(/Fuentes externas usadas aquí/i)).toBeInTheDocument();
     expect(screen.getByTestId("graph-canvas")).toBeInTheDocument();
   });
 
   it("routes generated leads back to new leads instead of the corroborated library", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify(SAMPLE_PACK), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
+    mockDossierFetches();
 
     render(
       <MemoryRouter initialEntries={["/investigations/nuevo-elefante"]}>
@@ -154,7 +215,7 @@ describe("InvestigationDossier", () => {
       ).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/^Alerta$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Pista nueva$/i)).toBeInTheDocument();
     expect(screen.getByText(/Volver a Elefante blanco \/ obra trabada/i)).toBeInTheDocument();
   });
 });
