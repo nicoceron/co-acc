@@ -15,10 +15,10 @@
   gap: 1rem;
   align-items: center;
   padding: 1rem clamp(1rem, 3vw, 2rem);
-  border-bottom: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border));
-  background: rgba(17, 12, 14, 0.72);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
+  border-bottom: 1px solid color-mix(in oklab, var(--accent) 12%, var(--border));
+  background: rgba(12, 9, 10, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .brandBlock {
@@ -28,22 +28,24 @@
 
 .logo {
   font-family: var(--font-display);
-  font-size: 1.55rem;
+  font-size: 1.7rem;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   color: var(--text-primary);
   text-decoration: none;
 }
 
 .brandNote {
   color: var(--text-muted);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
 }
 
 .nav {
   display: flex;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 1.2rem;
   flex-wrap: wrap;
 }
 
@@ -53,29 +55,29 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.58rem 0.9rem;
+  padding: 0.3rem 0;
   text-decoration: none;
   font-family: var(--font-sans);
-  font-size: 0.82rem;
-  letter-spacing: 0.01em;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   transition:
     border-color var(--transition-fast),
-    background var(--transition-fast),
     color var(--transition-fast);
-  border-radius: 999px;
 }
 
 .navLink,
 .secondaryLink {
-  border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
+  border: 0;
+  border-bottom: 1px solid transparent;
   color: var(--text-secondary);
-  background: rgba(255, 248, 236, 0.03);
+  background: transparent;
+  border-radius: 0;
 }
 
 .navLink:hover,
 .secondaryLink:hover {
-  border-color: color-mix(in oklab, var(--accent) 36%, var(--border-hover));
-  background: rgba(255, 248, 236, 0.06);
+  border-bottom-color: color-mix(in oklab, var(--accent) 40%, transparent);
   color: var(--text-primary);
 }
 
@@ -88,7 +90,9 @@
 
 .primaryLink {
   border: 1px solid color-mix(in oklab, var(--accent) 34%, transparent);
-  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 22%, transparent), color-mix(in oklab, var(--color-danger) 14%, transparent));
+  border-radius: 999px;
+  padding: 0.58rem 0.95rem;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 20%, transparent), color-mix(in oklab, var(--color-danger) 10%, transparent));
   color: var(--text-primary);
 }
 

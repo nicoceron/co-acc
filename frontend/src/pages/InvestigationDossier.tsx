@@ -19,14 +19,14 @@ import {
 import styles from "./InvestigationDossier.module.css";
 
 function statusLabel(investigation: MaterializedInvestigation): string {
-  return isCorroboratedInvestigation(investigation) ? "Caso corroborado" : "Pista nueva";
+  return isCorroboratedInvestigation(investigation) ? "Verificado" : "Alerta";
 }
 
 function collectionMeta(investigation?: MaterializedInvestigation | null): { href: string; label: string } {
   if (investigation && isCorroboratedInvestigation(investigation)) {
-    return { href: "/investigations", label: "Volver a biblioteca" };
+    return { href: "/biblioteca", label: "Volver a biblioteca" };
   }
-  return { href: "/results", label: "Volver a descubrir" };
+  return { href: "/casos", label: "Volver a casos" };
 }
 
 function categoryLabel(category: string): string {
@@ -193,6 +193,15 @@ export function InvestigationDossier() {
                 <p>{humanizePublicText(investigation.why_it_matters)}</p>
               </div>
             )}
+            <div className={styles.reviewRow}>
+              {priority ? (
+                <strong className={`${styles.reviewBadge} ${badgeToneClass(priority.tone)}`}>{priority.label}</strong>
+              ) : null}
+              {confidence ? (
+                <strong className={`${styles.reviewBadge} ${badgeToneClass(confidence.tone)}`}>{confidence.label}</strong>
+              ) : null}
+            </div>
+            <p className={styles.reviewReason}>{basis}</p>
             <div className={styles.tagRow}>
               <span className={styles.metaPill}>{categoryLabel(investigation.category)}</span>
               {investigation.tags.slice(0, 4).map((tag) => (
@@ -225,44 +234,10 @@ export function InvestigationDossier() {
           </aside>
         </header>
 
-        <section className={styles.reviewStrip}>
-          <article className={styles.reviewCard}>
-            <span className={styles.reviewLabel}>Prioridad</span>
-            {priority ? (
-              <strong className={`${styles.reviewBadge} ${badgeToneClass(priority.tone)}`}>{priority.label}</strong>
-            ) : null}
-          </article>
-          <article className={styles.reviewCard}>
-            <span className={styles.reviewLabel}>Estado del caso</span>
-            {confidence ? (
-              <strong className={`${styles.reviewBadge} ${badgeToneClass(confidence.tone)}`}>{confidence.label}</strong>
-            ) : null}
-          </article>
-          <article className={styles.reviewCard}>
-            <span className={styles.reviewLabel}>Base del caso</span>
-            <p>{basis}</p>
-          </article>
-        </section>
-
-        <section className={styles.glossaryStrip}>
-          <div className={styles.sectionHead}>
-            <BookOpenText size={16} />
-            <span>Glosario</span>
-          </div>
-          <div className={styles.glossaryGrid}>
-            {QUICK_GLOSSARY.map((item) => (
-              <article key={`${investigation.slug}-${item.term}`} className={styles.glossaryCard}>
-                <strong>{item.term}</strong>
-                <p>{item.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
         <section className={styles.storyCard}>
           <div className={styles.sectionHead}>
             <ScrollText size={16} />
-            <span>Qué encontramos</span>
+            <span>Qué sabemos</span>
           </div>
           <ol className={styles.findingsList}>
             {investigation.findings.map((finding) => (
@@ -279,9 +254,9 @@ export function InvestigationDossier() {
               <article className={`${styles.verificationCard} ${styles.claimsCard}`}>
                 <div className={styles.sectionHead}>
                   <Link2 size={16} />
-                  <span>Reportado afuera</span>
+                  <span>Ya reportado</span>
                 </div>
-                <p className={styles.boardTitle}>Lo que ya aparece en reportajes, denuncias o seguimiento externo</p>
+                <p className={styles.boardTitle}>Lo que ya se publicó afuera</p>
                 <ul className={styles.boardList}>
                   {investigation.reported_claims.map((item) => {
                     const parsed = splitBoardItem(item);
@@ -314,9 +289,9 @@ export function InvestigationDossier() {
               <article className={`${styles.verificationCard} ${styles.verifiedCard}`}>
                 <div className={styles.sectionHead}>
                   <BadgeCheck size={16} />
-                  <span>Verificado</span>
+                  <span>Lo que sabemos</span>
                 </div>
-                <p className={styles.boardTitle}>Confirmado por registros abiertos y documentos públicos</p>
+                <p className={styles.boardTitle}>Confirmado por documentos y datos públicos</p>
                 <ul className={styles.boardList}>
                   {investigation.verified_open_data.map((item) => {
                     const parsed = splitBoardItem(item);
@@ -335,9 +310,9 @@ export function InvestigationDossier() {
               <article className={`${styles.verificationCard} ${styles.openCard}`}>
                 <div className={styles.sectionHead}>
                   <BookOpenText size={16} />
-                  <span>Falta cierre</span>
+                  <span>Lo que falta</span>
                 </div>
-                <p className={styles.boardTitle}>Vacíos documentales que siguen abiertos</p>
+                <p className={styles.boardTitle}>Huecos documentales que siguen abiertos</p>
                 <ul className={styles.boardList}>
                   {investigation.open_questions.map((item) => {
                     const parsed = splitBoardItem(item);
@@ -354,122 +329,118 @@ export function InvestigationDossier() {
           </section>
         )}
 
-        <div className={styles.bodyGrid}>
-          <aside className={styles.evidenceRail}>
-            <div className={styles.railCard}>
-              <div className={styles.sectionHead}>
-                <BadgeCheck size={16} />
-                <span>Evidencia extraída</span>
-              </div>
-              <div className={styles.evidenceGrid}>
-                {investigation.evidence.map((item) => (
-                  <article key={`${investigation.slug}-${item.label}`} className={styles.evidenceCard}>
-                    <span>{humanizePublicText(item.label)}</span>
-                    <strong>{item.value}</strong>
-                    {item.detail && <small>{humanizePublicText(item.detail)}</small>}
-                  </article>
-                ))}
-              </div>
-            </div>
+        <section className={styles.railCard}>
+          <div className={styles.sectionHead}>
+            <BadgeCheck size={16} />
+            <span>Los documentos</span>
+          </div>
+          <div className={styles.evidenceGrid}>
+            {investigation.evidence.map((item) => (
+              <article key={`${investigation.slug}-${item.label}`} className={styles.evidenceCard}>
+                <span>{humanizePublicText(item.label)}</span>
+                <strong>{item.value}</strong>
+                {item.detail && <small>{humanizePublicText(item.detail)}</small>}
+              </article>
+            ))}
+          </div>
+        </section>
 
-            <div className={styles.railCard}>
-              <div className={styles.sectionHead}>
-                <FileSearch size={16} />
-                <span>Actores clave</span>
-              </div>
-              <div className={styles.actorList}>
-                {keyActors.map((actor) => (
+        <section className={styles.railCard}>
+          <div className={styles.sectionHead}>
+            <FileSearch size={16} />
+            <span>Actores en esta red</span>
+          </div>
+          <div className={styles.actorList}>
+            {keyActors.map((actor) => (
+              <button
+                key={`${investigation.slug}-${actor.id}`}
+                type="button"
+                className={styles.actorChip}
+                onClick={() => setSelectedNodeId(actor.id)}
+              >
+                <span>{actor.label}</span>
+                <small>{formatNodeTypeLabel(actor.type)}</small>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.exhibitCard}>
+          <div className={styles.sectionHead}>
+            <Network size={16} />
+            <span>Red de relaciones</span>
+          </div>
+          <p className={styles.exhibitLead}>
+            Primero la historia, luego la red. Aquí puedes seguir actores y conexiones guardadas del caso.
+          </p>
+
+          {graph ? (
+            <>
+              <div className={styles.traceList}>
+                {traces.map((trace) => (
                   <button
-                    key={`${investigation.slug}-${actor.id}`}
+                    key={trace.id}
                     type="button"
-                    className={styles.actorChip}
-                    onClick={() => setSelectedNodeId(actor.id)}
+                    className={styles.traceButton}
+                    onClick={() => setSelectedNodeId(trace.focusNodeId ?? graph.center_id)}
                   >
-                    <span>{actor.label}</span>
-                    <small>{formatNodeTypeLabel(actor.type)}</small>
+                    <strong>{trace.headline}</strong>
+                    {trace.detail && <span>{trace.detail}</span>}
                   </button>
                 ))}
               </div>
-            </div>
-          </aside>
 
-          <section className={styles.exhibitCard}>
-            <div className={styles.sectionHead}>
-              <Network size={16} />
-              <span>Red de relaciones</span>
-            </div>
-            <p className={styles.exhibitLead}>
-              Esta red acompaña la lectura. Sirve para ubicar actores y seguir las conexiones guardadas del caso.
-            </p>
+              <div className={styles.graphStage}>
+                <GraphCanvas
+                  data={{ nodes: graph.nodes, edges: graph.edges }}
+                  centerId={graph.center_id}
+                  enabledTypes={enabledTypes}
+                  enabledRelTypes={enabledRelTypes}
+                  hiddenNodeIds={new Set<string>()}
+                  selectedNodeIds={selectedNodeIds}
+                  hoveredNodeId={hoveredNodeId}
+                  layoutMode={layoutMode}
+                  onNodeClick={setSelectedNodeId}
+                  onNodeDeselect={() => setSelectedNodeId(null)}
+                  onNodeHover={setHoveredNodeId}
+                  onNodeRightClick={() => {}}
+                  onLayoutChange={setLayoutMode}
+                  onFullscreen={() => {}}
+                  sidebarCollapsed={false}
+                />
+              </div>
+            </>
+          ) : (
+            <div className={styles.emptyState}>Grafo en construcción.</div>
+          )}
+        </section>
 
-            {graph ? (
-              <>
-                <div className={styles.traceList}>
-                  {traces.map((trace) => (
-                    <button
-                      key={trace.id}
-                      type="button"
-                      className={styles.traceButton}
-                      onClick={() => setSelectedNodeId(trace.focusNodeId ?? graph.center_id)}
-                    >
-                      <strong>{trace.headline}</strong>
-                      {trace.detail && <span>{trace.detail}</span>}
-                    </button>
-                  ))}
-                </div>
+        <section className={styles.inspectorCard}>
+          <div className={styles.sectionHead}>
+            <Link2 size={16} />
+            <span>Actor seleccionado</span>
+          </div>
 
-                <div className={styles.graphStage}>
-                  <GraphCanvas
-                    data={{ nodes: graph.nodes, edges: graph.edges }}
-                    centerId={graph.center_id}
-                    enabledTypes={enabledTypes}
-                    enabledRelTypes={enabledRelTypes}
-                    hiddenNodeIds={new Set<string>()}
-                    selectedNodeIds={selectedNodeIds}
-                    hoveredNodeId={hoveredNodeId}
-                    layoutMode={layoutMode}
-                    onNodeClick={setSelectedNodeId}
-                    onNodeDeselect={() => setSelectedNodeId(null)}
-                    onNodeHover={setHoveredNodeId}
-                    onNodeRightClick={() => {}}
-                    onLayoutChange={setLayoutMode}
-                    onFullscreen={() => {}}
-                    sidebarCollapsed={false}
-                  />
-                </div>
-              </>
-            ) : (
-              <div className={styles.emptyState}>Este dossier aún no tiene una red guardada de relaciones.</div>
-            )}
-          </section>
-
-          <aside className={styles.inspectorCard}>
-            <div className={styles.sectionHead}>
-              <Link2 size={16} />
-              <span>Actor seleccionado</span>
-            </div>
-
-            {selectedNode ? (
-              <>
-                <h2 className={styles.inspectorTitle}>{selectedNode.label}</h2>
-                <p className={styles.inspectorMeta}>
-                  {formatNodeTypeLabel(selectedNode.type)}
-                  {selectedNode.document_id ? ` · ${selectedNode.document_id}` : ""}
-                </p>
-                <div className={styles.propertyList}>
-                  {Object.entries(selectedNode.properties ?? {}).slice(0, 14).map(([key, value]) => (
-                    <div key={key} className={styles.propertyRow}>
-                      <span>{formatPropertyLabel(key)}</span>
-                      <strong>{String(value ?? "—")}</strong>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className={styles.emptyState}>Selecciona un actor o una conexión destacada.</div>
-            )}
-          </aside>
-        </div>
+          {selectedNode ? (
+            <>
+              <h2 className={styles.inspectorTitle}>{selectedNode.label}</h2>
+              <p className={styles.inspectorMeta}>
+                {formatNodeTypeLabel(selectedNode.type)}
+                {selectedNode.document_id ? ` · ${selectedNode.document_id}` : ""}
+              </p>
+              <div className={styles.propertyList}>
+                {Object.entries(selectedNode.properties ?? {}).slice(0, 14).map(([key, value]) => (
+                  <div key={key} className={styles.propertyRow}>
+                    <span>{formatPropertyLabel(key)}</span>
+                    <strong>{String(value ?? "—")}</strong>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className={styles.emptyState}>Selecciona un actor o una conexión destacada.</div>
+          )}
+        </section>
 
         {investigation.public_sources.length > 0 && (
           <section className={styles.sourcesCard}>
@@ -488,6 +459,21 @@ export function InvestigationDossier() {
             </ol>
           </section>
         )}
+
+        <section className={styles.glossaryStrip}>
+          <div className={styles.sectionHead}>
+            <BookOpenText size={16} />
+            <span>Glosario</span>
+          </div>
+          <div className={styles.glossaryGrid}>
+            {QUICK_GLOSSARY.map((item) => (
+              <article key={`${investigation.slug}-${item.term}`} className={styles.glossaryCard}>
+                <strong>{item.term}</strong>
+                <p>{item.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -15,21 +15,18 @@ export function PublicShell() {
           <Link to="/" className={styles.logo}>
             CO·ACC
           </Link>
-          <span className={styles.brandNote}>hallazgos públicos con datos reales de Colombia</span>
+          <span className={styles.brandNote}>corrupción pública, explicada con datos oficiales</span>
         </div>
 
         <nav className={styles.nav}>
           <Link to="/" className={styles.navLink}>
             Inicio
           </Link>
-          <Link to="/results" className={styles.navLink}>
-            Descubrir
-          </Link>
-          <Link to="/investigations" className={styles.navLink}>
-            Biblioteca
+          <Link to="/casos" className={styles.navLink}>
+            Casos
           </Link>
           <Link to="/#metodologia" className={styles.navLink}>
-            Método
+            Metodología
           </Link>
         </nav>
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link2, ScrollText, ShieldCheck } from "lucide-react";
+import { Link2, ScrollText } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
 import { GraphCanvas } from "@/components/graph/GraphCanvas";
@@ -7,19 +7,16 @@ import { formatPropertyLabel, humanizeIdentifier } from "@/lib/display";
 import {
   buildConnectionTraces,
   formatDate,
-  formatMoney,
   formatSignalLabel,
 } from "@/lib/evidence";
 import {
   buildInvestigationBasis,
   buildValidationBasis,
   getInvestigationConfidenceBadge,
-  getInvestigationPriorityBadge,
   getLeadPriorityBadge,
   getValidationConfidenceBadge,
   humanizePublicText,
   isCorroboratedInvestigation,
-  QUICK_GLOSSARY,
   type ReviewBadge,
 } from "@/lib/review";
 import type {
@@ -209,10 +206,6 @@ function formatNodeTypeLabel(type: string): string {
   return labels[type] ?? humanizeIdentifier(type);
 }
 
-function signalCountLabel(count: number): string {
-  return `${count} ${count === 1 ? "alerta" : "alertas"}`;
-}
-
 function badgeToneClass(tone: ReviewBadge["tone"]): string {
   if (tone === "high") return styles.reviewHigh ?? "";
   if (tone === "medium") return styles.reviewMedium ?? "";
@@ -311,33 +304,6 @@ function buildLeadCategorySeeds(
 
 function buildIdentityKeys(entityId?: string | null, documentId?: string | null): string[] {
   return [...new Set([String(entityId ?? "").trim(), normalizeEntityRef(documentId)].filter(Boolean))];
-}
-
-function summarizeQueueMetrics(entity: QueueEntity, kind: QueueKind): string[] {
-  if (kind === "companies") {
-    const company = entity as MaterializedWatchlistCompany;
-    return [
-      `${company.contract_count} contratos · ${formatMoney(company.contract_value)}`,
-      company.sanction_count > 0 ? `${company.sanction_count} sanciones` : "",
-      company.official_officer_count > 0 ? `${company.official_officer_count} cruces con cargo público` : "",
-      company.execution_gap_contract_count > 0 ? `${company.execution_gap_contract_count} brechas de ejecución` : "",
-    ].filter(Boolean);
-  }
-
-  const person = entity as MaterializedWatchlistPerson;
-  return [
-    (person.person_sanction_count ?? 0) > 0 ? `${person.person_sanction_count ?? 0} sanciones oficiales` : "",
-    person.candidacy_count > 0 ? `${person.candidacy_count} candidaturas` : "",
-    person.donation_count > 0 ? `${person.donation_count} donaciones` : "",
-    person.supplier_contract_count > 0 ? `${person.supplier_contract_count} contratos como proveedor` : "",
-    person.conflict_disclosure_count > 0 ? `${person.conflict_disclosure_count} conflictos declarados` : "",
-  ].filter(Boolean);
-}
-
-function scoreTone(score: number): string {
-  if (score >= 16) return styles.scoreCritical ?? "";
-  if (score >= 10) return styles.scoreHot ?? "";
-  return styles.scoreWarm ?? "";
 }
 
 function formatPublicCaseTitle(title: string): string {
@@ -534,30 +500,29 @@ function SavedCaseModal({ detail, onClose }: { detail: DrilldownCase | null; onC
 }
 
 function InvestigationCard({ investigation }: { investigation: MaterializedInvestigation }) {
-  const priority = getInvestigationPriorityBadge(investigation);
   const confidence = getInvestigationConfidenceBadge(investigation);
   const basis = buildInvestigationBasis(investigation);
+  const statusLabel = isCorroboratedInvestigation(investigation) ? "Verificado" : "Alerta";
 
   return (
     <article className={styles.investigationCard}>
-      <p className={styles.cardEyebrow}>Dossier</p>
+      <p className={styles.cardEyebrow}>{statusLabel}</p>
       <h3>{investigation.title}</h3>
       <p className={styles.cardMeta}>
         {investigation.subject_name}
         {investigation.subject_ref ? ` · ${investigation.subject_ref}` : ""}
       </p>
       <div className={styles.reviewRow}>
-        <span className={`${styles.reviewBadge} ${badgeToneClass(priority.tone)}`}>{priority.label}</span>
         <span className={`${styles.reviewBadge} ${badgeToneClass(confidence.tone)}`}>{confidence.label}</span>
       </div>
       <p className={styles.reviewReason}>{basis}</p>
       <p className={styles.cardSummary}>{humanizePublicText(investigation.summary)}</p>
       <div className={styles.tagRow}>
-        {investigation.tags.slice(0, 4).map((tag) => (
+        {investigation.tags.slice(0, 2).map((tag) => (
           <span key={`${investigation.slug}-${tag}`} className={styles.tagChip}>{formatSignalLabel(tag)}</span>
         ))}
       </div>
-      <Link to={`/investigations/${investigation.slug}`} className={styles.inlineAction}>
+      <Link to={`/casos/${investigation.slug}`} className={styles.inlineAction}>
         Abrir dossier
       </Link>
     </article>
@@ -577,8 +542,7 @@ function ProofCaseCard({
   return (
     <article className={styles.proofCard}>
       <div className={styles.proofHead}>
-        <span className={styles.verifiedPill}>Corroborado</span>
-        <span className={styles.cardMeta}>Caso conocido</span>
+        <span className={styles.verifiedPill}>Verificado</span>
       </div>
       <h3>{formatPublicCaseTitle(validationCase.title)}</h3>
       <p className={styles.cardMeta}>{validationCase.entity_name} · {validationCase.entity_ref}</p>
@@ -622,7 +586,6 @@ function QueueLeadCard({
     : { label: "Sin corroboración externa", tone: "initial" };
   const practices = buildAlertPracticeLabels(row.alerts).slice(0, 3);
   const primaryReason = row.alerts[0]?.reason_text ?? "Cruce detectado en datos públicos.";
-  const metrics = summarizeQueueMetrics(row, queueKind);
 
   return (
     <article className={styles.queueCard}>
@@ -633,10 +596,6 @@ function QueueLeadCard({
             {"document_id" in row && row.document_id ? ` · ${row.document_id}` : ""}
           </p>
           <h3>{row.name}</h3>
-        </div>
-        <div className={`${styles.scorePill} ${scoreTone(row.suspicion_score)}`}>
-          <span>{row.suspicion_score}</span>
-          <small>{signalCountLabel(row.signal_types)}</small>
         </div>
       </div>
 
@@ -657,14 +616,6 @@ function QueueLeadCard({
         ))}
       </div>
 
-      {metrics.length > 0 && (
-        <ul className={styles.metricList}>
-          {metrics.map((metric) => (
-            <li key={`${row.entity_id}-${metric}`}>{metric}</li>
-          ))}
-        </ul>
-      )}
-
       {canOpen ? (
         <div className={styles.cardActions}>
           <button type="button" className={styles.detailButton} onClick={onOpen} disabled={loading}>
@@ -678,6 +629,7 @@ function QueueLeadCard({
 
 function CategoryShelf({
   section,
+  libraryMode,
   expanded,
   onToggle,
   onOpenValidation,
@@ -685,36 +637,36 @@ function CategoryShelf({
   resolveLeadState,
 }: {
   section: CatalogSection;
+  libraryMode: boolean;
   expanded: boolean;
   onToggle: () => void;
   onOpenValidation: (validationCase: MaterializedValidationCase) => void;
   onOpenEntity: (entityId: string) => void;
   resolveLeadState: (entityId: string) => { canOpen: boolean; loading: boolean };
 }) {
-  const visibleItems = expanded ? section.items : section.items.slice(0, 3);
+  const visibleItems = expanded ? section.items : section.items.slice(0, 2);
+  const freshCount = section.items.filter(isFreshCatalogItem).length;
 
   return (
     <section id={`category-${section.definition.id}`} className={styles.categorySection}>
       <div className={styles.categoryHeader}>
         <div>
-          <p className={styles.sectionEyebrow}>Categoría</p>
+          <p className={styles.sectionEyebrow}>{libraryMode ? "Archivo" : "Práctica"}</p>
           <h2>{section.definition.title}</h2>
           <p className={styles.categoryDescription}>{section.definition.description}</p>
         </div>
         <div className={styles.categoryMeta}>
           <span>{section.items.length} casos</span>
-          <span>{section.corroboratedCount} corroborados</span>
-          {section.definition.planned ? <span>En preparación</span> : null}
+          {!libraryMode ? <span>{freshCount} alertas</span> : null}
+          <span>{section.corroboratedCount} verificados</span>
+          {section.definition.planned ? <span>En construcción</span> : null}
         </div>
       </div>
 
       {section.items.length === 0 ? (
         <div className={styles.categoryEmpty}>
           <strong>Todavía no hay casos publicados.</strong>
-          <p>
-            Esta categoría ya tiene ruta de investigación, pero todavía no publicamos leads con suficiente cierre
-            documental como para exponerlos aquí.
-          </p>
+          <p>La línea ya existe, pero aún no tiene hallazgos con cierre público suficiente para entrar a portada.</p>
         </div>
       ) : (
         <>
@@ -747,10 +699,10 @@ function CategoryShelf({
             })}
           </div>
 
-          {section.items.length > 3 && (
+          {section.items.length > 2 && (
             <div className={styles.categoryFooter}>
               <button type="button" className={styles.moreButton} onClick={onToggle}>
-                {expanded ? "Ocultar biblioteca" : `Ver biblioteca (${section.items.length})`}
+                {expanded ? "Ocultar lista completa" : `Ver lista completa (${section.items.length})`}
               </button>
             </div>
           )}
@@ -977,7 +929,7 @@ export function Results() {
     () => catalogSections.filter((section) => section.items.length > 0 || section.definition.planned),
     [catalogSections],
   );
-  const isLibraryMode = location.pathname === "/investigations";
+  const isLibraryMode = location.pathname === "/investigations" || location.pathname === "/biblioteca";
 
   const frontlineCatalogSections = useMemo(
     () => visibleCatalogSections
@@ -1023,7 +975,6 @@ export function Results() {
     return { corroboratedItems, activeCategories };
   }, [libraryCatalogSections]);
   const pageSections = isLibraryMode ? libraryCatalogSections : frontlineCatalogSections;
-
   async function openEntityCase(entityId: string): Promise<void> {
     const existing = drilldownIndex.get(entityId) ?? caseCacheRef.current.get(entityId);
     if (existing) {
@@ -1074,132 +1025,46 @@ export function Results() {
     <div className={styles.page}>
       <header className={styles.hero}>
         <div className={styles.heroCopy}>
-          <p className={styles.heroEyebrow}>{isLibraryMode ? "Biblioteca pública" : "Portada de descubrimiento"}</p>
+          <p className={styles.heroEyebrow}>{isLibraryMode ? "Biblioteca pública" : "Directorio público"}</p>
           <h1 className={styles.heroTitle}>
-            {isLibraryMode ? "Biblioteca para contrastar y citar." : "Pistas ordenadas por práctica, no por ruido."}
+            {isLibraryMode ? "Biblioteca corroborada." : "Casos por práctica."}
           </h1>
-          <p className={styles.heroLead}>
-            {isLibraryMode
-              ? "Aquí quedan los casos con mejor cierre público. Sirven para contrastar, citar y comparar contra las pistas nuevas."
-              : "Aquí salen primero las pistas abiertas de mayor riesgo por práctica. Lo corroborado queda aparte como control, no como portada."}
-          </p>
           <div className={styles.heroMeta}>
             <span>Generado {formatDate(pack.generated_at_utc)}</span>
             {isLibraryMode ? (
               <>
-                <span>{librarySummary.corroboratedItems} casos corroborados</span>
-                <span>{librarySummary.activeCategories} categorías documentadas</span>
+                <span>{librarySummary.corroboratedItems} casos verificados</span>
+                <span>{librarySummary.activeCategories} prácticas</span>
               </>
             ) : (
               <>
-                <span>{catalogSummary.newItems} pistas nuevas visibles</span>
-                <span>{corroboratedLibraryCount} casos corroborados aparte</span>
+                <span>{catalogSummary.newItems} alertas abiertas</span>
+                <span>{catalogSummary.activeCategories} prácticas activas</span>
+                <span>{corroboratedLibraryCount} casos ya verificados</span>
               </>
             )}
           </div>
           <div className={styles.cardActions}>
             {pageSections[0] ? (
               <a href={`#category-${pageSections[0].definition.id}`} className={styles.primaryCta}>
-                Bajar a categorías
+                Explorar prácticas
               </a>
             ) : null}
-            <Link to={isLibraryMode ? "/results" : "/investigations"} className={styles.inlineAction}>
-              {isLibraryMode ? "Volver a descubrir" : "Abrir biblioteca"}
+            <Link to={isLibraryMode ? "/casos" : "/biblioteca"} className={styles.inlineAction}>
+              {isLibraryMode ? "Volver a alertas" : "Abrir biblioteca"}
             </Link>
           </div>
         </div>
-
-        <aside className={styles.heroProof}>
-          <div className={styles.heroProofHead}>
-            <ShieldCheck size={16} />
-            <span>Qué verás primero</span>
-          </div>
-          <div className={styles.heroProofGrid}>
-            <div className={styles.heroProofStat}>
-              <strong>{isLibraryMode ? librarySummary.activeCategories : catalogSummary.activeCategories}</strong>
-              <span>{isLibraryMode ? "categorías documentadas" : "categorías con pistas nuevas"}</span>
-            </div>
-            <div className={styles.heroProofStat}>
-              <strong>{isLibraryMode ? librarySummary.corroboratedItems : catalogSummary.newItems}</strong>
-              <span>{isLibraryMode ? "casos corroborados" : "pistas nuevas publicadas"}</span>
-            </div>
-            <div className={styles.heroProofStat}>
-              <strong>{isLibraryMode ? investigations.length : corroboratedLibraryCount}</strong>
-              <span>{isLibraryMode ? "dossiers en biblioteca" : "casos corroborados aparte"}</span>
-            </div>
-            <div className={styles.heroProofStat}>
-              <strong>{pack.stats.promoted_sources}</strong>
-              <span>fuentes oficiales activas</span>
-            </div>
-          </div>
-        </aside>
       </header>
 
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <div>
-            <p className={styles.sectionEyebrow}>Uso rápido</p>
+            <p className={styles.sectionEyebrow}>{isLibraryMode ? "Prácticas documentadas" : "Prácticas activas"}</p>
             <h2>
               {isLibraryMode
-                ? "Elige una práctica y revisa qué ya quedó documentado."
-                : "Elige una práctica y mira si la pista ya tiene respaldo."}
-            </h2>
-          </div>
-        </div>
-
-        <div className={styles.guideGrid}>
-          <article className={styles.guideCard}>
-            <strong>{isLibraryMode ? "1. Escoge una práctica documentada" : "1. Escoge una categoría"}</strong>
-            <p>
-              {isLibraryMode
-                ? "Aquí sólo quedan prácticas con material ya contrastable."
-                : "Elefante blanco, microdesfalco contable, supervisión y otras prácticas con pistas visibles."}
-            </p>
-          </article>
-          <article className={styles.guideCard}>
-            <strong>{isLibraryMode ? "2. Usa esto como control" : "2. Mira qué tan nuevo es"}</strong>
-            <p>
-              {isLibraryMode
-                ? "Úsala para comparar si una pista nueva ya tiene cierre suficiente o sigue verde."
-                : "Si algo ya está corroborado, queda marcado, pero no manda la pantalla."}
-            </p>
-          </article>
-          <article className={styles.guideCard}>
-            <strong>{isLibraryMode ? "3. Vuelve a descubrir" : "3. Usa lo corroborado como control"}</strong>
-            <p>
-              {isLibraryMode
-                ? "Si quieres encontrar algo nuevo, vuelve a la portada de descubrimiento."
-                : "La biblioteca sigue disponible, pero esta portada existe para descubrir, no para repetir benchmark."}
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div>
-            <p className={styles.sectionEyebrow}>Glosario</p>
-            <h2>Términos mínimos para leer un caso sin saber contratación pública</h2>
-          </div>
-        </div>
-        <div className={styles.glossaryGrid}>
-          {QUICK_GLOSSARY.map((item) => (
-            <article key={item.term} className={styles.glossaryCard}>
-              <strong>{item.term}</strong>
-              <p>{item.description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div>
-            <p className={styles.sectionEyebrow}>Explorar por categoría</p>
-            <h2>
-              {isLibraryMode
-                ? "La biblioteca está organizada por práctica para revisar rápido lo ya documentado."
-                : "Cada práctica muestra primero lo nuevo. Lo corroborado queda al fondo como referencia."}
+                ? "Casos listos para contraste, agrupados por práctica."
+                : "Abrir primero por práctica, no por ruido."}
             </h2>
           </div>
         </div>
@@ -1209,11 +1074,11 @@ export function Results() {
               <strong>{section.definition.title}</strong>
               <span>
                 {isLibraryMode
-                  ? `${section.items.length} corroborados`
-                  : `${section.items.filter(isFreshCatalogItem).length} pistas nuevas`}
+                  ? `${section.items.length} verificados`
+                  : `${section.items.filter(isFreshCatalogItem).length} alertas`}
               </span>
               <small>
-                {isLibraryMode ? "listos para contraste" : `${section.corroboratedCount} corroborados aparte`}
+                {isLibraryMode ? "listos para contraste" : `${section.corroboratedCount} ya verificados`}
               </small>
             </a>
           ))}
@@ -1227,6 +1092,7 @@ export function Results() {
             <CategoryShelf
               key={section.definition.id}
               section={section}
+              libraryMode={isLibraryMode}
               expanded={Boolean(expandedCategories[section.definition.id])}
               onToggle={() => setExpandedCategories((current) => ({
                 ...current,
@@ -1251,8 +1117,8 @@ export function Results() {
       <section className={styles.footerNote}>
         <p>
           {isLibraryMode
-            ? "Esta biblioteca existe para contrastar, citar y revisar material con cierre público más alto."
-            : "La portada sirve para cazar pistas nuevas. Lo corroborado sigue disponible, pero ya no tapa lo nuevo."}
+            ? "La biblioteca guarda los casos con mejor cierre documental."
+            : "Este directorio muestra primero alertas nuestras y deja los verificados aparte para contraste."}
         </p>
       </section>
 

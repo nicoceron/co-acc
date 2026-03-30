@@ -11,7 +11,7 @@
 }
 
 .frame {
-  max-width: 1380px;
+  max-width: 1180px;
   margin: 0 auto;
   display: grid;
   gap: 1.25rem;
@@ -243,7 +243,7 @@
 
 .glossaryGrid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -283,10 +283,11 @@
 
 .verificationBoard {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   grid-template-areas:
-    "reported verified"
-    "open open";
+    "reported"
+    "verified"
+    "open";
   gap: 1rem;
 }
 

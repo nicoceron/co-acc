@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BadgeCheck, BookOpenText, Link2, Network, ShieldCheck } from "lucide-react";
 import { Link } from "react-router";
 
 import { type StatsResponse, getStats } from "@/api/client";
+import { HeroGraph } from "@/components/landing/HeroGraph";
+import { NetworkAnimation } from "@/components/landing/NetworkAnimation";
+import { StatsBar } from "@/components/landing/StatsBar";
 import { formatSignalLabel } from "@/lib/evidence";
-import { loadMaterializedResultsPack, type MaterializedInvestigation, type MaterializedResultsPack } from "@/lib/materialized";
+import {
+  loadMaterializedResultsPack,
+  type MaterializedInvestigation,
+  type MaterializedResultsPack,
+} from "@/lib/materialized";
 import { isCorroboratedInvestigation, isFreshInvestigation } from "@/lib/review";
 
 import styles from "./Landing.module.css";
@@ -25,7 +31,7 @@ function useReveal() {
         node.classList.add(cls);
         observer.disconnect();
       }
-    }, { threshold: 0.16 });
+    }, { threshold: 0.15 });
 
     observer.observe(node);
   }, []);
@@ -46,19 +52,14 @@ interface SourceDef {
 }
 
 const DATA_SOURCES: SourceDef[] = [
-  { name: "SECOP Integrado", description: "Contratación pública y trazabilidad de procesos.", countFn: (s) => s.contract_count },
-  { name: "SECOP II Procesos", description: "Diseño del proceso, competencia y adjudicación.", countFn: (s) => s.contract_count },
-  { name: "SECOP II Contratos", description: "Contratos, adiciones, suspensiones y ejecución.", countFn: (s) => s.contract_count },
-  { name: "SECOP Proveedores", description: "Normalización de contratistas y empresas.", countFn: (s) => s.company_count },
-  { name: "SECOP Sanciones", description: "Antecedentes sancionatorios y ventanas activas.", countFn: (s) => s.sanction_count },
-  { name: "SIGEP", description: "Servidores públicos y ocupación institucional.", countFn: (s) => s.person_count },
-  { name: "Puestos Sensibles", description: "Cargos expuestos a mayor riesgo de captura.", countFn: (s) => s.person_count },
-  { name: "Activos Ley 2013", description: "Declaraciones patrimoniales y conflictos.", countFn: (s) => s.person_count },
-  { name: "Conflictos", description: "Referencias corporativas y conflictos declarados.", countFn: (s) => s.person_count },
-  { name: "SGR Gastos", description: "Obras, regalías y posibles elefantes blancos.", countFn: (s) => s.finance_count },
-  { name: "REPS Salud", description: "Prestadores de salud y cruces sancionatorios.", countFn: (s) => s.health_count },
-  { name: "MEN Matrícula", description: "Instituciones y control educativo enlazable.", countFn: (s) => s.education_count },
-  { name: "Cuentas Claras", description: "Financiación política conectada con contratación.", countFn: (s) => s.election_count },
+  { name: "SECOP Integrado", description: "Contratos, adjudicaciones y trazas de compra pública.", countFn: (s) => s.contract_count },
+  { name: "SECOP Sanciones", description: "Sanciones y ventanas donde la contratación siguió viva.", countFn: (s) => s.sanction_count },
+  { name: "SIGEP", description: "Servidores públicos y cargos enlazables con contratación.", countFn: (s) => s.person_count },
+  { name: "Ley 2013", description: "Activos, intereses y referencias declaradas por funcionarios.", countFn: (s) => s.person_count },
+  { name: "SGR", description: "Regalías, gasto y red flags de ejecución territorial.", countFn: (s) => s.finance_count },
+  { name: "Cuentas Claras", description: "Financiación política conectada con proveedores y campañas.", countFn: (s) => s.election_count },
+  { name: "MEN", description: "Control educativo, matrícula y puentes institucionales.", countFn: (s) => s.education_count },
+  { name: "REPS Salud", description: "Prestadores, sanciones y redes del sector salud.", countFn: (s) => s.health_count },
 ];
 
 function InvestigationFeature({
@@ -72,7 +73,7 @@ function InvestigationFeature({
 
   return (
     <article className={`${styles.investigationCard} ${featured ? styles.investigationCardFeatured : ""}`}>
-      <p className={styles.cardEyebrow}>{isFresh ? "Pista nueva" : "Caso corroborado"}</p>
+      <p className={styles.cardEyebrow}>{isFresh ? "Hallazgo abierto" : "Caso corroborado"}</p>
       <h3>{investigation.title}</h3>
       <p className={styles.cardMeta}>
         {investigation.subject_name}
@@ -81,24 +82,25 @@ function InvestigationFeature({
       <p className={styles.cardSummary}>{investigation.summary}</p>
       <div className={styles.tagRow}>
         {investigation.tags.slice(0, featured ? 4 : 2).map((tag) => (
-          <span key={`${investigation.slug}-${tag}`} className={styles.tagChip}>{formatSignalLabel(tag)}</span>
+          <span key={`${investigation.slug}-${tag}`} className={styles.tagChip}>
+            {formatSignalLabel(tag)}
+          </span>
         ))}
       </div>
-      <Link to={`/investigations/${investigation.slug}`} className={styles.inlineAction}>
-        {isFresh ? "Abrir pista" : "Abrir caso"}
+      <Link to={`/casos/${investigation.slug}`} className={styles.inlineAction}>
+        {isFresh ? "Abrir hallazgo" : "Abrir caso"}
       </Link>
     </article>
   );
 }
 
 export function Landing() {
+  const findingsRef = useReveal();
+  const methodRef = useReveal();
+  const sourcesRef = useReveal();
+
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [pack, setPack] = useState<MaterializedResultsPack | null>(null);
-
-  const proofRef = useReveal();
-  const investigationsRef = useReveal();
-  const methodologyRef = useReveal();
-  const sourcesRef = useReveal();
 
   useEffect(() => {
     getStats().then(setStats).catch(() => {});
@@ -117,186 +119,162 @@ export function Landing() {
     [investigations],
   );
   const featuredInvestigation = freshInvestigations[0] ?? null;
-  const supportingInvestigations = freshInvestigations.slice(1, 4);
-  const libraryPreview = corroboratedInvestigations.slice(0, 4);
-  const proofCases = useMemo(
-    () => (pack?.validation.cases ?? []).filter((item) => item.matched).slice(0, 4),
-    [pack],
-  );
+  const supportingInvestigations = freshInvestigations.slice(1, 3);
+  const libraryPreview = corroboratedInvestigations.slice(0, 3);
 
   return (
-    <div className={styles.page}>
+    <>
       <section className={styles.hero}>
-        <div className={styles.heroCopy}>
-          <p className={styles.badge}>Investigación pública con fuentes verificables</p>
-          <h1 className={styles.title}>
-            Descubre primero. Corrobora después.
-          </h1>
-          <p className={styles.subtitle}>
-            CO-ACC cruza contratación, sanciones, cargos públicos, financiación política, educación y otras fuentes
-            oficiales para publicar dos cosas distintas: pistas nuevas para investigar y una biblioteca aparte para
-            contrastar lo ya corroborado.
-          </p>
-          <div className={styles.heroActions}>
-            <Link to="/results" className={styles.primaryCta}>
-              Descubrir pistas
-            </Link>
-            <Link to="/investigations" className={styles.secondaryCta}>
-              Abrir biblioteca
-            </Link>
-          </div>
-          <p className={styles.disclaimer}>
-            Los hallazgos son señales investigativas basadas en datos públicos. No sustituyen una decisión judicial ni
-            atribuyen responsabilidad penal por sí solos.
-          </p>
-        </div>
+        <NetworkAnimation />
 
-        <aside className={styles.heroEvidence}>
-          <div className={styles.metricCard}>
-            <span>casos corroborados</span>
-            <strong>{pack ? String(pack.validation.matched) : "—"}</strong>
-          </div>
-          <div className={styles.metricCard}>
-            <span>contratos visibles</span>
-            <strong>{stats ? formatCount(stats.contract_count) : "—"}</strong>
-          </div>
-          <div className={styles.metricCard}>
-            <span>fuentes oficiales activas</span>
-            <strong>{pack?.stats.promoted_sources ?? "—"}</strong>
-          </div>
-          <div className={styles.metricCard}>
-            <span>pistas priorizadas</span>
-            <strong>{pack ? formatCount(pack.summary.company_watchlist_count + pack.summary.people_watchlist_count) : "—"}</strong>
-          </div>
-        </aside>
-      </section>
-
-      <section ref={investigationsRef} className={`${styles.section} ${styles.reveal}`}>
-        <div className={styles.sectionHead}>
-          <div>
-            <p className={styles.sectionEyebrow}>Portada</p>
-            <h2>La portada empieza por hallazgos nuevos, no por benchmark viejo.</h2>
-          </div>
-          <Link to="/results" className={styles.inlineAction}>
-            Ver portada
-          </Link>
-        </div>
-
-        <div className={styles.frontPageGrid}>
-          {featuredInvestigation ? (
-            <div className={styles.leadStory}>
-              <InvestigationFeature investigation={featuredInvestigation} featured />
-            </div>
-          ) : (
-            <article className={`${styles.investigationCard} ${styles.investigationCardFeatured}`}>
-              <p className={styles.cardEyebrow}>Portada de descubrimiento</p>
-              <h3>Todavía no hay una pista nueva con cierre público suficiente para ocupar la portada.</h3>
-              <p className={styles.cardSummary}>
-                La portada queda reservada para descubrimiento. Cuando un hallazgo nuevo supere el umbral mínimo de
-                legibilidad pública, aparece aquí antes que la biblioteca.
-              </p>
-              <Link to="/results" className={styles.inlineAction}>
-                Ver pistas
+        <div className={styles.heroContent}>
+          <div className={styles.heroLeft}>
+            <span className={styles.badge}>Investigación pública con datos oficiales de Colombia</span>
+            <h1 className={styles.title}>Hallazgos nuevos sobre corrupción en Colombia.</h1>
+            <p className={styles.subtitle}>
+              Rastreando la contratación pública en Colombia. Cruzamos datos oficiales para detectar redes de
+              corrupción, elefantes blancos y captura del Estado.
+            </p>
+            <div className={styles.heroActions}>
+              <Link to="/casos" className={styles.cta}>
+                Abrir casos
               </Link>
-            </article>
-          )}
-
-          {supportingInvestigations.length > 0 ? (
-            <div className={styles.supportingStories}>
-              {supportingInvestigations.map((investigation) => (
-                <InvestigationFeature key={investigation.slug} investigation={investigation} />
-              ))}
+              <Link to="/biblioteca" className={styles.secondaryCta}>
+                Ver verificados
+              </Link>
             </div>
-          ) : null}
+            <p className={styles.disclaimer}>
+              Hallazgos y casos se apoyan en fuentes públicas. La plataforma muestra señales investigativas, no fallos judiciales.
+            </p>
+          </div>
+
+          <div className={styles.heroRight}>
+            <HeroGraph />
+          </div>
         </div>
       </section>
 
-      <section ref={proofRef} className={`${styles.section} ${styles.reveal}`}>
-        <div className={styles.sectionHead}>
-          <div>
-            <p className={styles.sectionEyebrow}>Biblioteca corroborada</p>
-            <h2>Lo corroborado queda aparte para contrastar, citar y medir si las pistas nuevas van bien.</h2>
-          </div>
-          <div className={styles.proofBadge}>
-            <BadgeCheck size={16} />
-            <span>{libraryPreview.length > 0 ? libraryPreview.length : proofCases.length} controles visibles</span>
-          </div>
-        </div>
+      <StatsBar />
 
-        <div className={styles.proofGrid}>
-          {libraryPreview.length > 0 ? libraryPreview.map((investigation) => (
-            <InvestigationFeature key={investigation.slug} investigation={investigation} />
-          )) : proofCases.map((caseItem) => (
-            <article key={caseItem.case_id} className={styles.proofCard}>
-              <p className={styles.cardEyebrow}>{caseItem.category.replaceAll("_", " ")}</p>
-              <h3>{caseItem.title}</h3>
-              <p className={styles.cardMeta}>{caseItem.entity_name} · {caseItem.entity_ref}</p>
-              <p className={styles.cardSummary}>{caseItem.summary}</p>
-              <div className={styles.tagRow}>
-                {caseItem.matched_signals.slice(0, 3).map((signal) => (
-                  <span key={`${caseItem.case_id}-${signal}`} className={styles.tagChip}>{formatSignalLabel(signal)}</span>
-                ))}
+      <section className={styles.findings}>
+        <div ref={findingsRef} className={`${styles.findingsInner} ${styles.reveal}`}>
+          <div className={styles.sectionHead}>
+            <div>
+              <span className={styles.sectionLabel}>Abrir primero</span>
+              <h2 className={styles.sectionHeading}>Pistas nuestras antes que archivo.</h2>
+            </div>
+            <Link to="/casos" className={styles.inlineAction}>
+              Ver todos los casos
+            </Link>
+          </div>
+
+          <div className={styles.frontPageGrid}>
+            {featuredInvestigation ? (
+              <div className={styles.leadStory}>
+                <InvestigationFeature investigation={featuredInvestigation} featured />
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section id="metodologia" ref={methodologyRef} className={`${styles.section} ${styles.reveal}`}>
-        <div className={styles.sectionHead}>
-          <div>
-            <p className={styles.sectionEyebrow}>Metodología</p>
-            <h2>Cómo se convierte una base pública dispersa en una investigación legible</h2>
-          </div>
-        </div>
-
-        <div className={styles.methodologyGrid}>
-          <article className={styles.methodCard}>
-            <Network size={18} />
-            <h3>1. Normalización</h3>
-            <p>Unificamos cédulas, NIT, contratos, convenios y geografía para que el grafo conecte lo que los portales publican por separado.</p>
-          </article>
-          <article className={styles.methodCard}>
-            <Link2 size={18} />
-            <h3>2. Cruces y patrones</h3>
-            <p>Cruzamos contratación, sanciones, financiación política, educación, cargos públicos y ejecución para detectar patrones repetidos.</p>
-          </article>
-          <article className={styles.methodCard}>
-            <ShieldCheck size={18} />
-            <h3>3. Validación</h3>
-            <p>Contrastamos el sistema con casos públicos conocidos antes de tratar un hallazgo como evidencia útil.</p>
-          </article>
-          <article className={styles.methodCard}>
-            <BookOpenText size={18} />
-            <h3>4. Dossiers</h3>
-            <p>El resultado no se deja como lista cruda. Cada caso fuerte se publica como dossier con hallazgos, evidencia y fuentes citables.</p>
-          </article>
-        </div>
-      </section>
-
-      <section ref={sourcesRef} className={`${styles.section} ${styles.reveal}`}>
-        <div className={styles.sectionHead}>
-          <div>
-            <p className={styles.sectionEyebrow}>Registro de fuentes</p>
-            <h2>Fuentes activas en esta publicación</h2>
-          </div>
-        </div>
-
-        <div className={styles.sourcesGrid}>
-          {DATA_SOURCES.map((source) => {
-            const count = stats ? source.countFn(stats) : null;
-            return (
-              <article key={source.name} className={styles.sourceCard}>
-                <div className={styles.sourceHead}>
-                  <strong>{source.name}</strong>
-                  <span>{count != null ? formatCount(count) : "—"}</span>
-                </div>
-                <p>{source.description}</p>
+            ) : (
+              <article className={`${styles.investigationCard} ${styles.investigationCardFeatured}`}>
+                <p className={styles.cardEyebrow}>Hallazgo abierto</p>
+                <h3>Todavía no hay una pista nueva con cierre público suficiente para ocupar la portada.</h3>
+                <p className={styles.cardSummary}>
+                  Cuando aparezca una pista nueva con lectura pública suficiente, entra aquí primero.
+                </p>
+                <Link to="/casos" className={styles.inlineAction}>
+                  Abrir casos
+                </Link>
               </article>
-            );
-          })}
+            )}
+
+            <div className={styles.sideColumn}>
+              {supportingInvestigations.length > 0 ? (
+                <div className={styles.supportingStories}>
+                  {supportingInvestigations.map((investigation) => (
+                    <InvestigationFeature key={investigation.slug} investigation={investigation} />
+                  ))}
+                </div>
+              ) : null}
+
+              {libraryPreview.length > 0 ? (
+                <div className={styles.controlPanel}>
+                  <div className={styles.controlHead}>
+                    <span>Ya verificados</span>
+                  </div>
+                  <p>Casos cerrados que sirven para contraste y contexto.</p>
+                  <div className={styles.supportingStories}>
+                    {libraryPreview.slice(0, 2).map((investigation) => (
+                      <InvestigationFeature key={investigation.slug} investigation={investigation} />
+                    ))}
+                  </div>
+                  <Link to="/biblioteca" className={styles.inlineAction}>
+                    Abrir biblioteca
+                  </Link>
+                </div>
+              ) : null}
+            </div>
+          </div>
         </div>
       </section>
-    </div>
+
+      <section id="metodologia" className={styles.howItWorks}>
+        <div ref={methodRef} className={`${styles.howItWorksInner} ${styles.reveal}`}>
+          <span className={styles.sectionLabel}>Método</span>
+          <h2 className={styles.sectionHeading}>Cómo pasamos de tablas oficiales a casos legibles.</h2>
+          <div className={styles.stepsGrid}>
+            <div className={styles.step}>
+              <span className={styles.stepNumber}>1</span>
+              <span className={styles.stepTitle}>Conectamos fuentes</span>
+              <span className={styles.stepDesc}>Unimos contratos, personas, empresas, cargos, sanciones y otras capas oficiales.</span>
+            </div>
+            <div className={styles.step}>
+              <span className={styles.stepNumber}>2</span>
+              <span className={styles.stepTitle}>Agrupamos por práctica</span>
+              <span className={styles.stepDesc}>La salida no es una lista cruda: cada caso cae en una práctica entendible.</span>
+            </div>
+            <div className={styles.step}>
+              <span className={styles.stepNumber}>3</span>
+              <span className={styles.stepTitle}>Bajamos a dossier</span>
+              <span className={styles.stepDesc}>Cada caso fuerte termina en hallazgos, documentos, fuentes y red de relaciones.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.sources}>
+        <div ref={sourcesRef} className={`${styles.sourcesInner} ${styles.reveal}`}>
+          <span className={styles.sectionLabel}>Fuentes</span>
+          <h2 className={styles.sectionHeading}>Base pública activa.</h2>
+          <div className={styles.sourcesGrid}>
+            {DATA_SOURCES.map((source) => {
+              const count = stats ? source.countFn(stats) : null;
+              return (
+                <div key={source.name} className={styles.sourceCard}>
+                  <div className={styles.sourceHead}>
+                    <strong>{source.name}</strong>
+                    <span>{count != null ? formatCount(count) : "—"}</span>
+                  </div>
+                  <p>{source.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+          <div className={styles.footerTop}>
+            <Link to="/casos" className={styles.footerLink}>Casos</Link>
+            <Link to="/biblioteca" className={styles.footerLink}>Biblioteca</Link>
+            <a href="#metodologia" className={styles.footerLink}>Metodología</a>
+          </div>
+          <div className={styles.footerDivider} />
+          <span className={styles.footerBrand}>CO·ACC</span>
+          <p className={styles.footerDisclaimer}>
+            Investigación pública con datos oficiales de Colombia.
+          </p>
+        </div>
+      </footer>
+    </>
   );
 }

@@ -118,16 +118,16 @@ describe("InvestigationDossier", () => {
 
     expect(screen.getByText(/Red de relaciones/i)).toBeInTheDocument();
     expect(screen.getByText(/Por qué vale la pena mirar esto/i)).toBeInTheDocument();
-    expect(screen.getByText(/Estado del caso/i)).toBeInTheDocument();
     expect(screen.getByText(/^Glosario$/i)).toBeInTheDocument();
-    expect(screen.getByText(/^Caso corroborado$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Verificado$/i)).toBeInTheDocument();
     expect(screen.getByText(/Volver a biblioteca/i)).toBeInTheDocument();
     expect(screen.getByText(/Señal automática basada en alias coincidencia de identidad y boletines oficiales/i)).toBeInTheDocument();
     expect(screen.getByText(/Hay un alias coincidencia de identidad contractual/i)).toBeInTheDocument();
     expect(screen.getByText(/^boletines oficiales$/i)).toBeInTheDocument();
-    expect(screen.getByText(/^Reportado afuera$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Confirmado por registros abiertos y documentos públicos/i)).toBeInTheDocument();
-    expect(screen.getByText(/Vacíos documentales que siguen abiertos/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Ya reportado$/i)).toBeInTheDocument();
+    expect(screen.getByText(/Confirmado por documentos y datos públicos/i)).toBeInTheDocument();
+    expect(screen.getByText(/Huecos documentales que siguen abiertos/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Los documentos$/i)).toBeInTheDocument();
     expect(screen.getByText(/Fuentes externas usadas en esta sección/i)).toBeInTheDocument();
     expect(screen.getByTestId("graph-canvas")).toBeInTheDocument();
   });
@@ -154,7 +154,7 @@ describe("InvestigationDossier", () => {
       ).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/^Pista nueva$/i)).toBeInTheDocument();
-    expect(screen.getByText(/Volver a descubrir/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Alerta$/i)).toBeInTheDocument();
+    expect(screen.getByText(/Volver a casos/i)).toBeInTheDocument();
   });
 });

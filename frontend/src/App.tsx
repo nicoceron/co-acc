@@ -52,7 +52,9 @@ export function App() {
   useEffect(() => {
     if (
       location.pathname.startsWith("/results")
+      || location.pathname.startsWith("/casos")
       || location.pathname.startsWith("/investigations")
+      || location.pathname.startsWith("/biblioteca")
     ) {
       useAuthStore.setState((state) => ({ ...state, restored: true }));
       return;
@@ -71,8 +73,12 @@ export function App() {
         )}
       >
         <Route index element={<Landing />} />
+        <Route path="casos" element={<LazyPage><Results /></LazyPage>} />
+        <Route path="biblioteca" element={<LazyPage><Results /></LazyPage>} />
         <Route path="results" element={<LazyPage><Results /></LazyPage>} />
         <Route path="investigations" element={<LazyPage><Results /></LazyPage>} />
+        <Route path="casos/:slug" element={<LazyPage><InvestigationDossier /></LazyPage>} />
+        <Route path="biblioteca/:slug" element={<LazyPage><InvestigationDossier /></LazyPage>} />
         <Route path="investigations/:slug" element={<LazyPage><InvestigationDossier /></LazyPage>} />
         {!IS_PUBLIC_MODE && <Route path="login" element={<LazyPage><Login /></LazyPage>} />}
         {!IS_PUBLIC_MODE && <Route path="register" element={<LazyPage><Register /></LazyPage>} />}

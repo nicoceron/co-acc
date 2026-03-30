@@ -170,7 +170,7 @@ describe("Landing", () => {
     await act(async () => {
       renderLanding();
     });
-    expect(screen.getByText("Descubre primero. Corrobora después.")).toBeInTheDocument();
+    expect(screen.getByText("Hallazgos nuevos sobre corrupción en Colombia.")).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getAllByText("3.0M").length).toBeGreaterThan(0);
     });
@@ -180,10 +180,10 @@ describe("Landing", () => {
     await act(async () => {
       renderLanding();
     });
-    expect(screen.getByText("Descubre primero. Corrobora después.")).toBeInTheDocument();
-    expect(screen.getByText("Descubrir pistas")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Abrir biblioteca" })).toBeInTheDocument();
-    expect(screen.getByText("Pista nueva")).toBeInTheDocument();
+    expect(screen.getByText("Hallazgos nuevos sobre corrupción en Colombia.")).toBeInTheDocument();
+    expect(screen.getByText("Abrir casos")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver verificados" })).toBeInTheDocument();
+    expect(screen.getByText("Hallazgo abierto")).toBeInTheDocument();
     expect(screen.getByText("Caso corroborado")).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getAllByText("3.0M").length).toBeGreaterThan(0);
@@ -200,10 +200,14 @@ describe("Landing", () => {
     });
 
     const sourceNames = [
-      "SECOP Integrado", "SECOP II Procesos", "SECOP II Contratos", "SECOP Proveedores",
-      "SECOP Sanciones", "SIGEP", "Puestos Sensibles", "Activos Ley 2013",
-      "Conflictos", "SGR Gastos", "REPS Salud",
-      "MEN Matrícula", "Cuentas Claras",
+      "SECOP Integrado",
+      "SECOP Sanciones",
+      "SIGEP",
+      "Ley 2013",
+      "SGR",
+      "Cuentas Claras",
+      "MEN",
+      "REPS Salud",
     ];
 
     for (const name of sourceNames) {
