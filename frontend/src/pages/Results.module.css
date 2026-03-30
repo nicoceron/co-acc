@@ -120,6 +120,15 @@
   color: var(--text-muted);
 }
 
+.heroCurrent {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-primary);
+  font-family: var(--editorial-serif);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
 .primaryCta,
 .inlineAction,
 .detailButton,
@@ -418,8 +427,12 @@
   display: grid;
   gap: 0.45rem;
   padding: 1rem 0 1.15rem;
+  appearance: none;
+  width: 100%;
   text-decoration: none;
   color: inherit;
+  text-align: left;
+  cursor: pointer;
   transition:
     transform var(--transition-fast),
     border-color var(--transition-fast),
@@ -440,6 +453,14 @@
 .catalogNavCard span,
 .catalogNavCard small {
   color: var(--text-secondary);
+}
+
+.catalogNavCardActive {
+  border-color: var(--accent);
+}
+
+.catalogNavCardActive strong {
+  color: var(--text-primary);
 }
 
 .categorySection {
@@ -517,6 +538,46 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   margin-top: 1rem;
+}
+
+.categoryFocus {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.categoryLead,
+.categoryList {
+  display: grid;
+  gap: 0;
+}
+
+.caseCard {
+  position: relative;
+}
+
+.categoryLead .caseCard:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.categoryLead .caseCard h3 {
+  max-width: 16ch;
+  font-size: clamp(1.9rem, 3vw, 3rem);
+}
+
+.categoryLead .cardSummary {
+  max-width: 64ch;
+}
+
+.categoryList .caseCard h3 {
+  max-width: 20ch;
+  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
+}
+
+.categoryList .tagRow {
+  margin-top: 0.8rem;
 }
 
 .categoryFooter {
@@ -900,7 +961,8 @@
   .glossaryGrid,
   .practiceSummary,
   .catalogNav,
-  .categoryGrid {
+  .categoryGrid,
+  .categoryFocus {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -915,6 +977,7 @@
   .glossaryGrid,
   .catalogNav,
   .categoryGrid,
+  .categoryFocus,
   .highlightGrid,
   .queueGrid,
   .practiceGrid,

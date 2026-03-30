@@ -10,14 +10,8 @@ import {
   formatSignalLabel,
 } from "@/lib/evidence";
 import {
-  buildInvestigationBasis,
-  buildValidationBasis,
-  getInvestigationConfidenceBadge,
-  getLeadPriorityBadge,
-  getValidationConfidenceBadge,
   humanizePublicText,
   isCorroboratedInvestigation,
-  type ReviewBadge,
 } from "@/lib/review";
 import type {
   MaterializedCaseDetail,
@@ -80,7 +74,7 @@ interface CatalogSection {
 const BASE_CATALOG: CatalogDefinition[] = [
   {
     id: "elefante_blanco",
-    title: "Elefante blanco",
+    title: "Elefante blanco / obra trabada",
     description: "Obras o contratos donde pagos, facturación o avance reportado no cierran bien con la ejecución.",
     aliases: ["elefante_blanco", "budget_execution_discrepancy", "Facturación o pagos por delante de la ejecución"],
   },
@@ -204,12 +198,6 @@ function formatNodeTypeLabel(type: string): string {
     education: "Institución educativa",
   };
   return labels[type] ?? humanizeIdentifier(type);
-}
-
-function badgeToneClass(tone: ReviewBadge["tone"]): string {
-  if (tone === "high") return styles.reviewHigh ?? "";
-  if (tone === "medium") return styles.reviewMedium ?? "";
-  return styles.reviewInitial ?? "";
 }
 
 function normalizeEntityRef(value?: string | null): string {
@@ -500,25 +488,19 @@ function SavedCaseModal({ detail, onClose }: { detail: DrilldownCase | null; onC
 }
 
 function InvestigationCard({ investigation }: { investigation: MaterializedInvestigation }) {
-  const confidence = getInvestigationConfidenceBadge(investigation);
-  const basis = buildInvestigationBasis(investigation);
   const statusLabel = isCorroboratedInvestigation(investigation) ? "Verificado" : "Alerta";
 
   return (
-    <article className={styles.investigationCard}>
+    <article className={`${styles.investigationCard} ${styles.caseCard}`}>
       <p className={styles.cardEyebrow}>{statusLabel}</p>
       <h3>{investigation.title}</h3>
       <p className={styles.cardMeta}>
         {investigation.subject_name}
         {investigation.subject_ref ? ` · ${investigation.subject_ref}` : ""}
       </p>
-      <div className={styles.reviewRow}>
-        <span className={`${styles.reviewBadge} ${badgeToneClass(confidence.tone)}`}>{confidence.label}</span>
-      </div>
-      <p className={styles.reviewReason}>{basis}</p>
       <p className={styles.cardSummary}>{humanizePublicText(investigation.summary)}</p>
       <div className={styles.tagRow}>
-        {investigation.tags.slice(0, 2).map((tag) => (
+        {investigation.tags.slice(0, 1).map((tag) => (
           <span key={`${investigation.slug}-${tag}`} className={styles.tagChip}>{formatSignalLabel(tag)}</span>
         ))}
       </div>
@@ -536,23 +518,16 @@ function ProofCaseCard({
   validationCase: MaterializedValidationCase;
   onOpen: () => void;
 }) {
-  const confidence = getValidationConfidenceBadge(validationCase);
-  const basis = buildValidationBasis(validationCase);
-
   return (
-    <article className={styles.proofCard}>
+    <article className={`${styles.proofCard} ${styles.caseCard}`}>
       <div className={styles.proofHead}>
         <span className={styles.verifiedPill}>Verificado</span>
       </div>
       <h3>{formatPublicCaseTitle(validationCase.title)}</h3>
       <p className={styles.cardMeta}>{validationCase.entity_name} · {validationCase.entity_ref}</p>
-      <div className={styles.reviewRow}>
-        <span className={`${styles.reviewBadge} ${badgeToneClass(confidence.tone)}`}>{confidence.label}</span>
-      </div>
-      <p className={styles.reviewReason}>{basis}</p>
       <p className={styles.cardSummary}>{humanizePublicText(validationCase.summary)}</p>
       <div className={styles.tagRow}>
-        {validationCase.matched_signals.map((signal) => (
+        {validationCase.matched_signals.slice(0, 1).map((signal) => (
           <span key={`${validationCase.case_id}-${signal}`} className={styles.tagChip}>{formatSignalLabel(signal)}</span>
         ))}
       </div>
@@ -580,15 +555,11 @@ function QueueLeadCard({
   loading: boolean;
   onOpen: () => void;
 }) {
-  const priority = getLeadPriorityBadge(row.suspicion_score);
-  const corroborationBadge: ReviewBadge = corroborated
-    ? { label: "Corroborado", tone: "high" }
-    : { label: "Sin corroboración externa", tone: "initial" };
   const practices = buildAlertPracticeLabels(row.alerts).slice(0, 3);
   const primaryReason = row.alerts[0]?.reason_text ?? "Cruce detectado en datos públicos.";
 
   return (
-    <article className={styles.queueCard}>
+    <article className={`${styles.queueCard} ${styles.caseCard}`}>
       <div className={styles.queueHead}>
         <div>
           <p className={styles.cardEyebrow}>
@@ -598,22 +569,13 @@ function QueueLeadCard({
           <h3>{row.name}</h3>
         </div>
       </div>
-
-      <div className={styles.reviewRow}>
-        <span className={`${styles.reviewBadge} ${badgeToneClass(priority.tone)}`}>{priority.label}</span>
-        <span className={`${styles.reviewBadge} ${badgeToneClass(corroborationBadge.tone)}`}>
-          {corroborationBadge.label}
-        </span>
-      </div>
-      <p className={styles.reviewReason}>
-        {practices.length > 0 ? `Sube por ${practices.slice(0, 2).join(" y ")}.` : "Sube por señales cruzadas en datos públicos."}
-      </p>
       <p className={styles.cardSummary}>{primaryReason}</p>
 
       <div className={styles.tagRow}>
-        {practices.map((practice) => (
+        {practices.slice(0, 1).map((practice) => (
           <span key={`${row.entity_id}-${practice}`} className={styles.tagChip}>{practice}</span>
         ))}
+        <span className={styles.tagChip}>{corroborated ? "Con contraste externo" : "Pista abierta"}</span>
       </div>
 
       {canOpen ? (
@@ -644,20 +606,48 @@ function CategoryShelf({
   onOpenEntity: (entityId: string) => void;
   resolveLeadState: (entityId: string) => { canOpen: boolean; loading: boolean };
 }) {
-  const visibleItems = expanded ? section.items : section.items.slice(0, 2);
+  const visibleItems = expanded ? section.items : section.items.slice(0, 4);
   const freshCount = section.items.filter(isFreshCatalogItem).length;
+  const featuredItem = visibleItems[0] ?? null;
+  const remainingItems = visibleItems.slice(1);
+
+  function renderItem(item: CatalogItem) {
+    if (item.kind === "investigation") {
+      return <InvestigationCard key={item.key} investigation={item.investigation} />;
+    }
+    if (item.kind === "validation") {
+      return (
+        <ProofCaseCard
+          key={item.key}
+          validationCase={item.validationCase}
+          onOpen={() => onOpenValidation(item.validationCase)}
+        />
+      );
+    }
+    const leadState = resolveLeadState(item.row.entity_id);
+    return (
+      <QueueLeadCard
+        key={item.key}
+        row={item.row}
+        queueKind={item.queueKind}
+        corroborated={item.corroborated}
+        canOpen={leadState.canOpen}
+        loading={leadState.loading}
+        onOpen={() => { void onOpenEntity(item.row.entity_id); }}
+      />
+    );
+  }
 
   return (
     <section id={`category-${section.definition.id}`} className={styles.categorySection}>
       <div className={styles.categoryHeader}>
         <div>
-          <p className={styles.sectionEyebrow}>{libraryMode ? "Archivo" : "Práctica"}</p>
+          <p className={styles.sectionEyebrow}>{libraryMode ? "Archivo" : "Modalidad"}</p>
           <h2>{section.definition.title}</h2>
           <p className={styles.categoryDescription}>{section.definition.description}</p>
         </div>
         <div className={styles.categoryMeta}>
-          <span>{section.items.length} casos</span>
-          {!libraryMode ? <span>{freshCount} alertas</span> : null}
+          {!libraryMode ? <span>{freshCount} abiertos</span> : null}
           <span>{section.corroboratedCount} verificados</span>
           {section.definition.planned ? <span>En construcción</span> : null}
         </div>
@@ -670,39 +660,23 @@ function CategoryShelf({
         </div>
       ) : (
         <>
-          <div className={styles.categoryGrid}>
-            {visibleItems.map((item) => {
-              if (item.kind === "investigation") {
-                return <InvestigationCard key={item.key} investigation={item.investigation} />;
-              }
-              if (item.kind === "validation") {
-                return (
-                  <ProofCaseCard
-                    key={item.key}
-                    validationCase={item.validationCase}
-                    onOpen={() => onOpenValidation(item.validationCase)}
-                  />
-                );
-              }
-              const leadState = resolveLeadState(item.row.entity_id);
-              return (
-                <QueueLeadCard
-                  key={item.key}
-                  row={item.row}
-                  queueKind={item.queueKind}
-                  corroborated={item.corroborated}
-                  canOpen={leadState.canOpen}
-                  loading={leadState.loading}
-                  onOpen={() => { void onOpenEntity(item.row.entity_id); }}
-                />
-              );
-            })}
-          </div>
+          {featuredItem ? (
+            <div className={styles.categoryFocus}>
+              <div className={styles.categoryLead}>
+                {renderItem(featuredItem)}
+              </div>
+              {remainingItems.length > 0 ? (
+                <div className={styles.categoryList}>
+                  {remainingItems.map((item) => renderItem(item))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
-          {section.items.length > 2 && (
+          {section.items.length > 4 && (
             <div className={styles.categoryFooter}>
               <button type="button" className={styles.moreButton} onClick={onToggle}>
-                {expanded ? "Ocultar lista completa" : `Ver lista completa (${section.items.length})`}
+                {expanded ? "Ocultar relacionados" : `Ver relacionados (${section.items.length - 1})`}
               </button>
             </div>
           )}
@@ -720,6 +694,7 @@ export function Results() {
   const [caseLoadError, setCaseLoadError] = useState<string | null>(null);
   const [loadingCaseId, setLoadingCaseId] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const caseCacheRef = useRef(new Map<string, DrilldownCase>());
 
   useEffect(() => {
@@ -975,6 +950,33 @@ export function Results() {
     return { corroboratedItems, activeCategories };
   }, [libraryCatalogSections]);
   const pageSections = isLibraryMode ? libraryCatalogSections : frontlineCatalogSections;
+  const requestedCategoryId = location.hash.startsWith("#category-")
+    ? location.hash.replace("#category-", "")
+    : null;
+
+  useEffect(() => {
+    if (pageSections.length === 0) {
+      setActiveCategoryId(null);
+      return;
+    }
+
+    if (requestedCategoryId && pageSections.some((section) => section.definition.id === requestedCategoryId)) {
+      setActiveCategoryId(requestedCategoryId);
+      return;
+    }
+
+    setActiveCategoryId((current) => (
+      current && pageSections.some((section) => section.definition.id === current)
+        ? current
+        : pageSections[0]!.definition.id
+    ));
+  }, [pageSections, requestedCategoryId]);
+
+  const activeSection = useMemo(
+    () => pageSections.find((section) => section.definition.id === activeCategoryId) ?? pageSections[0] ?? null,
+    [activeCategoryId, pageSections],
+  );
+
   async function openEntityCase(entityId: string): Promise<void> {
     const existing = drilldownIndex.get(entityId) ?? caseCacheRef.current.get(entityId);
     if (existing) {
@@ -1027,7 +1029,7 @@ export function Results() {
         <div className={styles.heroCopy}>
           <p className={styles.heroEyebrow}>{isLibraryMode ? "Biblioteca pública" : "Directorio público"}</p>
           <h1 className={styles.heroTitle}>
-            {isLibraryMode ? "Biblioteca corroborada." : "Casos por práctica."}
+            {isLibraryMode ? "Biblioteca corroborada." : "Casos por modalidad."}
           </h1>
           <div className={styles.heroMeta}>
             <span>Generado {formatDate(pack.generated_at_utc)}</span>
@@ -1045,11 +1047,7 @@ export function Results() {
             )}
           </div>
           <div className={styles.cardActions}>
-            {pageSections[0] ? (
-              <a href={`#category-${pageSections[0].definition.id}`} className={styles.primaryCta}>
-                Explorar prácticas
-              </a>
-            ) : null}
+            {activeSection ? <span className={styles.heroCurrent}>{activeSection.definition.title}</span> : null}
             <Link to={isLibraryMode ? "/casos" : "/biblioteca"} className={styles.inlineAction}>
               {isLibraryMode ? "Volver a alertas" : "Abrir biblioteca"}
             </Link>
@@ -1060,17 +1058,22 @@ export function Results() {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <div>
-            <p className={styles.sectionEyebrow}>{isLibraryMode ? "Prácticas documentadas" : "Prácticas activas"}</p>
+            <p className={styles.sectionEyebrow}>{isLibraryMode ? "Modalidades documentadas" : "Modalidades activas"}</p>
             <h2>
               {isLibraryMode
-                ? "Casos listos para contraste, agrupados por práctica."
-                : "Abrir primero por práctica, no por ruido."}
+                ? "Elige una modalidad y revisa sólo los casos ya corroborados."
+                : "Elige una modalidad y mira un caso principal antes de abrir el resto."}
             </h2>
           </div>
         </div>
         <div className={styles.catalogNav}>
           {pageSections.map((section) => (
-            <a key={section.definition.id} href={`#category-${section.definition.id}`} className={styles.catalogNavCard}>
+            <button
+              key={section.definition.id}
+              type="button"
+              className={`${styles.catalogNavCard} ${activeSection?.definition.id === section.definition.id ? styles.catalogNavCardActive : ""}`}
+              onClick={() => setActiveCategoryId(section.definition.id)}
+            >
               <strong>{section.definition.title}</strong>
               <span>
                 {isLibraryMode
@@ -1078,9 +1081,9 @@ export function Results() {
                   : `${section.items.filter(isFreshCatalogItem).length} alertas`}
               </span>
               <small>
-                {isLibraryMode ? "listos para contraste" : `${section.corroboratedCount} ya verificados`}
+                {isLibraryMode ? "listos para contraste" : section.definition.description}
               </small>
-            </a>
+            </button>
           ))}
         </div>
       </section>
@@ -1088,15 +1091,15 @@ export function Results() {
       <section className={styles.section}>
         {caseLoadError && <p className={styles.queueError}>{caseLoadError}</p>}
         <div className={styles.catalogStack}>
-          {pageSections.map((section) => (
+          {activeSection ? (
             <CategoryShelf
-              key={section.definition.id}
-              section={section}
+              key={activeSection.definition.id}
+              section={activeSection}
               libraryMode={isLibraryMode}
-              expanded={Boolean(expandedCategories[section.definition.id])}
+              expanded={Boolean(expandedCategories[activeSection.definition.id])}
               onToggle={() => setExpandedCategories((current) => ({
                 ...current,
-                [section.definition.id]: !current[section.definition.id],
+                [activeSection.definition.id]: !current[activeSection.definition.id],
               }))}
               onOpenValidation={(validationCase) => {
                 const detail = buildValidationDrilldown(validationCase);
@@ -1110,7 +1113,7 @@ export function Results() {
                 loading: loadingCaseId === entityId,
               })}
             />
-          ))}
+          ) : null}
         </div>
       </section>
 
@@ -1118,7 +1121,7 @@ export function Results() {
         <p>
           {isLibraryMode
             ? "La biblioteca guarda los casos con mejor cierre documental."
-            : "Este directorio muestra primero alertas nuestras y deja los verificados aparte para contraste."}
+            : "Este directorio abre una modalidad a la vez para que la lectura empiece en el caso y no en el tablero."}
         </p>
       </section>
 

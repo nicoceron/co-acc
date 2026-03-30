@@ -429,26 +429,30 @@ describe("Results", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Casos por práctica/i)).toBeInTheDocument();
+      expect(screen.getByText(/Casos por modalidad/i)).toBeInTheDocument();
     });
 
-    expect(screen.getAllByText("FONDECUN validado").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Consorcio Río Verde").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Vivian Moreno").length).toBeGreaterThan(0);
     expect(screen.getByText(/Directorio público/i)).toBeInTheDocument();
-    expect(screen.getByText(/Explorar prácticas/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Prácticas activas/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Abrir primero por práctica, no por ruido/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Modalidades activas/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Elige una modalidad y mira un caso principal antes de abrir el resto/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Elefante blanco/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Vendedor de objetos robados/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Prioridad alta/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Sube por/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Abrir biblioteca/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Verificado/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Sin corroboración externa/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Ver lista completa \(4\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/Todavía no hay casos publicados/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Ver red de relaciones/i).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("button", { name: /Riesgo político-contractual/i }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Vivian Moreno").length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /Vendedor de objetos robados/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Todavía no hay casos publicados/i)).toBeInTheDocument();
+    });
   });
 
   it("opens a proof-case graph exhibit", async () => {
