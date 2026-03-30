@@ -4,10 +4,7 @@
   --editorial-serif: var(--font-display);
   min-height: 100vh;
   padding: clamp(5rem, 7vw, 6.5rem) clamp(1.1rem, 3vw, 2.6rem) 4rem;
-  background:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--color-warning) 14%, transparent) 0, transparent 34%),
-    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 18%, transparent) 0, transparent 28%),
-    linear-gradient(180deg, #15110f 0%, #0c0a09 58%, #090807 100%);
+  background: var(--bg-primary);
 }
 
 .frame {
@@ -31,12 +28,13 @@
 .inspectorCard,
 .sourcesCard,
 .stateWrap {
-  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(26, 20, 17, 0.96), rgba(13, 11, 10, 0.98)),
-    linear-gradient(135deg, rgba(255, 245, 230, 0.03), transparent 42%);
-  box-shadow: var(--shadow-md);
+  border-top: 1px solid var(--border);
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .topBar {
@@ -44,7 +42,7 @@
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
-  padding: 0.9rem 1rem;
+  padding: 0.9rem 0 0;
 }
 
 .backLink {
@@ -66,9 +64,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.48rem 0.82rem;
+  padding: 0.36rem 0.58rem;
   border: 1px solid color-mix(in oklab, var(--accent) 24%, var(--border));
-  border-radius: 999px;
+  border-radius: 0;
   font-family: var(--font-sans);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
@@ -85,7 +83,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.75fr);
   gap: 1.2rem;
-  padding: clamp(1.3rem, 2.8vw, 2rem);
+  padding: clamp(1.4rem, 2.8vw, 2rem) 0 0;
 }
 
 .heroMain {
@@ -132,10 +130,13 @@
 
 .whyBlock {
   margin-top: 1.2rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid color-mix(in oklab, var(--color-warning) 24%, var(--border));
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(194, 141, 71, 0.08), rgba(255, 255, 255, 0.02));
+  padding: 0.95rem 0 0 1rem;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 2px solid color-mix(in oklab, var(--color-warning) 48%, var(--border));
+  border-radius: 0;
+  background: transparent;
 }
 
 .whyBlock strong {
@@ -163,11 +164,11 @@
 }
 
 .metaPill {
-  background: rgba(255, 248, 240, 0.04);
+  background: transparent;
 }
 
 .tagChip {
-  background: color-mix(in oklab, var(--accent) 10%, transparent);
+  background: transparent;
   color: var(--text-secondary);
 }
 
@@ -185,12 +186,10 @@
 .reviewCard,
 .glossaryCard {
   padding: 1rem 1.05rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(26, 20, 17, 0.96), rgba(13, 11, 10, 0.98)),
-    linear-gradient(135deg, rgba(255, 245, 230, 0.03), transparent 42%);
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
 }
 
 .reviewLabel {
@@ -293,35 +292,24 @@
 
 .verificationCard {
   padding: 1.15rem 1.2rem 1.25rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(19, 17, 14, 0.96), rgba(10, 10, 9, 0.98)),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 45%);
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
 }
 
 .claimsCard {
   grid-area: reported;
-  border-color: color-mix(in oklab, var(--color-warning) 24%, var(--border));
-  background:
-    linear-gradient(180deg, rgba(24, 19, 13, 0.96), rgba(11, 10, 8, 0.98)),
-    linear-gradient(135deg, rgba(194, 141, 71, 0.08), transparent 42%);
+  border-color: color-mix(in oklab, var(--color-warning) 28%, var(--border));
 }
 
 .verifiedCard {
   grid-area: verified;
   border-color: color-mix(in oklab, var(--accent) 28%, var(--border));
-  background:
-    linear-gradient(180deg, rgba(13, 18, 16, 0.96), rgba(8, 11, 10, 0.98)),
-    linear-gradient(135deg, rgba(104, 177, 156, 0.08), transparent 42%);
 }
 
 .openCard {
   grid-area: open;
-  background:
-    linear-gradient(180deg, rgba(17, 16, 14, 0.96), rgba(10, 10, 9, 0.98)),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 45%);
 }
 
 .boardTitle {
@@ -395,7 +383,7 @@
 .inspectorCard,
 .railCard,
 .sourcesCard {
-  padding: 1.2rem;
+  padding: 1.2rem 0 0;
 }
 
 .evidenceRail {
@@ -431,9 +419,12 @@
 
 .evidenceCard {
   padding: 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: rgba(255, 248, 240, 0.04);
+  border-top: 1px solid var(--border);
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
   display: grid;
   gap: 0.28rem;
 }
@@ -465,9 +456,12 @@
 .actorChip {
   min-width: 140px;
   padding: 0.8rem 0.9rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border));
-  border-radius: 18px;
-  background: rgba(255, 248, 240, 0.04);
+  border-top: 1px solid color-mix(in oklab, var(--accent) 18%, var(--border));
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
   text-align: left;
   color: var(--text-primary);
   cursor: pointer;
@@ -495,9 +489,12 @@
 
 .traceButton {
   padding: 0.9rem 1rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  border-radius: 18px;
-  background: rgba(255, 248, 240, 0.04);
+  border-top: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
   text-align: left;
   cursor: pointer;
   transition:
@@ -530,10 +527,8 @@
   min-height: 440px;
   margin-top: 1rem;
   border: 1px solid var(--border);
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 10%, transparent), transparent 45%),
-    linear-gradient(180deg, rgba(12, 13, 12, 0.82), rgba(8, 8, 8, 0.96));
+  border-radius: 0;
+  background: #080808;
 }
 
 .inspectorTitle {

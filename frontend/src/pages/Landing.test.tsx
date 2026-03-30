@@ -170,9 +170,9 @@ describe("Landing", () => {
     await act(async () => {
       renderLanding();
     });
-    expect(screen.getByText("Hallazgos nuevos sobre corrupción en Colombia.")).toBeInTheDocument();
+    expect(screen.getByText("Hallazgos propios, no archivo de escándalos.")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getAllByText("3.0M").length).toBeGreaterThan(0);
+      expect(screen.getByText("Radar inmediato")).toBeInTheDocument();
     });
   });
 
@@ -180,14 +180,12 @@ describe("Landing", () => {
     await act(async () => {
       renderLanding();
     });
-    expect(screen.getByText("Hallazgos nuevos sobre corrupción en Colombia.")).toBeInTheDocument();
+    expect(screen.getByText("Hallazgos propios, no archivo de escándalos.")).toBeInTheDocument();
     expect(screen.getByText("Abrir casos")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ver verificados" })).toBeInTheDocument();
+    expect(screen.getByText("Radar inmediato")).toBeInTheDocument();
     expect(screen.getByText("Hallazgo abierto")).toBeInTheDocument();
     expect(screen.getByText("Caso corroborado")).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.getAllByText("3.0M").length).toBeGreaterThan(0);
-    });
   });
 
   it("shows the curated Colombia data sources", async () => {

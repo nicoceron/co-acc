@@ -3,27 +3,27 @@
 /* === Editorial Investigation Design System === */
 
 :root {
-  /* === Warm editorial palette === */
-  --bg-primary: oklch(15% 0.02 28);
-  --bg-secondary: oklch(18% 0.022 28);
-  --bg-tertiary: oklch(22% 0.024 28);
-  --bg-elevated: oklch(26% 0.028 28);
+  /* === Noir editorial palette === */
+  --bg-primary: #050505;
+  --bg-secondary: #0c0c0c;
+  --bg-tertiary: #121212;
+  --bg-elevated: #181818;
   --bg-surface: var(--bg-primary);
-  --bg-overlay: rgba(15, 11, 12, 0.92);
+  --bg-overlay: rgba(5, 5, 5, 0.94);
 
-  --text-primary: oklch(95% 0.01 68);
-  --text-secondary: oklch(82% 0.014 68);
-  --text-muted: oklch(62% 0.02 50);
+  --text-primary: #f4f1ed;
+  --text-secondary: #cfc7bf;
+  --text-muted: #8f867d;
 
   /* === Accents === */
-  --accent: oklch(78% 0.11 78);
-  --accent-hover: oklch(84% 0.13 78);
-  --accent-dim: oklch(78% 0.11 78 / 12%);
+  --accent: #eab308;
+  --accent-hover: #facc15;
+  --accent-dim: rgb(234 179 8 / 12%);
 
-  --color-success: oklch(72% 0.11 145);
-  --color-warning: oklch(75% 0.15 70);
-  --color-danger: oklch(64% 0.2 28);
-  --color-info: oklch(74% 0.08 245);
+  --color-success: #68b19c;
+  --color-warning: #d6a13b;
+  --color-danger: #d45745;
+  --color-info: #6a9be7;
 
   --data-person: oklch(76% 0.08 250);
   --data-company: oklch(79% 0.12 82);
@@ -32,15 +32,15 @@
   --data-sanction: oklch(64% 0.2 28);
   --data-amendment: oklch(84% 0.03 62);
 
-  --border: oklch(28% 0.03 32);
-  --border-subtle: oklch(22% 0.025 32);
-  --border-hover: oklch(36% 0.04 32);
+  --border: #222;
+  --border-subtle: #161616;
+  --border-hover: #303030;
   --border-active: var(--accent);
 
-  --shadow-sm: 0 8px 18px rgba(3, 2, 3, 0.18);
-  --shadow-md: 0 18px 48px rgba(3, 2, 3, 0.28);
-  --shadow-lg: 0 26px 72px rgba(3, 2, 3, 0.4);
-  --shadow-glow: 0 0 24px oklch(78% 0.11 78 / 0.08);
+  --shadow-sm: 0 0 0 rgba(0, 0, 0, 0);
+  --shadow-md: 0 0 0 rgba(0, 0, 0, 0);
+  --shadow-lg: 0 0 0 rgba(0, 0, 0, 0);
+  --shadow-glow: 0 0 0 rgba(0, 0, 0, 0);
 
   /* === Spacing === */
   --space-2xs: 2px;
@@ -66,9 +66,9 @@
   --font-size-3xl: 2.4rem;
 
   /* === Radius === */
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
 
   /* === Transitions === */
   --transition-fast: 120ms ease-out;
@@ -89,10 +89,7 @@
 }
 
 html, body {
-  background:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 12%, transparent) 0, transparent 28%),
-    radial-gradient(circle at top right, color-mix(in oklab, var(--color-danger) 10%, transparent) 0, transparent 26%),
-    linear-gradient(180deg, #151012 0%, #0c090b 100%);
+  background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 14px;

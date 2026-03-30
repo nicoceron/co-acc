@@ -2,10 +2,7 @@
   --editorial-serif: var(--font-display);
   min-height: 100vh;
   padding: clamp(4.6rem, 6vw, 6rem) clamp(1rem, 3vw, 2.5rem) 4rem;
-  background:
-    radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 14%, transparent) 0, transparent 28%),
-    radial-gradient(circle at top left, color-mix(in oklab, var(--color-warning) 16%, transparent) 0, transparent 30%),
-    linear-gradient(180deg, #140f0e 0%, #0c0a09 58%, #090807 100%);
+  background: var(--bg-primary);
 }
 
 .hero,
@@ -21,12 +18,10 @@
 .inspectorCard,
 .footerNote,
 .stateWrap {
-  border: 1px solid color-mix(in oklab, var(--accent) 10%, var(--border));
-  border-radius: 20px;
-  background:
-    linear-gradient(180deg, rgba(20, 16, 14, 0.96), rgba(10, 9, 8, 0.98)),
-    linear-gradient(135deg, rgba(255, 245, 230, 0.02), transparent 42%);
-  box-shadow: 0 22px 52px rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
 }
 
 .hero {
@@ -35,7 +30,9 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.8rem;
-  padding: clamp(1.35rem, 3vw, 2.1rem);
+  padding: clamp(1.6rem, 3vw, 2.4rem) 0 0;
+  border: 0;
+  border-top: 1px solid var(--border);
 }
 
 .heroCopy {
@@ -60,7 +57,7 @@
 .heroTitle,
 .stateTitle {
   margin-top: 0.95rem;
-  max-width: 10ch;
+  max-width: 9ch;
   font-family: var(--editorial-serif);
   font-size: clamp(2.8rem, 6vw, 5.1rem);
   line-height: 0.92;
@@ -93,16 +90,11 @@
 }
 
 .heroMeta span,
-.tagChip,
-.verifiedPill,
-.proofBadge,
-.queueTab,
 .detailButton,
 .primaryCta,
 .inlineAction,
 .moreButton,
-.closeButton,
-.scorePill {
+.closeButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -112,16 +104,20 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
-.heroMeta span,
-.tagChip,
-.queueTab {
-  padding: 0.48rem 0.82rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  background: rgba(255, 248, 240, 0.04);
+.heroMeta span {
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--text-secondary);
+}
+
+.heroMeta span + span::before {
+  content: "/";
+  margin-right: 0.65rem;
+  color: var(--text-muted);
 }
 
 .primaryCta,
@@ -142,15 +138,15 @@
 .primaryCta,
 .detailButton,
 .moreButton {
-  border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
-  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 28%, transparent), color-mix(in oklab, var(--accent) 16%, transparent));
-  color: var(--text-primary);
+  border: 1px solid var(--text-primary);
+  background: var(--text-primary);
+  color: var(--bg-primary);
 }
 
 .inlineAction,
 .closeButton {
-  border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  background: rgba(255, 248, 240, 0.04);
+  border: 1px solid var(--border);
+  background: transparent;
   color: var(--text-secondary);
 }
 
@@ -219,9 +215,9 @@
 .heroProofStat,
 .practiceSummaryCard {
   padding: 0.95rem;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 246, 236, 0.05), rgba(255, 255, 255, 0.02));
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
 }
 
 .heroProofStat strong,
@@ -305,6 +301,8 @@
   gap: 1rem;
   align-items: end;
   margin-bottom: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
 }
 
 .sectionHeader h2,
@@ -354,7 +352,10 @@
 .highlightCard,
 .signalCard,
 .queueCard {
-  padding: 1.1rem;
+  padding: 1.1rem 0 1.25rem;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
 }
 
 .investigationCard h3,
@@ -375,6 +376,7 @@
 .tagChip,
 .verifiedPill {
   padding: 0.42rem 0.68rem;
+  border-radius: 0;
 }
 
 .verifiedPill {
@@ -397,24 +399,25 @@
 }
 
 .catalogNav {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .catalogNavCard,
 .categorySection,
 .categoryEmpty {
-  border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
-  border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(26, 20, 17, 0.96), rgba(13, 11, 10, 0.98)),
-    linear-gradient(135deg, rgba(255, 245, 230, 0.03), transparent 42%);
-  box-shadow: var(--shadow-md);
+  border-top: 1px solid var(--border);
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .catalogNavCard {
   display: grid;
   gap: 0.45rem;
-  padding: 1rem;
+  padding: 1rem 0 1.15rem;
   text-decoration: none;
   color: inherit;
   transition:
@@ -430,7 +433,7 @@
 
 .catalogNavCard strong {
   font-family: var(--editorial-serif);
-  font-size: 1.2rem;
+  font-size: 1.45rem;
   line-height: 1;
 }
 
@@ -440,7 +443,7 @@
 }
 
 .categorySection {
-  padding: 1.2rem;
+  padding: 1.35rem 0 0;
   scroll-margin-top: 1rem;
 }
 
@@ -473,16 +476,22 @@
 }
 
 .categoryMeta span {
-  padding: 0.48rem 0.82rem;
-  border: 1px solid color-mix(in oklab, var(--accent) 14%, var(--border));
-  border-radius: 999px;
-  background: rgba(255, 248, 240, 0.04);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-sans);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.categoryMeta span + span::before {
+  content: "/";
+  margin-right: 0.65rem;
+  color: var(--text-muted);
 }
 
 .investigationCard,
@@ -517,7 +526,7 @@
 }
 
 .categoryEmpty {
-  padding: 1rem 1.05rem;
+  padding: 1rem 0 1.2rem;
 }
 
 .categoryEmpty strong {
@@ -760,7 +769,9 @@
 .footerNote {
   max-width: 1200px;
   margin: 1.7rem auto 0;
-  padding: 1rem 1.2rem;
+  padding: 1rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--border);
 }
 
 .footerNote p {

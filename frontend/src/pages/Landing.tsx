@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
-import { type StatsResponse, getStats } from "@/api/client";
-import { HeroGraph } from "@/components/landing/HeroGraph";
-import { NetworkAnimation } from "@/components/landing/NetworkAnimation";
-import { StatsBar } from "@/components/landing/StatsBar";
 import { formatSignalLabel } from "@/lib/evidence";
 import {
   loadMaterializedResultsPack,
@@ -39,27 +35,15 @@ function useReveal() {
   return setRef;
 }
 
-function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(Math.round(n / 100_000) / 10).toFixed(1)}M`;
-  if (n >= 1_000) return `${(Math.round(n / 100) / 10).toFixed(1)}K`;
-  return String(n);
-}
-
-interface SourceDef {
-  name: string;
-  description: string;
-  countFn: (s: StatsResponse) => number | null;
-}
-
-const DATA_SOURCES: SourceDef[] = [
-  { name: "SECOP Integrado", description: "Contratos, adjudicaciones y trazas de compra pública.", countFn: (s) => s.contract_count },
-  { name: "SECOP Sanciones", description: "Sanciones y ventanas donde la contratación siguió viva.", countFn: (s) => s.sanction_count },
-  { name: "SIGEP", description: "Servidores públicos y cargos enlazables con contratación.", countFn: (s) => s.person_count },
-  { name: "Ley 2013", description: "Activos, intereses y referencias declaradas por funcionarios.", countFn: (s) => s.person_count },
-  { name: "SGR", description: "Regalías, gasto y red flags de ejecución territorial.", countFn: (s) => s.finance_count },
-  { name: "Cuentas Claras", description: "Financiación política conectada con proveedores y campañas.", countFn: (s) => s.election_count },
-  { name: "MEN", description: "Control educativo, matrícula y puentes institucionales.", countFn: (s) => s.education_count },
-  { name: "REPS Salud", description: "Prestadores, sanciones y redes del sector salud.", countFn: (s) => s.health_count },
+const DATA_SOURCES = [
+  "SECOP Integrado",
+  "SECOP Sanciones",
+  "SIGEP",
+  "Ley 2013",
+  "SGR",
+  "Cuentas Claras",
+  "MEN",
+  "REPS Salud",
 ];
 
 function InvestigationFeature({
@@ -99,11 +83,9 @@ export function Landing() {
   const methodRef = useReveal();
   const sourcesRef = useReveal();
 
-  const [stats, setStats] = useState<StatsResponse | null>(null);
   const [pack, setPack] = useState<MaterializedResultsPack | null>(null);
 
   useEffect(() => {
-    getStats().then(setStats).catch(() => {});
     const controller = new AbortController();
     loadMaterializedResultsPack(controller.signal).then(setPack).catch(() => {});
     return () => controller.abort();
@@ -121,19 +103,18 @@ export function Landing() {
   const featuredInvestigation = freshInvestigations[0] ?? null;
   const supportingInvestigations = freshInvestigations.slice(1, 3);
   const libraryPreview = corroboratedInvestigations.slice(0, 3);
+  const heroHighlights = freshInvestigations.slice(0, 3);
 
   return (
     <>
       <section className={styles.hero}>
-        <NetworkAnimation />
-
         <div className={styles.heroContent}>
           <div className={styles.heroLeft}>
             <span className={styles.badge}>Investigación pública con datos oficiales de Colombia</span>
-            <h1 className={styles.title}>Hallazgos nuevos sobre corrupción en Colombia.</h1>
+            <h1 className={styles.title}>Hallazgos propios, no archivo de escándalos.</h1>
             <p className={styles.subtitle}>
-              Rastreando la contratación pública en Colombia. Cruzamos datos oficiales para detectar redes de
-              corrupción, elefantes blancos y captura del Estado.
+              Cruzamos contratación, sanciones, cargos públicos y documentos oficiales para publicar pistas nuevas
+              sobre corrupción en Colombia antes de que se vuelvan lugar común.
             </p>
             <div className={styles.heroActions}>
               <Link to="/casos" className={styles.cta}>
@@ -148,13 +129,31 @@ export function Landing() {
             </p>
           </div>
 
-          <div className={styles.heroRight}>
-            <HeroGraph />
-          </div>
+          <aside className={styles.heroLedger}>
+            <p className={styles.ledgerEyebrow}>Radar inmediato</p>
+            <ol className={styles.ledgerList}>
+              {heroHighlights.length > 0 ? heroHighlights.map((investigation, index) => (
+                <li key={investigation.slug} className={styles.ledgerItem}>
+                  <span className={styles.ledgerIndex}>{String(index + 1).padStart(2, "0")}</span>
+                  <div className={styles.ledgerBody}>
+                    <Link to={`/casos/${investigation.slug}`} className={styles.ledgerLink}>
+                      {investigation.title}
+                    </Link>
+                    <p className={styles.ledgerMeta}>
+                      {investigation.subject_name}
+                      {investigation.tags[0] ? ` · ${formatSignalLabel(investigation.tags[0])}` : ""}
+                    </p>
+                  </div>
+                </li>
+              )) : (
+                <li className={styles.ledgerEmpty}>
+                  La próxima pista nueva con suficiente soporte público aparecerá aquí primero.
+                </li>
+              )}
+            </ol>
+          </aside>
         </div>
       </section>
-
-      <StatsBar />
 
       <section className={styles.findings}>
         <div ref={findingsRef} className={`${styles.findingsInner} ${styles.reveal}`}>
@@ -219,24 +218,11 @@ export function Landing() {
       <section id="metodologia" className={styles.howItWorks}>
         <div ref={methodRef} className={`${styles.howItWorksInner} ${styles.reveal}`}>
           <span className={styles.sectionLabel}>Método</span>
-          <h2 className={styles.sectionHeading}>Cómo pasamos de tablas oficiales a casos legibles.</h2>
-          <div className={styles.stepsGrid}>
-            <div className={styles.step}>
-              <span className={styles.stepNumber}>1</span>
-              <span className={styles.stepTitle}>Conectamos fuentes</span>
-              <span className={styles.stepDesc}>Unimos contratos, personas, empresas, cargos, sanciones y otras capas oficiales.</span>
-            </div>
-            <div className={styles.step}>
-              <span className={styles.stepNumber}>2</span>
-              <span className={styles.stepTitle}>Agrupamos por práctica</span>
-              <span className={styles.stepDesc}>La salida no es una lista cruda: cada caso cae en una práctica entendible.</span>
-            </div>
-            <div className={styles.step}>
-              <span className={styles.stepNumber}>3</span>
-              <span className={styles.stepTitle}>Bajamos a dossier</span>
-              <span className={styles.stepDesc}>Cada caso fuerte termina en hallazgos, documentos, fuentes y red de relaciones.</span>
-            </div>
-          </div>
+          <h2 className={styles.sectionHeading}>Cómo pasamos de registros oficiales a casos.</h2>
+          <p className={styles.methodLead}>
+            Cruzamos contratación, cargos públicos, sanciones, financiación política y expedientes documentales.
+            Después agrupamos todo por práctica para que la lectura empiece en el hallazgo y no en la tabla.
+          </p>
         </div>
       </section>
 
@@ -244,19 +230,10 @@ export function Landing() {
         <div ref={sourcesRef} className={`${styles.sourcesInner} ${styles.reveal}`}>
           <span className={styles.sectionLabel}>Fuentes</span>
           <h2 className={styles.sectionHeading}>Base pública activa.</h2>
-          <div className={styles.sourcesGrid}>
-            {DATA_SOURCES.map((source) => {
-              const count = stats ? source.countFn(stats) : null;
-              return (
-                <div key={source.name} className={styles.sourceCard}>
-                  <div className={styles.sourceHead}>
-                    <strong>{source.name}</strong>
-                    <span>{count != null ? formatCount(count) : "—"}</span>
-                  </div>
-                  <p>{source.description}</p>
-                </div>
-              );
-            })}
+          <div className={styles.sourceLine}>
+            {DATA_SOURCES.map((source) => (
+              <span key={source} className={styles.sourcePill}>{source}</span>
+            ))}
           </div>
         </div>
       </section>
@@ -271,7 +248,7 @@ export function Landing() {
           <div className={styles.footerDivider} />
           <span className={styles.footerBrand}>CO·ACC</span>
           <p className={styles.footerDisclaimer}>
-            Investigación pública con datos oficiales de Colombia.
+            Investigación pública con datos oficiales de Colombia: {DATA_SOURCES.join(", ")}.
           </p>
         </div>
       </footer>
