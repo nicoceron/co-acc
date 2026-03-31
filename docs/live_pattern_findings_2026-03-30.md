@@ -16,6 +16,15 @@ Capas en carga al momento de este memo:
 - `TVECOrder`: carga viva en progreso
 - `EnvironmentalFile`: recarga viva en progreso con la ruta optimizada por `document_id`
 
+Actualizacion posterior:
+
+- `EnvironmentalFile`: carga completa terminada
+- `REGISTRO_AMBIENTAL`: `8,104` relaciones `Company -> EnvironmentalFile`
+- `Project`: `33,252` nodos
+- `Company -> Project`:
+  - `570` relaciones `ADMINISTRA`
+  - `16,306` relaciones `REFERENTE_A`
+
 ## Hallazgos reales ya validados
 
 ### 1. Captura multientidad en TVEC con eco en SECOP
@@ -130,7 +139,74 @@ Estos casos no prueban por si solos corrupcion. Si prueban algo mas util:
 ### 3. Lo que no salio aun
 
 - En pruebas manuales iniciales, `ICONTEC` y `PANAMERICANA LIBRERIA Y PAPELERIA` no devolvieron hits directos por string dentro de `JudicialCase`.
-- El patron `beneficiario_bpin_o_regalias_contrata` todavia no esta listo para hallazgos publicos fuertes porque la capa `Project` necesita una recarga dedicada y el cruce limpio por `BPIN` sigue incompleto.
+
+## Segunda ola de hallazgos reales: `beneficiario_bpin_o_regalias_contrata`
+
+Despues de recargar `Project` y de materializar `Company -> Project`, el patron ya devuelve cruces reales con `BPIN`.
+
+### EMPRESA DE DESARROLLO URBANO DE MEDELLIN (`800223337`)
+
+- `110` contratos
+- `11` proyectos vinculados
+- `11` `BPIN` solapados
+- `COP 10.42T` en monto contractual agregado
+
+### EMPRESA DE DESARROLLO SOSTENIBLE (`900974762`)
+
+- `109` contratos
+- `10` proyectos vinculados
+- `10` `BPIN` solapados
+- `COP 1.95T` en monto contractual agregado
+
+### ICETEX (`899999035`)
+
+- `124` contratos
+- `6` proyectos vinculados
+- `6` `BPIN` solapados
+- `COP 12.05T` en monto contractual agregado
+
+### FONDECUN (`900258772`)
+
+- `287` contratos
+- `6` proyectos vinculados
+- `6` `BPIN` solapados
+- `COP 2.39T` en monto contractual agregado
+- refs `BPIN` de muestra:
+  - `2024004250135`
+  - `2013011000385`
+  - `2018011000387`
+  - `2024110010169`
+  - `2024004250150`
+  - `2024004250228`
+
+### ORACLE COLOMBIA LTDA (`800103052`)
+
+- `326` contratos
+- `3` proyectos vinculados
+- `3` `BPIN` solapados
+- `COP 1.41T` en monto contractual agregado
+
+### COMPENSAR (`860066942`)
+
+- `513` contratos
+- `4` proyectos vinculados
+- `4` `BPIN` solapados
+- `COP 6.51T` en monto contractual agregado
+
+### PNUD (`800091076`)
+
+- `170` contratos
+- `3` proyectos vinculados
+- `3` `BPIN` solapados
+- `COP 5.20T` en monto contractual agregado
+
+### Como leer esta segunda ola
+
+Este patron tampoco prueba por si solo corrupcion. Si prueba algo muy util:
+
+- el actor contratado aparece tambien referenciado contra proyectos `BPIN` concretos;
+- el cruce ya no es solo por nombre libre, sino por referencia estructurada en el grafo;
+- eso permite pasar de "volumen contractual raro" a "actor con huella contractual sobre proyectos especificos".
 
 ## Lectura operativa
 
