@@ -287,6 +287,78 @@ PATTERN_METADATA: dict[str, dict[str, str]] = {
             " and also as a regular contractor, with additional risk overlays"
         ),
     },
+    "judicial_case_contract_overlap": {
+        "name_es": "Traslape documental con providencias judiciales",
+        "name_en": "Documentary overlap with judicial decisions",
+        "desc_es": (
+            "La empresa aparece en contratación pública y también es mencionada"
+            " en providencias judiciales públicas"
+        ),
+        "desc_en": (
+            "The company appears in public procurement and is also mentioned"
+            " in public judicial decisions"
+        ),
+    },
+    "acto_o_gaceta_contractual": {
+        "name_es": "Traslape documental con actos o gacetas",
+        "name_en": "Documentary overlap with acts or gazettes",
+        "desc_es": (
+            "La empresa aparece en contratación pública y también en actos"
+            " administrativos o gacetas territoriales públicas"
+        ),
+        "desc_en": (
+            "The company appears in public procurement and also in administrative"
+            " acts or territorial gazettes"
+        ),
+    },
+    "control_politico_contractual": {
+        "name_es": "Traslape documental con control político",
+        "name_en": "Documentary overlap with political oversight",
+        "desc_es": (
+            "La empresa aparece en contratación pública y también en registros"
+            " públicos de control político o sesiones asociadas"
+        ),
+        "desc_en": (
+            "The company appears in public procurement and also in public"
+            " political oversight records or related sessions"
+        ),
+    },
+    "beneficiario_bpin_o_regalias_contrata": {
+        "name_es": "Beneficiario BPIN o regalías con contratación",
+        "name_en": "BPIN or royalties beneficiary with contracts",
+        "desc_es": (
+            "La empresa administra, ejecuta o recibe flujos ligados a proyectos BPIN"
+            " o regalías y también recibe contratación pública"
+        ),
+        "desc_en": (
+            "The company administers, executes, or receives flows tied to BPIN"
+            " projects or royalties while also receiving public contracts"
+        ),
+    },
+    "environmental_file_contract_overlap": {
+        "name_es": "Expediente ambiental con contratación pública",
+        "name_en": "Environmental file with public contracting",
+        "desc_es": (
+            "La empresa aparece en expedientes o seguimientos ambientales"
+            " y también en contratación pública"
+        ),
+        "desc_en": (
+            "The company appears in environmental files or follow-up records"
+            " and also in public contracting"
+        ),
+    },
+    "tvec_multi_entity_capture": {
+        "name_es": "Captura multi-entidad en Tienda Virtual",
+        "name_en": "Multi-entity capture in the state marketplace",
+        "desc_es": (
+            "Proveedor que concentra órdenes de múltiples entidades"
+            " a través de una misma agregación en la Tienda Virtual"
+        ),
+        "desc_en": (
+            "Supplier that concentrates orders from multiple entities"
+            " through the same aggregation channel in the state marketplace"
+        ),
+    },
     "donor_official_vendor_loop": {
         "name_es": "Ciclo donante-servidor-proveedor",
         "name_en": "Donor-official-vendor loop",

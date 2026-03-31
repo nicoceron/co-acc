@@ -14,6 +14,7 @@ from coacc_etl.pipelines.colombia_procurement import (
     merge_company,
 )
 from coacc_etl.pipelines.colombia_shared import clean_name, clean_text, read_csv_normalized
+from coacc_etl.pipelines.project_graph import build_project_row, load_project_nodes, load_project_relationships
 from coacc_etl.transforms import deduplicate_rows, strip_document
 
 if TYPE_CHECKING:
@@ -70,15 +71,15 @@ class DnpProjectExecutorsPipeline(Pipeline):
             if not project_id:
                 continue
 
-            project_map[project_id] = {
-                "convenio_id": project_id,
-                "name": project_name or project_id,
-                "object": clean_text(row.get("nombreproyecto")) or project_name or project_id,
-                "executor_entity_code": executor_code,
-                "executor_entity_name": executor_name,
-                "source": self.source_id,
-                "country": "CO",
-            }
+            project_map[project_id] = build_project_row(
+                project_id,
+                name=project_name or project_id,
+                object=clean_text(row.get("nombreproyecto")) or project_name or project_id,
+                executor_entity_code=executor_code,
+                executor_entity_name=executor_name,
+                source=self.source_id,
+                country="CO",
+            )
 
             if not executor_name:
                 continue
@@ -105,7 +106,7 @@ class DnpProjectExecutorsPipeline(Pipeline):
             })
 
         self.companies = deduplicate_rows(list(company_map.values()), ["document_id"])
-        self.projects = deduplicate_rows(list(project_map.values()), ["convenio_id"])
+        self.projects = deduplicate_rows(list(project_map.values()), ["project_id"])
         self.rels = deduplicate_rows(rels, ["source_key", "target_key"])
 
     def load(self) -> None:
@@ -114,15 +115,14 @@ class DnpProjectExecutorsPipeline(Pipeline):
         if self.companies:
             loaded += loader.load_nodes("Company", self.companies, key_field="document_id")
         if self.projects:
-            loaded += loader.load_nodes("Convenio", self.projects, key_field="convenio_id")
+            loaded += load_project_nodes(loader, self.projects)
         if self.rels:
-            loaded += loader.load_relationships(
+            loaded += load_project_relationships(
+                loader,
                 rel_type="ADMINISTRA",
                 rows=self.rels,
                 source_label="Company",
                 source_key="document_id",
-                target_label="Convenio",
-                target_key="convenio_id",
                 properties=["source", "role"],
             )
         self.rows_loaded = loaded

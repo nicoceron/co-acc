@@ -32,6 +32,10 @@ _GRAPH_PROPS = {
     "doc_id", "title", "summary", "source_url", "document_url", "document_kind",
     "archive_label", "archive_name", "uploaded_at", "process_id", "contract_reference",
     "issuing_entity", "case_category", "case_domain", "event_date",
+    "case_id", "act_id", "gaceta_id", "requirement_id", "session_id", "order_id",
+    "project_id", "number", "year", "tema", "code", "aggregation", "entity_name",
+    "buyer_entity_name", "supplier_name", "subject_name", "search_text", "dispatch",
+    "document_type", "macro_case", "approval_date", "session_no", "project_name",
     "cdp_request_count", "cdp_balance_total", "cdp_commit_available_total", "cdp_used_value_total",
     "latest_siif_status", "latest_spending_destination", "registered_in_siif", "bpin_code",
     "execution_location_count", "execution_locations",
@@ -59,12 +63,20 @@ _LABEL_MAP: dict[str, str] = {
     "health": "Health",
     "education": "Education",
     "convenio": "Convenio",
+    "project": "Project",
     "laborstats": "LaborStats",
     "bid": "Bid",
     "publicOffice": "PublicOffice",
     "declaredAsset": "DeclaredAsset",
     "finding": "Finding",
     "cpi": "Inquiry",
+    "judicialCase": "JudicialCase",
+    "actoAdministrativo": "ActoAdministrativo",
+    "gacetaTerritorial": "GacetaTerritorial",
+    "inquiryRequirement": "InquiryRequirement",
+    "inquirySession": "InquirySession",
+    "tvecOrder": "TVECOrder",
+    "environmentalFile": "EnvironmentalFile",
     "sourceDocument": "SourceDocument",
 }
 
@@ -89,6 +101,8 @@ def _extract_label(node: Any, labels: list[str]) -> str:
         return str(props.get("description", props.get("uf", "Embargo")))
     if entity_type == "convenio":
         return str(props.get("object", props.get("convenio_id", "Convenio")))
+    if entity_type == "project":
+        return str(props.get("name", props.get("project_id", props.get("bpin_code", "Proyecto"))))
     if entity_type == "publicOffice":
         return str(props.get("name", props.get("role_name", props.get("org", "Public Office"))))
     if entity_type == "bid":
@@ -99,6 +113,20 @@ def _extract_label(node: Any, labels: list[str]) -> str:
         return str(props.get("name", props.get("radicado", props.get("finding_id", "Finding"))))
     if entity_type == "cpi":
         return str(props.get("title", props.get("summary", props.get("inquiry_id", "Caso"))))
+    if entity_type == "judicialCase":
+        return str(props.get("title", props.get("radicado", props.get("case_id", "Providencia"))))
+    if entity_type == "actoAdministrativo":
+        return str(props.get("title", props.get("number", props.get("act_id", "Acto"))))
+    if entity_type == "gacetaTerritorial":
+        return str(props.get("title", props.get("number", props.get("gaceta_id", "Gaceta"))))
+    if entity_type == "inquiryRequirement":
+        return str(props.get("title", props.get("code", props.get("requirement_id", "Requerimiento"))))
+    if entity_type == "inquirySession":
+        return str(props.get("title", props.get("session_no", props.get("session_id", "Sesión"))))
+    if entity_type == "tvecOrder":
+        return str(props.get("title", props.get("order_id", "Orden TVEC")))
+    if entity_type == "environmentalFile":
+        return str(props.get("title", props.get("file_id", "Expediente ambiental")))
     if entity_type == "sourceDocument":
         return str(
             props.get(

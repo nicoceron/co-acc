@@ -38,6 +38,12 @@ COMMUNITY_COMPANY_PATTERN_IDS = (
     "sanctioned_health_operator_overlap",
     "contract_suspension_stacking",
     "interadministrative_channel_stacking",
+    "judicial_case_contract_overlap",
+    "acto_o_gaceta_contractual",
+    "control_politico_contractual",
+    "beneficiario_bpin_o_regalias_contrata",
+    "environmental_file_contract_overlap",
+    "tvec_multi_entity_capture",
 )
 
 COMMUNITY_PERSON_PATTERN_IDS = (
@@ -69,6 +75,12 @@ COMMUNITY_ANALYSIS_PATTERN_IDS = (
     "sanctioned_health_operator_overlap",
     "contract_suspension_stacking",
     "interadministrative_channel_stacking",
+    "judicial_case_contract_overlap",
+    "acto_o_gaceta_contractual",
+    "control_politico_contractual",
+    "beneficiario_bpin_o_regalias_contrata",
+    "environmental_file_contract_overlap",
+    "tvec_multi_entity_capture",
     "donor_official_vendor_loop",
     "disclosure_risk_stack",
     "payment_supervision_risk_stack",
@@ -98,6 +110,16 @@ COMMUNITY_COMPANY_PATTERN_QUERIES: dict[str, str] = {
     "sanctioned_health_operator_overlap": "public_pattern_sanctioned_health_operator_overlap",
     "contract_suspension_stacking": "public_pattern_contract_suspension_stacking",
     "interadministrative_channel_stacking": "public_pattern_interadministrative_channel_stacking",
+    "judicial_case_contract_overlap": "public_pattern_judicial_case_contract_overlap",
+    "acto_o_gaceta_contractual": "public_pattern_acto_o_gaceta_contractual",
+    "control_politico_contractual": "public_pattern_control_politico_contractual",
+    "beneficiario_bpin_o_regalias_contrata": (
+        "public_pattern_beneficiario_bpin_o_regalias_contrata"
+    ),
+    "environmental_file_contract_overlap": (
+        "public_pattern_environmental_file_contract_overlap"
+    ),
+    "tvec_multi_entity_capture": "public_pattern_tvec_multi_entity_capture",
 }
 
 COMMUNITY_PERSON_PATTERN_QUERIES: dict[str, str] = {

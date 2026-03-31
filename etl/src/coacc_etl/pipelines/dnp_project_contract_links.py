@@ -39,7 +39,7 @@ class DnpProjectContractLinksPipeline(Pipeline):
             MATCH (buyer:Company)-[award:CONTRATOU]->(supplier:Company)
             WHERE coalesce(award.bpin_code, '') <> ''
               AND coalesce(award.summary_id, '') <> ''
-            MATCH (project:Convenio {convenio_id: award.bpin_code})
+            MATCH (project:Project {project_id: award.bpin_code})
             RETURN DISTINCT buyer.document_id AS buyer_document_id,
                             supplier.document_id AS supplier_document_id,
                             award.summary_id AS summary_id,
@@ -85,28 +85,34 @@ class DnpProjectContractLinksPipeline(Pipeline):
             UNWIND $rows AS row
             MATCH (buyer:Company {document_id: row.buyer_document_id})
             MATCH (supplier:Company {document_id: row.supplier_document_id})
-            MATCH (project:Convenio {convenio_id: row.bpin_code})
-            MERGE (buyer)-[
-                rb:REFERENTE_A {summary_id: row.summary_id, reference_kind: 'BPIN_BUYER'}
-            ]->(project)
-            SET rb.source = row.source,
-                rb.country = row.country,
-                rb.bpin_code = row.bpin_code,
-                rb.contract_role = 'BUYER'
-            MERGE (supplier)-[
-                rs:REFERENTE_A {
-                    summary_id: row.summary_id,
-                    reference_kind: 'BPIN_SUPPLIER'
-                }
-            ]->(project)
-            SET rs.source = row.source,
-                rs.country = row.country,
-                rs.bpin_code = row.bpin_code,
-                rs.contract_role = 'SUPPLIER'
-            WITH row, project
+            OPTIONAL MATCH (project:Project {project_id: row.bpin_code})
+            OPTIONAL MATCH (legacy:Convenio {convenio_id: row.bpin_code})
+            WITH row, buyer, supplier, [n IN [project, legacy] WHERE n IS NOT NULL] AS targets
+            FOREACH (target IN targets |
+                MERGE (buyer)-[
+                    rb:REFERENTE_A {summary_id: row.summary_id, reference_kind: 'BPIN_BUYER'}
+                ]->(target)
+                SET rb.source = row.source,
+                    rb.country = row.country,
+                    rb.bpin_code = row.bpin_code,
+                    rb.contract_role = 'BUYER'
+            )
+            FOREACH (target IN targets |
+                MERGE (supplier)-[
+                    rs:REFERENTE_A {
+                        summary_id: row.summary_id,
+                        reference_kind: 'BPIN_SUPPLIER'
+                    }
+                ]->(target)
+                SET rs.source = row.source,
+                    rs.country = row.country,
+                    rs.bpin_code = row.bpin_code,
+                    rs.contract_role = 'SUPPLIER'
+            )
+            WITH row, targets
             OPTIONAL MATCH (contract:Contract {contract_id: row.summary_id})
-            FOREACH (_ IN CASE WHEN contract IS NULL THEN [] ELSE [1] END |
-                MERGE (contract)-[rc:REFERENTE_A {reference_kind: 'BPIN_CONTRACT'}]->(project)
+            FOREACH (target IN CASE WHEN contract IS NULL THEN [] ELSE targets END |
+                MERGE (contract)-[rc:REFERENTE_A {reference_kind: 'BPIN_CONTRACT'}]->(target)
                 SET rc.source = row.source,
                     rc.country = row.country,
                     rc.bpin_code = row.bpin_code

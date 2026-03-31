@@ -14,6 +14,7 @@ from coacc_etl.pipelines.colombia_shared import (
     parse_amount,
     read_csv_normalized,
 )
+from coacc_etl.pipelines.project_graph import build_project_row, load_project_nodes, load_project_relationships
 from coacc_etl.transforms import deduplicate_rows
 
 if TYPE_CHECKING:
@@ -80,26 +81,26 @@ class SgrProjectsPipeline(Pipeline):
                     "source": "sgr_projects",
                 })
 
-            project_map[project_id] = {
-                "convenio_id": project_id,
-                "name": clean_name(row.get("nombre")) or project_id,
-                "object": clean_text(row.get("nombre")),
-                "value": parse_amount(row.get("valortotal")),
-                "status": clean_text(row.get("estado")),
-                "sector": clean_text(row.get("sector")),
-                "department": clean_text(row.get("departamento")),
-                "ocad_name": clean_text(row.get("nomocad")),
-                "execution_physical": parse_amount(row.get("ejecucionfisica")),
-                "execution_financial": parse_amount(row.get("ejecucionfinanciera")),
-                "peace_project": clean_text(row.get("proyecto_paz")),
-                "ethnic_project": clean_text(row.get("proyecto_grupo_etnico")),
-                "covid_project": clean_text(row.get("proyecto_covid")),
-                "source": "sgr_projects",
-                "country": "CO",
-            }
+            project_map[project_id] = build_project_row(
+                project_id,
+                name=clean_name(row.get("nombre")) or project_id,
+                object=clean_text(row.get("nombre")),
+                value=parse_amount(row.get("valortotal")),
+                status=clean_text(row.get("estado")),
+                sector=clean_text(row.get("sector")),
+                department=clean_text(row.get("departamento")),
+                ocad_name=clean_text(row.get("nomocad")),
+                execution_physical=parse_amount(row.get("ejecucionfisica")),
+                execution_financial=parse_amount(row.get("ejecucionfinanciera")),
+                peace_project=clean_text(row.get("proyecto_paz")),
+                ethnic_project=clean_text(row.get("proyecto_grupo_etnico")),
+                covid_project=clean_text(row.get("proyecto_covid")),
+                source="sgr_projects",
+                country="CO",
+            )
 
         self.companies = deduplicate_rows(list(company_map.values()), ["document_id"])
-        self.projects = deduplicate_rows(list(project_map.values()), ["convenio_id"])
+        self.projects = deduplicate_rows(list(project_map.values()), ["project_id"])
         self.rels = deduplicate_rows(rels, ["source_key", "target_key"])
 
     def load(self) -> None:
@@ -109,15 +110,14 @@ class SgrProjectsPipeline(Pipeline):
         if self.companies:
             loaded += loader.load_nodes("Company", self.companies, key_field="document_id")
         if self.projects:
-            loaded += loader.load_nodes("Convenio", self.projects, key_field="convenio_id")
+            loaded += load_project_nodes(loader, self.projects)
         if self.rels:
-            loaded += loader.load_relationships(
+            loaded += load_project_relationships(
+                loader,
                 rel_type="ADMINISTRA",
                 rows=self.rels,
                 source_label="Company",
                 source_key="document_id",
-                target_label="Convenio",
-                target_key="convenio_id",
                 properties=["source"],
             )
 

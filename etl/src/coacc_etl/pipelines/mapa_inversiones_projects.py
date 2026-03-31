@@ -20,6 +20,7 @@ from coacc_etl.pipelines.colombia_shared import (
     parse_integer,
     read_csv_normalized_with_fallback,
 )
+from coacc_etl.pipelines.project_graph import build_project_row, load_project_nodes, load_project_relationships
 from coacc_etl.transforms import deduplicate_rows
 
 if TYPE_CHECKING:
@@ -107,25 +108,25 @@ class MapaInversionesProjectsPipeline(Pipeline):
                 ),
             )
 
-            project_map[project_id] = {
-                "convenio_id": project_id,
-                "name": project_name,
-                "object": clean_text(row.get("nombreproyecto")),
-                "value": parse_amount(row.get("valortotalproyecto")),
-                "requested_value": parse_amount(row.get("valorsolicitadoproyecto")),
-                "executed_value": parse_amount(row.get("valorejecutadoproyecto")),
-                "execution_physical": parse_amount(row.get("avancefisico")),
-                "execution_financial": parse_amount(row.get("avancefinanciero")),
-                "beneficiaries": parse_integer(row.get("beneficiarios")),
-                "status": clean_text(row.get("estadoproyecto")),
-                "sub_status": clean_text(row.get("subestadoproyecto")),
-                "sector": clean_text(row.get("sectorproyecto")),
-                "project_type": clean_text(row.get("tipoproyecto")),
-                "horizon": clean_text(row.get("horizonteproyecto")),
-                "ocad_name": clean_text(row.get("ocad")),
-                "source": self.source_id,
-                "country": "CO",
-            }
+            project_map[project_id] = build_project_row(
+                project_id,
+                name=project_name,
+                object=clean_text(row.get("nombreproyecto")),
+                value=parse_amount(row.get("valortotalproyecto")),
+                requested_value=parse_amount(row.get("valorsolicitadoproyecto")),
+                executed_value=parse_amount(row.get("valorejecutadoproyecto")),
+                execution_physical=parse_amount(row.get("avancefisico")),
+                execution_financial=parse_amount(row.get("avancefinanciero")),
+                beneficiaries=parse_integer(row.get("beneficiarios")),
+                status=clean_text(row.get("estadoproyecto")),
+                sub_status=clean_text(row.get("subestadoproyecto")),
+                sector=clean_text(row.get("sectorproyecto")),
+                project_type=clean_text(row.get("tipoproyecto")),
+                horizon=clean_text(row.get("horizonteproyecto")),
+                ocad_name=clean_text(row.get("ocad")),
+                source=self.source_id,
+                country="CO",
+            )
 
             rels.append({
                 "source_key": entity_document,
@@ -134,7 +135,7 @@ class MapaInversionesProjectsPipeline(Pipeline):
             })
 
         self.companies = deduplicate_rows(list(company_map.values()), ["document_id"])
-        self.projects = deduplicate_rows(list(project_map.values()), ["convenio_id"])
+        self.projects = deduplicate_rows(list(project_map.values()), ["project_id"])
         self.rels = deduplicate_rows(rels, ["source_key", "target_key"])
 
     def load(self) -> None:
@@ -144,15 +145,14 @@ class MapaInversionesProjectsPipeline(Pipeline):
         if self.companies:
             loaded += loader.load_nodes("Company", self.companies, key_field="document_id")
         if self.projects:
-            loaded += loader.load_nodes("Convenio", self.projects, key_field="convenio_id")
+            loaded += load_project_nodes(loader, self.projects)
         if self.rels:
-            loaded += loader.load_relationships(
+            loaded += load_project_relationships(
+                loader,
                 rel_type="ADMINISTRA",
                 rows=self.rels,
                 source_label="Company",
                 source_key="document_id",
-                target_label="Convenio",
-                target_key="convenio_id",
                 properties=["source"],
             )
 
