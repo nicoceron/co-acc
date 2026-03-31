@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -228,14 +229,45 @@ class EnvironmentalFilesPipeline(Pipeline):
         if self.files:
             loaded += loader.load_nodes("EnvironmentalFile", self.files, key_field="file_id")
         if self.company_file_rows:
-            query = """
-                UNWIND $rows AS row
-                MATCH (e:EnvironmentalFile {file_id: row.file_id})
-                MATCH (c:Company)
-                WHERE toUpper(coalesce(c.razon_social, c.name, '')) = row.subject_name
-                MERGE (c)-[r:REGISTRO_AMBIENTAL]->(e)
-                SET r.source = row.source,
-                    r.subject_match = 'exact_normalized_name'
-            """
-            loaded += loader.run_query(query, self.company_file_rows)
+            relationship_rows: list[dict[str, Any]] = []
+            company_ids_by_name: dict[str, list[str]] = {}
+            with self.driver.session(database=os.getenv("NEO4J_DATABASE", "neo4j")) as session:
+                result = session.run(
+                    """
+                    MATCH (c:Company)
+                    WITH c,
+                         coalesce(c.document_id, '') AS document_id,
+                         toUpper(coalesce(c.razon_social, c.name, '')) AS subject_name
+                    WHERE document_id <> '' AND subject_name <> ''
+                    RETURN document_id, subject_name
+                    """
+                )
+                for row in result:
+                    company_ids_by_name.setdefault(row["subject_name"], []).append(row["document_id"])
+
+            for row in self.company_file_rows:
+                for document_id in company_ids_by_name.get(row["subject_name"], []):
+                    relationship_rows.append(
+                        {
+                            "source_key": document_id,
+                            "target_key": row["file_id"],
+                            "source": row["source"],
+                            "subject_match": "exact_normalized_name",
+                        }
+                    )
+
+            relationship_rows = deduplicate_rows(
+                relationship_rows,
+                ["source_key", "target_key"],
+            )
+            if relationship_rows:
+                loaded += loader.load_relationships(
+                    rel_type="REGISTRO_AMBIENTAL",
+                    rows=relationship_rows,
+                    source_label="Company",
+                    source_key="document_id",
+                    target_label="EnvironmentalFile",
+                    target_key="file_id",
+                    properties=["source", "subject_match"],
+                )
         self.rows_loaded = loaded
