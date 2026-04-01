@@ -26,7 +26,7 @@ class TerritorialGazettesPipeline(Pipeline):
     """Load territorial gazettes and acuerdos as documentary evidence."""
 
     name = "territorial_gazettes"
-    source_id = "territorial_gazettes"
+    source_id = "gacetas_territoriales"
 
     def __init__(
         self,

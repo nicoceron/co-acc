@@ -1,13 +1,21 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { exportInvestigation, exportInvestigationPDF, generateShareLink } from "@/api/client";
+import {
+  ApiError,
+  exportInvestigation,
+  exportInvestigationPDF,
+  generateShareLink,
+  getCase,
+  refreshCase,
+  type CaseResponse,
+} from "@/api/client";
 import { useInvestigationStore } from "@/stores/investigation";
 
 import styles from "./InvestigationDetail.module.css";
 
 export function InvestigationDetail() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     investigations,
     activeInvestigationId,
@@ -21,11 +29,55 @@ export function InvestigationDetail() {
   const [entityInput, setEntityInput] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [caseData, setCaseData] = useState<CaseResponse | null>(null);
+  const [caseLoading, setCaseLoading] = useState(false);
+  const [caseRefreshing, setCaseRefreshing] = useState(false);
+  const [caseError, setCaseError] = useState<string | null>(null);
 
   const investigation = useMemo(
     () => investigations.find((i) => i.id === activeInvestigationId),
     [investigations, activeInvestigationId],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!investigation) {
+      setCaseData(null);
+      setCaseError(null);
+      setCaseLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setCaseLoading(true);
+    setCaseError(null);
+    getCase(investigation.id)
+      .then((response) => {
+        if (!cancelled) {
+          setCaseData(response);
+        }
+      })
+      .catch((loadError) => {
+        if (cancelled) return;
+        if (loadError instanceof ApiError && loadError.status === 404) {
+          setCaseData(null);
+          setCaseError(t("investigation.noSignals"));
+          return;
+        }
+        setCaseData(null);
+        setCaseError(loadError instanceof Error ? loadError.message : t("investigation.signalLoadError"));
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setCaseLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [investigation?.id, investigation?.entity_ids, t]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -110,9 +162,27 @@ export function InvestigationDetail() {
     setConfirmDelete(false);
   }, [investigation, confirmDelete, deleteInvestigation, setActiveInvestigation]);
 
+  const handleRefreshCase = useCallback(async () => {
+    if (!investigation) return;
+    setCaseRefreshing(true);
+    setCaseError(null);
+    try {
+      const lang = i18n.resolvedLanguage?.startsWith("es") ? "es" : "en";
+      const response = await refreshCase(investigation.id, lang);
+      setCaseData(response);
+    } catch (loadError) {
+      setCaseError(loadError instanceof Error ? loadError.message : t("investigation.signalLoadError"));
+    } finally {
+      setCaseRefreshing(false);
+    }
+  }, [i18n.resolvedLanguage, investigation, t]);
+
   if (!investigation) {
     return <p className={styles.hint}>{t("investigation.noSelection")}</p>;
   }
+
+  const signals = caseData?.signals ?? [];
+  const events = caseData?.events.slice(0, 8) ?? [];
 
   return (
     <div className={styles.detail}>
@@ -180,6 +250,116 @@ export function InvestigationDetail() {
           ))}
         </div>
       </div>
+
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h3 className={styles.sectionTitle}>{t("investigation.signals")}</h3>
+          <div className={styles.sectionHeaderMeta}>
+            {caseData ? (
+              <span className={styles.counterPill}>
+                {caseData.public_signal_count}/{caseData.signal_count} {t("investigation.publicSignals")}
+              </span>
+            ) : null}
+            <button
+              className={styles.actionButton}
+              onClick={() => void handleRefreshCase()}
+              type="button"
+              disabled={caseRefreshing}
+            >
+              {caseRefreshing ? t("investigation.refreshingCase") : t("investigation.refreshCase")}
+            </button>
+          </div>
+        </div>
+
+        {caseData ? (
+          <div className={styles.caseMeta}>
+            <span>{caseData.stale ? t("investigation.caseStale") : t("investigation.caseFresh")}</span>
+            <span>{t("investigation.caseRun")}: {caseData.last_run_id ?? "—"}</span>
+            <span>
+              {t("investigation.caseRefreshedAt")}: {caseData.last_refreshed_at ? new Date(caseData.last_refreshed_at).toLocaleString() : "—"}
+            </span>
+          </div>
+        ) : null}
+
+        {caseLoading ? (
+          <p className={styles.hint}>{t("investigation.loadingSignals")}</p>
+        ) : caseError ? (
+          <p className={styles.error}>{caseError}</p>
+        ) : signals.length === 0 ? (
+          <p className={styles.hint}>{t("investigation.noSignals")}</p>
+        ) : (
+          <div className={styles.signalList}>
+            {signals.map((signal) => (
+              <article key={signal.hit_id} className={styles.signalCard}>
+                <div className={styles.signalHeader}>
+                  <div>
+                    <div className={styles.signalMetaRow}>
+                      <span className={`${styles.severityBadge} ${styles[`severity${signal.severity.charAt(0).toUpperCase()}${signal.severity.slice(1)}`]}`}>
+                        {signal.severity}
+                      </span>
+                      <span className={styles.signalCategory}>{signal.category}</span>
+                      <span className={styles.signalIdentity}>
+                        {Math.round(signal.identity_confidence * 100)}% ID
+                      </span>
+                    </div>
+                    <h4 className={styles.signalTitle}>{signal.title}</h4>
+                  </div>
+                  <div className={styles.signalMetrics}>
+                    <strong>{signal.evidence_count}</strong>
+                    <span>{t("investigation.evidenceItems")}</span>
+                  </div>
+                </div>
+                <p className={styles.signalDescription}>{signal.description}</p>
+                <div className={styles.signalContext}>
+                  <span>{signal.entity_key}</span>
+                  {signal.scope_key ? <span>{signal.scope_key}</span> : null}
+                  <span>{signal.scope_type}</span>
+                  <span>{signal.identity_match_type ?? signal.identity_quality ?? "identity:unknown"}</span>
+                  {signal.run_id ? <span>{signal.run_id}</span> : null}
+                  <span>{signal.public_safe ? t("investigation.publicSafe") : t("investigation.reviewerOnly")}</span>
+                </div>
+                {signal.evidence_items.length ? (
+                  <ul className={styles.evidenceList}>
+                    {signal.evidence_items.slice(0, 3).map((item) => (
+                      <li key={item.item_id} className={styles.evidenceItem}>
+                        {item.url ? (
+                          <a href={item.url} target="_blank" rel="noreferrer" className={styles.evidenceLink}>
+                            {item.label ?? item.url}
+                          </a>
+                        ) : (
+                          <span className={styles.evidenceLink}>{item.label ?? item.record_id}</span>
+                        )}
+                        <small>
+                          {[item.source_id ?? t("investigation.documentaryEvidence"), item.item_type, item.identity_match_type, item.node_ref]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </small>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {events.length ? (
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>{t("investigation.caseEvents")}</h3>
+          <div className={styles.eventList}>
+            {events.map((event) => (
+              <div key={event.id} className={styles.eventRow}>
+                <span className={styles.eventLabel}>{event.label}</span>
+                <span className={styles.eventDate}>
+                  {new Date(event.date).toLocaleString()}
+                  {typeof event.bundle_document_count === "number" ? ` · ${event.bundle_document_count} docs` : ""}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

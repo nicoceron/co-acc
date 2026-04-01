@@ -26,7 +26,7 @@ class ControlPoliticoSessionsPipeline(Pipeline):
     """Load plenary-session records as oversight-session subnodes."""
 
     name = "control_politico_sessions"
-    source_id = "control_politico_sessions"
+    source_id = "control_politico"
 
     def __init__(
         self,

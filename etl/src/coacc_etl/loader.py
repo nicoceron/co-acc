@@ -143,3 +143,27 @@ class Neo4jBatchLoader:
 
     def run_query(self, query: str, rows: list[dict[str, Any]]) -> int:
         return self._run_batches(query, rows)
+
+    def load_aliases(
+        self,
+        *,
+        rows: list[dict[str, Any]],
+        target_label: str,
+        target_key: str,
+    ) -> int:
+        rows = [row for row in rows if row.get("alias_id") and row.get("target_key")]
+        query = (
+            "UNWIND $rows AS row "
+            "MATCH (target:" + target_label + " {" + target_key + ": row.target_key}) "
+            "MERGE (alias:Alias {alias_id: row.alias_id}) "
+            "SET alias.kind = row.kind, "
+            "    alias.value = row.value, "
+            "    alias.normalized = row.normalized, "
+            "    alias.source_id = row.source_id, "
+            "    alias.confidence = row.confidence "
+            "MERGE (alias)-[rel:ALIAS_OF]->(target) "
+            "SET rel.match_type = row.match_type, "
+            "    rel.confidence = row.confidence, "
+            "    rel.source_id = row.source_id"
+        )
+        return self._run_batches(query, rows)

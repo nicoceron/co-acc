@@ -81,3 +81,16 @@ def test_environmental_files_pipeline_extracts_subject_names_for_exact_matching(
     assert len(pipeline.files) == 1
     assert len(pipeline.company_file_rows) == 1
     assert pipeline.company_file_rows[0]["subject_name"] == "ICONTEC"
+
+
+def test_environmental_files_pipeline_loads_documents_without_company_links() -> None:
+    driver = MagicMock()
+    pipeline = EnvironmentalFilesPipeline(driver=driver, data_dir=str(FIXTURES))
+    pipeline.extract()
+    pipeline.transform()
+    pipeline.load()
+
+    session_mock = driver.session.return_value.__enter__.return_value
+    run_calls = session_mock.run.call_args_list
+    assert any("MERGE (n:EnvironmentalFile {file_id: row.file_id})" in str(call) for call in run_calls)
+    assert not any("MATCH (a:Company" in str(call) and "EnvironmentalFile" in str(call) for call in run_calls)

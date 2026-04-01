@@ -6,10 +6,14 @@ import click
 from neo4j import GraphDatabase
 
 from coacc_etl.linking_hooks import run_post_load_hooks
+from coacc_etl.pipelines.actos_administrativos import ActosAdministrativosPipeline
+from coacc_etl.pipelines.administrative_acts import AdministrativeActsPipeline
+from coacc_etl.pipelines.adverse_media import AdverseMediaPipeline
 from coacc_etl.pipelines.asset_disclosures import AssetDisclosuresPipeline
 from coacc_etl.pipelines.company_branches_nb3d import CompanyBranchesNb3dPipeline
 from coacc_etl.pipelines.company_registry_c82u import CompanyRegistryC82uPipeline
 from coacc_etl.pipelines.conflict_disclosures import ConflictDisclosuresPipeline
+from coacc_etl.pipelines.control_politico import ControlPoliticoPipeline
 from coacc_etl.pipelines.control_politico_requirements import (
     ControlPoliticoRequirementsPipeline,
 )
@@ -25,6 +29,9 @@ from coacc_etl.pipelines.dnp_project_contract_links import DnpProjectContractLin
 from coacc_etl.pipelines.dnp_project_executors import DnpProjectExecutorsPipeline
 from coacc_etl.pipelines.dnp_project_locations import DnpProjectLocationsPipeline
 from coacc_etl.pipelines.environmental_files import EnvironmentalFilesPipeline
+from coacc_etl.pipelines.environmental_files_corantioquia import (
+    EnvironmentalFilesCorantioquiaPipeline,
+)
 from coacc_etl.pipelines.fiscal_findings import FiscalFindingsPipeline
 from coacc_etl.pipelines.fiscal_responsibility import FiscalResponsibilityPipeline
 from coacc_etl.pipelines.health_providers import HealthProvidersPipeline
@@ -33,6 +40,7 @@ from coacc_etl.pipelines.higher_ed_enrollment import HigherEdEnrollmentPipeline
 from coacc_etl.pipelines.higher_ed_institutions import HigherEdInstitutionsPipeline
 from coacc_etl.pipelines.igac_property_transactions import IgacPropertyTransactionsPipeline
 from coacc_etl.pipelines.judicial_cases import JudicialCasesPipeline
+from coacc_etl.pipelines.judicial_providencias import JudicialProvidenciasPipeline
 from coacc_etl.pipelines.mapa_inversiones_projects import MapaInversionesProjectsPipeline
 from coacc_etl.pipelines.official_case_bulletins import OfficialCaseBulletinsPipeline
 from coacc_etl.pipelines.paco_sanctions import PacoSanctionsPipeline
@@ -72,14 +80,17 @@ from coacc_etl.pipelines.siri_antecedents import SiriAntecedentsPipeline
 from coacc_etl.pipelines.territorial_gazettes import TerritorialGazettesPipeline
 from coacc_etl.pipelines.supersoc_top_companies import SupersocTopCompaniesPipeline
 from coacc_etl.pipelines.tvec_orders import TvecOrdersPipeline
-from coacc_etl.pipelines.administrative_acts import AdministrativeActsPipeline
+from coacc_etl.pipelines.tvec_orders_consolidated import TvecOrdersConsolidatedPipeline
 
 PIPELINES: dict[str, type] = {
+    "actos_administrativos": ActosAdministrativosPipeline,
+    "adverse_media": AdverseMediaPipeline,
     "asset_disclosures": AssetDisclosuresPipeline,
     "company_branches_nb3d": CompanyBranchesNb3dPipeline,
     "conflict_disclosures": ConflictDisclosuresPipeline,
     "company_registry_c82u": CompanyRegistryC82uPipeline,
     "cuentas_claras_income_2019": CuentasClarasIncome2019Pipeline,
+    "control_politico": ControlPoliticoPipeline,
     "control_politico_requirements": ControlPoliticoRequirementsPipeline,
     "control_politico_sessions": ControlPoliticoSessionsPipeline,
     "dnp_project_beneficiary_characterization": DnpProjectBeneficiaryCharacterizationPipeline,
@@ -87,6 +98,7 @@ PIPELINES: dict[str, type] = {
     "dnp_project_contract_links": DnpProjectContractLinksPipeline,
     "dnp_project_executors": DnpProjectExecutorsPipeline,
     "dnp_project_locations": DnpProjectLocationsPipeline,
+    "environmental_files_corantioquia": EnvironmentalFilesCorantioquiaPipeline,
     "environmental_files": EnvironmentalFilesPipeline,
     "fiscal_findings": FiscalFindingsPipeline,
     "fiscal_responsibility": FiscalResponsibilityPipeline,
@@ -95,6 +107,7 @@ PIPELINES: dict[str, type] = {
     "higher_ed_enrollment": HigherEdEnrollmentPipeline,
     "higher_ed_institutions": HigherEdInstitutionsPipeline,
     "igac_property_transactions": IgacPropertyTransactionsPipeline,
+    "judicial_providencias": JudicialProvidenciasPipeline,
     "judicial_cases": JudicialCasesPipeline,
     "mapa_inversiones_projects": MapaInversionesProjectsPipeline,
     "official_case_bulletins": OfficialCaseBulletinsPipeline,
@@ -132,6 +145,7 @@ PIPELINES: dict[str, type] = {
     "siri_antecedents": SiriAntecedentsPipeline,
     "administrative_acts": AdministrativeActsPipeline,
     "territorial_gazettes": TerritorialGazettesPipeline,
+    "tvec_orders_consolidated": TvecOrdersConsolidatedPipeline,
     "tvec_orders": TvecOrdersPipeline,
     "supersoc_top_companies": SupersocTopCompaniesPipeline,
 }
@@ -280,3 +294,7 @@ def sources(show_status: bool, neo4j_uri: str, neo4j_user: str, neo4j_password: 
 
 if __name__ == "__main__":
     cli()
+from coacc_etl.pipelines.gacetas_territoriales import GacetasTerritorialesPipeline
+from coacc_etl.pipelines.rub_beneficial_owners import RubBeneficialOwnersPipeline
+    "gacetas_territoriales": GacetasTerritorialesPipeline,
+    "rub_beneficial_owners": RubBeneficialOwnersPipeline,

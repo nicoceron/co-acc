@@ -26,7 +26,7 @@ class ControlPoliticoRequirementsPipeline(Pipeline):
     """Load control-politico propositions as Inquiry and requirement nodes."""
 
     name = "control_politico_requirements"
-    source_id = "control_politico_requirements"
+    source_id = "control_politico"
 
     def __init__(
         self,

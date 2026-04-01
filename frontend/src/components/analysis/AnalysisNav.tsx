@@ -1,10 +1,10 @@
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
-import { Network, Users, Clock, Download } from "lucide-react";
+import { Network, Users, Clock, Download, Radar } from "lucide-react";
 
 import styles from "./AnalysisNav.module.css";
 
-type AnalysisTab = "graph" | "connections" | "timeline" | "export";
+type AnalysisTab = "graph" | "connections" | "timeline" | "signals" | "export";
 
 interface AnalysisNavProps {
   activeTab: AnalysisTab;
@@ -15,6 +15,7 @@ const TABS: { id: AnalysisTab; icon: typeof Network; labelKey: string }[] = [
   { id: "connections", icon: Users, labelKey: "analysis.summary" },
   { id: "graph", icon: Network, labelKey: "analysis.graph" },
   { id: "timeline", icon: Clock, labelKey: "analysis.timeline" },
+  { id: "signals", icon: Radar, labelKey: "analysis.signals" },
   { id: "export", icon: Download, labelKey: "analysis.export" },
 ];
 

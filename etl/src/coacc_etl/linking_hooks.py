@@ -9,6 +9,64 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+_IDENTITY_ALIAS_STATEMENTS = [
+    """
+    MATCH (c:Company)
+    WHERE coalesce(c.document_id, '') <> ''
+    MERGE (a:Alias {alias_id: 'company:document:' + c.document_id})
+    SET a.kind = 'company_document',
+        a.value = c.document_id,
+        a.normalized = c.document_id,
+        a.source_id = coalesce(c.source, 'graph'),
+        a.confidence = 1.0
+    MERGE (a)-[:ALIAS_OF {match_type: 'EXACT_COMPANY_NIT', confidence: 1.0}]->(c)
+    """,
+    """
+    MATCH (c:Company)
+    WHERE coalesce(c.nit, '') <> ''
+    MERGE (a:Alias {alias_id: 'company:nit:' + c.nit})
+    SET a.kind = 'company_nit',
+        a.value = c.nit,
+        a.normalized = c.nit,
+        a.source_id = coalesce(c.source, 'graph'),
+        a.confidence = 1.0
+    MERGE (a)-[:ALIAS_OF {match_type: 'EXACT_COMPANY_NIT', confidence: 1.0}]->(c)
+    """,
+    """
+    MATCH (p:Person)
+    WHERE coalesce(p.document_id, '') <> ''
+    MERGE (a:Alias {alias_id: 'person:document:' + p.document_id})
+    SET a.kind = 'person_document',
+        a.value = p.document_id,
+        a.normalized = p.document_id,
+        a.source_id = coalesce(p.source, 'graph'),
+        a.confidence = 1.0
+    MERGE (a)-[:ALIAS_OF {match_type: 'EXACT_PERSON_DOCUMENT', confidence: 1.0}]->(p)
+    """,
+    """
+    MATCH (ct:Contract)
+    WHERE coalesce(ct.contract_id, '') <> ''
+    MERGE (a:Alias {alias_id: 'contract:key:' + ct.contract_id})
+    SET a.kind = 'contract_key',
+        a.value = ct.contract_id,
+        a.normalized = ct.contract_id,
+        a.source_id = coalesce(ct.source, 'graph'),
+        a.confidence = 1.0
+    MERGE (a)-[:ALIAS_OF {match_type: 'EXACT_CONTRACT_KEY', confidence: 1.0}]->(ct)
+    """,
+    """
+    MATCH (pr:Project)
+    WHERE coalesce(pr.project_id, '') <> ''
+    MERGE (a:Alias {alias_id: 'project:bpin:' + pr.project_id})
+    SET a.kind = 'project_bpin',
+        a.value = pr.project_id,
+        a.normalized = pr.project_id,
+        a.source_id = coalesce(pr.source, 'graph'),
+        a.confidence = 1.0
+    MERGE (a)-[:ALIAS_OF {match_type: 'EXACT_BPIN', confidence: 1.0}]->(pr)
+    """,
+]
+
 
 def _split_statements(raw: str) -> list[str]:
     statements = [s.strip() for s in raw.split(";") if s.strip()]
@@ -59,8 +117,7 @@ def run_post_load_hooks(
     script_names: list[str] = []
 
     if not script_names:
-        logger.info("No post-load linking hook configured for source=%s", source)
-        return
+        logger.info("No file-based post-load linking hook configured for source=%s", source)
 
     for name in script_names:
         script_path = scripts_dir / name
@@ -68,3 +125,8 @@ def run_post_load_hooks(
             logger.warning("Post-load linking script missing (skipped): %s", script_path)
             continue
         _run_script(driver, neo4j_database, script_path)
+
+    with driver.session(database=neo4j_database) as session:
+        for stmt in _IDENTITY_ALIAS_STATEMENTS:
+            session.run(stmt)
+    logger.info("Identity alias hooks applied for source=%s", source)

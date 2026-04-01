@@ -24,6 +24,7 @@ def _record_to_investigation(record: Record) -> InvestigationResponse:
         id=record["id"],
         title=record["title"],
         description=record["description"],
+        status=record["status"],
         created_at=_str(record["created_at"]),
         updated_at=_str(record["updated_at"]),
         entity_ids=record["entity_ids"],

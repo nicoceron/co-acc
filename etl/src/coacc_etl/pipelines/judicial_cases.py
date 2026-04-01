@@ -27,7 +27,7 @@ class JudicialCasesPipeline(Pipeline):
     """Load public judicial-decision records as documentary evidence nodes."""
 
     name = "judicial_cases"
-    source_id = "judicial_cases"
+    source_id = "judicial_providencias"
 
     def __init__(
         self,

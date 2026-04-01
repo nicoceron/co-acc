@@ -19,6 +19,11 @@ describe("useEntityAnalysisStore", () => {
     expect(useEntityAnalysisStore.getState().activeTab).toBe("timeline");
   });
 
+  it("supports signals tab", () => {
+    useEntityAnalysisStore.getState().setActiveTab("signals");
+    expect(useEntityAnalysisStore.getState().activeTab).toBe("signals");
+  });
+
   it("sets rightPanelTab", () => {
     useEntityAnalysisStore.getState().setRightPanelTab("detail");
     expect(useEntityAnalysisStore.getState().rightPanelTab).toBe("detail");

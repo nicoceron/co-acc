@@ -40,7 +40,7 @@ class TvecOrdersPipeline(Pipeline):
     """Load Tienda Virtual del Estado Colombiano orders as first-class order nodes."""
 
     name = "tvec_orders"
-    source_id = "tvec_orders"
+    source_id = "tvec_orders_consolidated"
 
     def __init__(
         self,
