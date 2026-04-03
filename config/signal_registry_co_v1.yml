@@ -1,0 +1,799 @@
+registry_version: 1
+default:
+  schedule: nightly
+  public_safe_default: false
+aliases:
+  split_contracts_below_threshold: procurement_repeat_awards_same_supplier
+  contract_concentration: procurement_supplier_concentration_across_entities
+  low_competition_bidding: procurement_single_bidder_high_value
+  contract_suspension_stacking: procurement_contract_suspensions
+  invoice_execution_gap: procurement_contract_execution_delay
+  judicial_case_contract_overlap: judicial_case_contract_overlap
+  acto_o_gaceta_contractual: acto_o_gaceta_contractual
+  control_politico_contractual: control_politico_contractual
+  beneficiario_bpin_o_regalias_contrata: project_regalias_execution_procurement_overlap
+  environmental_file_contract_overlap: environmental_file_contract_overlap
+  tvec_multi_entity_capture: tvec_multi_entity_capture
+signals:
+  - id: procurement_single_bidder_high_value
+    version: 1
+    title: Single bidder on high-value procurement process
+    description: Flags suppliers exposed through single-bidder or effectively single-bidder awards above value thresholds.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_offers, secop_ii_processes, secop_ii_contracts]
+    scope_type: procurement_process
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_single_bidder_high_value
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: procurement_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_repeat_awards_same_supplier
+    version: 1
+    title: Repeat awards from the same buyer to the same supplier
+    description: Detects repeat procurement exposure from the same buyer to the same supplier.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_ii_contracts]
+    scope_type: buyer
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_repeat_awards_same_supplier
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: procurement_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_large_modifications
+    version: 1
+    title: Large value increase via contract modifications
+    description: Flags contracts whose modifications materially increase awarded value.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_contract_modifications, secop_contract_additions, secop_ii_contracts]
+    scope_type: contract
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_large_modifications
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: procurement_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_sanctioned_supplier_awarded
+    version: 1
+    title: Award to supplier with official sanctions or findings
+    description: Supplier holds sanction or fiscal finding records while still showing procurement exposure.
+    category: sanctions
+    severity: critical
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [paco_sanctions, fiscal_findings, fiscal_responsibility, secop_ii_contracts]
+    scope_type: sanction_record
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_sanctioned_supplier_awarded
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: sanctions_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_public_servant_conflict_disclosure_overlap
+    version: 1
+    title: Public servant conflict disclosure overlaps procurement exposure
+    description: Person-level overlap between conflict disclosures, public office, and linked supplier procurement.
+    category: conflict
+    severity: medium
+    entity_types: [Person]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_PERSON_DOCUMENT]
+    sources_required: [conflict_disclosures, sigep_public_servants, secop_ii_contracts]
+    scope_type: disclosure
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_public_servant_conflict_disclosure_overlap
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: person_record
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_related_companies_shared_officer
+    version: 1
+    title: Supplier cluster sharing officers
+    description: Reviewer-only signal for supplier clusters connected through shared officers and procurement overlap.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [company_registry_c82u, secop_ii_contracts]
+    scope_type: officer_cluster
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_related_companies_shared_officer
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: project_bpin_procurement_overlap
+    version: 1
+    title: BPIN project linked to procurement contracts
+    description: Project-level overlap between BPIN-backed projects and procurement exposure.
+    category: projects
+    severity: medium
+    entity_types: [Project]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_BPIN]
+    sources_required: [dnp_project_contract_links, dnp_project_locations, secop_process_bpin, secop_ii_contracts]
+    scope_type: project
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: project_bpin_procurement_overlap
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_BPIN]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: project_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: project_regalias_execution_procurement_overlap
+    version: 1
+    title: Regalías execution overlaps procurement exposure
+    description: Project-level overlap between SGR execution records and procurement-linked projects.
+    category: projects
+    severity: high
+    entity_types: [Project]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_BPIN]
+    sources_required: [sgr_expense_execution, sgr_projects, dnp_project_contract_links, secop_process_bpin]
+    scope_type: project
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: project_regalias_execution_procurement_overlap
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_BPIN]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: project_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: judicial_case_contract_overlap
+    version: 1
+    title: Judicial decision overlaps procurement exposure
+    description: Documentary overlap between judicial decisions and procurement-exposed actors.
+    category: judicial
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources_required: [judicial_providencias, secop_ii_contracts]
+    scope_type: judicial_case
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: judicial_case_contract_overlap
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: document_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: acto_o_gaceta_contractual
+    version: 1
+    title: Administrative act or gazette overlaps procurement exposure
+    description: Documentary overlap between actos/gacetas and procurement-exposed actors.
+    category: governance
+    severity: medium
+    entity_types: [Company, Project]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_BPIN]
+    sources_required: [actos_administrativos, gacetas_territoriales, secop_ii_contracts]
+    scope_type: source_document
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: acto_o_gaceta_contractual
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_BPIN]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: document_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: control_politico_contractual
+    version: 1
+    title: Control político overlaps procurement or project actors
+    description: Documentary overlap between control político records and procurement/project exposure.
+    category: governance
+    severity: medium
+    entity_types: [Company, Project]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_BPIN]
+    sources_required: [control_politico, secop_ii_contracts, secop_process_bpin]
+    scope_type: inquiry_requirement
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: control_politico_contractual
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_BPIN]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: document_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: environmental_file_contract_overlap
+    version: 1
+    title: Environmental file overlaps procurement exposure
+    description: Documentary overlap between environmental files and procurement-exposed entities.
+    category: environment
+    severity: medium
+    entity_types: [Company, Project]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_BPIN]
+    sources_required: [environmental_files_corantioquia, secop_ii_contracts, secop_process_bpin]
+    scope_type: environmental_file
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: environmental_file_contract_overlap
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_BPIN]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: document_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: tvec_multi_entity_capture
+    version: 1
+    title: TVEC order overlaps procurement network
+    description: TVEC order aggregation pattern connecting suppliers to multiple buying entities and procurement exposure.
+    category: ordering
+    severity: high
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [tvec_orders_consolidated, secop_ii_contracts]
+    scope_type: tvec_order
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: tvec_multi_entity_capture
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: order_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_contract_suspensions
+    version: 1
+    title: Contract with multiple suspensions
+    description: Contracts with repeated suspension events and procurement exposure.
+    category: procurement
+    severity: medium
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_contract_suspensions, secop_ii_contracts]
+    scope_type: contract
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_contract_suspensions
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: procurement_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_payment_plan_anomalies
+    version: 1
+    title: Payment plan anomalies
+    description: Reviewer-only anomalies in payment-plan cadence or concentration.
+    category: procurement
+    severity: medium
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_payment_plans, secop_ii_contracts]
+    scope_type: contract
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_payment_plan_anomalies
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_offers_competition_drop
+    version: 1
+    title: Competition drop pattern for a buyer
+    description: Buyer-level deterioration in competition across recent procurement processes.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_ii_processes]
+    scope_type: buyer
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_offers_competition_drop
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: procurement_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_supplier_concentration_across_entities
+    version: 1
+    title: Supplier concentration across many buyers
+    description: Supplier accumulates exposure across many distinct buyers.
+    category: procurement
+    severity: medium
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_ii_contracts]
+    scope_type: supplier
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_supplier_concentration_across_entities
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: procurement_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_contract_value_outlier_by_category
+    version: 1
+    title: Contract value outlier within category
+    description: Reviewer-only value outlier within procurement categories.
+    category: procurement
+    severity: medium
+    entity_types: [Contract]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_CONTRACT_KEY]
+    sources_required: [secop_ii_contracts]
+    scope_type: contract
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_contract_value_outlier_by_category
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_CONTRACT_KEY]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_short_bidding_window
+    version: 1
+    title: Unusually short bidding window
+    description: Procurement process with very short open-close window.
+    category: procurement
+    severity: medium
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_ii_processes, secop_offers]
+    scope_type: procurement_process
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_short_bidding_window
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: procurement_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_contract_execution_delay
+    version: 1
+    title: Execution delay indicators
+    description: Contracts with invoice or execution lag indicators.
+    category: procurement
+    severity: low
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_contract_execution, secop_invoices]
+    scope_type: contract
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_contract_execution_delay
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: procurement_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_buyer_supplier_network_density
+    version: 1
+    title: Dense buyer supplier network cluster
+    description: Reviewer-only structural density in repeated buyer-supplier interactions.
+    category: procurement
+    severity: medium
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_ii_contracts]
+    scope_type: supplier_network
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_buyer_supplier_network_density
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_cartel_risk_cobidding
+    version: 1
+    title: Co-bidding cartel risk proxy
+    description: Reviewer-only co-bidding overlap across processes.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [secop_offers, secop_ii_processes]
+    scope_type: cobid_cluster
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_cartel_risk_cobidding
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_politically_exposed_position_supplier_overlap
+    version: 1
+    title: Supplier overlap with sensitive public positions
+    description: Reviewer-only overlap between supplier officers and sensitive positions.
+    category: conflict
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources_required: [sigep_sensitive_positions, company_registry_c82u]
+    scope_type: sensitive_position
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_politically_exposed_position_supplier_overlap
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: beneficial_ownership_overlap_review_only
+    version: 1
+    title: Beneficial ownership overlap between supplier and public actor
+    description: Reviewer-only beneficial ownership overlap under lawful RUB access.
+    category: conflict
+    severity: critical
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources_required: [rub_beneficial_owners, secop_ii_contracts]
+    scope_type: beneficial_owner
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: beneficial_ownership_overlap_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: adverse_media_supplier_review_only
+    version: 1
+    title: Adverse media hits for supplier
+    description: Reviewer-only documentary media overlap against suppliers or officers.
+    category: governance
+    severity: medium
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [adverse_media]
+    scope_type: media_item
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: adverse_media_supplier_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: media_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: official_case_bulletin_overlap
+    version: 1
+    title: Official case bulletin overlaps procurement actor
+    description: Documentary overlap between official case bulletins and procurement-exposed actors.
+    category: governance
+    severity: medium
+    entity_types: [Company, Person]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources_required: [official_case_bulletins, secop_ii_contracts]
+    scope_type: official_case_bulletin
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: official_case_bulletin_overlap
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: document_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: property_transactions_supplier_overlap
+    version: 1
+    title: Property transaction overlap with supplier network
+    description: Reviewer-only overlap between property transactions and supplier officers.
+    category: governance
+    severity: low
+    entity_types: [Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_PERSON_DOCUMENT]
+    sources_required: [igac_property_transactions, company_registry_c82u]
+    scope_type: property_transaction
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: property_transactions_supplier_overlap
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: cuentas_claras_donor_supplier_overlap
+    version: 1
+    title: Campaign donor overlaps procurement supplier
+    description: Donor entities later showing procurement supplier exposure.
+    category: conflict
+    severity: medium
+    entity_types: [Company]
+    public_safe: true
+    reviewer_only: false
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [cuentas_claras_income_2019, secop_ii_contracts]
+    scope_type: election
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: cuentas_claras_donor_supplier_overlap
+    public_policy:
+      allow_public: true
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: campaign_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_cross_source_identity_inconsistency
+    version: 1
+    title: Identity inconsistency across sources
+    description: Reviewer-only signal for companies with conflicting alias sprawl across sources.
+    category: governance
+    severity: low
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources_required: [company_registry_c82u, secop_suppliers]
+    scope_type: alias_cluster
+    dedup_fields: [scope_key]
+    runner:
+      kind: cypher
+      ref: procurement_cross_source_identity_inconsistency
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}

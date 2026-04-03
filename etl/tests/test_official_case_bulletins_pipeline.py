@@ -41,3 +41,6 @@ def test_load_creates_inquiries_reference_links_and_probable_match_queries() -> 
     assert any("MERGE (case_person)-[r:POSSIBLY_SAME_AS]->(matched_person)" in str(call) for call in run_calls)
     assert any("MERGE (case_person)-[r:POSSIBLY_SAME_AS]->(matched_company)" in str(call) for call in run_calls)
     assert any("size(matches) >= 1 AND size(matches) <= 3" in str(call) for call in run_calls)
+    assert any("identity_quality = 'name_only'" in str(call) for call in run_calls)
+    assert any("r.public_safe = CASE WHEN row.subject_match = 'document_id' THEN true ELSE false END" in str(call) for call in run_calls)
+    assert any("r.public_safe = false" in str(call) for call in run_calls)

@@ -1,9 +1,10 @@
 MATCH (i:Investigation {share_token: $token})
 OPTIONAL MATCH (i)-[:INCLUDES]->(e)
-WITH i, collect(coalesce(e.document_id, e.nit, e.cedula, e.numero_documento, e.contract_id, e.sanction_id, e.amendment_id, e.finance_id, e.embargo_id, e.school_id, e.convenio_id, e.stats_id, e.bid_id, e.asset_id, e.office_id, elementId(e))) AS eids
+WITH i, collect(coalesce(e.document_id, e.nit, e.cedula, e.numero_documento, e.reps_code, e.contract_id, e.sanction_id, e.amendment_id, e.finance_id, e.embargo_id, e.school_id, e.convenio_id, e.stats_id, e.bid_id, e.asset_id, e.office_id, e.project_id, e.bpin_code, e.case_id, e.act_id, e.gaceta_id, e.requirement_id, e.session_id, e.order_id, e.file_id, e.doc_id, elementId(e))) AS eids
 RETURN i.id AS id,
        i.title AS title,
        i.description AS description,
+       coalesce(i.status, "new") AS status,
        i.created_at AS created_at,
        i.updated_at AS updated_at,
        i.share_token AS share_token,

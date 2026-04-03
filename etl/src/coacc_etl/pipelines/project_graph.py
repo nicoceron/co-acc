@@ -2,14 +2,17 @@ from __future__ import annotations
 
 from typing import Any
 
+from coacc_etl.entity_resolution.canonical import canonical_project_key
 from coacc_etl.loader import Neo4jBatchLoader
 
 
 def build_project_row(project_id: str, **properties: Any) -> dict[str, Any]:
+    normalized_project_id = canonical_project_key(project_id)
     row = {
-        "project_id": project_id,
-        "convenio_id": project_id,
-        "bpin_code": project_id,
+        "project_id": normalized_project_id,
+        "convenio_id": normalized_project_id,
+        "bpin_code": normalized_project_id,
+        "identity_quality": "exact",
     }
     row.update(properties)
     return row
@@ -18,10 +21,7 @@ def build_project_row(project_id: str, **properties: Any) -> dict[str, Any]:
 def load_project_nodes(loader: Neo4jBatchLoader, rows: list[dict[str, Any]]) -> int:
     if not rows:
         return 0
-    loaded = 0
-    loaded += loader.load_nodes("Project", rows, key_field="project_id")
-    loaded += loader.load_nodes("Convenio", rows, key_field="convenio_id")
-    return loaded
+    return loader.load_nodes("Project", rows, key_field="project_id")
 
 
 def load_project_relationships(
@@ -35,8 +35,7 @@ def load_project_relationships(
 ) -> int:
     if not rows:
         return 0
-    loaded = 0
-    loaded += loader.load_relationships(
+    return loader.load_relationships(
         rel_type=rel_type,
         rows=rows,
         source_label=source_label,
@@ -45,13 +44,3 @@ def load_project_relationships(
         target_key="project_id",
         properties=properties,
     )
-    loaded += loader.load_relationships(
-        rel_type=rel_type,
-        rows=rows,
-        source_label=source_label,
-        source_key=source_key,
-        target_label="Convenio",
-        target_key="convenio_id",
-        properties=properties,
-    )
-    return loaded

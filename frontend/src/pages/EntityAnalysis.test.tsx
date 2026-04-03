@@ -8,6 +8,8 @@ import "@/i18n";
 vi.mock("@/api/client", () => ({
   getEntityByElementId: vi.fn(),
   getEntityPatterns: vi.fn(),
+  getEntitySignals: vi.fn(),
+  refreshEntitySignals: vi.fn(),
   getBaseline: vi.fn(),
   listInvestigations: vi.fn(),
   addEntityToInvestigation: vi.fn(),

@@ -300,7 +300,9 @@ class OfficialCaseBulletinsPipeline(Pipeline):
                     p.country = row.country,
                     p.source = row.source,
                     p.case_bulletin_placeholder = true,
-                    p.case_bulletin_subject = true
+                    p.case_bulletin_subject = true,
+                    p.identity_quality = 'name_only',
+                    p.public_safe = false
             """
             loaded += loader.run_query(placeholder_query, self.people_placeholders)
 
@@ -326,7 +328,9 @@ class OfficialCaseBulletinsPipeline(Pipeline):
                     c.source = row.source,
                     c.country = row.country,
                     c.case_bulletin_placeholder = true,
-                    c.case_bulletin_subject = true
+                    c.case_bulletin_subject = true,
+                    c.identity_quality = 'name_only',
+                    c.public_safe = false
             """
             loaded += loader.run_query(company_placeholder_query, self.company_placeholders)
 
@@ -341,7 +345,8 @@ class OfficialCaseBulletinsPipeline(Pipeline):
                 SET r.source = row.source,
                     r.case_role = row.case_role,
                     r.case_roles = row.case_roles,
-                    r.subject_match = row.subject_match
+                    r.subject_match = row.subject_match,
+                    r.public_safe = CASE WHEN row.subject_match = 'document_id' THEN true ELSE false END
             """
             loaded += loader.run_query(person_rel_query, self.person_rels)
 
@@ -356,7 +361,8 @@ class OfficialCaseBulletinsPipeline(Pipeline):
                 SET r.source = row.source,
                     r.case_role = row.case_role,
                     r.case_roles = row.case_roles,
-                    r.subject_match = row.subject_match
+                    r.subject_match = row.subject_match,
+                    r.public_safe = CASE WHEN row.subject_match = 'document_id' THEN true ELSE false END
             """
             loaded += loader.run_query(company_rel_query, self.company_rels)
 
@@ -386,7 +392,8 @@ class OfficialCaseBulletinsPipeline(Pipeline):
             MERGE (case_person)-[r:POSSIBLY_SAME_AS]->(matched_person)
             SET r.source = 'official_case_bulletins',
                 r.match_reason = 'unique_exact_full_name_person',
-                r.confidence = 0.6
+                r.confidence = 0.6,
+                r.public_safe = false
         """
 
         probable_company_query = """
@@ -412,7 +419,8 @@ class OfficialCaseBulletinsPipeline(Pipeline):
                 r.confidence = CASE
                   WHEN size(matches) = 1 THEN 0.58
                   ELSE 0.51
-                END
+                END,
+                r.public_safe = false
         """
 
         with self.driver.session(database=self.neo4j_database) as session:

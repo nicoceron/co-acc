@@ -8,15 +8,19 @@ from coacc.services.neo4j_service import CypherLoader
 EXPECTED_LABELS = {
     "Person", "Company", "Contract", "Sanction", "Election",
     "Amendment", "Finance", "Embargo", "Health", "Education",
-    "Convenio", "LaborStats", "PublicOffice",
+    "Convenio", "LaborStats", "PublicOffice", "Bid", "DeclaredAsset",
+    "Inquiry", "SourceDocument", "Project", "JudicialCase",
+    "ActoAdministrativo", "GacetaTerritorial", "InquiryRequirement",
+    "InquirySession", "TVECOrder", "EnvironmentalFile",
 }
 
 # Expected entity ID property fields in lookup/coalesce chains.
 EXPECTED_ID_FIELDS = {
-    "document_id", "nit", "cedula", "numero_documento", "document_id", "nit",
+    "document_id", "nit", "cedula", "numero_documento",
     "contract_id", "sanction_id", "amendment_id",
     "reps_code", "finance_id", "embargo_id", "school_id", "convenio_id",
-    "stats_id",
+    "stats_id", "project_id", "bpin_code", "case_id", "act_id", "gaceta_id",
+    "requirement_id", "session_id", "order_id", "file_id", "doc_id",
 }
 
 
@@ -121,7 +125,7 @@ def test_entity_by_id_has_all_11_id_fields() -> None:
     """entity_by_id.cypher must resolve all supported entity ID property fields."""
     cypher = _load_cypher("entity_by_id")
     all_fields = {
-        "document_id", "nit", "cedula", "numero_documento", "document_id", "nit",
+        "document_id", "nit", "cedula", "numero_documento",
         "contract_id", "sanction_id", "amendment_id",
         "reps_code", "finance_id", "embargo_id", "school_id",
         "convenio_id", "stats_id",
@@ -168,6 +172,8 @@ ALL_ID_FIELDS = [
     "e.contract_id", "e.sanction_id", "e.amendment_id",
     "e.reps_code", "e.finance_id", "e.embargo_id", "e.school_id",
     "e.convenio_id", "e.stats_id",
+    "e.project_id", "e.bpin_code", "e.case_id", "e.act_id", "e.gaceta_id",
+    "e.requirement_id", "e.session_id", "e.order_id", "e.file_id", "e.doc_id",
 ]
 
 

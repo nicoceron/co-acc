@@ -104,6 +104,28 @@ class TestNeo4jBatchLoader:
         count = loader.run_query("UNWIND $rows AS row CREATE (n:Test)", rows)
         assert count == 1
 
+    def test_load_aliases(self) -> None:
+        loader, session = self._make_loader()
+        rows = [
+            {
+                "alias_id": "nit:9001234567",
+                "kind": "nit",
+                "value": "900.123.456-7",
+                "normalized": "9001234567",
+                "target_key": "9001234567",
+                "source_id": "secop_ii_contracts",
+                "confidence": 1.0,
+                "match_type": "EXACT_COMPANY_NIT",
+            },
+        ]
+
+        count = loader.load_aliases(rows=rows, target_label="Company", target_key="nit")
+        assert count == 1
+        session.run.assert_called_once()
+        query = session.run.call_args[0][0]
+        assert "MERGE (alias:Alias {alias_id: row.alias_id})" in query
+        assert "ALIAS_OF" in query
+
     @patch("coacc_etl.loader.time.sleep")
     def test_run_query_with_retry_success(self, mock_sleep: MagicMock) -> None:
         loader, session = self._make_loader()

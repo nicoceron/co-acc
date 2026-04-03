@@ -11,6 +11,7 @@ import { useAuthStore } from "./stores/auth";
 const EntityAnalysis = lazy(() => import("./pages/EntityAnalysis").then((m) => ({ default: m.EntityAnalysis })));
 const Baseline = lazy(() => import("./pages/Baseline").then((m) => ({ default: m.Baseline })));
 const Dashboard = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })));
+const Cases = lazy(() => import("./pages/Cases").then((m) => ({ default: m.Cases })));
 const Investigations = lazy(() => import("./pages/Investigations").then((m) => ({ default: m.Investigations })));
 const InvestigationDossier = lazy(() => import("./pages/InvestigationDossier").then((m) => ({ default: m.InvestigationDossier })));
 const Login = lazy(() => import("./pages/Login").then((m) => ({ default: m.Login })));
@@ -18,6 +19,7 @@ const Patterns = lazy(() => import("./pages/Patterns").then((m) => ({ default: m
 const Register = lazy(() => import("./pages/Register").then((m) => ({ default: m.Register })));
 const Results = lazy(() => import("./pages/Results").then((m) => ({ default: m.Results })));
 const Search = lazy(() => import("./pages/Search").then((m) => ({ default: m.Search })));
+const Signals = lazy(() => import("./pages/Signals").then((m) => ({ default: m.Signals })));
 const SharedInvestigation = lazy(() => import("./pages/SharedInvestigation").then((m) => ({ default: m.SharedInvestigation })));
 
 function LazyPage({ children }: { children: React.ReactNode }) {
@@ -106,6 +108,10 @@ export function App() {
         <Route path="graph/:entityId" element={<GraphRedirect />} />
         {IS_PATTERNS_ENABLED && <Route path="patterns" element={<LazyPage><Patterns /></LazyPage>} />}
         {IS_PATTERNS_ENABLED && <Route path="patterns/:entityId" element={<LazyPage><Patterns /></LazyPage>} />}
+        {!IS_PUBLIC_MODE && <Route path="signals" element={<LazyPage><Signals /></LazyPage>} />}
+        {!IS_PUBLIC_MODE && <Route path="signals/:signalId" element={<LazyPage><Signals /></LazyPage>} />}
+        {!IS_PUBLIC_MODE && <Route path="cases" element={<LazyPage><Cases /></LazyPage>} />}
+        {!IS_PUBLIC_MODE && <Route path="cases/:caseId" element={<LazyPage><Cases /></LazyPage>} />}
         <Route path="baseline/:entityId" element={<LazyPage><Baseline /></LazyPage>} />
         {!IS_PUBLIC_MODE && <Route path="investigations" element={<LazyPage><Investigations /></LazyPage>} />}
         {!IS_PUBLIC_MODE && <Route path="investigations/:investigationId" element={<LazyPage><Investigations /></LazyPage>} />}

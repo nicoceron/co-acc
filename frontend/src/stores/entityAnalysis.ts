@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type AnalysisTab = "graph" | "connections" | "timeline" | "export";
+type AnalysisTab = "graph" | "connections" | "timeline" | "signals" | "export";
 type RightPanelTab = "insights" | "detail";
 
 interface EntityAnalysisState {

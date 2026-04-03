@@ -1,20 +1,23 @@
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Annotated
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from neo4j import AsyncSession
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from coacc.config import settings
-from coacc.dependencies import close_driver, init_driver
+from coacc.dependencies import close_driver, get_session, init_driver
 from coacc.middleware.rate_limit import limiter
 from coacc.middleware.security_headers import SecurityHeadersMiddleware
 from coacc.routers import (
     auth,
     baseline,
+    cases,
     entity,
     graph,
     investigation,
@@ -22,7 +25,9 @@ from coacc.routers import (
     patterns,
     public,
     search,
+    signals,
 )
+from coacc.services.neo4j_service import execute_query_single
 from coacc.services.neo4j_service import ensure_schema
 
 _logger = logging.getLogger(__name__)
@@ -82,11 +87,26 @@ app.include_router(entity.router)
 app.include_router(search.router)
 app.include_router(graph.router)
 app.include_router(patterns.router)
+app.include_router(signals.router)
 app.include_router(baseline.router)
 app.include_router(investigation.router)
 app.include_router(investigation.shared_router)
+app.include_router(cases.router)
 
 
 @app.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
+async def health(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> dict[str, str | None]:
+    latest_run = await execute_query_single(session, "signal_latest_completed_run")
+    return {
+        "status": "ok",
+        "last_signal_run_id": (
+            str(latest_run["run_id"]) if latest_run and latest_run["run_id"] is not None else None
+        ),
+        "last_signal_run_at": (
+            str(latest_run["finished_at"])
+            if latest_run and latest_run["finished_at"] is not None
+            else None
+        ),
+    }

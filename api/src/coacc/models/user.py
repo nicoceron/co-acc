@@ -1,4 +1,8 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
+
+UserRole = Literal["viewer", "reviewer", "admin"]
 
 
 class UserCreate(BaseModel):
@@ -11,6 +15,7 @@ class UserResponse(BaseModel):
     id: str
     email: str
     created_at: str
+    role: UserRole = "reviewer"
 
 
 class TokenResponse(BaseModel):
