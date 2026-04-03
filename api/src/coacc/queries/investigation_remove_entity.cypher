@@ -2,16 +2,27 @@ MATCH (u:User {id: $user_id})-[:OWNS]->(i:Investigation {id: $investigation_id})
 MATCH (i)-[r:INCLUDES]->(e)
 WHERE (e.document_id = $entity_id OR e.nit = $entity_id
    OR e.cedula = $entity_id OR e.numero_documento = $entity_id
+   OR e.reps_code = $entity_id
    OR e.contract_id = $entity_id OR e.sanction_id = $entity_id
    OR e.amendment_id = $entity_id
    OR e.finance_id = $entity_id OR e.embargo_id = $entity_id
    OR e.school_id = $entity_id OR e.convenio_id = $entity_id
    OR e.partner_id = $entity_id OR e.bid_id = $entity_id
    OR e.asset_id = $entity_id OR e.office_id = $entity_id
-   OR e.stats_id = $entity_id OR elementId(e) = $entity_id)
+   OR e.stats_id = $entity_id OR e.project_id = $entity_id
+   OR e.bpin_code = $entity_id OR e.case_id = $entity_id
+   OR e.act_id = $entity_id OR e.gaceta_id = $entity_id
+   OR e.requirement_id = $entity_id OR e.session_id = $entity_id
+   OR e.order_id = $entity_id OR e.file_id = $entity_id
+   OR e.doc_id = $entity_id OR elementId(e) = $entity_id)
   AND (e:Person OR e:Partner OR e:Company OR e:Contract OR e:Sanction OR e:Election
        OR e:Amendment OR e:Finance OR e:Embargo OR e:Health OR e:Education
        OR e:Convenio OR e:LaborStats OR e:PublicOffice OR e:Bid OR e:DeclaredAsset
-       OR e:Inquiry)
+       OR e:Inquiry OR e:SourceDocument OR e:Project OR e:JudicialCase
+       OR e:ActoAdministrativo OR e:GacetaTerritorial OR e:InquiryRequirement
+       OR e:InquirySession OR e:TVECOrder OR e:EnvironmentalFile)
 DELETE r
+SET i.updated_at = datetime(),
+    i.case_scope_updated_at = datetime(),
+    i.case_stale = true
 RETURN 1 AS deleted

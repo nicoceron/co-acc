@@ -13,6 +13,17 @@ from coacc.services.neo4j_service import execute_query_single
 ALLOWED_JWT_ALGORITHMS = ["HS256"]
 
 
+def _record_role(record: object) -> str:
+    try:
+        role = record["role"]  # type: ignore[index]
+    except (KeyError, TypeError):
+        return "reviewer"
+    if role is None:
+        return "reviewer"
+    text = str(role).strip()
+    return text or "reviewer"
+
+
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
@@ -53,12 +64,22 @@ async def register_user(
     record = await execute_query_single(
         session,
         "user_create",
-        {"id": str(uuid.uuid4()), "email": email, "password_hash": password_hash},
+        {
+            "id": str(uuid.uuid4()),
+            "email": email,
+            "password_hash": password_hash,
+            "role": "reviewer",
+        },
     )
     if record is None:
         msg = "Failed to create user"
         raise RuntimeError(msg)
-    return UserResponse(id=record["id"], email=record["email"], created_at=record["created_at"])
+    return UserResponse(
+        id=record["id"],
+        email=record["email"],
+        created_at=record["created_at"],
+        role=_record_role(record),
+    )
 
 
 async def authenticate_user(
@@ -71,7 +92,12 @@ async def authenticate_user(
         return None
     if not verify_password(password, record["password_hash"]):
         return None
-    return UserResponse(id=record["id"], email=record["email"], created_at=record["created_at"])
+    return UserResponse(
+        id=record["id"],
+        email=record["email"],
+        created_at=record["created_at"],
+        role=_record_role(record),
+    )
 
 
 async def get_user_by_id(
@@ -81,4 +107,9 @@ async def get_user_by_id(
     record = await execute_query_single(session, "user_get_by_id", {"id": user_id})
     if record is None:
         return None
-    return UserResponse(id=record["id"], email=record["email"], created_at=record["created_at"])
+    return UserResponse(
+        id=record["id"],
+        email=record["email"],
+        created_at=record["created_at"],
+        role=_record_role(record),
+    )

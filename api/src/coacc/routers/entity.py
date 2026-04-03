@@ -5,7 +5,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from neo4j import AsyncSession
 
 from coacc.constants import PEP_ROLES
-from coacc.dependencies import get_intelligence_provider, get_session
+from coacc.dependencies import (
+    CurrentUser,
+    can_access_reviewer_content,
+    get_intelligence_provider,
+    get_optional_user,
+    get_session,
+)
 from coacc.models.entity import (
     ConnectionResponse,
     EntityEvidenceTrailResponse,
@@ -19,6 +25,8 @@ from coacc.models.entity import (
     TimelineEvent,
     TimelineResponse,
 )
+from coacc.models.signal import EntitySignalsResponse
+from coacc.models.user import UserResponse
 from coacc.services.entity_types import entity_type_for_label
 from coacc.services.intelligence_provider import IntelligenceProvider
 from coacc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
@@ -31,6 +39,7 @@ from coacc.services.public_guard import (
     sanitize_public_properties,
     should_hide_person_entities,
 )
+from coacc.services.signal_materializer import get_stored_entity_signals, refresh_entity_signals
 
 router = APIRouter(prefix="/api/v1/entity", tags=["entity"])
 
@@ -202,6 +211,51 @@ async def get_entity_timeline(
         events=events,
         total=len(events),
         next_cursor=next_cursor,
+    )
+
+
+@router.get("/{entity_id}/signals", response_model=EntitySignalsResponse)
+async def get_entity_signals(
+    entity_id: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    user: Annotated[UserResponse | None, Depends(get_optional_user)],
+) -> EntitySignalsResponse:
+    enforce_entity_lookup_enabled()
+    record = await _lookup_entity_record(session, entity_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
+    enforce_person_access_policy(record["entity_labels"])
+    response = await get_stored_entity_signals(session, entity_id)
+    if can_access_reviewer_content(user):
+        return response
+    return response.model_copy(
+        update={
+            "signals": [signal for signal in response.signals if not signal.reviewer_only],
+            "total": len([signal for signal in response.signals if not signal.reviewer_only]),
+        }
+    )
+
+
+@router.post("/{entity_id}/signals/refresh", response_model=EntitySignalsResponse)
+async def refresh_signals_for_entity(
+    entity_id: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    user: CurrentUser,
+    provider: Annotated[IntelligenceProvider, Depends(get_intelligence_provider)],
+    lang: Annotated[str, Query()] = "es",
+) -> EntitySignalsResponse:
+    enforce_entity_lookup_enabled()
+    record = await _lookup_entity_record(session, entity_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
+    enforce_person_access_policy(record["entity_labels"])
+    return await refresh_entity_signals(
+        session,
+        entity_id,
+        provider,
+        lang=lang,
+        trigger="manual",
+        created_by=user.id,
     )
 
 

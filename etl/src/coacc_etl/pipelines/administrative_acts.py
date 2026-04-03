@@ -27,7 +27,7 @@ class AdministrativeActsPipeline(Pipeline):
     """Load public administrative acts as first-class graph evidence."""
 
     name = "administrative_acts"
-    source_id = "administrative_acts"
+    source_id = "actos_administrativos"
 
     def __init__(
         self,

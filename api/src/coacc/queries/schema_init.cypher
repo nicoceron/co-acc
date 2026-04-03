@@ -26,6 +26,9 @@ CREATE CONSTRAINT public_office_id_unique IF NOT EXISTS
 CREATE CONSTRAINT investigation_id_unique IF NOT EXISTS
   FOR (i:Investigation) REQUIRE i.id IS UNIQUE;
 
+CREATE CONSTRAINT case_id_unique IF NOT EXISTS
+  FOR (c:Case) REQUIRE c.id IS UNIQUE;
+
 CREATE CONSTRAINT inquiry_id_unique IF NOT EXISTS
   FOR (i:Inquiry) REQUIRE i.inquiry_id IS UNIQUE;
 
@@ -74,8 +77,29 @@ CREATE CONSTRAINT tvec_order_id_unique IF NOT EXISTS
 CREATE CONSTRAINT environmental_file_id_unique IF NOT EXISTS
   FOR (e:EnvironmentalFile) REQUIRE e.file_id IS UNIQUE;
 
+CREATE CONSTRAINT media_item_id_unique IF NOT EXISTS
+  FOR (m:MediaItem) REQUIRE m.media_id IS UNIQUE;
+
 CREATE CONSTRAINT ingestion_run_id_unique IF NOT EXISTS
   FOR (r:IngestionRun) REQUIRE r.run_id IS UNIQUE;
+
+CREATE CONSTRAINT signal_run_id_unique IF NOT EXISTS
+  FOR (r:SignalRun) REQUIRE r.run_id IS UNIQUE;
+
+CREATE CONSTRAINT signal_hit_id_unique IF NOT EXISTS
+  FOR (h:SignalHit) REQUIRE h.hit_id IS UNIQUE;
+
+CREATE CONSTRAINT evidence_bundle_id_unique IF NOT EXISTS
+  FOR (b:EvidenceBundle) REQUIRE b.bundle_id IS UNIQUE;
+
+CREATE CONSTRAINT evidence_item_id_unique IF NOT EXISTS
+  FOR (i:EvidenceItem) REQUIRE i.item_id IS UNIQUE;
+
+CREATE CONSTRAINT alias_id_unique IF NOT EXISTS
+  FOR (a:Alias) REQUIRE a.alias_id IS UNIQUE;
+
+CREATE CONSTRAINT case_event_id_unique IF NOT EXISTS
+  FOR (e:CaseEvent) REQUIRE e.event_id IS UNIQUE;
 
 // ── Indexes ─────────────────────────────────────────────
 CREATE INDEX person_name IF NOT EXISTS
@@ -185,6 +209,12 @@ CREATE INDEX tvec_order_aggregation IF NOT EXISTS
 CREATE INDEX environmental_file_subject_name IF NOT EXISTS
   FOR (e:EnvironmentalFile) ON (e.subject_name);
 
+CREATE INDEX media_item_published_at IF NOT EXISTS
+  FOR (m:MediaItem) ON (m.published_at);
+
+CREATE INDEX media_item_url IF NOT EXISTS
+  FOR (m:MediaItem) ON (m.url);
+
 CREATE INDEX ingestion_run_source_id IF NOT EXISTS
   FOR (r:IngestionRun) ON (r.source_id);
 
@@ -194,10 +224,43 @@ CREATE INDEX ingestion_run_status IF NOT EXISTS
 CREATE INDEX ingestion_run_started_at IF NOT EXISTS
   FOR (r:IngestionRun) ON (r.started_at);
 
+CREATE INDEX signal_hit_signal_id IF NOT EXISTS
+  FOR (h:SignalHit) ON (h.signal_id);
+
+CREATE INDEX signal_hit_entity_key IF NOT EXISTS
+  FOR (h:SignalHit) ON (h.entity_key);
+
+CREATE INDEX signal_hit_entity_id IF NOT EXISTS
+  FOR (h:SignalHit) ON (h.entity_id);
+
+CREATE INDEX signal_hit_last_seen_at IF NOT EXISTS
+  FOR (h:SignalHit) ON (h.last_seen_at);
+
+CREATE INDEX evidence_item_source_id IF NOT EXISTS
+  FOR (i:EvidenceItem) ON (i.source_id);
+
+CREATE INDEX evidence_item_node_ref IF NOT EXISTS
+  FOR (i:EvidenceItem) ON (i.node_ref);
+
+CREATE INDEX signal_run_scope_ref IF NOT EXISTS
+  FOR (r:SignalRun) ON (r.scope_ref);
+
+CREATE INDEX signal_run_entity_key IF NOT EXISTS
+  FOR (r:SignalRun) ON (r.entity_key);
+
+CREATE INDEX alias_normalized IF NOT EXISTS
+  FOR (a:Alias) ON (a.normalized);
+
+CREATE INDEX alias_kind IF NOT EXISTS
+  FOR (a:Alias) ON (a.kind);
+
+CREATE INDEX case_event_date IF NOT EXISTS
+  FOR (e:CaseEvent) ON (e.date);
+
 // ── Fulltext Search Index ───────────────────────────────
 CREATE FULLTEXT INDEX entity_search IF NOT EXISTS
-  FOR (n:Person|Company|Contract|Bid|Sanction|Finding|Election|Amendment|Finance|DeclaredAsset|Health|Education|PublicOffice|SourceDocument|Inquiry|Convenio|Project|JudicialCase|ActoAdministrativo|GacetaTerritorial|InquiryRequirement|InquirySession|TVECOrder|EnvironmentalFile)
-  ON EACH [n.name, n.title, n.razon_social, n.document_id, n.nit, n.cedula, n.numero_documento, n.object, n.contracting_org, n.infraction, n.org, n.function, n.subject, n.text, n.topic, n.tema, n.url, n.reference, n.bid_id, n.asset_id, n.office_id, n.finance_id, n.election_id, n.finding_id, n.radicado, n.process_name, n.description, n.summary, n.case_id, n.act_id, n.gaceta_id, n.requirement_id, n.session_id, n.order_id, n.project_id, n.bpin_code, n.number, n.search_text, n.subject_name, n.entity_name, n.aggregation];
+  FOR (n:Person|Company|Contract|Bid|Sanction|Finding|Election|Amendment|Finance|DeclaredAsset|Health|Education|PublicOffice|SourceDocument|Inquiry|Convenio|Project|JudicialCase|ActoAdministrativo|GacetaTerritorial|InquiryRequirement|InquirySession|TVECOrder|EnvironmentalFile|MediaItem|SignalHit|EvidenceBundle|EvidenceItem|Investigation|Case|Alias|CaseEvent)
+  ON EACH [n.name, n.title, n.razon_social, n.document_id, n.nit, n.cedula, n.numero_documento, n.object, n.contracting_org, n.infraction, n.org, n.function, n.subject, n.text, n.topic, n.tema, n.url, n.reference, n.bid_id, n.asset_id, n.office_id, n.finance_id, n.election_id, n.finding_id, n.radicado, n.process_name, n.description, n.summary, n.case_id, n.act_id, n.gaceta_id, n.requirement_id, n.session_id, n.order_id, n.project_id, n.bpin_code, n.number, n.search_text, n.subject_name, n.entity_name, n.aggregation, n.signal_id, n.bundle_id, n.item_id, n.id, n.alias_id, n.normalized, n.value, n.event_id, n.label, n.media_id];
 
 // ── User Constraints ────────────────────────────────────
 CREATE CONSTRAINT user_email_unique IF NOT EXISTS

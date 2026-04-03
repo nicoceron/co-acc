@@ -78,6 +78,11 @@
   color: var(--text-primary);
 }
 
+.actionButton:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
 .deleteButton {
   composes: actionButton;
   color: var(--color-sanction);
@@ -91,6 +96,27 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.sectionHeaderMeta,
+.caseMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.caseMeta {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
 }
 
 .sectionTitle {
@@ -165,4 +191,163 @@
 .hint {
   color: var(--text-muted);
   font-size: var(--font-size-sm);
+}
+
+.error {
+  color: var(--color-sanction);
+  font-size: var(--font-size-sm);
+}
+
+.counterPill {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.signalList {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.signalCard {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 55%),
+    var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.signalHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.signalMetaRow {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.severityBadge,
+.signalCategory,
+.signalIdentity {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.severityBadge {
+  border: 1px solid currentColor;
+}
+
+.severityCritical {
+  color: #ff6b6b;
+}
+
+.severityHigh {
+  color: #f59f00;
+}
+
+.severityMedium {
+  color: #4dabf7;
+}
+
+.severityLow {
+  color: #69db7c;
+}
+
+.signalCategory,
+.signalIdentity {
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+
+.signalTitle {
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+}
+
+.signalMetrics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 72px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.signalMetrics strong {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+}
+
+.signalDescription {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.signalContext {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.signalContext span {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.evidenceList,
+.eventList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.evidenceItem,
+.eventRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  align-items: baseline;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: var(--space-xs);
+}
+
+.evidenceItem small,
+.eventDate {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  text-align: right;
+}
+
+.evidenceLink,
+.eventLabel {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+}
+
+.evidenceLink:hover {
+  color: var(--accent);
 }

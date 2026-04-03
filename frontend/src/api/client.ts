@@ -371,6 +371,114 @@ export interface EntityEvidenceTrailResponse {
   total_documents: number;
 }
 
+export interface SignalDefinition {
+  id: string;
+  version: number;
+  title: string;
+  description: string;
+  category: string;
+  severity: "low" | "medium" | "high" | "critical";
+  entity_types: string[];
+  public_safe: boolean;
+  reviewer_only: boolean;
+  requires_identity: string[];
+  sources_required: string[];
+  scope_type: string;
+  dedup_fields: string[];
+  pattern_id?: string | null;
+  dedup_key_template?: string | null;
+  runner?: {
+    kind: "pattern" | "cypher";
+    ref: string;
+  };
+  public_policy?: {
+    allow_public: boolean;
+    require_public_evidence: boolean;
+    require_exact_identity: boolean;
+    allowed_identity_match_types: string[];
+    allow_person_entities: boolean;
+  };
+  evidence_mapping?: {
+    item_type: string;
+    label_field?: string | null;
+    node_ref_field?: string | null;
+    summary_field?: string | null;
+  };
+}
+
+export interface SignalListItem extends SignalDefinition {
+  hit_count: number;
+  last_seen_at?: string | null;
+}
+
+export interface SignalEvidenceItem {
+  item_id: string;
+  source_id?: string | null;
+  record_id?: string | null;
+  url?: string | null;
+  label?: string | null;
+  item_type: string;
+  node_ref?: string | null;
+  observed_at?: string | null;
+  public_safe: boolean;
+  identity_match_type?: string | null;
+  identity_quality?: string | null;
+}
+
+export interface SignalHit {
+  hit_id: string;
+  run_id?: string | null;
+  signal_id: string;
+  signal_version: number;
+  title: string;
+  description: string;
+  category: string;
+  severity: "low" | "medium" | "high" | "critical";
+  public_safe: boolean;
+  reviewer_only: boolean;
+  entity_id: string;
+  entity_key: string;
+  entity_label?: string | null;
+  scope_key?: string | null;
+  scope_type: string;
+  dedup_key: string;
+  score: number;
+  identity_confidence: number;
+  identity_match_type?: string | null;
+  identity_quality?: string | null;
+  evidence_count: number;
+  evidence_bundle_id?: string | null;
+  evidence_refs: string[];
+  data: Record<string, unknown>;
+  sources: SourceAttribution[];
+  evidence_items: SignalEvidenceItem[];
+  created_at?: string | null;
+  first_seen_at?: string | null;
+  last_seen_at?: string | null;
+}
+
+export interface SignalListResponse {
+  registry_version: number;
+  last_run_id?: string | null;
+  last_refreshed_at?: string | null;
+  signals: SignalListItem[];
+}
+
+export interface SignalDetailResponse {
+  definition: SignalDefinition;
+  sample_hits: SignalHit[];
+}
+
+export interface EntitySignalsResponse {
+  entity_id: string;
+  entity_key: string;
+  total: number;
+  last_run_id?: string | null;
+  last_refreshed_at?: string | null;
+  stale: boolean;
+  signals: SignalHit[];
+}
+
 export function listPatterns(): Promise<PatternListResponse> {
   return apiFetch<PatternListResponse>("/api/v1/patterns/");
 }
@@ -392,6 +500,35 @@ export function getEntityEvidenceTrail(
   const params = new URLSearchParams({ limit: String(limit) });
   return apiFetch<EntityEvidenceTrailResponse>(
     `/api/v1/entity/${encodeURIComponent(entityId)}/evidence-trail?${params}`,
+  );
+}
+
+export function listSignals(): Promise<SignalListResponse> {
+  return apiFetch<SignalListResponse>("/api/v1/signals/");
+}
+
+export function getSignal(signalId: string): Promise<SignalDetailResponse> {
+  return apiFetch<SignalDetailResponse>(`/api/v1/signals/${encodeURIComponent(signalId)}`);
+}
+
+export function getEntitySignals(
+  entityId: string,
+  lang = "es",
+): Promise<EntitySignalsResponse> {
+  const params = new URLSearchParams({ lang });
+  return apiFetch<EntitySignalsResponse>(
+    `/api/v1/entity/${encodeURIComponent(entityId)}/signals?${params}`,
+  );
+}
+
+export function refreshEntitySignals(
+  entityId: string,
+  lang = "es",
+): Promise<EntitySignalsResponse> {
+  const params = new URLSearchParams({ lang });
+  return apiFetch<EntitySignalsResponse>(
+    `/api/v1/entity/${encodeURIComponent(entityId)}/signals/refresh?${params}`,
+    { method: "POST" },
   );
 }
 
@@ -442,11 +579,56 @@ export interface Investigation {
   id: string;
   title: string;
   description: string;
+  status?: string;
   created_at: string;
   updated_at: string;
   entity_ids: string[];
   share_token: string | null;
   share_expires_at: string | null;
+}
+
+export interface CaseEvent {
+  id: string;
+  type: string;
+  label: string;
+  date: string;
+  entity_id?: string | null;
+  signal_hit_id?: string | null;
+  evidence_bundle_id?: string | null;
+  bundle_document_count?: number | null;
+}
+
+export interface CaseEvidenceBundle {
+  bundle_id: string;
+  headline: string;
+  source_list: string[];
+  evidence_items: SignalEvidenceItem[];
+}
+
+export interface CaseSummary {
+  id: string;
+  title: string;
+  description?: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  entity_ids: string[];
+  signal_count: number;
+  public_signal_count: number;
+  last_refreshed_at?: string | null;
+  last_run_id?: string | null;
+  stale: boolean;
+}
+
+export interface CaseListResponse {
+  cases: CaseSummary[];
+  total: number;
+}
+
+export interface CaseResponse extends CaseSummary {
+  signals: SignalHit[];
+  evidence_bundles: CaseEvidenceBundle[];
+  events: CaseEvent[];
 }
 
 export interface InvestigationListResponse {
@@ -479,6 +661,22 @@ export function listInvestigations(
 
 export function getInvestigation(id: string): Promise<Investigation> {
   return apiFetch<Investigation>(`/api/v1/investigations/${encodeURIComponent(id)}`);
+}
+
+export function listCases(page = 1, size = 20): Promise<CaseListResponse> {
+  const params = new URLSearchParams({ page: String(page), size: String(size) });
+  return apiFetch<CaseListResponse>(`/api/v1/cases/?${params}`);
+}
+
+export function getCase(id: string): Promise<CaseResponse> {
+  return apiFetch<CaseResponse>(`/api/v1/cases/${encodeURIComponent(id)}`);
+}
+
+export function refreshCase(id: string, lang = "es"): Promise<CaseResponse> {
+  const params = new URLSearchParams({ lang });
+  return apiFetch<CaseResponse>(`/api/v1/cases/${encodeURIComponent(id)}/refresh?${params}`, {
+    method: "POST",
+  });
 }
 
 export function createInvestigation(

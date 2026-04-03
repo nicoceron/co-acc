@@ -6,9 +6,12 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
+  FileStack,
   FolderOpen,
   LogOut,
+  Radar,
   Search,
+  type LucideIcon,
 } from "lucide-react";
 
 import { registerActions, type Action } from "@/actions/registry";
@@ -23,11 +26,20 @@ import { useAuthStore } from "@/stores/auth";
 
 import styles from "./AppShell.module.css";
 
-const NAV_ITEMS = [
+type NavItem = {
+  path: string;
+  icon: LucideIcon;
+  labelKey: string;
+  internalOnly?: boolean;
+};
+
+const NAV_ITEMS: NavItem[] = [
   { path: "/app", icon: BarChart3, labelKey: "nav.dashboard" },
   { path: "/app/search", icon: Search, labelKey: "nav.search" },
+  { path: "/app/signals", icon: Radar, labelKey: "nav.signals", internalOnly: true },
+  { path: "/app/cases", icon: FileStack, labelKey: "nav.cases", internalOnly: true },
   { path: "/app/investigations", icon: FolderOpen, labelKey: "nav.investigations" },
-] as const;
+];
 
 export function AppShell() {
   const { t } = useTranslation();
@@ -82,6 +94,8 @@ export function AppShell() {
       if (!IS_PUBLIC_MODE) {
         base.push(
           { id: "go-investigations", label: t("command.goToInvestigations"), shortcut: "cmd+4", group: t("command.navigation"), handler: () => navigate("/app/investigations") },
+          { id: "go-signals", label: t("command.goToSignals"), shortcut: "cmd+5", group: t("command.navigation"), handler: () => navigate("/app/signals") },
+          { id: "go-cases", label: t("command.goToCases"), shortcut: "cmd+6", group: t("command.navigation"), handler: () => navigate("/app/cases") },
         );
       }
       return base;
@@ -122,6 +136,7 @@ export function AppShell() {
         <div className={styles.navItems}>
           {NAV_ITEMS
             .filter((item) => !(IS_PUBLIC_MODE && item.path.includes("investigations")))
+            .filter((item) => !(IS_PUBLIC_MODE && item.internalOnly))
             .map(({ path, icon: Icon, labelKey }) => (
               <Link
                 key={path}

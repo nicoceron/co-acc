@@ -15,6 +15,7 @@ class InvestigationResponse(BaseModel):
     id: str
     title: str
     description: str | None = None
+    status: str = "new"
     created_at: str
     updated_at: str
     entity_ids: list[str] = []

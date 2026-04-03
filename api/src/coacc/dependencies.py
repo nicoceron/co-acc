@@ -100,3 +100,20 @@ async def get_optional_user(
 
 
 CurrentUser = Annotated[UserResponse, Depends(get_current_user)]
+
+
+def can_access_reviewer_content(user: UserResponse | None) -> bool:
+    if user is None:
+        return False
+    return user.role in {"reviewer", "admin"}
+
+
+async def get_current_reviewer(
+    user: CurrentUser,
+) -> UserResponse:
+    if not can_access_reviewer_content(user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Reviewer access required")
+    return user
+
+
+CurrentReviewer = Annotated[UserResponse, Depends(get_current_reviewer)]

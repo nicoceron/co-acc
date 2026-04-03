@@ -6,16 +6,20 @@ import {
   ApiError,
   getEntityByElementId,
   getEntityPatterns,
+  getEntitySignals,
+  refreshEntitySignals,
   getBaseline,
   listInvestigations,
   addEntityToInvestigation,
   createInvestigation,
   type EntityDetail,
+  type EntitySignalsResponse,
   type PatternResponse,
   type BaselineResponse,
   type Investigation,
 } from "@/api/client";
 import { Spinner } from "@/components/common/Spinner";
+import { EntitySignalsView } from "@/components/analysis/EntitySignalsView";
 import { GraphCanvas } from "@/components/graph/GraphCanvas";
 import { ControlsSidebar } from "@/components/graph/ControlsSidebar";
 import { AnalysisNav } from "@/components/analysis/AnalysisNav";
@@ -84,6 +88,9 @@ export function EntityAnalysis() {
   const [entityLoading, setEntityLoading] = useState(true);
   const [patterns, setPatterns] = useState<PatternResponse | null>(null);
   const [baseline, setBaseline] = useState<BaselineResponse | null>(null);
+  const [signals, setSignals] = useState<EntitySignalsResponse | null>(null);
+  const [signalsLoading, setSignalsLoading] = useState(false);
+  const [signalsError, setSignalsError] = useState<string | null>(null);
   const [patternsStatus, setPatternsStatus] = useState<
     "idle" | "ready" | "unavailable" | "error"
   >("idle");
@@ -115,6 +122,8 @@ export function EntityAnalysis() {
     setTimelineEnabled(false);
     setPatterns(null);
     setBaseline(null);
+    setSignals(null);
+    setSignalsError(null);
     setPatternsStatus("idle");
   }, [id]);
 
@@ -125,6 +134,51 @@ export function EntityAnalysis() {
       setTimelineEnabled(true);
     }
   }, [activeTab]);
+
+  const signalLang = i18n.resolvedLanguage?.startsWith("es") ? "es" : "en";
+
+  const loadSignals = useCallback(async () => {
+    if (!id) return;
+    setSignalsLoading(true);
+    setSignalsError(null);
+    try {
+      const response = await getEntitySignals(id, signalLang);
+      setSignals(response);
+    } catch (error: unknown) {
+      setSignalsError(
+        error instanceof Error
+          ? error.message
+          : t("analysis.signalLoadError"),
+      );
+    } finally {
+      setSignalsLoading(false);
+    }
+  }, [id, signalLang, t]);
+
+  const refreshSignals = useCallback(async () => {
+    if (!id) return;
+    setSignalsLoading(true);
+    setSignalsError(null);
+    try {
+      const response = await refreshEntitySignals(id, signalLang);
+      setSignals(response);
+    } catch (error: unknown) {
+      setSignalsError(
+        error instanceof Error
+          ? error.message
+          : t("analysis.signalLoadError"),
+      );
+    } finally {
+      setSignalsLoading(false);
+    }
+  }, [id, signalLang, t]);
+
+  useEffect(() => {
+    if (activeTab === "signals" && !loadedSectionsRef.current.has("signals")) {
+      loadedSectionsRef.current.add("signals");
+      void loadSignals();
+    }
+  }, [activeTab, loadSignals]);
 
   // Fetch entity only on mount — patterns and baseline are deferred
   useEffect(() => {
@@ -390,6 +444,18 @@ export function EntityAnalysis() {
               loading={timelineLoading}
               hasMore={timelineHasMore}
               onLoadMore={timelineLoadMore}
+            />
+          )}
+
+          {activeTab === "signals" && (
+            <EntitySignalsView
+              signals={signals}
+              loading={signalsLoading}
+              error={signalsError}
+              onRefresh={() => {
+                loadedSectionsRef.current.add("signals");
+                void refreshSignals();
+              }}
             />
           )}
 
