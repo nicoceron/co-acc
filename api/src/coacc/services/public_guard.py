@@ -15,6 +15,19 @@ SENSITIVE_PROP_KEYS = {
     "doc_raw",
     "masked_doc",
 }
+PUBLIC_SIGNAL_DENYLIST = {
+    "name",
+    "full_name",
+    "supplier_name",
+    "vendor_name",
+    "person_name",
+    "beneficiary_name",
+    "owner_name",
+    "document_id",
+    "supplier_document_id",
+    "person_document_id",
+    "nit",
+}
 
 IDENTIFIER_PATTERN = re.compile(r"^\d{5,14}$")
 
@@ -93,3 +106,13 @@ def ensure_investigations_enabled() -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Investigation endpoints disabled in public mode",
         )
+
+
+def public_signal_payload_leaks_identity(data: dict[str, object]) -> bool:
+    for key, value in data.items():
+        lowered = key.lower()
+        if lowered in PUBLIC_SIGNAL_DENYLIST or "document" in lowered or "cedula" in lowered:
+            return True
+        if lowered.endswith("_name") and value:
+            return True
+    return False

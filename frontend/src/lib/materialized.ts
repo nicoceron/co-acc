@@ -134,6 +134,15 @@ export interface MaterializedPracticeGroup {
   people: MaterializedPracticeGroupItem[];
 }
 
+export interface MaterializedTerritorialHit {
+  divipola?: string | null;
+  municipality: string;
+  department?: string | null;
+  sector?: string | null;
+  hits: number;
+  geometry?: GeoJSON.Geometry | null;
+}
+
 export interface MaterializedWatchlistCompany extends PrioritizedCompany {
   case_file?: string | null;
 }
@@ -166,6 +175,8 @@ export interface MaterializedResultsPack {
     territory_watchlist_count: number;
   };
   practice_summary: Array<{ label: string; count: number }>;
+  active_sectors?: string[];
+  territorial_hits?: MaterializedTerritorialHit[];
   practice_groups?: MaterializedPracticeGroup[];
   investigations?: MaterializedInvestigation[];
   featured_companies: MaterializedLead[];

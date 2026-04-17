@@ -1,0 +1,55 @@
+.sectorPage {
+  width: min(74rem, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: clamp(3rem, 7vw, 5rem) 0;
+}
+
+.eyebrow {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  max-width: 12ch;
+  margin-top: 0.8rem;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 0.92;
+}
+
+.summary {
+  max-width: 42rem;
+  margin-top: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.item {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.item a {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1.05;
+  text-decoration: none;
+}
+
+.item p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}

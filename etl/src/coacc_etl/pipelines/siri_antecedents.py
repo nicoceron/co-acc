@@ -144,4 +144,3 @@ class SiriAntecedentsPipeline(Pipeline):
             loaded += loader.run_query(query, self.person_rels)
 
         self.rows_loaded = loaded
-

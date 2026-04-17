@@ -4,10 +4,10 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-from coacc.models.entity import SourceAttribution
+from coacc.models.entity import SourceAttribution  # noqa: TC001
 
 SignalSeverity = Literal["low", "medium", "high", "critical"]
-SignalRunnerKind = Literal["pattern", "cypher"]
+SignalRunnerKind = Literal["pattern", "cypher", "duckdb"]
 
 
 class SignalRunner(BaseModel):
@@ -40,6 +40,10 @@ class SignalDefinition(BaseModel):
     entity_types: list[str] = Field(default_factory=list)
     public_safe: bool = False
     reviewer_only: bool = False
+    engine: SignalRunnerKind | None = None
+    sources: list[str] = Field(default_factory=list)
+    public_presentation: str | None = None
+    review_only_expansion: str | None = None
     requires_identity: list[str] = Field(default_factory=list)
     sources_required: list[str] = Field(default_factory=list)
     scope_type: str = "entity"
@@ -59,8 +63,16 @@ class SignalDefinition(BaseModel):
         upgraded = dict(data)
         pattern_id = upgraded.get("pattern_id")
         runner = upgraded.get("runner")
+        engine = upgraded.get("engine")
         if runner is None and isinstance(pattern_id, str) and pattern_id.strip():
             upgraded["runner"] = {"kind": "pattern", "ref": pattern_id.strip()}
+        if runner is None and isinstance(engine, str) and engine.strip():
+            upgraded["runner"] = {"kind": engine.strip(), "ref": upgraded["id"]}
+        if upgraded.get("engine") is None and isinstance(upgraded.get("runner"), dict):
+            upgraded["engine"] = upgraded["runner"].get("kind")
+
+        if not upgraded.get("sources") and upgraded.get("sources_required"):
+            upgraded["sources"] = upgraded["sources_required"]
 
         public_policy = upgraded.get("public_policy")
         requires_identity = [

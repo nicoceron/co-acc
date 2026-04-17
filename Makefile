@@ -3,7 +3,7 @@ include .env
 export $(shell sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' .env)
 endif
 
-.PHONY: dev stop api etl frontend demo demo-national demo-bogota demo-synthetic build-watchlist-snapshots materialize-results scan-real-pattern-coverage clean-data seed lint type-check test test-api test-etl test-frontend check \
+.PHONY: dev stop api etl frontend demo demo-national demo-bogota demo-synthetic build-watchlist-snapshots materialize-results scan-real-pattern-coverage clean-data seed lint type-check test test-api test-etl test-frontend check lake-init lake-pipeline lake-compact materialize-deps materialize-all \
 	validate-known-cases \
 	sync-colombia-registry generate-pipeline-status generate-source-summary \
 	download-secop-integrado download-secop-sanciones download-secop-proveedores \
@@ -35,6 +35,7 @@ endif
 	etl-igac-transacciones etl-company-registry-c82u etl-all
 
 NATIONAL_PROCUREMENT_SOURCES := secop_integrado,secop_sanctions,secop_suppliers,secop_ii_processes,secop_offers,secop_ii_contracts,secop_invoices,secop_payment_plans,secop_contract_execution,secop_contract_additions,secop_contract_suspensions,secop_interadmin_agreements,sigep_public_servants,sigep_sensitive_positions,asset_disclosures,conflict_disclosures,health_providers,cuentas_claras_income_2019,paco_sanctions,siri_antecedents,fiscal_responsibility,fiscal_findings,sgr_projects,sgr_expense_execution
+LAKE_ROOT ?= /var/lib/coacc/lake
 
 setup-env:
 	bash scripts/init_env.sh
@@ -453,3 +454,18 @@ check: lint type-check test
 
 validate-known-cases:
 	curl -s 'http://localhost:8000/api/v1/meta/validation/known-cases' | jq '.'
+
+lake-init:
+	mkdir -p $(LAKE_ROOT)/raw $(LAKE_ROOT)/curated $(LAKE_ROOT)/meta
+
+lake-pipeline:
+	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python -m coacc_etl.runner run --pipeline="$(PIPELINE)" --to-lake --data-dir ../data
+
+lake-compact:
+	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python -m coacc_etl.lakehouse.compactor --older-than=30d
+
+materialize-deps:
+	cd api && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python -m coacc.services.signal_materializer --advanced-sources="$(SOURCES)"
+
+materialize-all:
+	cd api && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python -m coacc.services.signal_materializer --all
