@@ -6,6 +6,7 @@ SET
   hit.run_id = $run_id,
   hit.signal_id = $signal_id,
   hit.signal_version = $signal_version,
+  hit.engine = $engine,
   hit.title = $title,
   hit.description = $description,
   hit.category = $category,

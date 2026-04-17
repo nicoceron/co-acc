@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
+import { ChoroplethMunicipal } from "@/components/maps/ChoroplethMunicipal";
 import { formatSignalLabel } from "@/lib/evidence";
 import {
   loadMaterializedResultsPack,
   type MaterializedInvestigation,
+  type MaterializedTerritorialHit,
   type MaterializedResultsPack,
 } from "@/lib/materialized";
 import { isCorroboratedInvestigation, isFreshInvestigation } from "@/lib/review";
@@ -46,6 +48,49 @@ const DATA_SOURCES = [
   "REPS Salud",
 ];
 
+function sectorKey(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function investigationMatchesSector(investigation: MaterializedInvestigation, sector: string | null) {
+  if (!sector) return true;
+  const selected = sectorKey(sector);
+  return [investigation.category, ...investigation.tags].some((value) => sectorKey(value) === selected);
+}
+
+function SectorChips({
+  sectors,
+  selected,
+  onSelect,
+}: {
+  sectors: string[];
+  selected: string | null;
+  onSelect: (sector: string | null) => void;
+}) {
+  if (sectors.length === 0) return null;
+  return (
+    <div className={styles.sectorChips} aria-label="Filtrar por sector">
+      <button
+        type="button"
+        className={`${styles.sectorChip} ${selected === null ? styles.sectorChipActive : ""}`}
+        onClick={() => onSelect(null)}
+      >
+        Todos
+      </button>
+      {sectors.map((sector) => (
+        <button
+          key={sector}
+          type="button"
+          className={`${styles.sectorChip} ${selected === sector ? styles.sectorChipActive : ""}`}
+          onClick={() => onSelect(sector)}
+        >
+          {formatSignalLabel(sector)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function InvestigationFeature({
   investigation,
   featured = false,
@@ -84,6 +129,8 @@ export function Landing() {
   const sourcesRef = useReveal();
 
   const [pack, setPack] = useState<MaterializedResultsPack | null>(null);
+  const [selectedSector, setSelectedSector] = useState<string | null>(null);
+  const [municipalityFilter, setMunicipalityFilter] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -91,7 +138,41 @@ export function Landing() {
     return () => controller.abort();
   }, []);
 
-  const investigations = useMemo(() => pack?.investigations ?? [], [pack]);
+  const sectors = useMemo(() => {
+    if (pack?.active_sectors?.length) return pack.active_sectors;
+    const derived = new Set<string>();
+    for (const investigation of pack?.investigations ?? []) {
+      if (investigation.category) derived.add(investigation.category);
+      for (const tag of investigation.tags) derived.add(tag);
+    }
+    return Array.from(derived).slice(0, 8);
+  }, [pack]);
+  const territorialHits: MaterializedTerritorialHit[] = useMemo(() => {
+    if (pack?.territorial_hits?.length) return pack.territorial_hits;
+    return (pack?.watchlists.territories ?? []).map((territory) => ({
+      divipola: territory.territory_id,
+      municipality: territory.municipality ?? territory.territory_name,
+      department: territory.department,
+      sector: "procurement",
+      hits: Math.max(1, Math.round(territory.suspicion_score)),
+    }));
+  }, [pack]);
+  const filteredTerritorialHits = useMemo(
+    () => territorialHits.filter((row) => {
+      const sectorOk = !selectedSector || !row.sector || sectorKey(row.sector) === sectorKey(selectedSector);
+      const municipalityOk = !municipalityFilter
+        || row.divipola === municipalityFilter
+        || row.municipality === municipalityFilter;
+      return sectorOk && municipalityOk;
+    }),
+    [municipalityFilter, selectedSector, territorialHits],
+  );
+  const investigations = useMemo(
+    () => (pack?.investigations ?? []).filter((investigation) => (
+      investigationMatchesSector(investigation, selectedSector)
+    )),
+    [pack, selectedSector],
+  );
   const freshInvestigations = useMemo(
     () => investigations.filter((investigation) => isFreshInvestigation(investigation)),
     [investigations],
@@ -152,6 +233,33 @@ export function Landing() {
               )}
             </ol>
           </aside>
+        </div>
+      </section>
+
+      <section className={styles.sectorAtlas}>
+        <div className={styles.sectorAtlasInner}>
+          <div className={styles.sectionHead}>
+            <div>
+              <span className={styles.sectionLabel}>Territorio</span>
+              <h2 className={styles.sectionHeading}>Lectura por sector y municipio.</h2>
+            </div>
+            {municipalityFilter ? (
+              <button
+                type="button"
+                className={styles.inlineAction}
+                onClick={() => setMunicipalityFilter(null)}
+              >
+                Limpiar municipio
+              </button>
+            ) : null}
+          </div>
+          <SectorChips sectors={sectors} selected={selectedSector} onSelect={setSelectedSector} />
+          <div className={styles.sectorMapShell}>
+            <ChoroplethMunicipal
+              data={filteredTerritorialHits}
+              onMunicipalityClick={(divipola) => setMunicipalityFilter(divipola)}
+            />
+          </div>
         </div>
       </section>
 

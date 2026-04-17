@@ -1,4 +1,5 @@
 .hero,
+.sectorAtlas,
 .findings,
 .howItWorks,
 .sources,
@@ -15,6 +16,7 @@
 }
 
 .hero::before,
+.sectorAtlas::before,
 .findings::before,
 .howItWorks::before,
 .sources::before,
@@ -30,6 +32,7 @@
 }
 
 .heroContent,
+.sectorAtlasInner,
 .findingsInner,
 .howItWorksInner,
 .sourcesInner,
@@ -38,6 +41,76 @@
   z-index: 1;
   width: min(74rem, calc(100% - 2rem));
   margin: 0 auto;
+}
+
+.sectorAtlas {
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklab, var(--bg-primary) 94%, var(--accent));
+}
+
+.sectorAtlasInner {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(2rem, 5vw, 3.5rem) 0;
+}
+
+.sectorChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.sectorChip {
+  min-height: 2.45rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sectorChip:hover,
+.sectorChipActive {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.sectorMapShell {
+  overflow: hidden;
+  min-height: 16rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.sectorMapShell > div:first-child:not(:has(canvas)) {
+  display: grid;
+  gap: 0;
+}
+
+.sectorMapShell button {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  min-height: 3.25rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sectorMapShell button:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .heroContent {
