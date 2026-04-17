@@ -211,7 +211,7 @@ def test_entity_connections_query_includes_same_as() -> None:
     CypherLoader.clear_cache()
     cypher = CypherLoader.load("entity_connections")
     assert "SAME_AS" in cypher
-    assert "POSSIBLE_SAME_AS" in cypher
+    assert "POSSIBLY_SAME_AS" in cypher
     assert "$include_probable" in cypher
 
 

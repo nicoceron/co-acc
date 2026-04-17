@@ -39,9 +39,11 @@ export function InvestigationDetail() {
     [investigations, activeInvestigationId],
   );
 
+  const investigationId = investigation?.id;
+
   useEffect(() => {
     let cancelled = false;
-    if (!investigation) {
+    if (!investigationId) {
       setCaseData(null);
       setCaseError(null);
       setCaseLoading(false);
@@ -52,7 +54,7 @@ export function InvestigationDetail() {
 
     setCaseLoading(true);
     setCaseError(null);
-    getCase(investigation.id)
+    getCase(investigationId)
       .then((response) => {
         if (!cancelled) {
           setCaseData(response);
@@ -77,7 +79,7 @@ export function InvestigationDetail() {
     return () => {
       cancelled = true;
     };
-  }, [investigation?.id, investigation?.entity_ids, t]);
+  }, [investigationId, t]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);

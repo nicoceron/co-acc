@@ -10,7 +10,12 @@ from coacc.services.source_registry import load_source_registry, source_registry
 async def test_health_returns_ok(client: AsyncClient) -> None:
     response = await client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert "last_signal_run_id" in payload
+    assert "last_signal_run_at" in payload
+    assert "last_signal_run_status" in payload
+    assert "last_signal_hit_count" in payload
     assert response.headers["x-content-type-options"] == "nosniff"
     assert response.headers["x-frame-options"] == "DENY"
     assert response.headers["referrer-policy"] == "no-referrer"
@@ -179,6 +184,7 @@ async def test_meta_prioritized_company_watchlist(client: AsyncClient) -> None:
     import coacc.routers.meta as meta_module
 
     meta_module._company_watchlist_cache = {}
+    meta_module._snapshot_cache = {}
 
     with patch(
         "coacc.routers.meta.execute_query",
@@ -209,10 +215,14 @@ async def test_meta_prioritized_company_watchlist(client: AsyncClient) -> None:
                 "execution_gap_invoice_total": 47_000_000.0,
                 "commitment_gap_contract_count": 1,
                 "commitment_gap_total": 8_000_000.0,
+                "sanctioned_still_receiving_contract_count": 0,
+                "sanctioned_still_receiving_total": 0.0,
+                "split_contract_group_count": 0,
+                "split_contract_total": 0.0,
                 "official_names": ["Ana Perez"],
             }
         ],
-    ):
+    ), patch("coacc.routers.meta._load_watchlist_snapshot", return_value=None):
         response = await client.get("/api/v1/meta/watchlist/companies?limit=5")
 
     assert response.status_code == 200
