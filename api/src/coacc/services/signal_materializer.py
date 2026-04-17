@@ -1,14 +1,19 @@
 from __future__ import annotations
 
+import argparse
+import asyncio
 import hashlib
 import json
 import logging
 import re
 import subprocess
 import uuid
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
+
+from neo4j import AsyncGraphDatabase
 
 from coacc.config import settings
 from coacc.models.entity import SourceAttribution
@@ -19,6 +24,7 @@ from coacc.models.signal import (
     SignalHitResponse,
     SignalListItem,
 )
+from coacc.services import dependency_registry, lakehouse_query
 from coacc.services.neo4j_service import execute_query, execute_query_single
 from coacc.services.signal_registry import (
     get_signal_definition,
@@ -30,6 +36,7 @@ from coacc.services.signal_registry import (
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    import duckdb
     from neo4j import AsyncSession, Record
 
     from coacc.services.intelligence_provider import IntelligenceProvider
@@ -66,6 +73,15 @@ _IDENTIFIER_KEYS = (
 )
 _PERSON_LABELS = {"Person", "Partner"}
 _SEVERITY_RANK = {"critical": 4, "high": 3, "medium": 2, "low": 1}
+
+
+@dataclass(frozen=True)
+class MaterializationResult:
+    signal_id: str
+    run_id: str
+    hit_count: int
+    skipped: bool = False
+    missing_required: list[str] | None = None
 
 
 def _clean_identifier(raw: str) -> str:
@@ -424,6 +440,226 @@ def _build_hit(
     )
 
 
+async def _persist_hit(session: AsyncSession, hit: SignalHitResponse, *, engine: str) -> None:
+    await execute_query(
+        session,
+        "signal_upsert",
+        {
+            "run_id": hit.run_id,
+            "entity_id": hit.entity_id,
+            "entity_key": hit.entity_key,
+            "entity_label": hit.entity_label,
+            "hit_id": hit.hit_id,
+            "signal_id": hit.signal_id,
+            "signal_version": hit.signal_version,
+            "engine": engine,
+            "title": hit.title,
+            "description": hit.description,
+            "category": hit.category,
+            "severity": hit.severity,
+            "public_safe": hit.public_safe,
+            "reviewer_only": hit.reviewer_only,
+            "scope_key": hit.scope_key,
+            "scope_type": hit.scope_type,
+            "dedup_key": hit.dedup_key,
+            "score": hit.score,
+            "identity_confidence": hit.identity_confidence,
+            "identity_match_type": hit.identity_match_type,
+            "identity_quality": hit.identity_quality,
+            "evidence_count": hit.evidence_count,
+            "evidence_refs": hit.evidence_refs,
+            "data_json": json.dumps(hit.data, ensure_ascii=True, sort_keys=True),
+            "sources": _as_source_rows(hit.sources),
+            "created_at": hit.created_at,
+            "first_seen_at": hit.first_seen_at,
+            "last_seen_at": hit.last_seen_at,
+            "bundle_id": hit.evidence_bundle_id,
+            "bundle_headline": hit.title,
+            "bundle_summary": hit.description,
+            "evidence_items": [
+                {
+                    "item_id": item.item_id,
+                    "source_id": item.source_id,
+                    "record_id": item.record_id,
+                    "url": item.url,
+                    "label": item.label,
+                    "item_type": item.item_type,
+                    "node_ref": item.node_ref,
+                    "observed_at": item.observed_at,
+                    "public_safe": item.public_safe,
+                    "identity_match_type": item.identity_match_type,
+                    "identity_quality": item.identity_quality,
+                }
+                for item in hit.evidence_items
+            ],
+        },
+    )
+
+
+def _duckdb_rows(con: duckdb.DuckDBPyConnection, sql: str) -> list[dict[str, Any]]:
+    cursor = con.execute(sql)
+    columns = [item[0] for item in cursor.description or []]
+    return [dict(zip(columns, row, strict=False)) for row in cursor.fetchall()]
+
+
+def _duckdb_entity_context(row: Mapping[str, Any]) -> dict[str, str | None]:
+    entity_id = str(row.get("entity_id") or row.get("entity_key") or row.get("scope_key") or "")
+    entity_key = str(row.get("entity_key") or entity_id)
+    entity_label = row.get("entity_label")
+    return {
+        "entity_id": entity_id,
+        "entity_key": entity_key,
+        "entity_label": str(entity_label) if entity_label is not None else None,
+    }
+
+
+async def materialize_via_duckdb(
+    session: AsyncSession,
+    sig_id: str,
+    con: duckdb.DuckDBPyConnection | None = None,
+) -> MaterializationResult:
+    definition = get_signal_definition(sig_id)
+    if definition is None:
+        raise ValueError(f"Unknown signal: {sig_id}")
+    if definition.runner.kind != "duckdb":
+        raise ValueError(f"Signal {sig_id} is not a DuckDB signal")
+
+    can_run, missing = dependency_registry.can_materialize(definition.id)
+    run_id = str(uuid.uuid4())
+    observed_at = _now_iso()
+    registry = load_signal_registry()
+    git_sha = _git_sha()
+    severity = dependency_registry.severity_for_sources(definition.id, definition.severity)
+    active_definition = definition.model_copy(update={"severity": severity})
+
+    await execute_query(
+        session,
+        "signal_run_upsert",
+        {
+            "run_id": run_id,
+            "registry_version": registry.registry_version,
+            "entity_id": None,
+            "entity_key": None,
+            "scope_type": "signal",
+            "scope_ref": definition.id,
+            "lang": "es",
+            "trigger": "dependency",
+            "created_by": None,
+            "git_sha": git_sha,
+            "data_snapshot_id": None,
+            "started_at": observed_at,
+            "finished_at": None,
+            "status": "running" if can_run else "skipped",
+            "hit_count": 0,
+        },
+    )
+    if not can_run:
+        await execute_query(
+            session,
+            "signal_run_upsert",
+            {
+                "run_id": run_id,
+                "registry_version": registry.registry_version,
+                "entity_id": None,
+                "entity_key": None,
+                "scope_type": "signal",
+                "scope_ref": definition.id,
+                "lang": "es",
+                "trigger": "dependency",
+                "created_by": None,
+                "git_sha": git_sha,
+                "data_snapshot_id": None,
+                "started_at": observed_at,
+                "finished_at": _now_iso(),
+                "status": "skipped",
+                "hit_count": 0,
+            },
+        )
+        return MaterializationResult(
+            definition.id,
+            run_id,
+            0,
+            skipped=True,
+            missing_required=missing,
+        )
+
+    owns_connection = con is None
+    if con is None:
+        con = lakehouse_query.connect(read_only=True)
+    try:
+        for source in active_definition.sources or active_definition.sources_required:
+            lakehouse_query.register_source(con, source)
+        sql_path = lakehouse_query.signal_sql_path(active_definition.id)
+        rows = _duckdb_rows(con, sql_path.read_text(encoding="utf-8"))
+    finally:
+        if owns_connection:
+            con.close()
+
+    sources = [
+        SourceAttribution(database=source)
+        for source in (active_definition.sources or active_definition.sources_required)
+    ]
+    hits_by_id: dict[str, SignalHitResponse] = {}
+    for row in rows:
+        normalized = _normalize_pattern_data(row)
+        hit = _build_hit(
+            active_definition,
+            _duckdb_entity_context(row),
+            normalized,
+            sources,
+            active_definition.description,
+            run_id,
+            observed_at,
+        )
+        await _persist_hit(session, hit, engine="duckdb")
+        hits_by_id[hit.hit_id] = hit
+
+    await execute_query(
+        session,
+        "signal_run_upsert",
+        {
+            "run_id": run_id,
+            "registry_version": registry.registry_version,
+            "entity_id": None,
+            "entity_key": None,
+            "scope_type": "signal",
+            "scope_ref": definition.id,
+            "lang": "es",
+            "trigger": "dependency",
+            "created_by": None,
+            "git_sha": git_sha,
+            "data_snapshot_id": None,
+            "started_at": observed_at,
+            "finished_at": _now_iso(),
+            "status": "completed",
+            "hit_count": len(hits_by_id),
+        },
+    )
+    return MaterializationResult(definition.id, run_id, len(hits_by_id))
+
+
+async def materialize_dependency_signals(
+    session: AsyncSession,
+    *,
+    advanced_sources: set[str] | None = None,
+    all_signals: bool = False,
+) -> list[MaterializationResult]:
+    definitions = list_signal_definitions()
+    if all_signals:
+        selected = [definition for definition in definitions if definition.runner.kind == "duckdb"]
+    else:
+        signal_ids = dependency_registry.signals_to_rerun(advanced_sources or set())
+        selected = [
+            definition
+            for definition in definitions
+            if definition.id in set(signal_ids) and definition.runner.kind == "duckdb"
+        ]
+    results: list[MaterializationResult] = []
+    for definition in selected:
+        results.append(await materialize_via_duckdb(session, definition.id))
+    return results
+
+
 async def _execute_signal_runner(
     session: AsyncSession,
     definition: SignalDefinition,
@@ -541,58 +777,7 @@ async def refresh_entity_signals(
                 run_id,
                 observed_at,
             )
-            await execute_query(
-                session,
-                "signal_upsert",
-                {
-                    "run_id": run_id,
-                    "entity_id": hit.entity_id,
-                    "entity_key": hit.entity_key,
-                    "entity_label": hit.entity_label,
-                    "hit_id": hit.hit_id,
-                    "signal_id": hit.signal_id,
-                    "signal_version": hit.signal_version,
-                    "title": hit.title,
-                    "description": hit.description,
-                    "category": hit.category,
-                    "severity": hit.severity,
-                    "public_safe": hit.public_safe,
-                    "reviewer_only": hit.reviewer_only,
-                    "scope_key": hit.scope_key,
-                    "scope_type": hit.scope_type,
-                    "dedup_key": hit.dedup_key,
-                    "score": hit.score,
-                    "identity_confidence": hit.identity_confidence,
-                    "identity_match_type": hit.identity_match_type,
-                    "identity_quality": hit.identity_quality,
-                    "evidence_count": hit.evidence_count,
-                    "evidence_refs": hit.evidence_refs,
-                    "data_json": json.dumps(hit.data, ensure_ascii=True, sort_keys=True),
-                    "sources": _as_source_rows(hit.sources),
-                    "created_at": hit.created_at,
-                    "first_seen_at": hit.first_seen_at,
-                    "last_seen_at": hit.last_seen_at,
-                    "bundle_id": hit.evidence_bundle_id,
-                    "bundle_headline": hit.title,
-                    "bundle_summary": hit.description,
-                    "evidence_items": [
-                        {
-                            "item_id": item.item_id,
-                            "source_id": item.source_id,
-                            "record_id": item.record_id,
-                            "url": item.url,
-                            "label": item.label,
-                            "item_type": item.item_type,
-                            "node_ref": item.node_ref,
-                            "observed_at": item.observed_at,
-                            "public_safe": item.public_safe,
-                            "identity_match_type": item.identity_match_type,
-                            "identity_quality": item.identity_quality,
-                        }
-                        for item in hit.evidence_items
-                    ],
-                },
-            )
+            await _persist_hit(session, hit, engine=definition.runner.kind)
             hits_by_id[hit.hit_id] = hit
 
     finished_at = _now_iso()
@@ -811,3 +996,37 @@ def filter_signal_hits_for_viewer(
     if can_view_reviewer:
         return hits
     return [hit for hit in hits if not hit.reviewer_only]
+
+
+async def _run_cli(args: argparse.Namespace) -> None:
+    driver = AsyncGraphDatabase.driver(
+        settings.neo4j_uri,
+        auth=(settings.neo4j_user, settings.neo4j_password),
+    )
+    try:
+        async with driver.session(database=settings.neo4j_database) as session:
+            results = await materialize_dependency_signals(
+                session,
+                advanced_sources=(
+                    set(args.advanced_sources.split(",")) if args.advanced_sources else None
+                ),
+                all_signals=args.all,
+            )
+    finally:
+        await driver.close()
+
+    for result in results:
+        status = "skipped" if result.skipped else "completed"
+        print(f"{result.signal_id}: {status}, hits={result.hit_count}, run={result.run_id}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--advanced-sources", default="")
+    parser.add_argument("--all", action="store_true")
+    args = parser.parse_args()
+    asyncio.run(_run_cli(args))
+
+
+if __name__ == "__main__":
+    main()

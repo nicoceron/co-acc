@@ -797,3 +797,255 @@ signals:
       item_type: reviewer_reference
       node_ref_field: node_ref
     dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: pida_full30_meta
+    version: 1
+    engine: duckdb
+    title: PIDA category convergence by territory
+    description: Flags territories where procurement records span three or more PIDA categories.
+    category: cross_sector
+    severity: high
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_integrado, pida_category_hits]
+    sources_required: [secop_integrado]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: pida_full30_meta}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: reincorporacion_sirr_vs_contractor
+    version: 1
+    engine: duckdb
+    title: Reincorporation registry overlap with supplier base
+    description: Counts contractor overlap with reincorporation records without surfacing person names.
+    category: cross_sector
+    severity: high
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [sirr_reincorporacion, secop_integrado, secop_suppliers]
+    sources_required: [secop_suppliers]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: reincorporacion_sirr_vs_contractor}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: damnificados_emergency_contract_overlap
+    version: 1
+    engine: duckdb
+    title: Emergency beneficiary territory overlaps concentrated awards
+    description: Flags emergency-contract territories where affected-population records and contract additions converge.
+    category: cross_sector
+    severity: high
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [ungrd_damnificados, secop_integrado, secop_contract_additions, secop_budget_commitments]
+    sources_required: [secop_integrado, secop_contract_additions]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: damnificados_emergency_contract_overlap}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: pnis_familia_municipality_vs_award
+    version: 1
+    engine: duckdb
+    title: PNIS family territory overlaps award concentration
+    description: Compares PNIS and PDET territories against procurement concentration.
+    category: cross_sector
+    severity: medium
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_integrado, pnis_beneficiarios, pdet_municipios]
+    sources_required: [secop_integrado]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: pnis_familia_municipality_vs_award}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: dane_pobreza_vs_award_ratio
+    version: 1
+    engine: duckdb
+    title: Poverty indicators versus territorial award value
+    description: Flags high poverty or IPM territories with elevated per-capita award exposure.
+    category: cross_sector
+    severity: medium
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_integrado, dane_pobreza_monetaria, dane_ipm]
+    sources_required: [secop_integrado]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: dane_pobreza_vs_award_ratio}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: catastro_igac_vs_vendor_address
+    version: 1
+    engine: duckdb
+    title: Multiple supplier domiciles on the same cadastral parcel
+    description: Aggregates suppliers declaring the same cadastral parcel or normalized address.
+    category: property
+    severity: high
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_suppliers, igac_parcelas]
+    sources_required: [secop_suppliers]
+    scope_type: property
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: catastro_igac_vs_vendor_address}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: anim_inmueble_vs_vendor_domicilio
+    version: 1
+    engine: duckdb
+    title: Supplier domicile overlaps state-owned property
+    description: Flags territories where supplier domiciles align with state-owned property records.
+    category: property
+    severity: critical
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_suppliers, anim_inmuebles]
+    sources_required: [secop_suppliers]
+    scope_type: property
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: anim_inmueble_vs_vendor_domicilio}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: iniciativas_33007_municipal_vs_award
+    version: 1
+    engine: duckdb
+    title: Presidential initiative territories versus awards
+    description: Compares initiative territories against supplier concentration in procurement awards.
+    category: cross_sector
+    severity: medium
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_integrado, presidencia_iniciativas_33007]
+    sources_required: [secop_integrado]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: iniciativas_33007_municipal_vs_award}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: mineria_titulo_vs_anla_license_vs_contractor
+    version: 1
+    engine: duckdb
+    title: Mining title, ANLA license, and contractor chain
+    description: Detects territories where the same contractor chain appears across mining titles, environmental licenses, and awards.
+    category: environment
+    severity: high
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_integrado, anm_titulos, anla_licencias]
+    sources_required: [secop_integrado]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: mineria_titulo_vs_anla_license_vs_contractor}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: upme_subsidio_energia_vs_vendor
+    version: 1
+    engine: duckdb
+    title: Energy subsidy recipient overlaps supplier base
+    description: Counts territories where subsidy recipients also appear in supplier records.
+    category: energy
+    severity: medium
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_suppliers, upme_subsidios]
+    sources_required: [secop_suppliers]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: upme_subsidio_energia_vs_vendor}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: dane_micronegocio_vs_secop_subcontract
+    version: 1
+    engine: duckdb
+    title: Microbusiness record overlaps subcontract execution
+    description: Flags large subcontract execution rows where the subcontractor appears in microbusiness data.
+    category: procurement
+    severity: low
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_contract_execution, dane_micronegocios]
+    sources_required: [secop_contract_execution]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: dane_micronegocio_vs_secop_subcontract}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: registro_actores_deporte_vs_funcionario_pdet
+    version: 1
+    engine: duckdb
+    title: Sports actor registry overlaps public servants
+    description: Aggregates PDET-territory overlap between sports actor records and public servant records.
+    category: conflict
+    severity: medium
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [sigep_public_servants, mindeporte_actores]
+    sources_required: [sigep_public_servants]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: registro_actores_deporte_vs_funcionario_pdet}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: bpin_dnp_vs_pida27_obras_prioritarias
+    version: 1
+    engine: duckdb
+    title: BPIN projects on priority infrastructure list
+    description: Flags BPIN-backed procurement links that also appear in priority infrastructure records.
+    category: projects
+    severity: high
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_process_bpin, dnp_obras_prioritarias, secop_integrado]
+    sources_required: [secop_process_bpin]
+    scope_type: project
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: bpin_dnp_vs_pida27_obras_prioritarias}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}
+
+  - id: pida5_pida27_pida4_chain
+    version: 1
+    engine: duckdb
+    title: Sanctioned supplier on priority infrastructure chain
+    description: Flags territories where sanctioned suppliers appear on PIDA priority infrastructure award chains.
+    category: cross_sector
+    severity: critical
+    public_safe: true
+    public_presentation: territorial
+    review_only_expansion: by_entity
+    sources: [secop_integrado, secop_sanctions, dnp_obras_prioritarias]
+    sources_required: [secop_integrado, secop_sanctions]
+    scope_type: territory
+    dedup_fields: [scope_key]
+    runner: {kind: duckdb, ref: pida5_pida27_pida4_chain}
+    public_policy: {allow_public: true, require_public_evidence: true, require_exact_identity: false, allowed_identity_match_types: [], allow_person_entities: false}
+    evidence_mapping: {item_type: aggregate_reference, label_field: municipality}

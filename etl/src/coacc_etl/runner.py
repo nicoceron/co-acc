@@ -1,3 +1,4 @@
+import importlib
 import logging
 import os
 from datetime import UTC, datetime
@@ -34,6 +35,7 @@ from coacc_etl.pipelines.environmental_files_corantioquia import (
 )
 from coacc_etl.pipelines.fiscal_findings import FiscalFindingsPipeline
 from coacc_etl.pipelines.fiscal_responsibility import FiscalResponsibilityPipeline
+from coacc_etl.pipelines.gacetas_territoriales import GacetasTerritorialesPipeline
 from coacc_etl.pipelines.health_providers import HealthProvidersPipeline
 from coacc_etl.pipelines.higher_ed_directors import HigherEdDirectorsPipeline
 from coacc_etl.pipelines.higher_ed_enrollment import HigherEdEnrollmentPipeline
@@ -49,6 +51,7 @@ from coacc_etl.pipelines.pte_top_contracts import PteTopContractsPipeline
 from coacc_etl.pipelines.registraduria_death_status_checks import (
     RegistraduriaDeathStatusChecksPipeline,
 )
+from coacc_etl.pipelines.rub_beneficial_owners import RubBeneficialOwnersPipeline
 from coacc_etl.pipelines.rues_chambers import RuesChambersPipeline
 from coacc_etl.pipelines.secop_additional_locations import SecopAdditionalLocationsPipeline
 from coacc_etl.pipelines.secop_budget_commitments import SecopBudgetCommitmentsPipeline
@@ -77,8 +80,8 @@ from coacc_etl.pipelines.sgr_projects import SgrProjectsPipeline
 from coacc_etl.pipelines.sigep_public_servants import SigepPublicServantsPipeline
 from coacc_etl.pipelines.sigep_sensitive_positions import SigepSensitivePositionsPipeline
 from coacc_etl.pipelines.siri_antecedents import SiriAntecedentsPipeline
-from coacc_etl.pipelines.territorial_gazettes import TerritorialGazettesPipeline
 from coacc_etl.pipelines.supersoc_top_companies import SupersocTopCompaniesPipeline
+from coacc_etl.pipelines.territorial_gazettes import TerritorialGazettesPipeline
 from coacc_etl.pipelines.tvec_orders import TvecOrdersPipeline
 from coacc_etl.pipelines.tvec_orders_consolidated import TvecOrdersConsolidatedPipeline
 
@@ -102,6 +105,7 @@ PIPELINES: dict[str, type] = {
     "environmental_files": EnvironmentalFilesPipeline,
     "fiscal_findings": FiscalFindingsPipeline,
     "fiscal_responsibility": FiscalResponsibilityPipeline,
+    "gacetas_territoriales": GacetasTerritorialesPipeline,
     "health_providers": HealthProvidersPipeline,
     "higher_ed_directors": HigherEdDirectorsPipeline,
     "higher_ed_enrollment": HigherEdEnrollmentPipeline,
@@ -115,6 +119,7 @@ PIPELINES: dict[str, type] = {
     "pte_sector_commitments": PteSectorCommitmentsPipeline,
     "pte_top_contracts": PteTopContractsPipeline,
     "registraduria_death_status_checks": RegistraduriaDeathStatusChecksPipeline,
+    "rub_beneficial_owners": RubBeneficialOwnersPipeline,
     "rues_chambers": RuesChambersPipeline,
     "sgr_expense_execution": SgrExpenseExecutionPipeline,
     "sgr_projects": SgrProjectsPipeline,
@@ -150,6 +155,62 @@ PIPELINES: dict[str, type] = {
     "supersoc_top_companies": SupersocTopCompaniesPipeline,
 }
 
+LAKE_ONLY_PIPELINE_MODULES = {
+    "ungrd_emergencias": "coacc_etl.pipelines.ungrd_emergencias",
+    "ideam_gei_inventario": "coacc_etl.pipelines.ideam_gei_inventario",
+    "ideam_meteo_historica": "coacc_etl.pipelines.ideam_meteo_historica",
+    "anla_concesiones": "coacc_etl.pipelines.anla_concesiones",
+    "parques_naturales_areas_protegidas": "coacc_etl.pipelines.parques_naturales_areas_protegidas",
+    "upme_energia_geovisor": "coacc_etl.pipelines.upme_energia_geovisor",
+    "upme_subsidios_foes": "coacc_etl.pipelines.upme_subsidios_foes",
+    "servicio_geologico_minerales": "coacc_etl.pipelines.servicio_geologico_minerales",
+    "anm_titulos_mineros": "coacc_etl.pipelines.anm_titulos_mineros",
+    "dane_censo_poblacion": "coacc_etl.pipelines.dane_censo_poblacion",
+    "dane_pobreza_monetaria": "coacc_etl.pipelines.dane_pobreza_monetaria",
+    "dane_ipm_municipal": "coacc_etl.pipelines.dane_ipm_municipal",
+    "dane_violencia_genero": "coacc_etl.pipelines.dane_violencia_genero",
+    "igac_catastro_alfanumerico": "coacc_etl.pipelines.igac_catastro_alfanumerico",
+    "igac_ortoimagenes": "coacc_etl.pipelines.igac_ortoimagenes",
+    "servicios_postales_direcciones": "coacc_etl.pipelines.servicios_postales_direcciones",
+    "minsalud_cobertura_seguros": "coacc_etl.pipelines.minsalud_cobertura_seguros",
+    "minsalud_centros_atencion": "coacc_etl.pipelines.minsalud_centros_atencion",
+    "invima_sanciones": "coacc_etl.pipelines.invima_sanciones",
+    "dapre_consejos_consultivos": "coacc_etl.pipelines.dapre_consejos_consultivos",
+    "secretaria_transparencia_aip": "coacc_etl.pipelines.secretaria_transparencia_aip",
+    "presidencia_iniciativas_33007": "coacc_etl.pipelines.presidencia_iniciativas_33007",
+    "presidencia_normativa_sanciones": "coacc_etl.pipelines.presidencia_normativa_sanciones",
+    "dnp_obras_prioritarias": "coacc_etl.pipelines.dnp_obras_prioritarias",
+    "contratistas_sancionados_cce": "coacc_etl.pipelines.contratistas_sancionados_cce",
+    "dian_registro_organizaciones_beneficas": (
+        "coacc_etl.pipelines.dian_registro_organizaciones_beneficas"
+    ),
+    "dian_impuestos_publico": "coacc_etl.pipelines.dian_impuestos_publico",
+    "snr_propiedad_tierras": "coacc_etl.pipelines.snr_propiedad_tierras",
+    "cne_financiamiento_partidos": "coacc_etl.pipelines.cne_financiamiento_partidos",
+    "rnec_promesas_campana": "coacc_etl.pipelines.rnec_promesas_campana",
+    "camara_registro_cabilderos": "coacc_etl.pipelines.camara_registro_cabilderos",
+    "senado_votaciones": "coacc_etl.pipelines.senado_votaciones",
+    "senado_proyectos_ley": "coacc_etl.pipelines.senado_proyectos_ley",
+    "sirr_reincorporacion": "coacc_etl.pipelines.sirr_reincorporacion",
+    "pnis_beneficiarios": "coacc_etl.pipelines.pnis_beneficiarios",
+    "pdet_municipios": "coacc_etl.pipelines.pdet_municipios",
+    "anim_inmuebles": "coacc_etl.pipelines.anim_inmuebles",
+    "dane_micronegocios": "coacc_etl.pipelines.dane_micronegocios",
+    "mindeporte_actores": "coacc_etl.pipelines.mindeporte_actores",
+}
+
+
+def resolve_pipeline(source: str) -> type | None:
+    if source in PIPELINES:
+        return PIPELINES[source]
+    module_name = LAKE_ONLY_PIPELINE_MODULES.get(source)
+    if module_name is None:
+        return None
+    module = importlib.import_module(module_name)
+    pipeline_cls = module.PIPELINE_CLASS
+    PIPELINES[source] = pipeline_cls
+    return pipeline_cls
+
 
 @click.group()
 def cli() -> None:
@@ -158,10 +219,16 @@ def cli() -> None:
 
 
 @cli.command()
-@click.option("--source", required=True, help="Pipeline name (see 'sources' command)")
+@click.option(
+    "--source",
+    "--pipeline",
+    "source",
+    required=True,
+    help="Pipeline name (see 'sources' command)",
+)
 @click.option("--neo4j-uri", default="bolt://localhost:7687", help="Neo4j URI")
 @click.option("--neo4j-user", default="neo4j", help="Neo4j user")
-@click.option("--neo4j-password", required=True, help="Neo4j password")
+@click.option("--neo4j-password", default=None, help="Neo4j password")
 @click.option("--neo4j-database", default="neo4j", help="Neo4j database")
 @click.option("--data-dir", default="./data", help="Directory for downloaded data")
 @click.option("--limit", type=int, default=None, help="Limit rows processed")
@@ -176,6 +243,12 @@ def cli() -> None:
 @click.option("--streaming/--no-streaming", default=False, help="Streaming mode")
 @click.option("--start-phase", type=int, default=1, help="Skip to phase N")
 @click.option("--history/--no-history", default=False, help="Enable history mode when supported")
+@click.option(
+    "--to-lake/--to-neo4j",
+    default=False,
+    help="Write pipeline output to the Parquet lake",
+)
+@click.option("--full-refresh/--incremental", default=False, help="Ignore lake watermarks")
 def run(
     source: str,
     neo4j_uri: str,
@@ -189,17 +262,41 @@ def run(
     streaming: bool,
     start_phase: int,
     history: bool,
+    to_lake: bool,
+    full_refresh: bool,
 ) -> None:
     """Run an ETL pipeline."""
     os.environ["NEO4J_DATABASE"] = neo4j_database
 
-    if source not in PIPELINES:
-        available = ", ".join(sorted(PIPELINES))
+    pipeline_cls = resolve_pipeline(source)
+    if pipeline_cls is None:
+        available = ", ".join(sorted({*PIPELINES, *LAKE_ONLY_PIPELINE_MODULES}))
         raise click.ClickException(f"Unknown source: {source}. Available: {available}")
+
+    if to_lake:
+        pipeline = pipeline_cls(
+            driver=None,
+            data_dir=data_dir,
+            limit=limit,
+            chunk_size=chunk_size,
+            history=history,
+        )
+        if not hasattr(pipeline, "run_to_lake"):
+            raise click.ClickException(f"Pipeline {source} does not implement --to-lake")
+        delta = pipeline.run_to_lake(full_refresh=full_refresh)
+        click.echo(
+            f"{delta.source}: wrote {delta.rows:,} rows "
+            f"(batch={delta.batch_id}, advanced={delta.advanced})"
+        )
+        return
+
+    if not neo4j_password:
+        neo4j_password = os.environ.get("NEO4J_PASSWORD")
+    if not neo4j_password:
+        raise click.ClickException("--neo4j-password or NEO4J_PASSWORD env var required")
 
     driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
     try:
-        pipeline_cls = PIPELINES[source]
         pipeline = pipeline_cls(
             driver=driver,
             data_dir=data_dir,
@@ -250,7 +347,7 @@ def sources(show_status: bool, neo4j_uri: str, neo4j_user: str, neo4j_password: 
     """List available data sources."""
     if not show_status:
         click.echo("Available pipelines:")
-        for name in sorted(PIPELINES):
+        for name in sorted({*PIPELINES, *LAKE_ONLY_PIPELINE_MODULES}):
             click.echo(f"  {name}")
         return
 
@@ -278,7 +375,7 @@ def sources(show_status: bool, neo4j_uri: str, neo4j_user: str, neo4j_password: 
         )
         click.echo("-" * 100)
 
-        for name in sorted(PIPELINES):
+        for name in sorted({*PIPELINES, *LAKE_ONLY_PIPELINE_MODULES}):
             run = runs.get(name, {})
             click.echo(
                 f"{name:<20} "
@@ -294,7 +391,3 @@ def sources(show_status: bool, neo4j_uri: str, neo4j_user: str, neo4j_password: 
 
 if __name__ == "__main__":
     cli()
-from coacc_etl.pipelines.gacetas_territoriales import GacetasTerritorialesPipeline
-from coacc_etl.pipelines.rub_beneficial_owners import RubBeneficialOwnersPipeline
-    "gacetas_territoriales": GacetasTerritorialesPipeline,
-    "rub_beneficial_owners": RubBeneficialOwnersPipeline,

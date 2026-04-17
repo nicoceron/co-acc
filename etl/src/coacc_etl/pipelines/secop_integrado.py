@@ -2,12 +2,16 @@ from __future__ import annotations
 
 # ruff: noqa: E501
 import logging
+import uuid
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import pandas as pd
+import pyarrow as pa
 
 from coacc_etl.base import Pipeline
+from coacc_etl.lakehouse import append_parquet, watermark
 from coacc_etl.loader import Neo4jBatchLoader
 from coacc_etl.pipelines.colombia_procurement import (
     build_company_row,
@@ -16,14 +20,18 @@ from coacc_etl.pipelines.colombia_procurement import (
     merge_limited_unique,
     procurement_relation_id,
 )
-from coacc_etl.pipelines.colombia_shared import read_csv_normalized
-from coacc_etl.streaming import iter_csv_chunks
+from coacc_etl.pipelines.colombia_shared import normalize_dataframe_columns, read_csv_normalized
+from coacc_etl.streaming import iter_csv_chunks, pipeline_stream_to_lake
 from coacc_etl.transforms import deduplicate_rows, normalize_name, strip_document
 
 if TYPE_CHECKING:
     from neo4j import Driver
 
+    from coacc_etl.lakehouse.watermark import WatermarkDelta
+
 logger = logging.getLogger(__name__)
+SOURCE = "secop_integrado"
+SOCRATA_ID = "jbjy-vk9h"
 
 
 def _clean_value(raw: object) -> str:
@@ -41,6 +49,54 @@ def _parse_amount(raw: object) -> float | None:
         return float(value)
     except ValueError:
         return None
+
+
+def normalize(rows: list[dict[str, Any]]) -> pa.Table:
+    frame = normalize_dataframe_columns(pd.DataFrame.from_records(rows))
+    return normalize_frame_for_lake(frame)
+
+
+def normalize_frame_for_lake(frame: pd.DataFrame) -> pa.Table:
+    normalized = normalize_dataframe_columns(frame.fillna(""))
+
+    def col(name: str) -> pd.Series:
+        if name in normalized:
+            return normalized[name].astype(str)
+        return pd.Series([""] * len(normalized), index=normalized.index, dtype="string")
+
+    supplier_document = col("documento_proveedor").map(strip_document)
+    supplier_name = col("nom_raz_social_contratista").map(lambda value: normalize_name(value))
+    buyer_name = col("nombre_de_la_entidad").map(_clean_value)
+    buyer_document = [
+        make_company_document_id(raw_doc, raw_name, kind="buyer")
+        for raw_doc, raw_name in zip(col("nit_de_la_entidad"), buyer_name, strict=False)
+    ]
+
+    normalized = normalized.copy()
+    normalized["source"] = SOURCE
+    normalized["supplier_document_id"] = supplier_document
+    normalized["supplier_name"] = supplier_name
+    normalized["buyer_document_id"] = buyer_document
+    normalized["buyer_name"] = buyer_name
+    normalized["contract_id"] = col("numero_del_contrato").where(
+        col("numero_del_contrato") != "",
+        col("id_contrato"),
+    )
+    normalized["process_id"] = col("numero_de_proceso").where(
+        col("numero_de_proceso") != "",
+        col("id_proceso"),
+    )
+    normalized["department"] = col("departamento_entidad").map(_clean_value)
+    normalized["municipality"] = col("municipio_entidad").map(_clean_value)
+    normalized["modality"] = col("modalidad_de_contrataci_n").map(_clean_value)
+    normalized["status"] = col("estado_del_proceso").map(_clean_value)
+    normalized["origin"] = col("origen").map(_clean_value)
+    normalized["contract_value"] = [
+        _parse_amount(value) for value in col("valor_contrato")
+    ]
+    normalized["load_date"] = col("fecha_de_cargue_en_secop").map(_clean_value)
+    normalized["object"] = col("objeto_del_contrato").map(_clean_value)
+    return pa.Table.from_pandas(normalized, preserve_index=False)
 
 
 class SecopIntegratedPipeline(Pipeline):
@@ -298,3 +354,34 @@ class SecopIntegratedPipeline(Pipeline):
             if processed >= next_log_at:
                 logger.info("[%s] streamed %s rows", self.name, f"{processed:,}")
                 next_log_at += self.chunk_size * 10
+
+    def run_to_lake(self, *, full_refresh: bool = False) -> WatermarkDelta:
+        last = watermark.get(SOURCE)
+        where = None
+        if not full_refresh and last is not None:
+            where = f"fecha_de_cargue_en_secop > '{last.last_seen_ts.isoformat()}'"
+
+        csv_path = self._csv_path()
+        batch_id = uuid.uuid4().hex
+        rows_total = 0
+        if csv_path.exists():
+            for chunk in iter_csv_chunks(
+                csv_path,
+                chunk_size=self.chunk_size,
+                limit=self.limit,
+                dtype=str,
+                keep_default_na=False,
+            ):
+                table = normalize_frame_for_lake(chunk)
+                now = datetime.now(tz=UTC)
+                append_parquet(table, SOURCE, year=now.year, month=now.month)
+                rows_total += len(chunk)
+            return watermark.advance(SOURCE, rows=rows_total, batch_id=batch_id)
+
+        return pipeline_stream_to_lake(
+            SOURCE,
+            SOCRATA_ID,
+            normalizer=normalize,
+            chunk_size=self.chunk_size,
+            where=where,
+        )

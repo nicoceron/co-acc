@@ -19,6 +19,7 @@ const Patterns = lazy(() => import("./pages/Patterns").then((m) => ({ default: m
 const Register = lazy(() => import("./pages/Register").then((m) => ({ default: m.Register })));
 const Results = lazy(() => import("./pages/Results").then((m) => ({ default: m.Results })));
 const Search = lazy(() => import("./pages/Search").then((m) => ({ default: m.Search })));
+const Sector = lazy(() => import("./pages/Sector").then((m) => ({ default: m.Sector })));
 const Signals = lazy(() => import("./pages/Signals").then((m) => ({ default: m.Signals })));
 const SharedInvestigation = lazy(() => import("./pages/SharedInvestigation").then((m) => ({ default: m.SharedInvestigation })));
 
@@ -83,6 +84,7 @@ export function App() {
         <Route path="results/modalidad/:categoryId" element={<LazyPage><Results /></LazyPage>} />
         <Route path="investigations" element={<LazyPage><Results /></LazyPage>} />
         <Route path="investigations/modalidad/:categoryId" element={<LazyPage><Results /></LazyPage>} />
+        <Route path="sector/:sectorId" element={<LazyPage><Sector /></LazyPage>} />
         <Route path="casos/:slug" element={<LazyPage><InvestigationDossier /></LazyPage>} />
         <Route path="biblioteca/:slug" element={<LazyPage><InvestigationDossier /></LazyPage>} />
         <Route path="investigations/:slug" element={<LazyPage><InvestigationDossier /></LazyPage>} />

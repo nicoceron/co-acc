@@ -1,0 +1,210 @@
+version: 1
+signals:
+  procurement_single_bidder_high_value:
+    sources: [secop_offers, secop_ii_processes, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [secop_offers, secop_ii_processes]
+    severity_on_partial: medium
+  procurement_repeat_awards_same_supplier:
+    sources: [secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: []
+  procurement_large_modifications:
+    sources: [secop_contract_modifications, secop_contract_additions, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [secop_contract_modifications, secop_contract_additions]
+    severity_on_partial: medium
+  procurement_sanctioned_supplier_awarded:
+    sources: [paco_sanctions, fiscal_findings, fiscal_responsibility, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [paco_sanctions, fiscal_findings, fiscal_responsibility]
+    severity_on_partial: high
+  procurement_public_servant_conflict_disclosure_overlap:
+    sources: [conflict_disclosures, sigep_public_servants, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [conflict_disclosures, sigep_public_servants]
+    severity_on_partial: low
+  procurement_related_companies_shared_officer:
+    sources: [company_registry_c82u, secop_ii_contracts]
+    required: [company_registry_c82u, secop_ii_contracts]
+    optional: []
+  project_bpin_procurement_overlap:
+    sources: [dnp_project_contract_links, dnp_project_locations, secop_process_bpin, secop_ii_contracts]
+    required: [secop_process_bpin]
+    optional: [dnp_project_contract_links, dnp_project_locations, secop_ii_contracts]
+    severity_on_partial: low
+  project_regalias_execution_procurement_overlap:
+    sources: [sgr_expense_execution, sgr_projects, dnp_project_contract_links, secop_process_bpin]
+    required: [secop_process_bpin]
+    optional: [sgr_expense_execution, sgr_projects, dnp_project_contract_links]
+    severity_on_partial: low
+  judicial_case_contract_overlap:
+    sources: [judicial_providencias, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [judicial_providencias]
+    severity_on_partial: low
+  acto_o_gaceta_contractual:
+    sources: [actos_administrativos, gacetas_territoriales, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [actos_administrativos, gacetas_territoriales]
+    severity_on_partial: low
+  control_politico_contractual:
+    sources: [control_politico, secop_ii_contracts, secop_process_bpin]
+    required: [secop_ii_contracts]
+    optional: [control_politico, secop_process_bpin]
+    severity_on_partial: low
+  environmental_file_contract_overlap:
+    sources: [environmental_files_corantioquia, secop_ii_contracts, secop_process_bpin]
+    required: [secop_ii_contracts]
+    optional: [environmental_files_corantioquia, secop_process_bpin]
+    severity_on_partial: low
+  tvec_multi_entity_capture:
+    sources: [tvec_orders_consolidated, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [tvec_orders_consolidated]
+    severity_on_partial: low
+  procurement_contract_suspensions:
+    sources: [secop_contract_suspensions, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [secop_contract_suspensions]
+    severity_on_partial: medium
+  procurement_payment_plan_anomalies:
+    sources: [secop_payment_plans, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [secop_payment_plans]
+    severity_on_partial: medium
+  procurement_offers_competition_drop:
+    sources: [secop_ii_processes]
+    required: [secop_ii_processes]
+    optional: []
+  procurement_supplier_concentration_across_entities:
+    sources: [secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: []
+  procurement_contract_value_outlier_by_category:
+    sources: [secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: []
+  procurement_short_bidding_window:
+    sources: [secop_ii_processes, secop_offers]
+    required: [secop_ii_processes]
+    optional: [secop_offers]
+    severity_on_partial: low
+  procurement_contract_execution_delay:
+    sources: [secop_contract_execution, secop_invoices]
+    required: [secop_contract_execution]
+    optional: [secop_invoices]
+    severity_on_partial: low
+  procurement_buyer_supplier_network_density:
+    sources: [secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: []
+  procurement_cartel_risk_cobidding:
+    sources: [secop_offers, secop_ii_processes]
+    required: [secop_ii_processes]
+    optional: [secop_offers]
+    severity_on_partial: low
+  procurement_politically_exposed_position_supplier_overlap:
+    sources: [sigep_sensitive_positions, company_registry_c82u]
+    required: [company_registry_c82u]
+    optional: [sigep_sensitive_positions]
+    severity_on_partial: low
+  beneficial_ownership_overlap_review_only:
+    sources: [rub_beneficial_owners, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [rub_beneficial_owners]
+    severity_on_partial: low
+  adverse_media_supplier_review_only:
+    sources: [adverse_media]
+    required: [adverse_media]
+    optional: []
+  official_case_bulletin_overlap:
+    sources: [official_case_bulletins, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [official_case_bulletins]
+    severity_on_partial: low
+  property_transactions_supplier_overlap:
+    sources: [igac_property_transactions, company_registry_c82u]
+    required: [company_registry_c82u]
+    optional: [igac_property_transactions]
+    severity_on_partial: low
+  cuentas_claras_donor_supplier_overlap:
+    sources: [cuentas_claras_income_2019, secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: [cuentas_claras_income_2019]
+    severity_on_partial: low
+  procurement_cross_source_identity_inconsistency:
+    sources: [company_registry_c82u, secop_suppliers]
+    required: [company_registry_c82u, secop_suppliers]
+    optional: []
+
+  pida_full30_meta:
+    sources: [secop_integrado, pida_category_hits]
+    required: [secop_integrado]
+    optional: [pida_category_hits]
+    severity_on_partial: low
+  reincorporacion_sirr_vs_contractor:
+    sources: [sirr_reincorporacion, secop_integrado, secop_suppliers]
+    required: [secop_suppliers]
+    optional: [sirr_reincorporacion, secop_integrado]
+    severity_on_partial: low
+  damnificados_emergency_contract_overlap:
+    sources: [ungrd_damnificados, secop_integrado, secop_contract_additions, secop_budget_commitments]
+    required: [secop_integrado, secop_contract_additions]
+    optional: [ungrd_damnificados, secop_budget_commitments]
+    severity_on_partial: low
+  pnis_familia_municipality_vs_award:
+    sources: [secop_integrado, pnis_beneficiarios, pdet_municipios]
+    required: [secop_integrado]
+    optional: [pnis_beneficiarios, pdet_municipios]
+    severity_on_partial: low
+  dane_pobreza_vs_award_ratio:
+    sources: [secop_integrado, dane_pobreza_monetaria, dane_ipm]
+    required: [secop_integrado]
+    optional: [dane_pobreza_monetaria, dane_ipm]
+    severity_on_partial: low
+  catastro_igac_vs_vendor_address:
+    sources: [secop_suppliers, igac_parcelas]
+    required: [secop_suppliers]
+    optional: [igac_parcelas]
+    severity_on_partial: low
+  anim_inmueble_vs_vendor_domicilio:
+    sources: [secop_suppliers, anim_inmuebles]
+    required: [secop_suppliers]
+    optional: [anim_inmuebles]
+    severity_on_partial: low
+  iniciativas_33007_municipal_vs_award:
+    sources: [secop_integrado, presidencia_iniciativas_33007]
+    required: [secop_integrado]
+    optional: [presidencia_iniciativas_33007]
+    severity_on_partial: low
+  mineria_titulo_vs_anla_license_vs_contractor:
+    sources: [secop_integrado, anm_titulos, anla_licencias]
+    required: [secop_integrado]
+    optional: [anm_titulos, anla_licencias]
+    severity_on_partial: low
+  upme_subsidio_energia_vs_vendor:
+    sources: [secop_suppliers, upme_subsidios]
+    required: [secop_suppliers]
+    optional: [upme_subsidios]
+    severity_on_partial: low
+  dane_micronegocio_vs_secop_subcontract:
+    sources: [secop_contract_execution, dane_micronegocios]
+    required: [secop_contract_execution]
+    optional: [dane_micronegocios]
+    severity_on_partial: low
+  registro_actores_deporte_vs_funcionario_pdet:
+    sources: [sigep_public_servants, mindeporte_actores]
+    required: [sigep_public_servants]
+    optional: [mindeporte_actores]
+    severity_on_partial: low
+  bpin_dnp_vs_pida27_obras_prioritarias:
+    sources: [secop_process_bpin, dnp_obras_prioritarias, secop_integrado]
+    required: [secop_process_bpin]
+    optional: [dnp_obras_prioritarias, secop_integrado]
+    severity_on_partial: low
+  pida5_pida27_pida4_chain:
+    sources: [secop_integrado, secop_sanctions, dnp_obras_prioritarias]
+    required: [secop_integrado, secop_sanctions]
+    optional: [dnp_obras_prioritarias]
+    severity_on_partial: high

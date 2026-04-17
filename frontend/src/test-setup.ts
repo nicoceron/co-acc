@@ -8,3 +8,11 @@ if (typeof globalThis.ResizeObserver === "undefined") {
     disconnect() {}
   } as unknown as typeof globalThis.ResizeObserver;
 }
+
+if (typeof URL.createObjectURL === "undefined") {
+  URL.createObjectURL = () => "blob:coacc-test";
+}
+
+if (typeof URL.revokeObjectURL === "undefined") {
+  URL.revokeObjectURL = () => {};
+}
