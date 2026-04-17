@@ -27,8 +27,7 @@ from coacc.routers import (
     search,
     signals,
 )
-from coacc.services.neo4j_service import execute_query_single
-from coacc.services.neo4j_service import ensure_schema
+from coacc.services.neo4j_service import ensure_schema, execute_query_single
 
 _logger = logging.getLogger(__name__)
 
@@ -97,7 +96,7 @@ app.include_router(cases.router)
 @app.get("/health")
 async def health(
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> dict[str, str | None]:
+) -> dict[str, str | int | None]:
     latest_run = await execute_query_single(session, "signal_latest_completed_run")
     return {
         "status": "ok",
@@ -107,6 +106,18 @@ async def health(
         "last_signal_run_at": (
             str(latest_run["finished_at"])
             if latest_run and latest_run["finished_at"] is not None
+            else None
+        ),
+        "last_signal_run_status": (
+            str(latest_run["status"])
+            if latest_run and "status" in latest_run and latest_run["status"] is not None
+            else None
+        ),
+        "last_signal_hit_count": (
+            latest_run["hit_count"]
+            if latest_run
+            and "hit_count" in latest_run
+            and latest_run["hit_count"] is not None
             else None
         ),
     }
