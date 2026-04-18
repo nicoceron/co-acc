@@ -1,159 +1,201 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&display=swap");
+/* === IBM Plex Sans — UI chrome === */
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/IBMPlexSans-Bold.woff2") format("woff2");
+}
 
-/* === Editorial Investigation Design System === */
+/* === IBM Plex Mono — data display === */
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/IBMPlexMono-Bold.woff2") format("woff2");
+}
 
 :root {
-  /* === Noir editorial palette === */
-  --bg-primary: #050505;
-  --bg-secondary: #0c0c0c;
-  --bg-tertiary: #121212;
-  --bg-elevated: #181818;
-  --bg-surface: var(--bg-primary);
-  --bg-overlay: rgba(5, 5, 5, 0.94);
+  /* Night-vision base — deep black-green */
+  --bg-primary: #060a07;
+  --bg-secondary: #0c1210;
+  --bg-tertiary: #111a16;
+  --bg-elevated: #162018;
+  --bg-surface: #1a2820;
+  --bg-overlay: rgba(0, 0, 0, 0.75);
 
-  --text-primary: #f4f1ed;
-  --text-secondary: #cfc7bf;
-  --text-muted: #8f867d;
+  /* High-contrast text */
+  --text-primary: #e8ede9;
+  --text-secondary: #94a39a;
+  --text-muted: #5a6b60;
 
-  /* === Accents === */
-  --accent: #eab308;
-  --accent-hover: #facc15;
-  --accent-dim: rgb(234 179 8 / 12%);
+  /* Amber/gold accent (WCAG AA on bg-primary) */
+  --accent: #ff9a3c;
+  --accent-hover: #ffb060;
+  --accent-dim: rgba(255, 154, 60, 0.15);
+  --accent-border: rgba(255, 154, 60, 0.35);
 
-  --color-success: #68b19c;
-  --color-warning: #d6a13b;
-  --color-danger: #d45745;
-  --color-info: #6a9be7;
+  /* System signals */
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ef4444;
+  --info: #3b82f6;
 
-  --data-person: oklch(76% 0.08 250);
-  --data-company: oklch(79% 0.12 82);
-  --data-election: oklch(70% 0.12 150);
-  --data-contract: oklch(92% 0.015 70);
-  --data-sanction: oklch(64% 0.2 28);
-  --data-amendment: oklch(84% 0.03 62);
+  /* Borders + dividers */
+  --border-subtle: rgba(232, 237, 233, 0.06);
+  --border-default: rgba(232, 237, 233, 0.1);
+  --border-strong: rgba(232, 237, 233, 0.18);
 
-  --border: #222;
-  --border-subtle: #161616;
-  --border-hover: #303030;
-  --border-active: var(--accent);
+  /* Typography */
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.25rem;
+  --fs-2xl: 1.5rem;
+  --fs-3xl: 2rem;
+  --fs-4xl: 2.75rem;
+  --fs-5xl: 3.75rem;
 
-  --shadow-sm: 0 0 0 rgba(0, 0, 0, 0);
-  --shadow-md: 0 0 0 rgba(0, 0, 0, 0);
-  --shadow-lg: 0 0 0 rgba(0, 0, 0, 0);
-  --shadow-glow: 0 0 0 rgba(0, 0, 0, 0);
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --space-10: 4rem;
+  --space-12: 6rem;
 
-  /* === Spacing === */
-  --space-2xs: 2px;
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
+  /* Radii */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
 
-  /* === Typography === */
-  --font-display: "Newsreader", serif;
-  --font-sans: "Instrument Sans", sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
-  
-  --font-size-2xs: 0.7rem;
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.85rem;
-  --font-size-md: 0.95rem;
-  --font-size-lg: 1.1rem;
-  --font-size-xl: 1.4rem;
-  --font-size-2xl: 1.8rem;
-  --font-size-3xl: 2.4rem;
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
 
-  /* === Radius === */
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 8px;
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* === Transitions === */
-  --transition-fast: 120ms ease-out;
-  --transition-normal: 240ms cubic-bezier(0.16, 1, 0.3, 1);
-
-  /* === Focus === */
-  --focus-ring: 0 0 0 1px var(--bg-primary), 0 0 0 2px var(--accent);
-
-  /* === Hover === */
-  --bg-hover: oklch(72% 0.11 165 / 4%);
+  color-scheme: dark;
 }
 
-/* Base resets and defaults */
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
-html, body {
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.55;
-  overflow-x: hidden;
+  font-size: var(--fs-base);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4 {
-  font-family: var(--font-display);
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
   font-weight: 600;
-  text-transform: none;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
-
-code, .mono {
-  font-family: var(--font-mono);
-  font-feature-settings: "tnum" 1;
+p {
+  margin: 0;
 }
 
 a {
   color: var(--accent);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: color var(--duration-fast) var(--ease-standard);
 }
 
 a:hover {
-  color: #fff;
+  color: var(--accent-hover);
 }
 
 button {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  cursor: pointer;
+  font-family: inherit;
 }
 
-input, select, textarea {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+code,
+pre,
+kbd {
+  font-family: var(--font-mono);
+}
+
+::selection {
+  background: var(--accent-dim);
   color: var(--text-primary);
-  font-family: var(--font-sans);
-  padding: var(--space-sm);
-  border-radius: var(--radius-md);
 }
 
-input:focus {
-  border-color: var(--accent);
-  outline: none;
-}
-
-/* === Custom Scrollbar === */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-primary);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }

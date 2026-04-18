@@ -1,13 +1,12 @@
 import styles from "./Spinner.module.css";
 
-interface SpinnerProps {
-  size?: "sm" | "md" | "lg";
-  variant?: "ring" | "scan";
-}
-
-export function Spinner({ size = "md", variant = "ring" }: SpinnerProps) {
-  if (variant === "scan") {
-    return <span className={`${styles.scan} ${styles[size]}`} role="status" />;
-  }
-  return <span className={`${styles.spinner} ${styles[size]}`} role="status" />;
+export function Spinner({ label }: { label?: string }) {
+  return (
+    <div className={styles.root} role="status" aria-live="polite">
+      <div className={styles.dot} />
+      <div className={styles.dot} />
+      <div className={styles.dot} />
+      {label ? <span className={styles.label}>{label}</span> : null}
+    </div>
+  );
 }

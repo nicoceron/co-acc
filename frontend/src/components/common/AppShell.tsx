@@ -1,188 +1,51 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Link, Outlet, useLocation, useNavigate } from "react-router";
+import { NavLink, Outlet } from "react-router";
 
-import {
-  BarChart3,
-  ChevronLeft,
-  ChevronRight,
-  FileStack,
-  FolderOpen,
-  LogOut,
-  Radar,
-  Search,
-  type LucideIcon,
-} from "lucide-react";
-
-import { registerActions, type Action } from "@/actions/registry";
-import { CommandPalette } from "@/components/common/CommandPalette";
-import { Kbd } from "@/components/common/Kbd";
-import { KeyboardShortcutsHelp } from "@/components/common/KeyboardShortcutsHelp";
-import { StatusBar } from "@/components/common/StatusBar";
-import { ToastContainer } from "@/components/common/ToastContainer";
-import { IS_PATTERNS_ENABLED, IS_PUBLIC_MODE } from "@/config/runtime";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { useAuthStore } from "@/stores/auth";
+import { IS_PATTERNS_ENABLED } from "@/config/runtime";
 
 import styles from "./AppShell.module.css";
 
-type NavItem = {
-  path: string;
-  icon: LucideIcon;
-  labelKey: string;
-  internalOnly?: boolean;
-};
-
-const NAV_ITEMS: NavItem[] = [
-  { path: "/app", icon: BarChart3, labelKey: "nav.dashboard" },
-  { path: "/app/search", icon: Search, labelKey: "nav.search" },
-  { path: "/app/signals", icon: Radar, labelKey: "nav.signals", internalOnly: true },
-  { path: "/app/cases", icon: FileStack, labelKey: "nav.cases", internalOnly: true },
-  { path: "/app/investigations", icon: FolderOpen, labelKey: "nav.investigations" },
+const NAV = [
+  { to: "/app", label: "Overview", end: true },
+  { to: "/app/search", label: "Search" },
+  { to: "/app/signals", label: "Signals" },
+  { to: "/app/cases", label: "Cases" },
+  ...(IS_PATTERNS_ENABLED ? [{ to: "/app/patterns", label: "Patterns" }] : []),
 ];
 
 export function AppShell() {
-  const { t } = useTranslation();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const logout = useAuthStore((s) => s.logout);
-  const user = useAuthStore((s) => s.user);
-
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [commandOpen, setCommandOpen] = useState(false);
-  const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const [isMobileBlocked, setIsMobileBlocked] = useState(false);
-
-  // Desktop-only: check viewport on mount and resize
-  useEffect(() => {
-    function check() {
-      setIsMobileBlocked(window.innerWidth < 1024);
-    }
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-
-  const isGraphRoute = location.pathname.startsWith("/app/graph") || location.pathname.startsWith("/app/analysis");
-
-  // Auto-collapse sidebar on graph/analysis routes
-  useEffect(() => {
-    if (isGraphRoute) setSidebarCollapsed(true);
-  }, [isGraphRoute]);
-
-  const handleLogout = useCallback(() => {
-    logout();
-    navigate("/");
-  }, [logout, navigate]);
-
-  // Register actions for command palette + keyboard shortcuts
-  const actions: Action[] = useMemo(
-    () => {
-      const base: Action[] = [
-        { id: "go-dashboard", label: t("command.goToDashboard"), shortcut: "cmd+1", group: t("command.navigation"), handler: () => navigate("/app") },
-        { id: "go-search", label: t("command.goToSearch"), shortcut: "cmd+2", group: t("command.navigation"), handler: () => navigate("/app/search") },
-        { id: "toggle-sidebar", label: t("command.toggleSidebar"), shortcut: "cmd+b", group: t("command.actions"), handler: () => setSidebarCollapsed((p) => !p) },
-        { id: "command-palette", label: t("shortcuts.commandPalette"), shortcut: "cmd+k", group: t("command.actions"), handler: () => setCommandOpen(true) },
-        { id: "show-shortcuts", label: t("command.showShortcuts"), shortcut: "shift+?", group: t("command.actions"), handler: () => setShortcutsOpen(true) },
-      ];
-      if (IS_PATTERNS_ENABLED) {
-        base.push(
-          { id: "go-patterns", label: t("command.goToPatterns"), shortcut: "cmd+3", group: t("command.navigation"), handler: () => navigate("/app/patterns") },
-        );
-      }
-      if (!IS_PUBLIC_MODE) {
-        base.push(
-          { id: "go-investigations", label: t("command.goToInvestigations"), shortcut: "cmd+4", group: t("command.navigation"), handler: () => navigate("/app/investigations") },
-          { id: "go-signals", label: t("command.goToSignals"), shortcut: "cmd+5", group: t("command.navigation"), handler: () => navigate("/app/signals") },
-          { id: "go-cases", label: t("command.goToCases"), shortcut: "cmd+6", group: t("command.navigation"), handler: () => navigate("/app/cases") },
-        );
-      }
-      return base;
-    },
-    [t, navigate],
-  );
-
-  useEffect(() => {
-    registerActions(actions);
-  }, [actions]);
-
-  useKeyboardShortcuts();
-
-  const isActive = (path: string) => {
-    if (path === "/app") return location.pathname === "/app";
-    return location.pathname.startsWith(path);
-  };
-
-  if (isMobileBlocked) {
-    return (
-      <div className={styles.mobileBlock}>
-        <h1 className={styles.mobileTitle}>{t("mobile.title")}</h1>
-        <p className={styles.mobileMessage}>{t("mobile.message")}</p>
-        <p className={styles.mobileHint}>{t("mobile.hint")}</p>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.shell}>
-      <nav className={`${styles.sidebar} ${sidebarCollapsed ? styles.collapsed : ""}`}>
-        <div className={styles.sidebarHeader}>
-          <Link to="/app" className={styles.logo}>
-            {sidebarCollapsed ? "C" : "CO-ACC"}
-          </Link>
-        </div>
+      <aside className={styles.sidebar}>
+        <NavLink to="/" className={styles.brand}>
+          <span className={styles.brandMark}>co/</span>
+          <span className={styles.brandName}>acc</span>
+        </NavLink>
 
-        <div className={styles.navItems}>
-          {NAV_ITEMS
-            .filter((item) => !(IS_PUBLIC_MODE && item.path.includes("investigations")))
-            .filter((item) => !(IS_PUBLIC_MODE && item.internalOnly))
-            .map(({ path, icon: Icon, labelKey }) => (
-              <Link
-                key={path}
-                to={path}
-                className={`${styles.navItem} ${isActive(path) ? styles.navItemActive : ""}`}
-                title={sidebarCollapsed ? t(labelKey) : undefined}
-              >
-                <Icon size={20} />
-                {!sidebarCollapsed && <span>{t(labelKey)}</span>}
-              </Link>
-            ))}
-        </div>
+        <nav className={styles.nav}>
+          {NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+              }
+            >
+              <span className={styles.navDot} aria-hidden />
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
 
         <div className={styles.sidebarFooter}>
-          {!sidebarCollapsed && (
-            <button className={styles.cmdHint} onClick={() => setCommandOpen(true)}>
-              <Kbd>&#8984;K</Kbd>
-            </button>
-          )}
-          {user && !sidebarCollapsed && (
-            <span className={styles.userEmail}>{user.email}</span>
-          )}
-          {!IS_PUBLIC_MODE && (
-            <button className={styles.logoutBtn} onClick={handleLogout} title={t("nav.logout")} aria-label={t("nav.logout")}>
-              <LogOut size={20} />
-              {!sidebarCollapsed && <span>{t("nav.logout")}</span>}
-            </button>
-          )}
-          <button
-            className={styles.collapseBtn}
-            onClick={() => setSidebarCollapsed((p) => !p)}
-            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          </button>
+          <span className={styles.sidebarFooterLabel}>workspace</span>
+          <span className={styles.sidebarFooterValue}>colombia.open-graph</span>
         </div>
-      </nav>
+      </aside>
 
-      <div className={styles.content}>
-        <main className={styles.main}><Outlet /></main>
-        <StatusBar />
-      </div>
-
-      <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
-      <KeyboardShortcutsHelp open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-      <ToastContainer />
+      <main className={styles.main}>
+        <Outlet />
+      </main>
     </div>
   );
 }

@@ -1,55 +1,58 @@
-import { Link, Outlet } from "react-router";
-
-import { IS_PUBLIC_MODE } from "@/config/runtime";
-import { useAuthStore } from "@/stores/auth";
+import { NavLink, Outlet } from "react-router";
 
 import styles from "./PublicShell.module.css";
 
 export function PublicShell() {
-  const token = useAuthStore((s) => s.token);
-
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <div className={styles.brandBlock}>
-          <Link to="/" className={styles.logo}>
-            CO·ACC
-          </Link>
-          <span className={styles.brandNote}>corrupción pública, explicada con datos oficiales</span>
-        </div>
-
+        <NavLink to="/" className={styles.brand}>
+          <span className={styles.brandMark}>co/</span>
+          <span className={styles.brandName}>acc</span>
+        </NavLink>
         <nav className={styles.nav}>
-          <Link to="/" className={styles.navLink}>
-            Inicio
-          </Link>
-          <Link to="/casos" className={styles.navLink}>
+          <NavLink
+            to="/casos"
+            className={({ isActive }) =>
+              isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+            }
+          >
             Casos
-          </Link>
-          <Link to="/#metodologia" className={styles.navLink}>
-            Metodología
-          </Link>
+          </NavLink>
+          <NavLink
+            to="/sector/procurement"
+            className={({ isActive }) =>
+              isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+            }
+          >
+            Sectores
+          </NavLink>
+          <a
+            href="https://github.com/nicoceron/co-acc"
+            target="_blank"
+            rel="noreferrer"
+            className={styles.navLink}
+          >
+            GitHub
+          </a>
         </nav>
-
-        <div className={styles.actions}>
-          {IS_PUBLIC_MODE ? (
-            <Link to="/app/search" className={styles.primaryLink}>
-              Abrir grafo
-            </Link>
-          ) : !token && (
-            <>
-              <Link to="/login" className={styles.secondaryLink}>
-                Ingresar
-              </Link>
-              <Link to="/register" className={styles.primaryLink}>
-                Crear cuenta
-              </Link>
-            </>
-          )}
-        </div>
       </header>
-      <main className={styles.content}>
+
+      <main className={styles.main}>
         <Outlet />
       </main>
+
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+          <span className={styles.footerNote}>
+            Contexto documental. No constituye acusación ni puntaje de riesgo.
+          </span>
+          <span className={styles.footerMeta}>
+            <span className={styles.footerChip}>CO</span>
+            <span>open graph infrastructure</span>
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
