@@ -46,7 +46,6 @@ class LakeCsvPipeline(Pipeline):
         return pa.Table.from_pandas(normalized, preserve_index=False)
 
     def run_to_lake(self, *, full_refresh: bool = False) -> WatermarkDelta:
-        del full_refresh
         csv_path = self.csv_path()
         batch_id = uuid.uuid4().hex
         rows_total = 0
@@ -71,6 +70,7 @@ class LakeCsvPipeline(Pipeline):
                 dataset_id,
                 normalizer=self.normalize_rows,
                 chunk_size=self.chunk_size,
+                full_refresh=full_refresh,
             )
 
         return watermark.advance(self.source_id, rows=0, batch_id=batch_id)

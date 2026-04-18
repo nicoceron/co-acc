@@ -22,6 +22,7 @@ class Watermark:
     last_batch_id: str
     row_count: int
     advanced_at: datetime | None = None
+    last_offset: int | None = None
 
 
 @dataclass(frozen=True)
@@ -31,6 +32,7 @@ class WatermarkDelta:
     batch_id: str
     advanced: bool
     last_seen_ts: datetime
+    last_offset: int | None = None
 
 
 def _latest_path() -> Path:
@@ -73,16 +75,22 @@ def _to_record(watermark: Watermark, advanced_at: datetime | None = None) -> dic
         "last_batch_id": watermark.last_batch_id,
         "row_count": int(watermark.row_count),
         "advanced_at": advanced,
+        "last_offset": (
+            int(watermark.last_offset) if watermark.last_offset is not None else None
+        ),
     }
 
 
 def _from_row(row: pd.Series) -> Watermark:
+    offset_raw = row.get("last_offset") if hasattr(row, "get") else None
+    last_offset = int(offset_raw) if offset_raw is not None and pd.notna(offset_raw) else None
     return Watermark(
         source=str(row["source"]),
         last_seen_ts=_utc(pd.Timestamp(row["last_seen_ts"]).to_pydatetime()),
         last_batch_id=str(row["last_batch_id"]),
         row_count=int(row["row_count"]),
         advanced_at=_utc(pd.Timestamp(row["advanced_at"]).to_pydatetime()),
+        last_offset=last_offset,
     )
 
 
@@ -123,6 +131,7 @@ def advance(
     rows: int,
     batch_id: str | None = None,
     last_seen_ts: datetime | None = None,
+    last_offset: int | None = None,
 ) -> WatermarkDelta:
     seen = _utc(last_seen_ts or datetime.now(tz=UTC))
     current = get(source)
@@ -132,11 +141,20 @@ def advance(
             f"{current.last_seen_ts.isoformat()} to {seen.isoformat()}"
         )
     batch = batch_id or uuid.uuid4().hex
-    set(Watermark(source=source, last_seen_ts=seen, last_batch_id=batch, row_count=rows))
+    set(
+        Watermark(
+            source=source,
+            last_seen_ts=seen,
+            last_batch_id=batch,
+            row_count=rows,
+            last_offset=last_offset,
+        )
+    )
     return WatermarkDelta(
         source=source,
         rows=rows,
         batch_id=batch,
         advanced=current is None or seen > _utc(current.last_seen_ts) or rows > 0,
         last_seen_ts=seen,
+        last_offset=last_offset,
     )

@@ -35,7 +35,7 @@ endif
 	etl-igac-transacciones etl-company-registry-c82u etl-all
 
 NATIONAL_PROCUREMENT_SOURCES := secop_integrado,secop_sanctions,secop_suppliers,secop_ii_processes,secop_offers,secop_ii_contracts,secop_invoices,secop_payment_plans,secop_contract_execution,secop_contract_additions,secop_contract_suspensions,secop_interadmin_agreements,sigep_public_servants,sigep_sensitive_positions,asset_disclosures,conflict_disclosures,health_providers,cuentas_claras_income_2019,paco_sanctions,siri_antecedents,fiscal_responsibility,fiscal_findings,sgr_projects,sgr_expense_execution
-LAKE_ROOT ?= /var/lib/coacc/lake
+LAKE_ROOT ?= $(abspath $(CURDIR))/lake
 
 setup-env:
 	bash scripts/init_env.sh

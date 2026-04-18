@@ -90,6 +90,9 @@ data/comprasnet/
 data/rais/
 data/tse/
 
+# Colocated lakehouse (parquet + watermarks)
+lake/
+
 # Local MCP runtime config (keep example only)
 .mcp.json
 

@@ -358,7 +358,10 @@ class SecopIntegratedPipeline(Pipeline):
     def run_to_lake(self, *, full_refresh: bool = False) -> WatermarkDelta:
         last = watermark.get(SOURCE)
         where = None
-        if not full_refresh and last is not None:
+        # Only apply incremental $where once the previous backfill has completed
+        # (last_offset cleared). If last_offset is set we are mid-resume and must
+        # continue the same pagination, otherwise we'd double-count rows.
+        if not full_refresh and last is not None and last.last_offset is None:
             where = f"fecha_de_cargue_en_secop > '{last.last_seen_ts.isoformat()}'"
 
         csv_path = self._csv_path()
@@ -384,4 +387,5 @@ class SecopIntegratedPipeline(Pipeline):
             normalizer=normalize,
             chunk_size=self.chunk_size,
             where=where,
+            full_refresh=full_refresh,
         )
