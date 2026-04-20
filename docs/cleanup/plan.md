@@ -57,19 +57,19 @@ Signed list: `docs/cleanup/cleanup_review.signed.csv`.
 
 Source of truth for Phase 1: `docs/cleanup/cleanup_review.signed.csv`.
 
-- [ ] **1.1** `audit-results/` — entire dir.
-- [ ] **1.2** Dated investigation docs (22 files) — see signed CSV rows `doc-investigation`.
-- [ ] **1.3** Discovery + one-off scripts: `deep_discovery*`, `hidden_discovery`, `semantic_discovery`, `probe_colombia_*`, `collect_*_public_*`, `parse_*_public_*`, `generate_demo_dataset`, `materialize_real_results`, `scan_real_pattern_coverage`, `run_bootstrap_all` + `bootstrap_all/`, `bootstrap_all_public.sh`, `bootstrap_public_demo.sh`, `ingest_colombia_all.sh`, `sync_colombia_portal_registry`, `generate_pipeline_status`, `generate_data_sources_summary`.
-- [ ] **1.4** Governance simplification — kill `check_pipeline_contracts`, `check_pipeline_inputs`, `check_public_claims`, `check_source_urls`, `claude_merge_gate`, `prompt_injection_scan`, `generate_reference_metrics`. Keep `check_compliance_pack`, `check_open_core_boundary`, `check_public_privacy`.
-- [ ] **1.5** CI workflows — delete `bootstrap-all-audit.yml`, `source-url-audit.yml`, `claude-pr-governor.yml`. Verify `security.yml` still runs on remaining 3 governance scripts.
-- [ ] **1.6** Demo payloads: `data/paco_sanctions/`, `data/official_case_bulletins/`, `output/playwright/`, `output/`, `logs/`, `.conductor/`.
-- [ ] **1.7** Nuke lake: `lake/raw/`, `lake/curated/`, `lake/meta/`. Rebuild empty skeleton (`lake/raw/`, `lake/curated/`, `lake/meta/`).
-- [ ] **1.8** Roadmap artifacts: kill `scripts/extract_roadmap_links.py`, `scripts/roadmap_links.csv`, `scripts/roadmap_links.json`, `scripts/roadmap_socrata_datasets.csv`. Copy canonical audit JSON into repo at `docs/datasets/colombia_open_data_audit.json`.
-- [ ] **1.9** `.gitignore`: add `govt data roadmap/` (keep PDFs on disk, stop tracking), add `lake/raw/`, `lake/curated/`, `lake/meta/*.parquet`, `lake/meta/*.csv` if not already.
-- [ ] **1.10** Auto-gen docs: delete `docs/pipeline_status.md`, `docs/data-sources.md`, `docs/reference_metrics.md`, `docs/ai-pr-governor.md`.
-- [ ] **1.11** Makefile surgery: delete `make` targets whose script is gone (`materialize-results`, `scan-real-pattern-coverage`, `sync-colombia-registry`, `generate-pipeline-status`, `generate-source-summary`, `probe-colombia-candidates`, `demo-national`, `demo-bogota`, `demo-synthetic`, `build-watchlist-snapshots` if not used). Keep `setup-env`, `dev`, `stop`, `api`, `etl`, `frontend`, `lake-*`, `test*`, `lint`, `type-check`, `clean-data`.
+- [x] **1.1** `audit-results/` — entire dir (untracked; rm from disk).
+- [x] **1.2** Dated investigation docs (22 files).
+- [x] **1.3** Discovery + one-off scripts (24 files including 196K materializer).
+- [x] **1.4** Governance simplification — killed 7, kept 3.
+- [x] **1.5** CI workflows — 3 deleted.
+- [x] **1.6** Demo payloads + empty dirs.
+- [x] **1.7** Nuke lake (untracked; rm from disk, 2.0G recovered).
+- [x] **1.8** Roadmap artifacts replaced by `docs/datasets/colombia_open_data_audit.json`.
+- [x] **1.9** `.gitignore` — `govt data roadmap/` added.
+- [x] **1.10** Auto-gen docs removed (4 files).
+- [x] **1.11** Makefile surgery — 7 dead targets removed, 31 lines trimmed.
 - [ ] **1.12** Decide rows from signed CSV: `skills-lock.json`, `.playwright-cli/`, `docs/public_scope.md`. Investigate origin; resolve in a follow-up micro-commit.
-- [ ] **1.13** `docs/competition/datos_al_ecosistema_2026.md` §12 decision log: append Phase 1 commit SHAs.
+- [x] **1.13** `docs/cleanup/plan.md` decision log appended.
 
 ### Phase 1 commit order (one per bullet)
 
@@ -225,13 +225,29 @@ Follow `docs/competition/program_plan.md` tracks D/M/F/R/C. No change — that p
 
 - **2026-04-20** — Plan created. Canonical dataset source = `colombia_open_data_audit.json` (285 valid IDs). Tier A target size = 15–25 datasets.
 - **2026-04-20** — Gate 0 signed. Decisions Q1–Q6 recorded in Phase 0 section. `cleanup_review.signed.csv` committed.
+- **2026-04-20** — Phase 1 applied on branch `cleanup/phase1`. Commits:
+  - `7c455162` docs(cleanup): add Phase 0 inventory, signed review, program plan
+  - `30e14da1` chore(cleanup): remove 22 dated investigation docs
+  - `49fbc244` chore(cleanup): remove discovery + one-off investigation scripts (24 files, 8624 lines)
+  - `8c98b5c1` chore(cleanup): simplify governance script layer (7 killed, 3 kept)
+  - `70f68891` chore(cleanup): delete dead CI workflows (3 workflows)
+  - `6f53c6ca` chore(cleanup): drop demo data + empty dirs
+  - `a3da056f` chore(cleanup): canonical dataset audit replaces roadmap extractors
+  - `71cf23c0` chore(cleanup): gitignore roadmap PDFs, drop dead roadmap_links rule
+  - `648b9efc` chore(cleanup): remove auto-generated docs with dead producers
+  - `46e63eef` chore(cleanup): remove Makefile targets whose script is deleted
+  Disk reclaimed: ~2.0G (lake) + 19M (paco_sanctions) + 34M (roadmap PDFs gitignored in-place) + ~300K doc/script cruft.
+  Tests: ETL 209 pass / 4 pre-existing fail (unchanged from baseline); API 196 pass / 1 skip.
+  `source_registry_co_v1.csv` deferred to Phase 2 migrate-then-kill.
+  `skills-lock.json`, `.playwright-cli/`, `docs/public_scope.md` still flagged `decide` — Phase 1.12 micro-commits pending.
 
 ---
 
 ## Progress snapshot
 
 - Phase 0: ✅ complete — `inventory.md` + `cleanup_review.csv` produced; Gate 0 signed 2026-04-20
-- Phase 1: ready — 12-commit plan defined; awaiting "go phase 1"
+- Phase 1: ✅ complete — 9 cleanup commits on `cleanup/phase1`; ETL 209/4, API 196 pass; 2.0G recovered; Gate 1 pending user merge
+- Phase 2: ready — dataset triage pipeline + tier classification
 - Phase 1: not started
 - Phase 2: not started
 - Phase 3: not started
