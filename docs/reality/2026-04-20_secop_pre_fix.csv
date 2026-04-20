@@ -1,2 +1,0 @@
-source,lake_rows,lake_distinct_pk,lake_distinct_pk_dupes,buyer_name_null_pct,supplier_name_null_pct,contract_value_null_pct,supplier_document_id_null_pct,buyer_document_id_null_pct,earliest_firma,latest_firma,null_firma_pct,live_rows,delta,delta_pct,probed_at
-secop_integrado,5601945,5601929,14,100.0,100.0,100.0,3.09,100.0,2015-06-11T00:00:00.000,2026-04-14T00:00:00.000,7.18,5605002,3057,0.0545,2026-04-20T17:14:08.875380+00:00
