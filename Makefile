@@ -3,9 +3,8 @@ include .env
 export $(shell sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' .env)
 endif
 
-.PHONY: dev stop api etl frontend demo demo-national demo-bogota demo-synthetic build-watchlist-snapshots materialize-results scan-real-pattern-coverage clean-data seed lint type-check test test-api test-etl test-frontend check lake-init lake-pipeline lake-compact lake-reality materialize-deps materialize-all \
+.PHONY: dev stop api etl frontend demo-bogota demo-synthetic build-watchlist-snapshots clean-data seed lint type-check test test-api test-etl test-frontend check lake-init lake-pipeline lake-compact lake-reality materialize-deps materialize-all \
 	validate-known-cases \
-	sync-colombia-registry generate-pipeline-status generate-source-summary \
 	download-secop-integrado download-secop-sanciones download-secop-proveedores \
 	download-secop-procesos download-secop-ofertas download-secop-contratos \
 	download-secop-compromisos download-secop-solicitudes-cdp download-secop-facturas \
@@ -16,7 +15,6 @@ endif
 	download-secop-ubicaciones-adicionales download-connected-secop-i-history \
 	download-connected-secop-scope \
 	download-connected-company-registry \
-	probe-colombia-candidates \
 	download-reps-salud download-men-matricula download-sgr-proyectos download-sgr-gastos \
 	download-cuentas-claras-2019 download-paco-sanciones download-pte-compromisos-sector \
 	download-siri-antecedentes download-responsabilidad-fiscal download-hallazgos-fiscales \
@@ -34,7 +32,6 @@ endif
 	etl-registraduria-checks etl-supersoc-1000 \
 	etl-igac-transacciones etl-company-registry-c82u etl-all
 
-NATIONAL_PROCUREMENT_SOURCES := secop_integrado,secop_sanctions,secop_suppliers,secop_ii_processes,secop_offers,secop_ii_contracts,secop_invoices,secop_payment_plans,secop_contract_execution,secop_contract_additions,secop_contract_suspensions,secop_interadmin_agreements,sigep_public_servants,sigep_sensitive_positions,asset_disclosures,conflict_disclosures,health_providers,cuentas_claras_income_2019,paco_sanctions,siri_antecedents,fiscal_responsibility,fiscal_findings,sgr_projects,sgr_expense_execution
 LAKE_ROOT ?= $(abspath $(CURDIR))/lake
 
 setup-env:
@@ -87,16 +84,6 @@ demo-bogota:
 	$(MAKE) build-watchlist-snapshots
 	@echo "Demo Bogotá ready. Visit http://localhost:3000"
 
-# Demo: National procurement-first real-data graph.
-# RUN THIS: make demo
-demo: demo-national
-
-demo-national:
-	$(MAKE) clean-data
-	bash scripts/bootstrap_all_public.sh --yes-reset --noninteractive --sources $(NATIONAL_PROCUREMENT_SOURCES)
-	$(MAKE) build-watchlist-snapshots
-	@echo "National procurement demo ready. Visit http://localhost:3000"
-
 # Synthetic regression/demo seed kept as an explicit fallback target.
 demo-synthetic:
 	docker compose down -v --remove-orphans
@@ -125,23 +112,8 @@ etl:
 frontend:
 	cd frontend && npm run dev
 
-sync-colombia-registry:
-	python3 scripts/sync_colombia_portal_registry.py
-
-generate-pipeline-status:
-	python3 scripts/generate_pipeline_status.py --registry-path docs/source_registry_co_v1.csv --output docs/pipeline_status.md --api-base http://localhost:8000
-
-generate-source-summary:
-	python3 scripts/generate_data_sources_summary.py --registry-path docs/source_registry_co_v1.csv --docs-path docs/data-sources.md --api-base http://localhost:8000
-
 build-watchlist-snapshots:
 	cd api && uv run python scripts/build_watchlist_snapshots.py
-
-materialize-results: build-watchlist-snapshots
-	python3 scripts/materialize_real_results.py --api-base http://localhost:8000 --output frontend/public/data/materialized-results.json --mirror audit-results/materialized-results/latest/materialized-results.json
-
-scan-real-pattern-coverage:
-	python3 scripts/scan_real_pattern_coverage.py --api-base http://localhost:8000 --output docs/real_pattern_coverage_2026-03-21.md
 
 download-secop-integrado:
 	cd etl && uv run python scripts/download_socrata_dataset.py --dataset-id rpmr-utcd --output ../data/secop_integrado/secop_integrado.csv
@@ -225,9 +197,6 @@ download-secop-ubicaciones-adicionales:
 
 download-secop-archivos-descarga:
 	cd etl && uv run python scripts/download_socrata_dataset.py --dataset-id dmgg-8hin --output ../data/secop_document_archives/secop_document_archives.csv
-
-probe-colombia-candidates:
-	cd etl && uv run python ../scripts/probe_colombia_candidate_datasets.py
 
 download-reps-salud:
 	cd etl && uv run python scripts/download_socrata_dataset.py --dataset-id c36g-9fc2 --output ../data/health_providers/health_providers.csv
