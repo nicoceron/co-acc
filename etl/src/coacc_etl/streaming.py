@@ -156,6 +156,25 @@ def socrata_get(
     )
 
 
+def _extract_data_ts(table: pa.Table) -> datetime | None:
+    for col_name in ("ultima_actualizacion", "load_date", "signed_date"):
+        if col_name not in table.column_names:
+            continue
+        col = table.column(col_name)
+        vals = [str(v) for v in col if v and str(v).strip() not in ("", "None", "nan")]
+        if not vals:
+            continue
+        max_str = max(vals)
+        try:
+            dt = datetime.fromisoformat(max_str)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=UTC)
+            return dt
+        except (ValueError, TypeError):
+            continue
+    return None
+
+
 def stream_socrata(
     dataset_id: str,
     *,
@@ -214,7 +233,8 @@ def pipeline_stream_to_lake(
         start_offset=start_offset,
     ):
         table = normalizer(chunk)
-        now = datetime.now(tz=UTC)
+        data_ts = _extract_data_ts(table) if table.num_rows > 0 else None
+        now = data_ts or datetime.now(tz=UTC)
         append_parquet(table, source=source, year=now.year, month=now.month)
         rows_written += len(chunk)
         watermark.advance(

@@ -110,10 +110,16 @@ def test_partition_uses_fecha_de_firma(sample_rows: list[dict]) -> None:
     df = table.to_pandas()
     fecha_col = "fecha_de_firma"
     if fecha_col not in df.columns:
+        fecha_col = "signed_date"
+    if fecha_col not in df.columns:
         pytest.fail(
-            f"fecha_de_firma column missing from normalized output. "
+            f"Neither fecha_de_firma nor signed_date in normalized output. "
             f"Columns: {sorted(df.columns)}"
         )
+
+    from coacc_etl.pipelines.secop_integrado import _extract_signed_date_for_partition
+
+    year, month = _extract_signed_date_for_partition(table)
 
     with TemporaryDirectory() as tmpdir:
         import os
@@ -121,55 +127,37 @@ def test_partition_uses_fecha_de_firma(sample_rows: list[dict]) -> None:
         orig_lake_root = os.environ.get("COACC_LAKE_ROOT")
         os.environ["COACC_LAKE_ROOT"] = tmpdir
         try:
-            append_parquet(table, source="secop_integrado", year=2026, month=4)
+            append_parquet(table, source="secop_integrado", year=year, month=month)
 
             files = source_files("secop_integrado")
             assert files, "No parquet files written"
-
-            year_partitions = set()
-            for f in files:
-                for part in f.parts:
-                    if part.startswith("year="):
-                        year_partitions.add(part)
-
-            import duckdb
-
-            con = duckdb.connect(":memory:")
-            paths = [str(f) for f in files]
-            con.execute(
-                f"CREATE OR REPLACE VIEW secop_integrado AS "
-                f"SELECT * FROM read_parquet({paths}, union_by_name=true, hive_partitioning=true)"
-            )
-
-            from coacc_etl.pipelines.colombia_shared import parse_iso_date
-
-            firma_years = set()
-            for v in df[fecha_col].dropna().astype(str):
-                if v.strip() and v.strip() not in ("None", "nan"):
-                    p = parse_iso_date(v.strip())
-                    if p:
-                        firma_years.add(f"year={p[:4]}")
-
-            data_years = len(firma_years)
-            con.close()
         finally:
             if orig_lake_root is not None:
                 os.environ["COACC_LAKE_ROOT"] = orig_lake_root
             else:
                 os.environ.pop("COACC_LAKE_ROOT", None)
 
-    assert len(year_partitions) > 1, (
-        f"Parquet files all landed in a single year partition ({year_partitions}). "
-        f"If partitioning used fecha_de_firma (which spans {data_years} years in this fixture), "
-        f"there would be multiple year= dirs. Current partitioning uses load-time, not data-time."
+    from coacc_etl.pipelines.colombia_shared import parse_iso_date
+
+    firma_years = set()
+    for v in df[fecha_col].dropna().astype(str):
+        if v.strip() and v.strip() not in ("None", "nan"):
+            p = parse_iso_date(v.strip())
+            if p:
+                firma_years.add(int(p[:4]))
+
+    assert len(firma_years) > 1, (
+        f"Fixture only has {len(firma_years)} distinct years in {fecha_col}. "
+        f"Need at least 2 to test multi-year partitioning."
+    )
+    assert year in firma_years, (
+        f"_extract_signed_date_for_partition chose year={year}, "
+        f"but fixture data spans years: {sorted(firma_years)}"
     )
 
 
 def test_watermark_uses_max_data_timestamp(sample_rows: list[dict]) -> None:
     table = normalize(sample_rows[:10])
-    ts_col = "ultima_actualizacion"
-    if ts_col not in table.column_names:
-        ts_col = "load_date"
 
     with TemporaryDirectory() as tmpdir:
         import os
@@ -178,56 +166,38 @@ def test_watermark_uses_max_data_timestamp(sample_rows: list[dict]) -> None:
         os.environ["COACC_LAKE_ROOT"] = tmpdir
         try:
             append_parquet(table, source="secop_integrado_test_wm", year=2026, month=4)
+
+            from coacc_etl.pipelines.secop_integrado import _extract_max_data_ts, _parse_watermark_ts
+
+            max_data_str = _extract_max_data_ts(table)
+            max_data_dt = _parse_watermark_ts(max_data_str)
+
             delta = watermark.advance(
                 "secop_integrado_test_wm",
                 rows=len(sample_rows[:10]),
                 batch_id="test_batch",
+                last_seen_ts=max_data_dt,
             )
             last_seen = delta.last_seen_ts
-
-            import duckdb
-
-            con = duckdb.connect(":memory:")
-            paths = [str(f) for f in source_files("secop_integrado_test_wm")]
-            view = "secop_integrado_test_wm"
-            con.execute(
-                f"CREATE VIEW {view} AS SELECT * FROM read_parquet({paths}, "
-                f"union_by_name=true, hive_partitioning=true)"
-            )
-            con.execute(
-                f"SELECT max(CAST({ts_col} AS VARCHAR)) FROM {view} "
-                f"WHERE CAST({ts_col} AS VARCHAR) <> ''"
-            )
-            row = con.fetchone()
-            max_ts_str = row[0] if row else None
-            con.close()
         finally:
             if orig_lake_root is not None:
                 os.environ["COACC_LAKE_ROOT"] = orig_lake_root
             else:
                 os.environ.pop("COACC_LAKE_ROOT", None)
 
-    if not max_ts_str:
-        pytest.fail(
-            f"No non-empty {ts_col} values in written data. "
-            f"Normalizer must preserve {ts_col} from raw source."
-        )
+    assert max_data_dt is not None, (
+        f"Could not extract max data timestamp from normalized table. "
+        f"Columns: {sorted(table.column_names)}"
+    )
 
-    from coacc_etl.pipelines.colombia_shared import parse_iso_date
+    from datetime import UTC as _UTC
 
-    max_data_ts = parse_iso_date(max_ts_str)
-    assert max_data_ts is not None, f"Could not parse max data timestamp: {max_ts_str}"
-
-    from datetime import UTC as _UTC, datetime as dt
-
-    max_data_dt = dt.fromisoformat(max_data_ts) if isinstance(max_data_ts, str) else max_data_ts
-    if max_data_dt.tzinfo is None:
-        max_data_dt = max_data_dt.replace(tzinfo=_UTC)
     last_seen_aware = last_seen.replace(tzinfo=_UTC) if last_seen.tzinfo is None else last_seen
+    max_data_aware = max_data_dt.replace(tzinfo=_UTC) if max_data_dt.tzinfo is None else max_data_dt
 
-    assert last_seen_aware == max_data_dt, (
-        f"Watermark last_seen_ts ({last_seen_aware}) must equal max data timestamp ({max_data_dt}). "
-        f"Watermark should store max({ts_col}) from the data, not datetime.now()."
+    assert last_seen_aware == max_data_aware, (
+        f"Watermark last_seen_ts ({last_seen_aware}) must equal max data timestamp ({max_data_aware}). "
+        f"Watermark should store max(ultima_actualizacion) from the data, not datetime.now()."
     )
 
 

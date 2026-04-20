@@ -33,6 +33,59 @@ logger = logging.getLogger(__name__)
 SOURCE = "secop_integrado"
 SOCRATA_ID = "jbjy-vk9h"
 
+COLUMN_MAP: dict[str, str] = {
+    "nombre_entidad": "buyer_name",
+    "nit_entidad": "buyer_document_raw",
+    "proveedor_adjudicado": "supplier_name",
+    "documento_proveedor": "supplier_document_raw",
+    "tipodocproveedor": "supplier_doc_type",
+    "valor_del_contrato": "contract_value",
+    "ultima_actualizacion": "load_date",
+    "fecha_de_firma": "signed_date",
+    "departamento": "department",
+    "ciudad": "municipality",
+    "modalidad_de_contratacion": "modality",
+    "estado_contrato": "status",
+    "orden": "origin",
+    "referencia_del_contrato": "contract_id",
+    "id_contrato": "contract_id_fallback",
+    "proceso_de_compra": "process_id",
+    "objeto_del_contrato": "object",
+}
+
+QUALITY_NULL_THRESHOLD: dict[str, float] = {
+    "buyer_name": 0.90,
+    "contract_value": 0.50,
+    "supplier_name": 0.80,
+    "load_date": 0.90,
+}
+
+
+class LakeQualityError(Exception):
+    def __init__(self, source: str, metrics: dict[str, float]) -> None:
+        lines = [f"  {col}: {pct:.1%} non-null (threshold {QUALITY_NULL_THRESHOLD[col]:.0%})" for col, pct in sorted(metrics.items())]
+        super().__init__(f"Quality gate failed for {source}:\n" + "\n".join(lines))
+        self.source = source
+        self.metrics = metrics
+
+
+def _check_quality(df: pd.DataFrame, source: str = SOURCE) -> None:
+    total = len(df)
+    if total == 0:
+        return
+    failures: dict[str, float] = {}
+    for col, threshold in QUALITY_NULL_THRESHOLD.items():
+        if col not in df.columns:
+            failures[col] = 0.0
+            continue
+        non_null = df[col].notna().sum()
+        non_empty = (df[col].astype(str).str.strip() != "").sum() if df[col].dtype == object else non_null
+        coverage = max(non_null, non_empty) / total
+        if coverage < threshold:
+            failures[col] = coverage
+    if failures:
+        raise LakeQualityError(source, failures)
+
 
 def _clean_value(raw: object) -> str:
     value = str(raw or "").strip()
@@ -51,6 +104,56 @@ def _parse_amount(raw: object) -> float | None:
         return None
 
 
+def _extract_max_data_ts(table: pa.Table) -> str | None:
+    for ts_col in ("ultima_actualizacion", "load_date"):
+        if ts_col in table.column_names:
+            col = table.column(ts_col)
+            vals = [str(v) for v in col if v and str(v).strip() not in ("", "None", "nan")]
+            if vals:
+                return max(vals)
+    return None
+
+
+def _extract_signed_date_for_partition(table: pa.Table) -> tuple[int, int]:
+    from coacc_etl.pipelines.colombia_shared import parse_iso_date
+
+    col_name = "signed_date" if "signed_date" in table.column_names else "fecha_de_firma"
+    if col_name not in table.column_names:
+        now = datetime.now(tz=UTC)
+        return now.year, now.month
+    col = table.column(col_name)
+    years, months = [], []
+    for v in col:
+        s = str(v).strip()
+        if s and s not in ("None", "nan", ""):
+            p = parse_iso_date(s)
+            if p:
+                years.append(int(p[:4]))
+                months.append(int(p[5:7]))
+    if years:
+        from collections import Counter
+
+        y, _ = Counter(years).most_common(1)[0]
+        m, _ = Counter(months).most_common(1)[0]
+        return y, m
+    now = datetime.now(tz=UTC)
+    return now.year, now.month
+
+
+def _parse_watermark_ts(ts_str: str | None) -> datetime | None:
+    if not ts_str:
+        return None
+    from coacc_etl.pipelines.colombia_shared import parse_iso_date
+
+    parsed = parse_iso_date(ts_str)
+    if not parsed:
+        return None
+    dt = datetime.fromisoformat(parsed) if isinstance(parsed, str) else datetime.fromisoformat(str(parsed))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt
+
+
 def normalize(rows: list[dict[str, Any]]) -> pa.Table:
     frame = normalize_dataframe_columns(pd.DataFrame.from_records(rows))
     return normalize_frame_for_lake(frame)
@@ -64,37 +167,38 @@ def normalize_frame_for_lake(frame: pd.DataFrame) -> pa.Table:
             return normalized[name].astype(str)
         return pd.Series([""] * len(normalized), index=normalized.index, dtype="string")
 
-    supplier_document = col("documento_proveedor").map(strip_document)
-    supplier_name = col("nom_raz_social_contratista").map(lambda value: normalize_name(value))
-    buyer_name = col("nombre_de_la_entidad").map(_clean_value)
+    supplier_document_raw = col("documento_proveedor").map(strip_document)
+    supplier_name = col("proveedor_adjudicado").map(lambda v: normalize_name(v))
+    buyer_name = col("nombre_entidad").map(_clean_value)
     buyer_document = [
         make_company_document_id(raw_doc, raw_name, kind="buyer")
-        for raw_doc, raw_name in zip(col("nit_de_la_entidad"), buyer_name, strict=False)
+        for raw_doc, raw_name in zip(col("nit_entidad"), buyer_name, strict=False)
     ]
 
     normalized = normalized.copy()
     normalized["source"] = SOURCE
-    normalized["supplier_document_id"] = supplier_document
+    normalized["supplier_document_id"] = supplier_document_raw
     normalized["supplier_name"] = supplier_name
     normalized["buyer_document_id"] = buyer_document
     normalized["buyer_name"] = buyer_name
-    normalized["contract_id"] = col("numero_del_contrato").where(
-        col("numero_del_contrato") != "",
+    normalized["contract_id"] = col("referencia_del_contrato").where(
+        col("referencia_del_contrato") != "",
         col("id_contrato"),
     )
-    normalized["process_id"] = col("numero_de_proceso").where(
-        col("numero_de_proceso") != "",
+    normalized["process_id"] = col("proceso_de_compra").where(
+        col("proceso_de_compra") != "",
         col("id_proceso"),
     )
-    normalized["department"] = col("departamento_entidad").map(_clean_value)
-    normalized["municipality"] = col("municipio_entidad").map(_clean_value)
-    normalized["modality"] = col("modalidad_de_contrataci_n").map(_clean_value)
-    normalized["status"] = col("estado_del_proceso").map(_clean_value)
-    normalized["origin"] = col("origen").map(_clean_value)
+    normalized["department"] = col("departamento").map(_clean_value)
+    normalized["municipality"] = col("ciudad").map(_clean_value)
+    normalized["modality"] = col("modalidad_de_contratacion").map(_clean_value)
+    normalized["status"] = col("estado_contrato").map(_clean_value)
+    normalized["origin"] = col("orden").map(_clean_value)
     normalized["contract_value"] = [
-        _parse_amount(value) for value in col("valor_contrato")
+        _parse_amount(value) for value in col("valor_del_contrato")
     ]
-    normalized["load_date"] = col("fecha_de_cargue_en_secop").map(_clean_value)
+    normalized["load_date"] = col("ultima_actualizacion").map(_clean_value)
+    normalized["signed_date"] = col("fecha_de_firma").map(_clean_value)
     normalized["object"] = col("objeto_del_contrato").map(_clean_value)
     return pa.Table.from_pandas(normalized, preserve_index=False)
 
@@ -140,27 +244,27 @@ class SecopIntegratedPipeline(Pipeline):
         procurement_map: dict[str, dict[str, Any]] = {}
 
         for row in frame.to_dict(orient="records"):
-            entity_name = _clean_value(row.get("nombre_de_la_entidad"))
+            entity_name = _clean_value(row.get("nombre_entidad"))
             entity_nit = make_company_document_id(
-                row.get("nit_de_la_entidad"),
+                row.get("nit_entidad"),
                 entity_name,
                 kind="buyer",
             )
             supplier_document = strip_document(_clean_value(row.get("documento_proveedor")))
-            supplier_name = normalize_name(_clean_value(row.get("nom_raz_social_contratista")))
+            supplier_name = normalize_name(_clean_value(row.get("proveedor_adjudicado")))
             supplier_document = supplier_document or make_company_document_id(
                 supplier_document,
                 supplier_name,
                 kind="supplier",
             )
-            supplier_doc_type = _clean_value(row.get("tipo_documento_proveedor"))
-            contract_id = _clean_value(row.get("numero_del_contrato")) or _clean_value(
+            supplier_doc_type = _clean_value(row.get("tipodocproveedor"))
+            contract_id = _clean_value(row.get("referencia_del_contrato")) or _clean_value(
                 row.get("id_contrato")
             )
-            process_id = _clean_value(row.get("numero_de_proceso")) or _clean_value(
+            process_id = _clean_value(row.get("proceso_de_compra")) or _clean_value(
                 row.get("id_proceso")
             )
-            origin = _clean_value(row.get("origen"))
+            origin = _clean_value(row.get("orden"))
             if not entity_nit or not entity_name or not supplier_document or not supplier_name:
                 continue
 
@@ -170,8 +274,8 @@ class SecopIntegratedPipeline(Pipeline):
                     document_id=entity_nit,
                     name=entity_name,
                     source="secop_integrado",
-                    department=_clean_value(row.get("departamento_entidad")),
-                    municipality=_clean_value(row.get("municipio_entidad")),
+                    department=_clean_value(row.get("departamento")),
+                    municipality=_clean_value(row.get("ciudad")),
                     entity_scope=_clean_value(row.get("nivel_entidad")),
                 ),
             )
@@ -205,25 +309,25 @@ class SecopIntegratedPipeline(Pipeline):
                     "contract_count": 0,
                     "total_value": 0.0,
                     "average_value": None,
-                    "department": _clean_value(row.get("departamento_entidad")),
-                    "city": _clean_value(row.get("municipio_entidad")),
-                    "modality": _clean_value(row.get("modalidad_de_contrataci_n")),
-                    "status": _clean_value(row.get("estado_del_proceso")),
+                    "department": _clean_value(row.get("departamento")),
+                    "city": _clean_value(row.get("ciudad")),
+                    "modality": _clean_value(row.get("modalidad_de_contratacion")),
+                    "status": _clean_value(row.get("estado_contrato")),
                     "origin": origin,
                     "evidence_refs": [],
                 },
             )
             summary["contract_count"] += 1
-            summary["total_value"] += _parse_amount(row.get("valor_contrato")) or 0.0
+            summary["total_value"] += _parse_amount(row.get("valor_del_contrato")) or 0.0
             summary["average_value"] = summary["total_value"] / float(summary["contract_count"])
             if not summary.get("department"):
-                summary["department"] = _clean_value(row.get("departamento_entidad"))
+                summary["department"] = _clean_value(row.get("departamento"))
             if not summary.get("city"):
-                summary["city"] = _clean_value(row.get("municipio_entidad"))
+                summary["city"] = _clean_value(row.get("ciudad"))
             if not summary.get("modality"):
-                summary["modality"] = _clean_value(row.get("modalidad_de_contrataci_n"))
+                summary["modality"] = _clean_value(row.get("modalidad_de_contratacion"))
             if not summary.get("status"):
-                summary["status"] = _clean_value(row.get("estado_del_proceso"))
+                summary["status"] = _clean_value(row.get("estado_contrato"))
             if not summary.get("origin"):
                 summary["origin"] = origin
             summary["evidence_refs"] = merge_limited_unique(
@@ -358,15 +462,13 @@ class SecopIntegratedPipeline(Pipeline):
     def run_to_lake(self, *, full_refresh: bool = False) -> WatermarkDelta:
         last = watermark.get(SOURCE)
         where = None
-        # Only apply incremental $where once the previous backfill has completed
-        # (last_offset cleared). If last_offset is set we are mid-resume and must
-        # continue the same pagination, otherwise we'd double-count rows.
         if not full_refresh and last is not None and last.last_offset is None:
-            where = f"fecha_de_cargue_en_secop > '{last.last_seen_ts.isoformat()}'"
+            where = f"ultima_actualizacion > '{last.last_seen_ts.isoformat()}'"
 
         csv_path = self._csv_path()
         batch_id = uuid.uuid4().hex
         rows_total = 0
+        table = None
         if csv_path.exists():
             for chunk in iter_csv_chunks(
                 csv_path,
@@ -376,10 +478,11 @@ class SecopIntegratedPipeline(Pipeline):
                 keep_default_na=False,
             ):
                 table = normalize_frame_for_lake(chunk)
-                now = datetime.now(tz=UTC)
-                append_parquet(table, SOURCE, year=now.year, month=now.month)
+                year, month = _extract_signed_date_for_partition(table)
+                append_parquet(table, SOURCE, year=year, month=month)
                 rows_total += len(chunk)
-            return watermark.advance(SOURCE, rows=rows_total, batch_id=batch_id)
+            max_data_ts = _extract_max_data_ts(table) if table is not None else None
+            return watermark.advance(SOURCE, rows=rows_total, batch_id=batch_id, last_seen_ts=_parse_watermark_ts(max_data_ts))
 
         return pipeline_stream_to_lake(
             SOURCE,
