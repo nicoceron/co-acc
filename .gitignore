@@ -53,6 +53,8 @@ htmlcov/
 !docs/source_registry_co_v1.csv
 !docs/release/public_boundary_matrix.csv
 !docs/reality/*.csv
+!docs/cleanup/*.csv
+!docs/datasets/*.csv
 *.tsv
 *.parquet
 *.dbc
