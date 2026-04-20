@@ -1,12 +1,12 @@
-import styles from "./Spinner.module.css";
-
 export function Spinner({ label }: { label?: string }) {
   return (
-    <div className={styles.root} role="status" aria-live="polite">
-      <div className={styles.dot} />
-      <div className={styles.dot} />
-      <div className={styles.dot} />
-      {label ? <span className={styles.label}>{label}</span> : null}
+    <div className="inline-flex items-center gap-2 p-3 text-[13px] text-ink-400" role="status" aria-live="polite">
+      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-lime-400 [animation-delay:0ms]" />
+      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-lime-400 [animation-delay:150ms]" />
+      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-lime-400 [animation-delay:300ms]" />
+      {label ? (
+        <span className="ml-1 font-mono text-[11px] uppercase tracking-wider">{label}</span>
+      ) : null}
     </div>
   );
 }

@@ -46,6 +46,7 @@ export function App() {
         <Route index element={<Landing />} />
         <Route path="casos" element={<LazyRoute><Casos /></LazyRoute>} />
         <Route path="casos/:slug" element={<LazyRoute><CasoDetail /></LazyRoute>} />
+        <Route path="sector" element={<LazyRoute><Sector /></LazyRoute>} />
         <Route path="sector/:sectorId" element={<LazyRoute><Sector /></LazyRoute>} />
         {!IS_PUBLIC_MODE && <Route path="login" element={<LazyRoute><Login /></LazyRoute>} />}
         {!IS_PUBLIC_MODE && (

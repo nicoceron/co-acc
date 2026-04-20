@@ -1,201 +1,108 @@
-/* === IBM Plex Sans — UI chrome === */
-@font-face {
-  font-family: "IBM Plex Sans";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/IBMPlexSans-Regular.woff2") format("woff2");
-}
-@font-face {
-  font-family: "IBM Plex Sans";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("/fonts/IBMPlexSans-Medium.woff2") format("woff2");
-}
-@font-face {
-  font-family: "IBM Plex Sans";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/IBMPlexSans-SemiBold.woff2") format("woff2");
-}
-@font-face {
-  font-family: "IBM Plex Sans";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("/fonts/IBMPlexSans-Bold.woff2") format("woff2");
-}
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+@import "tailwindcss";
 
-/* === IBM Plex Mono — data display === */
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/IBMPlexMono-Regular.woff2") format("woff2");
-}
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("/fonts/IBMPlexMono-Medium.woff2") format("woff2");
-}
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
-}
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("/fonts/IBMPlexMono-Bold.woff2") format("woff2");
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Neutral scale — warm stone */
+  --color-ink-50: #fafaf9;
+  --color-ink-100: #f5f5f4;
+  --color-ink-200: #e7e5e4;
+  --color-ink-300: #d6d3d1;
+  --color-ink-400: #a8a29e;
+  --color-ink-500: #78716c;
+  --color-ink-600: #57534e;
+  --color-ink-700: #3a3735;
+  --color-ink-800: #1f1d1c;
+  --color-ink-900: #141312;
+  --color-ink-950: #0a0a0a;
+
+  /* Accent — electric lime */
+  --color-lime-300: #d3f261;
+  --color-lime-400: #c4f542;
+  --color-lime-500: #a3d91e;
+
+  /* Semantic signal colors (muted) */
+  --color-sev-low: #7dd3fc;
+  --color-sev-med: #fbbf24;
+  --color-sev-high: #fb923c;
+  --color-sev-crit: #f87171;
+
+  /* Data category */
+  --color-data-person: #93c5fd;
+  --color-data-company: #fdba74;
+  --color-data-contract: #fde68a;
+  --color-data-sanction: #fca5a5;
 }
 
-:root {
-  /* Night-vision base — deep black-green */
-  --bg-primary: #060a07;
-  --bg-secondary: #0c1210;
-  --bg-tertiary: #111a16;
-  --bg-elevated: #162018;
-  --bg-surface: #1a2820;
-  --bg-overlay: rgba(0, 0, 0, 0.75);
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-  /* High-contrast text */
-  --text-primary: #e8ede9;
-  --text-secondary: #94a39a;
-  --text-muted: #5a6b60;
+  html,
+  body,
+  #root {
+    margin: 0;
+    background: var(--color-ink-950);
+    color: var(--color-ink-100);
+  }
 
-  /* Amber/gold accent (WCAG AA on bg-primary) */
-  --accent: #ff9a3c;
-  --accent-hover: #ffb060;
-  --accent-dim: rgba(255, 154, 60, 0.15);
-  --accent-border: rgba(255, 154, 60, 0.35);
+  body {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
-  /* System signals */
-  --success: #22c55e;
-  --warning: #eab308;
-  --danger: #ef4444;
-  --info: #3b82f6;
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--color-ink-50);
+  }
 
-  /* Borders + dividers */
-  --border-subtle: rgba(232, 237, 233, 0.06);
-  --border-default: rgba(232, 237, 233, 0.1);
-  --border-strong: rgba(232, 237, 233, 0.18);
+  p { margin: 0; }
 
-  /* Typography */
-  --font-sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
-  --fs-xs: 0.75rem;
-  --fs-sm: 0.875rem;
-  --fs-base: 1rem;
-  --fs-lg: 1.125rem;
-  --fs-xl: 1.25rem;
-  --fs-2xl: 1.5rem;
-  --fs-3xl: 2rem;
-  --fs-4xl: 2.75rem;
-  --fs-5xl: 3.75rem;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 
-  /* Spacing */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --space-8: 3rem;
-  --space-10: 4rem;
-  --space-12: 6rem;
+  button { font-family: inherit; }
 
-  /* Radii */
-  --radius-sm: 3px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  code, pre, kbd, .mono {
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum" 1, "zero" 1;
+    font-variant-numeric: tabular-nums slashed-zero;
+  }
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  ::selection {
+    background: var(--color-lime-300);
+    color: var(--color-ink-950);
+  }
 
-  /* Motion */
-  --duration-fast: 120ms;
-  --duration-base: 200ms;
-  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  :focus-visible {
+    outline: 1px solid var(--color-lime-300);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
 
-  color-scheme: dark;
+  :root {
+    color-scheme: dark;
+  }
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-}
-
-body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: var(--fs-base);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin: 0;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-
-p {
-  margin: 0;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-  transition: color var(--duration-fast) var(--ease-standard);
-}
-
-a:hover {
-  color: var(--accent-hover);
-}
-
-button {
-  font-family: inherit;
-}
-
-code,
-pre,
-kbd {
-  font-family: var(--font-mono);
-}
-
-::selection {
-  background: var(--accent-dim);
-  color: var(--text-primary);
-}
-
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

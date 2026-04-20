@@ -885,6 +885,34 @@ export function getHealthStatus(): Promise<HealthResponse> {
   return apiFetch<HealthResponse>("/api/v1/meta/health");
 }
 
+// --- Public meta ---
+
+export interface PublicMetaSourceHealth {
+  data_sources: number;
+  implemented_sources: number;
+  loaded_sources: number;
+  healthy_sources: number;
+  stale_sources: number;
+}
+
+export interface PublicMetaResponse {
+  product: string;
+  mode: string;
+  total_nodes: number;
+  total_relationships: number;
+  company_count: number;
+  contract_count: number;
+  sanction_count: number;
+  finance_count: number;
+  bid_count: number;
+  inquiry_count: number;
+  source_health: PublicMetaSourceHealth;
+}
+
+export function getPublicMeta(): Promise<PublicMetaResponse> {
+  return apiFetch<PublicMetaResponse>("/api/v1/public/meta");
+}
+
 export function exportInvestigationPDF(
   investigationId: string,
   lang = "es",

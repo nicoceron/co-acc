@@ -85,6 +85,9 @@ scripts/audit-prompts/
 # Claude plans
 .claude/plans/
 
+# Government data roadmap PDFs (large reference docs)
+govt data roadmap/
+
 # Data directories (downloaded datasets)
 data/comprasnet/
 data/rais/
