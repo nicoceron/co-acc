@@ -3,7 +3,7 @@ include .env
 export $(shell sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' .env)
 endif
 
-.PHONY: dev stop api etl frontend demo demo-national demo-bogota demo-synthetic build-watchlist-snapshots materialize-results scan-real-pattern-coverage clean-data seed lint type-check test test-api test-etl test-frontend check lake-init lake-pipeline lake-compact materialize-deps materialize-all \
+.PHONY: dev stop api etl frontend demo demo-national demo-bogota demo-synthetic build-watchlist-snapshots materialize-results scan-real-pattern-coverage clean-data seed lint type-check test test-api test-etl test-frontend check lake-init lake-pipeline lake-compact lake-reality materialize-deps materialize-all \
 	validate-known-cases \
 	sync-colombia-registry generate-pipeline-status generate-source-summary \
 	download-secop-integrado download-secop-sanciones download-secop-proveedores \
@@ -463,6 +463,9 @@ lake-pipeline:
 
 lake-compact:
 	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python -m coacc_etl.lakehouse.compactor --older-than=30d
+
+lake-reality:
+	PYTHONPATH=etl/src etl/.venv/bin/python scripts/lake_reality.py
 
 materialize-deps:
 	cd api && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python -m coacc.services.signal_materializer --advanced-sources="$(SOURCES)"

@@ -52,6 +52,7 @@ htmlcov/
 *.sqlite3
 !docs/source_registry_co_v1.csv
 !docs/release/public_boundary_matrix.csv
+!docs/reality/*.csv
 *.tsv
 *.parquet
 *.dbc
@@ -100,3 +101,6 @@ lake/
 CLAUDE.md
 AGENTS.md
 AGENTS*.md
+
+# Roadmap extraction side products (large JSON)
+scripts/roadmap_links.*

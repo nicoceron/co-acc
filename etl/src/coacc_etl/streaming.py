@@ -66,28 +66,19 @@ def iter_csv_chunks(
             break
 
 
-def socrata_get(
+def _socrata_request(
     dataset_id: str,
     *,
-    limit: int,
-    offset: int,
-    order: str = ":id",
-    where: str | None = None,
+    params: dict[str, str | int],
     domain: str | None = None,
     timeout: float = 60.0,
     max_attempts: int = 10,
     initial_backoff: float = 2.0,
     max_backoff: float = 300.0,
+    log_label: str = "",
 ) -> list[dict[str, Any]]:
     base_domain = (domain or os.environ.get("SOCRATA_DOMAIN") or "www.datos.gov.co").strip("/")
-    params: dict[str, str | int] = {
-        "$limit": limit,
-        "$offset": offset,
-        "$order": order,
-    }
-    if where:
-        params["$where"] = where
-    headers = {}
+    headers: dict[str, str] = {}
     app_token = os.environ.get("SOCRATA_APP_TOKEN")
     if app_token:
         headers["X-App-Token"] = app_token
@@ -117,9 +108,9 @@ def socrata_get(
             if attempt >= max_attempts:
                 break
             LOG.warning(
-                "socrata_get %s offset=%s attempt=%s/%s failed (%s); retrying in %.1fs",
+                "socrata_%s %s attempt=%s/%s failed (%s); retrying in %.1fs",
+                log_label or "request",
                 dataset_id,
-                offset,
                 attempt,
                 max_attempts,
                 exc.__class__.__name__,
@@ -129,8 +120,40 @@ def socrata_get(
             backoff = min(backoff * 2, max_backoff)
 
     if last_error is None:
-        raise RuntimeError(f"socrata_get exhausted retries for {dataset_id} offset={offset}")
+        raise RuntimeError(f"socrata request exhausted retries for {dataset_id}")
     raise last_error
+
+
+def socrata_get(
+    dataset_id: str,
+    *,
+    limit: int,
+    offset: int,
+    order: str = ":id",
+    where: str | None = None,
+    domain: str | None = None,
+    timeout: float = 60.0,
+    max_attempts: int = 10,
+    initial_backoff: float = 2.0,
+    max_backoff: float = 300.0,
+) -> list[dict[str, Any]]:
+    params: dict[str, str | int] = {
+        "$limit": limit,
+        "$offset": offset,
+        "$order": order,
+    }
+    if where:
+        params["$where"] = where
+    return _socrata_request(
+        dataset_id,
+        params=params,
+        domain=domain,
+        timeout=timeout,
+        max_attempts=max_attempts,
+        initial_backoff=initial_backoff,
+        max_backoff=max_backoff,
+        log_label=f"get_offset={offset}",
+    )
 
 
 def stream_socrata(
