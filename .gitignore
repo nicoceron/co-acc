@@ -104,5 +104,5 @@ CLAUDE.md
 AGENTS.md
 AGENTS*.md
 
-# Roadmap extraction side products (large JSON)
-scripts/roadmap_links.*
+# Government data roadmap (25 sector PDFs, 34M — keep on disk, not in git)
+govt data roadmap/
