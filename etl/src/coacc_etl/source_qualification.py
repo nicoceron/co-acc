@@ -7,26 +7,26 @@ then proves join keys against the current registry's known key classes. The
 Gemini LLM pass is a required second-review gate for government datasets with
 badly named columns.
 
-  1. docs/datasets/source_qualification_catalog.csv
+  1. docs/datasets/catalog.signed.csv
      - Full metadata/rowcount/column profile for every probed dataset
-  2. docs/datasets/source_qualification_report.md
+  2. docs/datasets/catalog.report.md
      - Human-readable report grouped by recommendation
-  3. docs/datasets/source_qualification_proven.csv
+  3. docs/datasets/catalog.proven.csv
      - Only datasets where at least one join key was proven
 
 Architecture
 ~~~~~~~~~~~~
 
-  source inventories (appendix, audit JSON, registry, env-configured pipelines)
+  source inventories (archived appendix, audit JSON, registry, env-configured pipelines)
          |
          v  (filter: recommendation in candidates + valid audit_status)
   Socrata metadata API  ──►  column schema + rowcount per dataset
          |
          v  (column name normalization + join-key matching)
-  source_qualification_catalog.csv  ──►  deterministic + LLM review
+  catalog.signed.csv  ──►  deterministic + LLM review
          |
          v  (filter: proven join keys only)
-  source_qualification_proven.csv  ──►  feed into main ETL source contracts
+  catalog.proven.csv  ──►  feed into main ETL source contracts
 
 Join key classes (heavily normalized):
   - nit:        document_id, numero_documento, nit, documento_proveedor,
@@ -45,10 +45,10 @@ both match.
 
 Usage:
     python -m coacc_etl.source_qualification
-        [--appendix docs/datasets/dataset_relevance_appendix.csv]
-        [--catalog-out docs/datasets/source_qualification_catalog.csv]
-        [--proven-out docs/datasets/source_qualification_proven.csv]
-        [--report-out docs/datasets/source_qualification_report.md]
+        [--appendix docs/datasets/archive/dataset_relevance_appendix.csv]
+        [--catalog-out docs/datasets/catalog.signed.csv]
+        [--proven-out docs/datasets/catalog.proven.csv]
+        [--report-out docs/datasets/catalog.report.md]
         [--limit N]               # probe only first N candidates (smoke)
         [--sleep 0.25]            # seconds between Socrata API calls
         [--probe-sample 5]        # sample N rows to check join-key density
@@ -1741,8 +1741,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--appendix",
-        default=str(REPO_ROOT / "docs/datasets/dataset_relevance_appendix.csv"),
-        help="Path to the relevance appendix CSV",
+        default=str(REPO_ROOT / "docs/datasets/archive/dataset_relevance_appendix.csv"),
+        help="Path to the (archived) relevance appendix CSV",
     )
     parser.add_argument(
         "--audit-json",
@@ -1766,17 +1766,17 @@ def main() -> int:
     )
     parser.add_argument(
         "--catalog-out",
-        default=str(REPO_ROOT / "docs/datasets/source_qualification_catalog.csv"),
-        help="Output: full catalog CSV with all probed metadata",
+        default=str(REPO_ROOT / "docs/datasets/catalog.signed.csv"),
+        help="Output: full catalog CSV with all probed metadata (signed canonical)",
     )
     parser.add_argument(
         "--proven-out",
-        default=str(REPO_ROOT / "docs/datasets/source_qualification_proven.csv"),
+        default=str(REPO_ROOT / "docs/datasets/catalog.proven.csv"),
         help="Output: only datasets with proven join keys",
     )
     parser.add_argument(
         "--report-out",
-        default=str(REPO_ROOT / "docs/datasets/source_qualification_report.md"),
+        default=str(REPO_ROOT / "docs/datasets/catalog.report.md"),
         help="Output: human-readable markdown report",
     )
     parser.add_argument(
@@ -1804,7 +1804,7 @@ def main() -> int:
     parser.add_argument(
         "--no-appendix",
         action="store_true",
-        help="With --all-known, skip dataset_relevance_appendix.csv",
+        help="With --all-known, skip archived dataset_relevance_appendix.csv",
     )
     parser.add_argument(
         "--no-audit-json",

@@ -105,7 +105,7 @@ Commits 1.12 (decide rows) happen inline as micro-commits after investigation.
 
 **Goal:** turn 285 "alive" IDs into a curated Tier A ingest set (~15–25 datasets) with evidence.
 
-- [x] **2.1** Implement `coacc_etl.source_qualification` as the pre-lake source gate. Input: `colombia_open_data_audit.json`, `dataset_relevance_appendix.csv`, `source_registry_co_v1.csv`, `signal_source_deps.yml`, and env-backed pipeline IDs. It hits Socrata metadata/schema first, then runs the required Gemini review for naming issues.
+- [x] **2.1** Implement `coacc_etl.source_qualification` as the pre-lake source gate. Input: `colombia_open_data_audit.json`, `archive/dataset_relevance_appendix.csv`, `docs/source_registry_co_v1.csv`, `signal_source_deps.yml`, and env-backed pipeline IDs. It hits Socrata metadata/schema first, then runs the required Gemini review for naming issues. Canonical outputs: `docs/datasets/catalog.signed.csv`, `catalog.proven.csv`, `catalog.report.md`. Phase 2.2+ superseded by `docs/cleanup/refactor_plan.md`.
 - [ ] **2.2** Classify into tiers:
   - **Tier A (ingest now):** anticorruption-relevant (contracts, sanctions, budget execution, procurement, public roles, beneficiaries, subsidies, SECOP, PAA, inhabilidades, disciplinario). Must pass: ≥10k rows, `rowsUpdatedAt` within 365 days, at least 5 non-metadata columns with readable field names.
   - **Tier B (backlog):** sector context (education, health, transport stats). Useful later, not ingested for MVP.
