@@ -5,10 +5,29 @@ tier: core
 join_keys:
   nit:
   - nit
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_recibo_traslado
+partition_column: fecha_recibo_traslado
+columns_map:
+  nit: nit
+  entity_name: nombre_sujeto
+  process: proceso_o_asunto_evaluado
+  audited_year: vigencia_auditada
+  received_date: fecha_recibo_traslado
+  report_date: fecha_comunicaci_n_informe
+  procedure_date: fecha_tr_mite
+  radicado: radicado
+  status: tr_mite_a_corte_de_la_fecha
+  facts: hechos
+  amount: cuant_a
+  observations: observaciones
+required_coverage:
+  nit: 0.95
+  nombre_sujeto: 0.95
+  fecha_recibo_traslado: 0.80
+  radicado: 0.95
+freq: monthly
 url: https://www.datos.gov.co/d/8qxx-ubmq
-notes: ''
+notes: 'Colombia: Hallazgos Fiscales — official fiscal findings registered by the
+  Contraloría. Small, slow-moving sanctions dataset; fecha_recibo_traslado is the
+  transfer-received timestamp and is the best proxy for both watermark and
+  partition. First live end-to-end ingest for Wave 3.'

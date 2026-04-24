@@ -105,10 +105,10 @@ def get(source: str) -> Watermark | None:
     return _from_row(rows.iloc[-1])
 
 
-def set(watermark: Watermark) -> None:  # noqa: A001
+def set(watermark: Watermark, *, force: bool = False) -> None:  # noqa: A001
     existing = get(watermark.source)
     next_seen = _utc(watermark.last_seen_ts)
-    if existing and next_seen < _utc(existing.last_seen_ts):
+    if not force and existing and next_seen < _utc(existing.last_seen_ts):
         raise ValueError(
             f"Watermark for {watermark.source} would regress from "
             f"{existing.last_seen_ts.isoformat()} to {next_seen.isoformat()}"
@@ -132,10 +132,11 @@ def advance(
     batch_id: str | None = None,
     last_seen_ts: datetime | None = None,
     last_offset: int | None = None,
+    force: bool = False,
 ) -> WatermarkDelta:
     seen = _utc(last_seen_ts or datetime.now(tz=UTC))
     current = get(source)
-    if current and seen < _utc(current.last_seen_ts):
+    if not force and current and seen < _utc(current.last_seen_ts):
         raise ValueError(
             f"Watermark for {source} would regress from "
             f"{current.last_seen_ts.isoformat()} to {seen.isoformat()}"
@@ -148,7 +149,8 @@ def advance(
             last_batch_id=batch,
             row_count=rows,
             last_offset=last_offset,
-        )
+        ),
+        force=force,
     )
     return WatermarkDelta(
         source=source,

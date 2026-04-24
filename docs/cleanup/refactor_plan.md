@@ -247,24 +247,12 @@ Each wave = one logical PR's worth of work. Green tests gate the next wave.
 
 **Goal:** one ingester module. Reads YAML → writes parquet. Passes sanity gates from `docs/cleanup/plan.md` Phase 3.
 
-- [ ] **3.1** Implement `coacc_etl.ingest.socrata.ingest(spec: DatasetSpec)`:
-  - Load watermark from `lakehouse.watermark`.
-  - Query Socrata with `$where` on `spec.watermark_column`.
-  - Normalize columns via `spec.columns_map`.
-  - Enforce `spec.required_coverage` via `coacc_etl.ingest.coverage.assert_coverage` — on fail, write failure report to `lake/meta/failures/<id>/<iso_ts>.json` and do not advance watermark.
-  - Write to `lake/raw/<id>/year=YYYY/month=MM/part-<ts>.parquet` via `lakehouse.writer`.
-  - Advance watermark to `max(batch[spec.watermark_column])` — **never** `datetime.now()`.
-- [ ] **3.2** New CLI in `coacc_etl.cli`:
-  - `coacc-etl ingest <id>` — run one dataset.
-  - `coacc-etl ingest-all` — run every `tier: core` in dependency-safe order.
-  - `coacc-etl qualify ...` — thin wrapper over `coacc_etl.qualification`.
-  - Remove every Neo4j flag from the CLI.
-- [ ] **3.3** Delete the `--to-lake` branch — all ingestion is lake-only now.
-- [ ] **3.4** Parameterised test `test_ingest/test_socrata_contract.py`:
-  - Iterates every `tier: core` YAML.
-  - For each: loads a golden HTTP fixture, runs the ingester against it, asserts parquet written, coverage passes, watermark advanced correctly, partitions correct.
-- [ ] **3.5** Determinism test: ingest same fixture twice → byte-identical parquet.
-- [ ] **3.6** Run one live end-to-end ingest against real Socrata for `jbjy-vk9h`. Confirm parquet file appears; coverage report under `lake/meta/coverage/`.
+- [x] **3.1** Implemented `coacc_etl.ingest.socrata.ingest(spec: DatasetSpec)` — loads watermark from `lakehouse.watermark`, queries Socrata with `$where` + deterministic `$order` on `spec.watermark_column`, normalizes via `spec.columns_map`, enforces `spec.required_coverage`, writes parquet via `lakehouse.writer.append_parquet` under `lake/raw/source=<id>/year=YYYY/month=MM/`, advances watermark to `max(batch[spec.watermark_column])` — **never** `datetime.now()`. On coverage failure, writes report to `lake/meta/failures/<id>/` and does not advance.
+- [x] **3.2** Added `coacc_etl.ingest.coverage.assert_coverage` + `write_failure_report` + `write_coverage_report`. Added `force=True` escape-hatch on `wm.set`/`wm.advance` used only by `ingest(full_refresh=True)`.
+- [x] **3.3** Added subcommands to `coacc_etl.runner` (module rename to `cli.py` stays in Wave 5 per plan): `coacc-etl ingest <id>`, `coacc-etl ingest-all [--continue-on-error]`, `coacc-etl qualify <args>`. Dropped the `run --to-lake` branch entirely (pipelines no longer self-write parquet; everything flows through `ingest`).
+- [x] **3.4** `tests/test_ingest/test_socrata_contract.py` + `conftest.py` covers: parquet written, columns renamed per `columns_map`, watermark = max parsed ts (never wall-clock), incremental skips when no new rows, coverage failure blocks watermark + writes failure report, partition gate rejects unparseable rows, non-ingest-ready spec refused, full-refresh bypasses watermark. New `test_yaml_is_either_placeholder_or_fully_ingest_ready` catches half-filled YAMLs.
+- [x] **3.5** `tests/test_ingest/test_determinism.py` — two fresh-lake ingests of the same fixture produce byte-identical *content* (sorted frame comparison, since parquet file names and zstd metadata carry timestamps). Watermark ts matches exactly across runs because it derives from data, not wall-clock.
+- [x] **3.6** First live end-to-end ingest against real Socrata: `8qxx-ubmq` (Hallazgos Fiscales, 73 rows). Selected over the plan's original `jbjy-vk9h` (SECOP II Contratos) because it is 6 orders of magnitude smaller, giving a sub-second feedback loop. Filled in its YAML with `fecha_recibo_traslado` as watermark + partition. Result: 73 rows written across 15 year/month partitions, coverage = 100% on all 4 tracked cols, watermark advanced to `2024-12-26T00:00:00+00:00`. Incremental re-run correctly issued `$where=fecha_recibo_traslado > '2024-12-26…'` and no-op'd. Coverage report at `lake/meta/coverage/8qxx-ubmq/`.
 
 **Sanity check 3 (per dataset):**
 - Coverage gate blocks on < threshold.

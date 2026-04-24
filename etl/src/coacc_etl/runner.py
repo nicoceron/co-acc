@@ -1,10 +1,14 @@
 import logging
 import os
+import sys
 from datetime import UTC, datetime
 
 import click
 from neo4j import GraphDatabase
 
+from coacc_etl.catalog import load_catalog
+from coacc_etl.ingest import IngestError
+from coacc_etl.ingest import ingest as socrata_ingest
 from coacc_etl.linking_hooks import run_post_load_hooks
 from coacc_etl.pipeline_registry import get_pipeline_spec, list_pipeline_names
 
@@ -40,12 +44,6 @@ def cli() -> None:
 @click.option("--streaming/--no-streaming", default=False, help="Streaming mode")
 @click.option("--start-phase", type=int, default=1, help="Skip to phase N")
 @click.option("--history/--no-history", default=False, help="Enable history mode when supported")
-@click.option(
-    "--to-lake/--to-neo4j",
-    default=False,
-    help="Write pipeline output to the Parquet lake",
-)
-@click.option("--full-refresh/--incremental", default=False, help="Ignore lake watermarks")
 def run(
     source: str,
     neo4j_uri: str,
@@ -59,10 +57,11 @@ def run(
     streaming: bool,
     start_phase: int,
     history: bool,
-    to_lake: bool,
-    full_refresh: bool,
 ) -> None:
-    """Run an ETL pipeline."""
+    """Run a legacy Neo4j pipeline.
+
+    Kept for Wave 4 parity. Use ``coacc-etl ingest`` for lakehouse writes.
+    """
     os.environ["NEO4J_DATABASE"] = neo4j_database
 
     pipeline_spec = get_pipeline_spec(source)
@@ -70,23 +69,6 @@ def run(
         available = ", ".join(list_pipeline_names())
         raise click.ClickException(f"Unknown source: {source}. Available: {available}")
     pipeline_cls = pipeline_spec.pipeline_cls
-
-    if to_lake:
-        pipeline = pipeline_cls(
-            driver=None,
-            data_dir=data_dir,
-            limit=limit,
-            chunk_size=chunk_size,
-            history=history,
-        )
-        if not hasattr(pipeline, "run_to_lake"):
-            raise click.ClickException(f"Pipeline {source} does not implement --to-lake")
-        delta = pipeline.run_to_lake(full_refresh=full_refresh)
-        click.echo(
-            f"{delta.source}: wrote {delta.rows:,} rows "
-            f"(batch={delta.batch_id}, advanced={delta.advanced})"
-        )
-        return
 
     if not neo4j_password:
         neo4j_password = os.environ.get("NEO4J_PASSWORD")
@@ -192,6 +174,109 @@ def sources(show_status: bool, neo4j_uri: str, neo4j_user: str, neo4j_password: 
             )
     finally:
         driver.close()
+
+
+def _dataset_core_order(specs: dict) -> list[str]:
+    # Deterministic dep-safe order: contract- and entity-keyed first (they
+    # anchor joins), then the rest. Within tiers, sort by dataset id.
+    core = [s for s in specs.values() if s.tier == "core"]
+    anchors = {"contract", "entity", "nit"}
+
+    def key(spec) -> tuple[int, str]:
+        classes = set(spec.join_keys.keys())
+        anchor_rank = 0 if classes & anchors else 1
+        return (anchor_rank, spec.id)
+
+    return [spec.id for spec in sorted(core, key=key)]
+
+
+@cli.command(name="ingest")
+@click.argument("dataset_id")
+@click.option(
+    "--full-refresh/--incremental",
+    default=False,
+    help="Ignore lake watermark and re-pull from the beginning",
+)
+def ingest_cmd(dataset_id: str, full_refresh: bool) -> None:
+    """Ingest one ``tier: core`` dataset from Socrata into the lake."""
+    specs = load_catalog()
+    spec = specs.get(dataset_id)
+    if spec is None:
+        raise click.ClickException(
+            f"dataset_id {dataset_id!r} not in signed catalog "
+            f"(known: {len(specs)} datasets)"
+        )
+    try:
+        result = socrata_ingest(spec, full_refresh=full_refresh)
+    except IngestError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if not result.ingested:
+        click.echo(f"{dataset_id}: {result.skipped_reason or 'no-op'}")
+        return
+    click.echo(
+        f"{dataset_id}: wrote {result.rows:,} rows across "
+        f"{len(result.partitions)} partition(s); watermark -> "
+        f"{result.watermark_delta.last_seen_ts.isoformat() if result.watermark_delta else '-'}"
+    )
+
+
+@cli.command(name="ingest-all")
+@click.option(
+    "--full-refresh/--incremental",
+    default=False,
+    help="Ignore lake watermarks for every dataset",
+)
+@click.option(
+    "--continue-on-error/--stop-on-error",
+    default=False,
+    help="Keep going if one dataset fails (default stops)",
+)
+def ingest_all_cmd(full_refresh: bool, continue_on_error: bool) -> None:
+    """Ingest every ``tier: core`` dataset in dep-safe order."""
+    specs = load_catalog()
+    ids = _dataset_core_order(specs)
+    if not ids:
+        click.echo("no tier=core datasets are ingest-ready")
+        return
+
+    ok = 0
+    skipped: list[str] = []
+    failed: list[tuple[str, str]] = []
+    for dataset_id in ids:
+        spec = specs[dataset_id]
+        if not spec.is_ingest_ready():
+            skipped.append(dataset_id)
+            continue
+        try:
+            result = socrata_ingest(spec, full_refresh=full_refresh)
+            if result.ingested:
+                ok += 1
+                click.echo(f"  {dataset_id}: {result.rows:,} rows")
+            else:
+                click.echo(f"  {dataset_id}: {result.skipped_reason}")
+        except IngestError as exc:
+            failed.append((dataset_id, str(exc)))
+            click.echo(f"  {dataset_id}: FAIL — {exc}", err=True)
+            if not continue_on_error:
+                break
+
+    click.echo(
+        f"ingest-all: ok={ok}, skipped={len(skipped)}, failed={len(failed)} "
+        f"of {len(ids)} core datasets"
+    )
+    if failed and not continue_on_error:
+        raise click.ClickException(f"stopped on first failure: {failed[0][0]}")
+
+
+@cli.command(name="qualify", context_settings={"ignore_unknown_options": True})
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+def qualify_cmd(args: tuple[str, ...]) -> None:
+    """Thin wrapper over ``coacc-source-qualification``."""
+    from coacc_etl import source_qualification as sq
+
+    sys.argv = ["coacc-source-qualification", *args]
+    raise SystemExit(sq.main())
 
 
 if __name__ == "__main__":

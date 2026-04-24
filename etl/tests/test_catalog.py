@@ -80,7 +80,24 @@ def test_context_specs_have_only_context_join_keys() -> None:
         )
 
 
-def test_no_ingest_ready_yaml_yet_wave2_placeholder() -> None:
-    """Wave 2 only bootstraps placeholders; Wave 4 populates watermark/columns."""
-    ready = [spec.id for spec in load_catalog().values() if spec.is_ingest_ready()]
-    assert ready == [], f"unexpected ingest-ready specs this early: {ready}"
+def test_yaml_is_either_placeholder_or_fully_ingest_ready() -> None:
+    """Each core YAML must be all-placeholder or fully ingest-ready — no partials.
+
+    Wave 2 bootstrapped all 148 YAMLs as placeholders. Wave 3 filled the first
+    real one (``8qxx-ubmq`` — Hallazgos Fiscales, the end-to-end smoke test).
+    Wave 4 continues filling one dataset per commit. This test catches
+    half-filled YAMLs that would otherwise sneak through.
+    """
+    for dataset_id, spec in load_catalog().items():
+        if spec.tier != "core":
+            continue
+        placeholder = (
+            spec.watermark_column is None
+            and spec.partition_column is None
+            and not spec.columns_map
+        )
+        assert placeholder or spec.is_ingest_ready(), (
+            f"{dataset_id}: half-filled YAML — watermark_column="
+            f"{spec.watermark_column!r}, partition_column={spec.partition_column!r},"
+            f" columns_map_keys={list(spec.columns_map)!r}"
+        )
