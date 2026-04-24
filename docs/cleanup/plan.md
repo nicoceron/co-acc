@@ -105,7 +105,7 @@ Commits 1.12 (decide rows) happen inline as micro-commits after investigation.
 
 **Goal:** turn 285 "alive" IDs into a curated Tier A ingest set (~15–25 datasets) with evidence.
 
-- [ ] **2.1** Write `scripts/dataset_triage.py`. Input: `colombia_open_data_audit.json`. For each of 285 valid IDs, hit Socrata metadata API (`/api/views/{id}.json`) + count query (`/resource/{id}.json?$select=count(*)`). Extract: `rowsUpdatedAt`, `viewCount`, `downloadCount`, `updateFrequency`, `category`, `owner`, `columns[*].{name,fieldName,dataTypeName}`, row count.
+- [x] **2.1** Implement `coacc_etl.source_qualification` as the pre-lake source gate. Input: `colombia_open_data_audit.json`, `dataset_relevance_appendix.csv`, `source_registry_co_v1.csv`, `signal_source_deps.yml`, and env-backed pipeline IDs. It hits Socrata metadata/schema first, then runs the required Gemini review for naming issues.
 - [ ] **2.2** Classify into tiers:
   - **Tier A (ingest now):** anticorruption-relevant (contracts, sanctions, budget execution, procurement, public roles, beneficiaries, subsidies, SECOP, PAA, inhabilidades, disciplinario). Must pass: ≥10k rows, `rowsUpdatedAt` within 365 days, at least 5 non-metadata columns with readable field names.
   - **Tier B (backlog):** sector context (education, health, transport stats). Useful later, not ingested for MVP.
@@ -205,7 +205,7 @@ Follow `docs/competition/program_plan.md` tracks D/M/F/R/C. No change — that p
 | Scale | Cadence | Mechanism | Red-build trigger |
 |---|---|---|---|
 | Micro | per-commit | `make test` + `make lake-reality` | Coverage regression, schema drift, watermark staleness |
-| Meso | weekly Friday | `scripts/dataset_triage.py` rerun, coverage delta report, rubric burn-up | New dead datasets, Tier A dropouts, coverage trend ↓ |
+| Meso | weekly Friday | `coacc-source-qualification --all-known --metadata-only` + required Gemini review, coverage delta report, rubric burn-up | New dead datasets, Tier A dropouts, coverage trend ↓ |
 | Macro | monthly | full replay from empty lake → verify reproducibility | Replay fails, total row count differs >1% from prior macro |
 
 ---

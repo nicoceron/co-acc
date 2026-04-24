@@ -27,6 +27,7 @@ frontend/dist/
 .env
 .env.local
 .env.*.local
+.env.example
 
 # Neo4j
 neo4j/data/
