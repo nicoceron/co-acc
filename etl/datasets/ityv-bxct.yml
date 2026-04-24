@@ -1,0 +1,19 @@
+id: ityv-bxct
+name: SECOP - Convenios Interadministrativos
+sector: contracts
+tier: core
+join_keys:
+  contract:
+  - id_contrato
+  - numero_de_contrato
+  entity:
+  - id_entidad
+  process:
+  - id_proceso
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/ityv-bxct
+notes: ''

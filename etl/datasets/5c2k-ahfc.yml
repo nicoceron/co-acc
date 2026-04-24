@@ -1,0 +1,15 @@
+id: 5c2k-ahfc
+name: MEN_NÚMERO_BACHILLERES_POR_ETC
+sector: Education Sector Roadmap
+tier: context
+join_keys:
+  divipola:
+  - codigo_municipio
+  - codigo_departamento
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/5c2k-ahfc
+notes: ''

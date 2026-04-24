@@ -1,0 +1,14 @@
+id: 7y2j-43cv
+name: IGAC OIC - transacciones inmobiliarias
+sector: property
+tier: context
+join_keys:
+  divipola:
+  - divipola
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/7y2j-43cv
+notes: ''

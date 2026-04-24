@@ -1,0 +1,17 @@
+id: 5wck-szir
+name: MEN_MATRICULA_ESTADISTICA_ES
+sector: Education
+tier: context
+join_keys:
+  divipola:
+  - c_digo_del_departamento_ies
+  - c_digo_del_municipio_ies
+  - c_digo_del_departamento_programa
+  - c_digo_del_municipio_programa
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/5wck-szir
+notes: ''

@@ -1,0 +1,15 @@
+id: jgra-rz2t
+name: Base ingresos cuentas claras 2019
+sector: electoral
+tier: core
+join_keys:
+  nit:
+  - can_identificacion
+  - ing_identificacion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/jgra-rz2t
+notes: ''

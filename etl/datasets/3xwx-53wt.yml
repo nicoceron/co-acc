@@ -1,0 +1,16 @@
+id: 3xwx-53wt
+name: SECOP I - Origen de los Recursos
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  bpin:
+  - codigo_bpin
+  process:
+  - id_adjudicacion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/3xwx-53wt
+notes: ''

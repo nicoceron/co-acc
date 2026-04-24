@@ -1,0 +1,25 @@
+id: a86w-fh92
+name: SECOP II - Solicitudes CDPs
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  bpin:
+  - entidad_bpin
+  - bpin_codigo
+  contract:
+  - id_contrato
+  - referencia_contrato
+  entity:
+  - codigo_unidad_ejecutora
+  nit:
+  - nit
+  - nit_proveedor
+  process:
+  - id_proceso
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/a86w-fh92
+notes: ''

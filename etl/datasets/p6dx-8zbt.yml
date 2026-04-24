@@ -1,0 +1,20 @@
+id: p6dx-8zbt
+name: SECOP II - Procesos de Contratación
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - nit_entidad
+  - codigo_entidad
+  nit:
+  - nit_entidad
+  - nit_del_proveedor_adjudicado
+  process:
+  - id_adjudicacion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/p6dx-8zbt
+notes: ''

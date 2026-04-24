@@ -1,0 +1,14 @@
+id: prwj-nzxa
+name: Estados Financieros NIIF- Estado de Resultado Integral
+sector: MINCIT Sectoral Roadmap 2026
+tier: core
+join_keys:
+  nit:
+  - nit
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/prwj-nzxa
+notes: ''

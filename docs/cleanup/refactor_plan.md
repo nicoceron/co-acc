@@ -181,11 +181,11 @@ Each wave = one logical PR's worth of work. Green tests gate the next wave.
 
 **Goal:** remove files with zero references. Registry auto-excludes them; deletion is mechanical.
 
-- [ ] **1.1** Delete 35 stub pipelines (12-line files with no class body). Enumerate via `find etl/src/coacc_etl/pipelines -name '*.py' -size -700c`.
-- [ ] **1.2** Delete registry-excluded modules: `colombia_procurement.py`, `disclosure_mining.py`, `project_graph.py`, `lake_template.py`. Remove from `_EXCLUDED_MODULES` set.
-- [ ] **1.3** Grep every deleted path against the rest of the repo. If any reference exists, stop and audit.
-- [ ] **1.4** Delete the corresponding test files (should be few — stubs mostly lack tests).
-- [ ] **1.5** Delete empty fixture subdirs.
+- [x] **1.1** Deleted 39 LakeCsvPipeline stub pipelines (no `COACC_DATASET_*` env vars configured, no tests). Enumerated via size filter then verified against import graph.
+- [x] **1.2** Deleted `lake_template.py` (all 39 importers gone); dropped from `_EXCLUDED_MODULES`. `colombia_procurement`, `colombia_shared`, `disclosure_mining`, `project_graph` **kept** — 64/37/1/6 live importers, they follow their dependents in Wave 4.
+- [x] **1.3** Grepped every deleted path. Only matches were `config/signals/sql/*.sql` + `api/tests/unit/test_wave_b_signals.py` (aspirational signal references; never worked against live system because stubs were no-ops) — Wave 6 aligns those.
+- [x] **1.4** No stub-specific test files existed. Also deleted 5 thin-alias subclasses (`actos_administrativos`, `tvec_orders_consolidated`, `environmental_files_corantioquia`, `gacetas_territoriales`, `judicial_providencias`) that only renamed a functional pipeline. Updated `test_pipeline_registry.py` to stop asserting on a deleted stub.
+- [x] **1.5** No empty fixture dirs to clean (none existed for stubs).
 
 **Sanity check 1:**
 - `pytest etl/tests/` green after deletion.
@@ -200,7 +200,7 @@ Each wave = one logical PR's worth of work. Green tests gate the next wave.
 
 **Goal:** one YAML per dataset in `etl/datasets/`. Generated from `catalog.signed.csv` + `catalog.proven.csv`.
 
-- [ ] **2.1** Define `etl/src/coacc_etl/catalog/models.py` with a `DatasetSpec` Pydantic model:
+- [x] **2.1** Defined `etl/src/coacc_etl/catalog/models.py` with a `DatasetSpec` Pydantic model:
   ```yaml
   id: jbjy-vk9h
   name: SECOP II - Contratos Electrónicos
@@ -229,10 +229,10 @@ Each wave = one logical PR's worth of work. Green tests gate the next wave.
   url: https://www.datos.gov.co/d/jbjy-vk9h
   notes: ""
   ```
-- [ ] **2.2** Write `scripts/bootstrap_dataset_yamls.py` (one-shot): reads `catalog.signed.csv` + `catalog.proven.csv` → emits one `etl/datasets/<id>.yml` per row. 118 core + 30 context = 148 files. `watermark_column` / `partition_column` / `required_coverage` / `columns_map` are left as placeholders where unknown and flagged `tier: backlog` if unresolvable.
-- [ ] **2.3** Implement `coacc_etl.catalog.loader.load_catalog() -> dict[str, DatasetSpec]`. Validates every YAML against the Pydantic model on load; fails loud.
-- [ ] **2.4** Unit test: `test_catalog.py` loads all 148 YAMLs, asserts each dataset_id in `catalog.signed.csv` has a matching YAML (no drift).
-- [ ] **2.5** Delete `scripts/bootstrap_dataset_yamls.py` after use (one-shot; the YAMLs become the source).
+- [x] **2.2** Wrote `scripts/bootstrap_dataset_yamls.py` (one-shot): read `catalog.proven.csv` → emitted 148 YAMLs (118 core + 30 context) under `etl/datasets/`. `watermark_column`, `partition_column`, `columns_map`, `required_coverage`, `freq` left as placeholders; Wave 4 fills them per dataset during migration. No `tier: backlog` rows needed at this stage.
+- [x] **2.3** Implemented `coacc_etl.catalog.loader.load_catalog() -> dict[str, DatasetSpec]`. Validates every YAML against the Pydantic model on load; fails loud on id/filename drift or extra fields.
+- [x] **2.4** `tests/test_catalog.py` asserts: (a) every `catalog.proven.csv` id has a matching YAML and vice versa, (b) every YAML validates, (c) tier distribution = 118 core + 30 context, (d) every core spec has at least one core join key, (e) context specs only hold context/entity classes, (f) no YAML is yet ingest-ready (Wave 2 placeholders only).
+- [x] **2.5** Deleted `scripts/bootstrap_dataset_yamls.py` after use (YAMLs are now the source of truth; re-bootstrap would overwrite Wave-4 hand-edits).
 
 **Sanity check 2:**
 - Catalog loader returns exactly `len(catalog.signed.csv) == len(etl/datasets/*.yml)`.

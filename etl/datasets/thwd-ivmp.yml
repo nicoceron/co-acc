@@ -1,0 +1,17 @@
+id: thwd-ivmp
+name: Registro Nacional de Turismo - RNT
+sector: MINCIT Sectoral Roadmap 2026
+tier: core
+join_keys:
+  divipola:
+  - cod_dpto
+  - cod_mun
+  nit:
+  - nit
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/thwd-ivmp
+notes: ''

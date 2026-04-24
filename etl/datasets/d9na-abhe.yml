@@ -1,0 +1,16 @@
+id: d9na-abhe
+name: SECOP II - BPIN por Proceso
+sector: contracts
+tier: core
+join_keys:
+  bpin:
+  - codigo_bpin
+  process:
+  - id_proceso
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/d9na-abhe
+notes: ''

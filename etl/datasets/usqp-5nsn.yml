@@ -1,0 +1,14 @@
+id: usqp-5nsn
+name: TVEC - Items
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - id_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/usqp-5nsn
+notes: ''

@@ -1,0 +1,14 @@
+id: gaic-b8aw
+name: Exportaciones agrícolas no tradicionales y tradicionales
+sector: Agriculture and Rural Development Sector Roadmap
+tier: context
+join_keys:
+  divipola:
+  - cod_depto
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/gaic-b8aw
+notes: ''

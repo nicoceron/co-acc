@@ -1,0 +1,14 @@
+id: cb9c-h8sn
+name: SECOP II - Adiciones
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  contract:
+  - id_contrato
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/cb9c-h8sn
+notes: ''

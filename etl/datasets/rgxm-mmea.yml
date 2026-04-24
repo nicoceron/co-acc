@@ -1,0 +1,18 @@
+id: rgxm-mmea
+name: Tienda Virtual del Estado Colombiano - Consolidado
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - nit_entidad
+  - id_entidad
+  nit:
+  - nit_proveedor
+  - nit_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/rgxm-mmea
+notes: ''

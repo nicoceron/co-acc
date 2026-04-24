@@ -1,0 +1,15 @@
+id: mxk5-ce6w
+name: Información financiera con fines de supervisión – CUIF por moneda Entidades
+  vigiladas
+sector: Finance
+tier: core
+join_keys:
+  entity:
+  - codigo_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/mxk5-ce6w
+notes: ''

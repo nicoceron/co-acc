@@ -1,0 +1,20 @@
+id: u37r-hjmu
+name: Resultados únicos Saber Pro
+sector: Education
+tier: core
+join_keys:
+  divipola:
+  - estu_cod_reside_depto
+  - estu_coddane_cole_termino
+  - estu_cod_depto_presentacion
+  - estu_inst_codmunicipio
+  - estu_prgm_codmunicipio
+  entity:
+  - inst_cod_institucion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/u37r-hjmu
+notes: ''

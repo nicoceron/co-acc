@@ -1,0 +1,16 @@
+id: kg2d-yfyg
+name: Listado de Entidades del Sector Solidario
+sector: Finance and Public Credit Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - codentidad
+  nit:
+  - nit
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/kg2d-yfyg
+notes: ''

@@ -1,0 +1,17 @@
+id: n5yy-8nav
+name: MEN_INSTITUCIONES EDUCACIÓN SUPERIOR
+sector: Education Sector Roadmap
+tier: core
+join_keys:
+  divipola:
+  - cod_departamento
+  - cod_municipio
+  entity:
+  - c_digo_instituci_n
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/n5yy-8nav
+notes: ''

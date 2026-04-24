@@ -1,0 +1,15 @@
+id: skc9-met7
+name: SECOP II - Compromisos Presupuestales
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  contract:
+  - id_contrato
+  - referencia_contrato
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/skc9-met7
+notes: ''

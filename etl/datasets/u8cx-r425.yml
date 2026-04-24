@@ -1,0 +1,16 @@
+id: u8cx-r425
+name: SECOP II - Modificaciones a contratos
+sector: contracts
+tier: core
+join_keys:
+  bpin:
+  - codigo_bpin
+  contract:
+  - id_contrato
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/u8cx-r425
+notes: ''

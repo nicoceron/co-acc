@@ -1,0 +1,14 @@
+id: rs3u-8r4q
+name: SECTORES CRITICOS DE SINIESTRALIDAD VIAL
+sector: Transport Sector Roadmap
+tier: context
+join_keys:
+  divipola:
+  - divipola
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/rs3u-8r4q
+notes: ''

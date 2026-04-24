@@ -1,0 +1,18 @@
+id: 2jzx-383z
+name: Conjunto servidores públicos
+sector: public_sector
+tier: core
+join_keys:
+  divipola:
+  - idmunicipioentidad
+  entity:
+  - idmunicipioentidad
+  nit:
+  - numerodeidentificacion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/2jzx-383z
+notes: ''

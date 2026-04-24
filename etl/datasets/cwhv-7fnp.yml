@@ -1,0 +1,15 @@
+id: cwhv-7fnp
+name: SECOP II - Rubros Presupuestales
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  contract:
+  - id_contrato
+  - referencia_contrato
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/cwhv-7fnp
+notes: ''

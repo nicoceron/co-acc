@@ -1,0 +1,18 @@
+id: s97v-q3tx
+name: Superservicios - Inf. Comercial Usuarios NO Regulados
+sector: National Planning
+tier: core
+join_keys:
+  divipola:
+  - car_t1556_codigodane
+  entity:
+  - identificador_empresa
+  nit:
+  - nit
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/s97v-q3tx
+notes: ''

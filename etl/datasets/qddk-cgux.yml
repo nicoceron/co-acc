@@ -1,0 +1,27 @@
+id: qddk-cgux
+name: SECOP I - Procesos de Compra Pública Histórico
+sector: contracts
+tier: core
+join_keys:
+  bpin:
+  - codigo_bpin
+  contract:
+  - numero_de_contrato
+  divipola:
+  - c_digo_de_la_entidad
+  entity:
+  - nit_de_la_entidad
+  - c_digo_de_la_entidad
+  nit:
+  - nit_de_la_entidad
+  - identificacion_del_contratista
+  - identific_representante_legal
+  process:
+  - id_adjudicacion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/qddk-cgux
+notes: ''

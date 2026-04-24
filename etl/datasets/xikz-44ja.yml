@@ -1,0 +1,18 @@
+id: xikz-44ja
+name: DNP - localización de proyectos
+sector: budget
+tier: core
+join_keys:
+  bpin:
+  - bpin
+  divipola:
+  - codigomunicipio
+  entity:
+  - codigoentidadresponsable
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/xikz-44ja
+notes: ''

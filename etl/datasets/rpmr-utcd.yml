@@ -1,0 +1,18 @@
+id: rpmr-utcd
+name: SECOP Integrado
+sector: contracts
+tier: core
+join_keys:
+  entity:
+  - codigo_entidad_en_secop
+  - nit_de_la_entidad
+  nit:
+  - nit_de_la_entidad
+  - documento_proveedor
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/rpmr-utcd
+notes: ''

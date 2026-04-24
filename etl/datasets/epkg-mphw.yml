@@ -1,0 +1,15 @@
+id: epkg-mphw
+name: MEN_INDICADORES_PAE
+sector: Education
+tier: context
+join_keys:
+  divipola:
+  - codigo_departamento
+  - codigo_municipio
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/epkg-mphw
+notes: ''

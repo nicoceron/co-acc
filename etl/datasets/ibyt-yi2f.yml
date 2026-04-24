@@ -1,0 +1,16 @@
+id: ibyt-yi2f
+name: SECOP II - Facturas
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  contract:
+  - id_contrato
+  entity:
+  - codigo_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/ibyt-yi2f
+notes: ''

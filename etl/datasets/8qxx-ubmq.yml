@@ -1,0 +1,14 @@
+id: 8qxx-ubmq
+name: Hallazgos Fiscales
+sector: sanctions
+tier: core
+join_keys:
+  nit:
+  - nit
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/8qxx-ubmq
+notes: ''

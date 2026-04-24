@@ -1,0 +1,19 @@
+id: br9a-gygu
+name: Ejecución Financiera de Regalías
+sector: Finance and Public Credit Sector Roadmap
+tier: core
+join_keys:
+  bpin:
+  - codigobpin
+  divipola:
+  - codigodanedepartamento
+  - codigodaneentidad
+  entity:
+  - codigodaneentidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/br9a-gygu
+notes: ''

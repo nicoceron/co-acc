@@ -1,0 +1,14 @@
+id: ps88-5e3v
+name: SECOP I - Archivos Descarga
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - codigo_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/ps88-5e3v
+notes: ''

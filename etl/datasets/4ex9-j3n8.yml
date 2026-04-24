@@ -1,0 +1,18 @@
+id: 4ex9-j3n8
+name: SECOP II - Contacto Entidades y Proveedores
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - codigo_entidad
+  - nit_entidad
+  nit:
+  - nit_entidad
+  - n_mero_documento_representante_legal
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/4ex9-j3n8
+notes: ''

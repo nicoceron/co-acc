@@ -1,0 +1,14 @@
+id: vbr4-v5x7
+name: Entidades Acreditadas
+sector: Labor
+tier: core
+join_keys:
+  nit:
+  - n_mero_nit
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/vbr4-v5x7
+notes: ''

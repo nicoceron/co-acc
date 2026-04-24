@@ -1,0 +1,16 @@
+id: cf9k-55fw
+name: DNP-proyectos_datos_basicos
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  bpin:
+  - bpin
+  entity:
+  - codigoentidadresponsable
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/cf9k-55fw
+notes: ''

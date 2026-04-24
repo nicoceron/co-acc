@@ -1,0 +1,16 @@
+id: iaeu-rcn6
+name: Antecedentes de SIRI
+sector: sanctions
+tier: core
+join_keys:
+  nit:
+  - numero_identificacion
+  process:
+  - numero_proceso
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/iaeu-rcn6
+notes: ''

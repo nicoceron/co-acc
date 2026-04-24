@@ -1,0 +1,21 @@
+id: gra4-pcp2
+name: SECOP II - Ubicaciones ejecucion contratos
+sector: contracts
+tier: core
+join_keys:
+  contract:
+  - id_contrato
+  entity:
+  - codigo_entidad
+  - nit_entidad
+  - codigo_proveedor
+  nit:
+  - nit_entidad
+  - documento_proveedor
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/gra4-pcp2
+notes: ''

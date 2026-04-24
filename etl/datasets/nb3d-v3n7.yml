@@ -1,0 +1,15 @@
+id: nb3d-v3n7
+name: RUES - establecimientos y sucursales conectadas
+sector: identity
+tier: core
+join_keys:
+  nit:
+  - numero_identificacion
+  - nit_propietario
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/nb3d-v3n7
+notes: ''

@@ -1,0 +1,16 @@
+id: 5u9e-g5w9
+name: Puestos Sensibles a la Corrupción
+sector: public_sector
+tier: core
+join_keys:
+  entity:
+  - cod_institucion
+  nit:
+  - identificacion_funcionario
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/5u9e-g5w9
+notes: ''

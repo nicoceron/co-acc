@@ -1,0 +1,14 @@
+id: gbry-rnq4
+name: Declaraciones conflictos de interés
+sector: disclosures
+tier: core
+join_keys:
+  nit:
+  - numero_documento
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/gbry-rnq4
+notes: ''

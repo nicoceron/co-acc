@@ -1,0 +1,16 @@
+id: c82u-588k
+name: Personas Naturales Personas Jurídicas y Entidades Sin Ánimo de Lucro
+sector: identity
+tier: core
+join_keys:
+  nit:
+  - numero_identificacion
+  - nit
+  - num_identificacion_representante_legal
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/c82u-588k
+notes: ''

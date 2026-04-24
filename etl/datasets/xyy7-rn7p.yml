@@ -1,0 +1,15 @@
+id: xyy7-rn7p
+name: Quejas interpuestas por los consumidores financieros en contra de las entidades
+  vigiladas en la plataforma Smartsupervision
+sector: Finance and Public Credit Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - codigo_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/xyy7-rn7p
+notes: ''

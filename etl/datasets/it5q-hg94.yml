@@ -1,0 +1,18 @@
+id: it5q-hg94
+name: SECOPII - Multas y Sanciones
+sector: sanctions
+tier: core
+join_keys:
+  contract:
+  - id_contrato
+  entity:
+  - codigo_entidad_creadora
+  process:
+  - id_proceso
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/it5q-hg94
+notes: ''

@@ -1,0 +1,16 @@
+id: dmgg-8hin
+name: SECOP II - Archivos Descarga Desde 2025
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - nit_entidad
+  nit:
+  - nit_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/dmgg-8hin
+notes: ''

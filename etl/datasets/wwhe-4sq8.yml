@@ -1,0 +1,20 @@
+id: wwhe-4sq8
+name: SECOP II - Ubicaciones Adicionales
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  contract:
+  - id_contrato
+  - referencia_contrato
+  entity:
+  - nit_entidad
+  - codigo_entidad
+  nit:
+  - nit_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/wwhe-4sq8
+notes: ''

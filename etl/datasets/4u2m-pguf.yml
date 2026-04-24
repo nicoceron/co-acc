@@ -1,0 +1,19 @@
+id: 4u2m-pguf
+name: Resultados Saber TyT Genericas 2019-2
+sector: Education
+tier: core
+join_keys:
+  divipola:
+  - estu_cod_reside_depto
+  - estu_prgm_codmunicipio
+  - estu_inst_codmunicipio
+  - estu_cod_depto_presentacion
+  entity:
+  - inst_cod_institucion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/4u2m-pguf
+notes: ''

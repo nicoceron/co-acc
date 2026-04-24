@@ -1,0 +1,19 @@
+id: 4n4q-k399
+name: Multas y Sanciones SECOP I
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  contract:
+  - numero_de_contrato
+  entity:
+  - nit_entidad
+  nit:
+  - nit_entidad
+  - documento_contratista
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/4n4q-k399
+notes: ''

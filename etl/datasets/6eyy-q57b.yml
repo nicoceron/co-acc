@@ -1,0 +1,14 @@
+id: 6eyy-q57b
+name: Pre registros Estatuto Temporal de Protección para Migrantes Venezolanos
+sector: Foreign Affairs Sector Roadmap
+tier: context
+join_keys:
+  divipola:
+  - departamento_divipola
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/6eyy-q57b
+notes: ''

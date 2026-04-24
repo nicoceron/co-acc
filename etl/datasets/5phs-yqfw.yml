@@ -1,0 +1,14 @@
+id: 5phs-yqfw
+name: Información de Gastos del Presupuesto General de la Nación
+sector: Finance and Public Credit Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - codigoentidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/5phs-yqfw
+notes: ''

@@ -1,0 +1,15 @@
+id: rtxu-twjm
+name: Distritos de Riego activos
+sector: Agriculture
+tier: context
+join_keys:
+  divipola:
+  - cod_dane_depto
+  - cod_dane_municipio
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/rtxu-twjm
+notes: ''

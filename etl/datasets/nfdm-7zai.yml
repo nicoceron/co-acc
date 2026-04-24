@@ -1,0 +1,15 @@
+id: nfdm-7zai
+name: Informes al congreso
+sector: Foreign Affairs Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - c_digo_entidad
+  - c_digo_entidad_adscrita
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/nfdm-7zai
+notes: ''

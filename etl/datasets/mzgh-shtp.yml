@@ -1,0 +1,16 @@
+id: mzgh-shtp
+name: DNP-ProyectosSGR
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  bpin:
+  - codigobpin
+  entity:
+  - codejecutor
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/mzgh-shtp
+notes: ''

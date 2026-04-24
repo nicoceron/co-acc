@@ -1,0 +1,21 @@
+id: uymx-8p3j
+name: SECOP II - Plan de pagos
+sector: contracts
+tier: core
+join_keys:
+  contract:
+  - id_del_contrato
+  - referencia_contrato
+  entity:
+  - codigo_entidad
+  - nit_entidad
+  nit:
+  - nit_entidad
+  - documento_proveedor
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/uymx-8p3j
+notes: ''

@@ -1,0 +1,17 @@
+id: ceth-n4bn
+name: Grupos de Proveedores - SECOP II
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  nit:
+  - codigo_grupo
+  - nit_grupo
+  - codigo_participante
+  - nit_participante
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/ceth-n4bn
+notes: ''

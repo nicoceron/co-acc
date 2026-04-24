@@ -1,0 +1,15 @@
+id: jr8e-e8tu
+name: Responsabilidad Fiscal
+sector: sanctions
+tier: core
+join_keys:
+  nit:
+  - identificaci_n
+  - n_mero_de_identificaci_n
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/jr8e-e8tu
+notes: ''

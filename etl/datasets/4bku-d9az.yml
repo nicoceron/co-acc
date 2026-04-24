@@ -1,0 +1,15 @@
+id: 4bku-d9az
+name: Actuaciones judiciales ante la Corte Constitucional realizadas por el Ministerio
+  de Justicia y del Derecho
+sector: Justice and Law Sector Roadmap
+tier: core
+join_keys:
+  process:
+  - n_mero_de_proceso
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/4bku-d9az
+notes: ''

@@ -1,0 +1,14 @@
+id: 5n52-6rih
+name: Población Afiliada
+sector: Labor Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - id_ccf
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/5n52-6rih
+notes: ''
