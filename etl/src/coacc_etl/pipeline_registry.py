@@ -17,7 +17,6 @@ _EXCLUDED_MODULES = {
     "colombia_procurement",
     "colombia_shared",
     "disclosure_mining",
-    "lake_template",
     "project_graph",
 }
 

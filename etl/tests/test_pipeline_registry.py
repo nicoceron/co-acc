@@ -8,7 +8,7 @@ def test_registry_discovers_known_graph_and_lake_pipelines() -> None:
     names = list_pipeline_names()
 
     assert "secop_ii_contracts" in names
-    assert "contratistas_sancionados_cce" in names
+    assert "administrative_acts" in names
     assert "colombia_shared" not in names
     assert "lake_template" not in names
 
