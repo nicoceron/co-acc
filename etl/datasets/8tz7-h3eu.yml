@@ -5,10 +5,40 @@ tier: core
 join_keys:
   nit:
   - numero_documento
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_publicac_declarac
+partition_column: fecha_publicac_declarac
+columns_map:
+  liabilities: acreencias_obligaciones_pn
+  private_economic_activities: activ_econom_privadas
+  taxable_year: ano_gravable_declarac_iyr
+  patrimonial_assets: bienes_patrimoniales_pn
+  declarant_role: cargo_declarante
+  bank_accounts: ctas_bancarias_pn
+  declarant_is_contractor: declarante_es_contratista
+  declaration_status: estado_declaracion
+  publication_date: fecha_publicac_declarac
+  entity_name: nombre_entidad
+  document_id: numero_documento
+  form_number: numero_formulario
+  corp_society_participations: particip_corp_socied_asoc
+  board_council_participations: particip_juntas_consejos
+  declarant_first_lastname: primer_apellido_declarante
+  declarant_first_name: primer_nombre_declarante
+  reported_income: reporto_ingresos
+  declarant_second_lastname: segundo_apellido_declarante
+  declarant_second_name: segundo_nombre_declarante
+  declaration_type: tipo_declaracion
+  document_type: tipo_documento
+required_coverage:
+  numero_documento: 0.99
+  numero_formulario: 0.99
+  nombre_entidad: 0.95
+  fecha_publicac_declarac: 0.99
+freq: monthly
 url: https://www.datos.gov.co/d/8tz7-h3eu
-notes: ''
+notes: 'Colombia: Declaración de activos (Función Pública / Ley 2013) —
+  patrimonial / asset disclosures by public servants. 328k rows as of
+  2026-04-25, paired with gbry-rnq4 (conflicts of interest declarations).
+  fecha_publicac_declarac is the publication timestamp and is fully
+  populated. High signal value: pairs declarant identity with bank account
+  declarations, board memberships, private activities, etc.'

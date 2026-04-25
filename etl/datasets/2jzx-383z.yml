@@ -3,16 +3,50 @@ name: Conjunto servidores públicos
 sector: public_sector
 tier: core
 join_keys:
-  divipola:
-  - idmunicipioentidad
   entity:
-  - idmunicipioentidad
+  - codigosigep
+  - nombreentidad
   nit:
   - numerodeidentificacion
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+  divipola:
+  - iddepartamentodenacimiento
+  - idmunicipiodenacimiento
+watermark_column: fecha_de_vinculaci_n
+partition_column: fecha_de_vinculaci_n
+columns_map:
+  basic_salary: asignacionbasicasalarial
+  sigep_code: codigosigep
+  current_job_title: denominacionempleoactual
+  birth_department: departamentodenacimiento
+  current_dependency: dependenciaempleoactual
+  hire_date: fecha_de_vinculaci_n
+  birth_department_id: iddepartamentodenacimiento
+  birth_municipality_id: idmunicipiodenacimiento
+  months_teaching_experience: mesesdeexperienciadocente
+  months_independent_experience: mesesdeexperienciaindependiente
+  months_private_experience: mesesdeexperienciaprivado
+  months_public_experience: mesesdeexperienciapublico
+  birth_municipality: municipiodenacimiento
+  legal_nature: naturalezajuridica
+  education_level: niveleducativo
+  job_hierarchy_level: niveljerarquicoempleo
+  name: nombre
+  entity_name: nombreentidad
+  document_id: numerodeidentificacion
+  government_order: orden
+  sex: sexo
+  appointment_type: tipodenombramiento
+required_coverage:
+  numerodeidentificacion: 0.99
+  codigosigep: 0.99
+  nombreentidad: 0.99
+  fecha_de_vinculaci_n: 0.99
+freq: monthly
 url: https://www.datos.gov.co/d/2jzx-383z
-notes: ''
+notes: 'Colombia: SIGEP Conjunto servidores públicos — full registry of
+  public servants in Colombia. 265k rows as of 2026-04-25, growing.
+  fecha_de_vinculaci_n (hire date) is the watermark and is fully populated.
+  Note: catalog.proven.csv listed idmunicipioentidad as a join key but that
+  column no longer exists in the current schema; corrected to use
+  iddepartamentodenacimiento + idmunicipiodenacimiento for divipola joins
+  and codigosigep for entity.'

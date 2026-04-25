@@ -5,10 +5,42 @@ tier: core
 join_keys:
   nit:
   - numero_documento
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_publicac_declarac
+partition_column: fecha_publicac_declarac
+columns_map:
+  taxable_year: ano_gravable_declarac_iyr
+  declarant_role: cargo_declarante
+  spouse_partner: conyuge_companero_permanente
+  declarant_is_contractor: declarante_es_contratista
+  other_potential_conflicts_desc: descripc_otros_posibles
+  conflict_donations: donaciones_confl_interes
+  declaration_status: estado_declaracion
+  publication_date: fecha_publicac_declarac
+  conflict_trusts: fideicomisos_conflicto_interes
+  direct_interest_actions: intereses_directos_actuaciones
+  entity_name: nombre_entidad
+  document_id: numero_documento
+  form_number: numero_formulario
+  other_conflict_investments: otras_inversiones_conflicto
+  other_potential_conflicts: otros_posibles_conflictos
+  conflict_relatives: parientes_conflictos_interes
+  declarant_first_lastname: primer_apellido_declarante
+  declarant_first_name: primer_nombre_declarante
+  declarant_second_lastname: segundo_apellido_declarante
+  declarant_second_name: segundo_nombre_declarante
+  has_spouse_partner: tiene_conyuge_companero
+  declaration_type: tipo_declaracion
+  document_type: tipo_documento
+required_coverage:
+  numero_documento: 0.99
+  numero_formulario: 0.99
+  nombre_entidad: 0.95
+  fecha_publicac_declarac: 0.99
+  primer_nombre_declarante: 0.95
+freq: monthly
 url: https://www.datos.gov.co/d/gbry-rnq4
-notes: ''
+notes: 'Colombia: Declaraciones conflictos de interés (Función Pública / Ley
+  2013) — public servants self-declaring potential conflicts of interest.
+  328k rows as of 2026-04-25. fecha_publicac_declarac is the publication
+  timestamp and is fully populated. High signal value: declarant identity
+  joined against contracting and lobbying datasets.'

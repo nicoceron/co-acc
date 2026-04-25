@@ -215,8 +215,29 @@ def _parse_ts(value: object) -> datetime | None:
         try:
             parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
         except ValueError:
-            return None
+            parsed = _parse_dmy(raw)
+            if parsed is None:
+                return None
         return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
+    return None
+
+
+_FALLBACK_FORMATS = (
+    "%d/%m/%Y",         # DD/MM/YYYY (Colombian gov)
+    "%d-%m-%Y",         # DD-MM-YYYY
+    "%d/%m/%Y %H:%M:%S",
+    "%Y%m%d",           # YYYYMMDD compact (e.g. SGR period codes)
+    "%Y%m",             # YYYYMM
+)
+
+
+def _parse_dmy(raw: str) -> datetime | None:
+    """Fallback for non-ISO date formats common in Colombian Socrata data."""
+    for fmt in _FALLBACK_FORMATS:
+        try:
+            return datetime.strptime(raw, fmt).replace(tzinfo=UTC)
+        except ValueError:
+            continue
     return None
 
 

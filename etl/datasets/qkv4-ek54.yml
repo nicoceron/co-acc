@@ -7,10 +7,45 @@ join_keys:
   - bpin
   entity:
   - codigo_entidad
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: periodo
+partition_column: periodo
+columns_map:
+  scope_code: ambito_codigo
+  bpin: bpin
+  cpc_code: cod_cpc
+  funding_sources_code: cod_fuentes_financiacion
+  public_policy_code: cod_politica_publica
+  mga_program_code: cod_programatico_mga
+  sector_code: cod_sector
+  fund_situation_code: cod_situacion_de_fondos
+  thirdparty_code: cod_terceros
+  resource_type_code: cod_tipo_recurso
+  entity_code: codigo_entidad
+  commitments: compromisos
+  account: cuenta
+  cpc_name: nom_cpc
+  funding_sources_name: nom_fuentes_financiacion
+  public_policy_name: nom_politica_publica
+  mga_program_name: nom_programatico_mga
+  sector_name: nom_sector
+  fund_situation_name: nom_situacion_de_fondos
+  thirdparty_name: nom_terceros
+  resource_type_name: nom_tipo_recursos
+  account_name: nombre_cuenta
+  entity_name: nombre_entidad
+  obligations: obligaciones
+  payments: pagos
+  period: periodo
+required_coverage:
+  bpin: 0.99
+  codigo_entidad: 0.99
+  periodo: 0.99
+  cuenta: 0.99
+freq: quarterly
 url: https://www.datos.gov.co/d/qkv4-ek54
-notes: ''
+notes: 'Colombia: SGR (Sistema General de Regalías) Ejecución de Gastos —
+  budget execution (commitments / obligations / payments) per BPIN project.
+  386k rows as of 2026-04-25, periodo column is YYYYMMDD format (handled
+  by the ingester fallback parser). Each row links a BPIN project to a
+  spending entity through actual disbursement amounts — strong signal for
+  budget-anomaly detection.'
