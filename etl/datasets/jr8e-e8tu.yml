@@ -4,12 +4,32 @@ sector: sanctions
 tier: core
 join_keys:
   nit:
-  - identificaci_n
   - n_mero_de_identificaci_n
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_de_resoluci_n_de_la
+partition_column: fecha_de_resoluci_n_de_la
+columns_map:
+  nit: n_mero_de_identificaci_n
+  document_type: identificaci_n
+  entity_name: raz_n_social_de_la_entidad
+  sanction_type: tipo_de_sanci_n_multa
+  topic: tema_clasificaci_n_o_motivo
+  resolution_date: fecha_de_resoluci_n_de_la
+  decision_finality_date: fecha_de_firmeza_de_la_decisi
+  appeal_resolution_number: n_mero_de_resoluci_n_que
+  appeal_resolution_date: fecha_de_resoluci_n_que
+  appeal_info: informaci_n_de_recursos
+  description: descripci_n_o_detalle_resumen
+  amount: monto_de_la_multa_o_sanci
+  source_system: fuente
+required_coverage:
+  n_mero_de_identificaci_n: 0.95
+  raz_n_social_de_la_entidad: 0.95
+  fecha_de_resoluci_n_de_la: 0.95
+  monto_de_la_multa_o_sanci: 0.80
+freq: yearly
 url: https://www.datos.gov.co/d/jr8e-e8tu
-notes: ''
+notes: 'Colombia: Responsabilidad Fiscal — Contraloría sanctions of fiscal
+  responsibility. Tiny dataset (60 rows as of 2026-04-25), spans 2006-2021.
+  fecha_de_resoluci_n_de_la (resolution date) is fully populated and is the
+  natural watermark; fecha_de_firmeza_de_la_decisi only covers 78% so it is
+  kept as a regular column rather than the watermark.'
