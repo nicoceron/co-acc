@@ -105,17 +105,40 @@ def test_coverage_failure_blocks_watermark(
     assert len(failures) == 1
 
 
-def test_partition_gate_rejects_unparseable_rows(
+def test_partition_sentinel_for_unparseable_rows(
     hallazgos_spec: DatasetSpec,
     hallazgos_page: list[dict[str, object]],
     fake_client_factory,
 ) -> None:
+    """Unparseable watermark rows survive in the year=0/month=0 sentinel.
+
+    Socrata's ``$where`` on a date column never returns NULL-comparing rows,
+    so dropping them on first ingest would lose them forever. The watermark
+    advances using only parseable rows.
+    """
     page = list(hallazgos_page)
-    # One row has a partition column that cannot be parsed as a timestamp.
     page[1] = dict(page[1], fecha_recibo_traslado="not-a-date")
     client = fake_client_factory([page])
 
-    with pytest.raises(IngestError, match="unparseable|could not be parsed"):
+    result = ingest(hallazgos_spec, client=client)
+
+    assert result.rows == 3
+    assert (0, 0) in result.partitions  # sentinel partition created
+    # Watermark = max parseable, ignoring the bad row.
+    assert result.watermark_delta is not None
+    assert result.watermark_delta.last_seen_ts == datetime(2025, 1, 15, tzinfo=UTC)
+
+
+def test_partition_gate_rejects_when_all_rows_unparseable(
+    hallazgos_spec: DatasetSpec,
+    hallazgos_page: list[dict[str, object]],
+    fake_client_factory,
+) -> None:
+    """Hard fail when the watermark column appears to be misnamed."""
+    page = [dict(row, fecha_recibo_traslado="???") for row in hallazgos_page]
+    client = fake_client_factory([page])
+
+    with pytest.raises(IngestError, match="parseable"):
         ingest(hallazgos_spec, client=client)
 
 

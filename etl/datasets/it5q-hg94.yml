@@ -9,10 +9,37 @@ join_keys:
   - codigo_entidad_creadora
   process:
   - id_proceso
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_evento
+partition_column: fecha_evento
+columns_map:
+  process_id: id_proceso
+  process_reference: referencia_proceso
+  contract_id: id_contrato
+  entity_id: codigo_entidad_creadora
+  entity_name: nombre_entidad_creadora
+  supplier_code: as_codigo_proveedor_objeto
+  supplier_name: nombre_proveedor_objeto_de
+  amount: valor
+  amount_paid: valor_pagado
+  event_date: fecha_evento
+  applied_warranties: aplico_garantias
+  act_number: numero_de_acto
+  sanction_type: tipo_de_sancion
+  description_other_type: descripcion_otro_tipo_de
+  status: estado
+  type: tipo
+  version_number: numero_de_version
+required_coverage:
+  id_proceso: 0.99
+  id_contrato: 0.95
+  codigo_entidad_creadora: 0.99
+  numero_de_acto: 0.95
+  fecha_evento: 0.85
+freq: weekly
 url: https://www.datos.gov.co/d/it5q-hg94
-notes: ''
+notes: 'Colombia: SECOPII Multas y Sanciones — administrative sanctions
+  (clausula penal, multas, incumplimientos) recorded against suppliers in
+  SECOP II contracts. 518 rows as of 2026-04-25. fecha_evento covers ~90% so
+  threshold relaxed; some rows lack a date but still carry the act number.
+  Highly signal-relevant: each row is a contractor sanctioned by a public
+  buyer.'

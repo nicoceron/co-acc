@@ -10,10 +10,45 @@ join_keys:
   - id_entidad
   process:
   - id_proceso
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_cargue
+partition_column: fecha_cargue
+columns_map:
+  contract_id: id_contrato
+  load_year: anno_cargue
+  signing_year: anno_firma
+  load_date: fecha_cargue
+  signing_date: fecha_firma
+  contract_start_date: fecha_inicio_del_contrato
+  contract_end_date: fecha_fin_del_contrato
+  government_order: orden
+  department: departamento
+  municipality: municipio
+  entity_name: nombre_entidad
+  procurement_modality: modalidad_contratacion
+  contract_type: tipo_de_contrato
+  modality_justification: justificacion_modalidad
+  unspsc_class_id: unspsc_id_clase
+  process_id: id_proceso
+  contract_number: numero_de_contrato
+  contractual_object: objeto_contractual
+  amount_with_additions: valor_con_adiciones
+  contractor_name: contratista
+  contractor_type: tipo_contratista
+  contractor_id: identificacion_contratista
+  contract_status: estado_contrato
+  link: link
+  entity_id: id_entidad
+  source_system: fuente
+  resource_origin: origen_de_los_recursos
+required_coverage:
+  id_contrato: 0.99
+  id_entidad: 0.95
+  id_proceso: 0.99
+  identificacion_contratista: 0.95
+  fecha_cargue: 0.99
+freq: monthly
 url: https://www.datos.gov.co/d/ityv-bxct
-notes: ''
+notes: 'Colombia: SECOP Convenios Interadministrativos — inter-administrative
+  agreements (one public entity contracting another) registered in SECOP I.
+  2,362 rows as of 2026-04-25; static (last updated 2018). fecha_cargue is
+  the upload-to-platform timestamp and is fully populated.'

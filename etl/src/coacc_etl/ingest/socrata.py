@@ -193,8 +193,14 @@ class SocrataClient:
 
 
 def _parse_ts(value: object) -> datetime | None:
-    if value is None or value == "":
+    if value is None:
         return None
+    # pandas StringDtype/Float64Dtype use pd.NA which raises on truthy/eq checks.
+    try:
+        if pd.isna(value):  # type: ignore[arg-type]
+            return None
+    except (TypeError, ValueError):
+        pass
     if isinstance(value, datetime):
         return value if value.tzinfo else value.replace(tzinfo=UTC)
     if isinstance(value, int | float):
@@ -231,16 +237,21 @@ def _rows_to_frame(rows: Iterable[dict[str, object]]) -> pd.DataFrame:
 def _assign_partitions(
     frame: pd.DataFrame, partition_column: str
 ) -> tuple[pd.DataFrame, list[tuple[int, int]]]:
+    """Assign year/month partitions; rows without a parseable partition_column
+    are routed to the sentinel ``year=0/month=0`` partition so they survive
+    incremental ingest. Rejecting them entirely would lose data permanently —
+    Socrata's ``$where`` on a date column never returns rows whose value is
+    NULL, so the next incremental run cannot re-pull them.
+    """
     parsed = frame[partition_column].map(_parse_ts)
-    missing = parsed.isna().sum()
-    if missing:
+    if parsed.notna().sum() == 0:
         msg = (
-            f"{partition_column} could not be parsed for {missing} of "
-            f"{len(frame)} rows; ingest refuses to write unpartitionable rows"
+            f"{partition_column} is unparseable for every row "
+            f"({len(frame)}) — likely a column-name typo in the YAML"
         )
         raise IngestError(msg)
-    years = parsed.map(lambda d: d.year).astype("int32")
-    months = parsed.map(lambda d: d.month).astype("int32")
+    years = parsed.map(lambda d: d.year if d is not None else 0).fillna(0).astype("int32")
+    months = parsed.map(lambda d: d.month if d is not None else 0).fillna(0).astype("int32")
     out = frame.copy()
     out["__year"] = years
     out["__month"] = months
@@ -334,15 +345,28 @@ def ingest(
         write_coverage_report(coverage)
 
         # Parse watermark column — we need the max BEFORE column rename.
+        # Rows with unparseable watermark survive (see _assign_partitions) but
+        # don't contribute to max(); if every row is unparseable, refuse to
+        # advance because the column is almost certainly misnamed.
         parsed_wm = frame[spec.watermark_column].map(_parse_ts)
-        if parsed_wm.isna().any():
-            bad = int(parsed_wm.isna().sum())
+        parseable = [ts for ts in parsed_wm.tolist() if ts is not None]
+        if not parseable:
             msg = (
-                f"{spec.id}: {bad} rows have unparseable "
-                f"{spec.watermark_column!r} — refusing to advance watermark"
+                f"{spec.id}: zero rows have a parseable "
+                f"{spec.watermark_column!r} — likely a column-name typo"
             )
             raise IngestError(msg)
-        max_ts = max(parsed_wm.tolist())
+        unparseable = len(parsed_wm) - len(parseable)
+        if unparseable:
+            LOG.warning(
+                "ingest %s: %s of %s rows have unparseable %s and will land in "
+                "the year=0/month=0 sentinel partition",
+                spec.id,
+                unparseable,
+                len(parsed_wm),
+                spec.watermark_column,
+            )
+        max_ts = max(parseable)
 
         frame, partitions = _assign_partitions(frame, spec.partition_column)
 
