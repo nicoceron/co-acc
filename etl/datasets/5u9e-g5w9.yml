@@ -7,10 +7,47 @@ join_keys:
   - cod_institucion
   nit:
   - identificacion_funcionario
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_vinculacion
+partition_column: fecha_vinculacion
+columns_map:
+  document_type: tipo_dcto
+  funcionario_id: identificacion_funcionario
+  full_name: nombre_completo
+  sex: sexo
+  nationality: nacionalidad
+  birth_municipality: municipio_nacimiento
+  birth_department: dpto_nacimiento
+  months_public_experience: meses_experiencia_publico
+  months_private_experience: meses_experiencia_privado
+  months_self_employed_experience: meses_exp_neg_propio
+  months_teaching_experience: meses_experiencia_docente
+  academic_level: nivel_academico
+  formation_level: nivel_formacion
+  institution_id: cod_institucion
+  institution_name: nombre_institucion
+  institution_municipality: municipio_institucion
+  institution_department: dpto_institucion
+  government_order: orden
+  administrative_sector: sector_admtivo
+  legal_nature: naturaleza_juridica
+  organic_classification: clasificacion_organica
+  job_hierarchy_level: nivel_jerarquico_empleo
+  appointment_type: tipo_nombramiento
+  current_job_title: denominacion_empleo_actual
+  current_dependency: dependencia_empleo_actual
+  basic_salary: asig_basica
+  start_date: fecha_vinculacion
+required_coverage:
+  identificacion_funcionario: 0.99
+  nombre_completo: 0.99
+  cod_institucion: 0.95
+  nombre_institucion: 0.95
+  fecha_vinculacion: 0.99
+freq: monthly
 url: https://www.datos.gov.co/d/5u9e-g5w9
-notes: ''
+notes: 'Colombia: SIGEP Puestos Sensibles a la Corrupción — public servants in
+  positions classified as corruption-sensitive (asesor, libre nombramiento,
+  defense, etc.). 24k rows as of 2026-04-25, 100% coverage on join keys.
+  fecha_vinculacion (hire date) is the watermark; some rows carry far-future
+  dates (e.g. 2887) that will land in dated partitions but the parquet write
+  remains correct.'
