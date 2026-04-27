@@ -1,4 +1,0 @@
-id_contrato,tipo,fecha_de_creacion,fecha_de_aprobacion,proposito_de_la_modificacion,fecha_de_inicio_del_contrato,fecha_de_fin_del_contrato
-CO1.PCCNTR.3001,Suspension,2025-01-12T00:00:00.000,2025-01-15T00:00:00.000,Suspension temporal por ajustes tecnicos,2025-01-01T00:00:00.000,2025-12-31T00:00:00.000
-CO1.PCCNTR.3001,Suspension,2025-03-01T00:00:00.000,2025-03-05T00:00:00.000,Suspension temporal por hallazgos de interventoria,2025-01-01T00:00:00.000,2025-12-31T00:00:00.000
-CO1.PCCNTR.3002,Suspension,2025-02-02T00:00:00.000,2025-02-04T00:00:00.000,Suspension por ajustes presupuestales,2025-02-01T00:00:00.000,2025-10-31T00:00:00.000

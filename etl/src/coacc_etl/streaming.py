@@ -1,25 +1,33 @@
+"""Low-level Socrata + CSV helpers used outside the generic ingester.
+
+The bulk of this module's prior surface (``stream_socrata`` /
+``pipeline_stream_to_lake``) was the legacy resumable-streaming path that
+served the bespoke pipelines now retired in Wave 4. What survives here are:
+
+- ``iter_csv_chunks`` — chunked CSV reader still used by the legacy
+  ``test_colombia_shared`` regression test and by any future custom adapter
+  that consumes CSVs.
+- ``_socrata_request`` — single-page HTTP fetch with retry/backoff still
+  used by ``coacc_etl.lakehouse.reality`` to do live freshness probes
+  against Socrata datasets (one cheap row each).
+
+The supported ingest path is now :mod:`coacc_etl.ingest.socrata` —
+``SocrataClient`` paginates with the same retry rules and writes parquet
+through ``lakehouse.writer``.
+"""
 from __future__ import annotations
 
 import logging
 import os
 import time
-import uuid
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 import httpx
 import pandas as pd
 
-from coacc_etl.lakehouse import append_parquet, watermark
-from coacc_etl.pipelines.colombia_shared import normalize_dataframe_columns
-
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Iterator
     from pathlib import Path
-
-    import pyarrow as pa
-
-    from coacc_etl.lakehouse.watermark import WatermarkDelta
 
 
 LOG = logging.getLogger(__name__)
@@ -60,7 +68,7 @@ def iter_csv_chunks(
             break
 
         processed += len(chunk)
-        yield normalize_dataframe_columns(chunk)
+        yield chunk
 
         if limit is not None and processed >= limit:
             break
@@ -99,9 +107,8 @@ def _socrata_request(
                 response.raise_for_status()
                 payload = response.json()
             if not isinstance(payload, list):
-                raise ValueError(
-                    f"Unexpected Socrata payload for {dataset_id}: {type(payload).__name__}"
-                )
+                msg = f"Unexpected Socrata payload for {dataset_id}: {type(payload).__name__}"
+                raise ValueError(msg)
             return [row for row in payload if isinstance(row, dict)]
         except _RETRYABLE_EXCEPTIONS as exc:
             last_error = exc
@@ -120,136 +127,6 @@ def _socrata_request(
             backoff = min(backoff * 2, max_backoff)
 
     if last_error is None:
-        raise RuntimeError(f"socrata request exhausted retries for {dataset_id}")
+        msg = f"socrata request exhausted retries for {dataset_id}"
+        raise RuntimeError(msg)
     raise last_error
-
-
-def socrata_get(
-    dataset_id: str,
-    *,
-    limit: int,
-    offset: int,
-    order: str = ":id",
-    where: str | None = None,
-    domain: str | None = None,
-    timeout: float = 60.0,
-    max_attempts: int = 10,
-    initial_backoff: float = 2.0,
-    max_backoff: float = 300.0,
-) -> list[dict[str, Any]]:
-    params: dict[str, str | int] = {
-        "$limit": limit,
-        "$offset": offset,
-        "$order": order,
-    }
-    if where:
-        params["$where"] = where
-    return _socrata_request(
-        dataset_id,
-        params=params,
-        domain=domain,
-        timeout=timeout,
-        max_attempts=max_attempts,
-        initial_backoff=initial_backoff,
-        max_backoff=max_backoff,
-        log_label=f"get_offset={offset}",
-    )
-
-
-def _extract_data_ts(table: pa.Table) -> datetime | None:
-    for col_name in ("ultima_actualizacion", "load_date", "signed_date"):
-        if col_name not in table.column_names:
-            continue
-        col = table.column(col_name)
-        vals = [str(v) for v in col if v and str(v).strip() not in ("", "None", "nan")]
-        if not vals:
-            continue
-        max_str = max(vals)
-        try:
-            dt = datetime.fromisoformat(max_str)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=UTC)
-            return dt
-        except (ValueError, TypeError):
-            continue
-    return None
-
-
-def stream_socrata(
-    dataset_id: str,
-    *,
-    chunk_size: int = 10_000,
-    order_by: str = ":id",
-    where: str | None = None,
-    start_offset: int = 0,
-) -> Iterator[tuple[int, list[dict[str, Any]]]]:
-    """Yield (offset_after_chunk, rows) pairs so callers can checkpoint progress."""
-    offset = start_offset
-    while True:
-        rows = socrata_get(
-            dataset_id,
-            limit=chunk_size,
-            offset=offset,
-            order=order_by,
-            where=where,
-        )
-        if not rows:
-            return
-        offset += len(rows)
-        yield offset, rows
-        if len(rows) < chunk_size:
-            return
-
-
-def pipeline_stream_to_lake(
-    source: str,
-    dataset_id: str,
-    *,
-    normalizer: Callable[[list[dict[str, Any]]], pa.Table],
-    chunk_size: int = 10_000,
-    where: str | None = None,
-    full_refresh: bool = False,
-) -> WatermarkDelta:
-    batch_id = uuid.uuid4().hex
-    start_offset = 0
-    rows_written = 0
-
-    if not full_refresh:
-        existing = watermark.get(source)
-        if existing and existing.last_offset is not None:
-            start_offset = int(existing.last_offset)
-            rows_written = int(existing.row_count)
-            LOG.info(
-                "[%s] resuming from watermark offset=%s rows=%s",
-                source,
-                start_offset,
-                rows_written,
-            )
-
-    for next_offset, chunk in stream_socrata(
-        dataset_id,
-        chunk_size=chunk_size,
-        where=where,
-        start_offset=start_offset,
-    ):
-        table = normalizer(chunk)
-        data_ts = _extract_data_ts(table) if table.num_rows > 0 else None
-        now = data_ts or datetime.now(tz=UTC)
-        append_parquet(table, source=source, year=now.year, month=now.month)
-        rows_written += len(chunk)
-        watermark.advance(
-            source,
-            rows=rows_written,
-            batch_id=batch_id,
-            last_seen_ts=now,
-            last_offset=next_offset,
-        )
-
-    # Loop exited naturally (final page returned). Clear offset so the next
-    # run uses the incremental `$where` filter rather than resuming pagination.
-    return watermark.advance(
-        source,
-        rows=rows_written,
-        batch_id=batch_id,
-        last_offset=None,
-    )

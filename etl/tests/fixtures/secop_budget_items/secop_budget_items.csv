@@ -1,4 +1,0 @@
-identificador_unico,identificador_item_compromiso,identificador_compromiso,id_contrato,referencia_contrato,codigo,nombre,valor_actual,anno
-CO1.SIIFCPOS.1,CO1.SIIFCITEM.1,CO1.SIIFC.1,CO1.PCCNTR.3001,CT-001,A-01,Sector Transporte,550.00,2025
-CO1.SIIFCPOS.2,CO1.SIIFCITEM.2,CO1.SIIFC.2,CO1.PCCNTR.3001,CT-001,A-02,Sector Salud,450.00,2025
-CO1.SIIFCPOS.3,CO1.SIIFCITEM.3,CO1.SIIFC.3,CO1.PCCNTR.3002,CT-002,B-01,Sector Clinico,300.00,2025

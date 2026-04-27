@@ -1,3 +1,0 @@
-identificador_de_la_orden,entidad,proveedor,nit_entidad,nit_proveedor,fecha,fecha_vence,agregacion,total,solicitud,sector_de_la_entidad,rama_de_la_entidad,orden_de_la_entidad,ciudad,items,actividad_economica_proveedor
-TVEC-1,ALCALDIA DE PRUEBA,ICONTEC,900100200,860012336,2024-02-01,2024-03-01,Acuerdo Marco Nube,150000000,SOL-1,Administrativo,Ejecutiva,Territorial,Bogota,3,7210
-TVEC-2,GOBERNACION DE PRUEBA,ICONTEC,900100201,860012336,2024-02-05,2024-03-05,Acuerdo Marco Nube,170000000,SOL-2,Administrativo,Ejecutiva,Departamental,Tunja,5,7210

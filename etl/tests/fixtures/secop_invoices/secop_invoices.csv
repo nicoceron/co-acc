@@ -1,4 +1,0 @@
-id_contrato,id_pago,numero_de_factura,fecha_factura,valor_neto,valor_total,notas,fecha_de_entrega,radicado,fecha_estiamda_de_pago,valor_a_pagar,estado,pago_confirmado,usuario_pago,codigo_entidad
-CO1.PCCNTR.3001,PAGO-1,F-001,2025-03-10T00:00:00.000,800,1000,Entrega parcial,2025-03-12T00:00:00.000,RAD-1,2025-03-30T00:00:00.000,1000,Pendiente,No,usuario1,100
-CO1.PCCNTR.3001,PAGO-2,F-002,2025-04-15T00:00:00.000,900,1100,Entrega final,2025-04-20T00:00:00.000,RAD-2,2025-04-30T00:00:00.000,0,Pagado,Si,usuario2,100
-CO1.PCCNTR.3002,PAGO-3,F-003,2025-05-01T00:00:00.000,500,500,Factura unica,2025-05-03T00:00:00.000,RAD-3,2025-05-20T00:00:00.000,500,Pendiente,No,usuario3,100
