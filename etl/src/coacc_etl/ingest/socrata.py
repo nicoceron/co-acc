@@ -212,8 +212,21 @@ def _parse_ts(value: object) -> datetime | None:
         raw = value.strip()
         if not raw:
             return None
+        # Some Colombian sources use slashes instead of dashes and pad
+        # fractional seconds with extra digits (e.g. "2020/11/14 05:28:48.583000000").
+        # Truncate nanoseconds to microseconds and try ISO again with the swap.
+        normalized = raw.replace("Z", "+00:00")
+        if "/" in normalized and "-" not in normalized.split("/", 1)[0]:
+            normalized = normalized.replace("/", "-", 2)
+        if "." in normalized:
+            head, _, frac = normalized.rpartition(".")
+            digits = frac[:6]
+            tail = frac[len(digits):]
+            # If trailing chars after frac are all digits (extra precision), drop them.
+            if tail.isdigit():
+                normalized = f"{head}.{digits}"
         try:
-            parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            parsed = datetime.fromisoformat(normalized)
         except ValueError:
             parsed = _parse_dmy(raw)
             if parsed is None:

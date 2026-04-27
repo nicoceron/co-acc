@@ -1,6 +1,6 @@
 id: jbjy-vk9h
 name: SECOP II - Contratos Electrónicos
-sector: National Planning Sector Roadmap
+sector: contracts
 tier: core
 join_keys:
   contract:
@@ -12,10 +12,99 @@ join_keys:
   nit:
   - nit_entidad
   - documento_proveedor
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_de_firma
+partition_column: fecha_de_firma
+columns_map:
+  city: ciudad
+  primary_category_code: codigo_de_categoria_principal
+  entity_code: codigo_entidad
+  supplier_code: codigo_proveedor
+  delivery_conditions: condiciones_de_entrega
+  department: departamento
+  process_description: descripcion_del_proceso
+  document_descriptions: descripcion_documentos_tipo
+  spending_destination: destino_gasto
+  added_days: dias_adicionados
+  supplier_document: documento_proveedor
+  document_types: documentos_tipo
+  legal_rep_address: domicilio_representante_legal
+  contract_duration: duraci_n_del_contrato
+  can_be_extended: el_contrato_puede_ser_prorrogado
+  centralized_entity: entidad_centralizada
+  is_group: es_grupo
+  is_pyme: es_pyme
+  is_postconflict: espostconflicto
+  contract_status: estado_contrato
+  contract_end_date: fecha_de_fin_del_contrato
+  signing_date: fecha_de_firma
+  contract_start_date: fecha_de_inicio_del_contrato
+  legal_rep_gender: g_nero_representante_legal
+  enables_advance_payment: habilita_pago_adelantado
+  contract_id: id_contrato
+  legal_rep_id: identificaci_n_representante_legal
+  modality_justification: justificacion_modalidad_de
+  liquidation: liquidaci_n
+  location: localizaci_n
+  procurement_modality: modalidad_de_contratacion
+  account_number: n_mero_de_cuenta
+  payment_orderer_doc_number: n_mero_de_documento_ordenador_de_pago
+  spending_orderer_doc_number: n_mero_de_documento_ordenador_del_gasto
+  supervisor_doc_number: n_mero_de_documento_supervisor
+  legal_rep_nationality: nacionalidad_representante_legal
+  entity_nit: nit_entidad
+  bank_name: nombre_del_banco
+  entity_name: nombre_entidad
+  payment_orderer_name: nombre_ordenador_de_pago
+  spending_orderer_name: nombre_ordenador_del_gasto
+  legal_rep_name: nombre_representante_legal
+  supervisor_name: nombre_supervisor
+  contract_object: objeto_del_contrato
+  environmental_obligation: obligaci_n_ambiental
+  postconsumer_obligations: obligaciones_postconsumo
+  government_order: orden
+  resource_origin: origen_de_los_recursos
+  agreement_pillars: pilares_del_acuerdo
+  national_general_budget: presupuesto_general_de_la_nacion_pgn
+  procurement_process: proceso_de_compra
+  awarded_supplier: proveedor_adjudicado
+  agreement_points: puntos_del_acuerdo
+  branch: rama
+  credit_resources: recursos_de_credito
+  own_resources: recursos_propios
+  local_own_resources: recursos_propios_alcald_as_gobernaciones_y_resguardos_ind_genas_
+  contract_reference: referencia_del_contrato
+  reversion: reversion
+  cdp_balance: saldo_cdp
+  validity_balance: saldo_vigencia
+  sector: sector
+  general_participation_system: sistema_general_de_participaciones
+  royalties_system: sistema_general_de_regal_as
+  contract_type: tipo_de_contrato
+  account_type: tipo_de_cuenta
+  payment_orderer_doc_type: tipo_de_documento_ordenador_de_pago
+  spending_orderer_doc_type: tipo_de_documento_ordenador_del_gasto
+  supervisor_doc_type: tipo_de_documento_supervisor
+  legal_rep_doc_type: tipo_de_identificaci_n_representante_legal
+  supplier_doc_type: tipodocproveedor
+  last_update: ultima_actualizacion
+  process_url: urlproceso
+  amortized_value: valor_amortizado
+  advance_payment_value: valor_de_pago_adelantado
+  contract_value: valor_del_contrato
+  invoiced_value: valor_facturado
+  paid_value: valor_pagado
+  pending_value: valor_pendiente_de
+  pending_execution_value: valor_pendiente_de_ejecucion
+  pending_payment_value: valor_pendiente_de_pago
+required_coverage:
+  id_contrato: 0.99
+  nit_entidad: 0.99
+  documento_proveedor: 0.95
+  fecha_de_firma: 0.85
+freq: weekly
 url: https://www.datos.gov.co/d/jbjy-vk9h
-notes: ''
+notes: 'Colombia: SECOP II Contratos Electrónicos — 5.6M live electronic
+  contracts on the SECOP II platform. The single most important Colombian
+  procurement dataset. fecha_de_firma covers ~93% (some legacy migration
+  rows lack it); ultima_actualizacion would be more semantically correct
+  but only covers ~56%. Operator runs initial full ingest off-hours.'

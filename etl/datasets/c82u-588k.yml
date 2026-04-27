@@ -5,12 +5,42 @@ tier: core
 join_keys:
   nit:
   - numero_identificacion
-  - nit
-  - num_identificacion_representante_legal
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_actualizacion
+partition_column: fecha_actualizacion
+columns_map:
+  chamber_of_commerce: camara_comercio
+  matricula_category: categoria_matricula
+  identification_class: clase_identificacion
+  ciiu_primary_activity_code: cod_ciiu_act_econ_pri
+  chamber_code: codigo_camara
+  matricula_category_code: codigo_categoria_matricula
+  identification_class_code: codigo_clase_identificacion
+  matricula_status_code: codigo_estado_matricula
+  legal_organization_code: codigo_organizacion_juridica
+  society_type_code: codigo_tipo_sociedad
+  matricula_status: estado_matricula
+  update_date: fecha_actualizacion
+  cancellation_date: fecha_cancelacion
+  matricula_date: fecha_matricula
+  validity_date: fecha_vigencia
+  proponent_inscription: inscripcion_proponente
+  matricula: matricula
+  document_id: numero_identificacion
+  legal_organization: organizacion_juridica
+  business_name: razon_social
+  society_type: tipo_sociedad
+  last_renewed_year: ultimo_ano_renovado
+required_coverage:
+  numero_identificacion: 0.99
+  matricula: 0.99
+  razon_social: 0.95
+  fecha_actualizacion: 0.99
+freq: monthly
 url: https://www.datos.gov.co/d/c82u-588k
-notes: ''
+notes: 'Colombia: RUES — Registro Único Empresarial y Social (Personas
+  Naturales / Jurídicas / ESAL). 9.2M rows as of 2026-04-25. Massive
+  identity-resolution backbone. fecha_actualizacion is the last-updated
+  timestamp, fully populated, in the unusual YYYY/MM/DD HH:MM:SS.nnnnnnnnn
+  format (handled by the ingester normalizer). Recommend operator runs
+  initial full ingest off-hours; subsequent incremental runs only fetch
+  rows updated since the prior watermark.'
