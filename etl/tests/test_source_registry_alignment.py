@@ -53,6 +53,21 @@ _DEFERRED_BACKLOG = {
     # not in catalog.signed.csv. Bespoke pipeline retired with no YAML
     # contract; can be promoted to a YAML if a downstream signal needs it.
     "higher_ed_directors",
+    # SECOP extension/relationship tables: snapshots tied to contracts
+    # but without their own row-level timestamp. Need a full_refresh_only
+    # mode (planned) before the YAML can be made ingest-ready. YAMLs
+    # remain placeholders in catalog.signed.csv.
+    "secop_additional_locations",     # wwhe-4sq8
+    "secop_budget_commitments",       # skc9-met7
+    "secop_budget_items",             # cwhv-7fnp
+    "secop_cdp_requests",             # a86w-fh92
+    "secop_execution_locations",      # gra4-pcp2
+    "secop_i_resource_origins",       # 3xwx-53wt
+    "secop_process_bpin",             # d9na-abhe
+    # secop_offers and secop_payment_plans had Socrata IDs that timed out
+    # on probe; YAMLs left as placeholders pending a re-probe.
+    "secop_offers",                   # wi7w-2nvm
+    "secop_payment_plans",            # uymx-8p3j
 }
 
 

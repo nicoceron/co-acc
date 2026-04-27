@@ -5,10 +5,29 @@ tier: core
 join_keys:
   contract:
   - identificadorcontrato
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fechacreacion
+partition_column: fechacreacion
+columns_map:
+  cantidad_adjudicada: cantidad_adjudicada
+  cantidad_planeada: cantidad_planeada
+  cantidadporrecibir: cantidadporrecibir
+  cantidadrecibida: cantidadrecibida
+  descripci_n: descripci_n
+  estado_del_contrato: estado_del_contrato
+  fechacreacion: fechacreacion
+  fechadeentregaesperada: fechadeentregaesperada
+  fechadeentregareal: fechadeentregareal
+  identificadorcontrato: identificadorcontrato
+  nombreplan: nombreplan
+  porcentaje_de_avance_real: porcentaje_de_avance_real
+  porcentajedeavanceesperado: porcentajedeavanceesperado
+  referencia_de_articulos: referencia_de_articulos
+  tipoejecucion: tipoejecucion
+  unidad: unidad
+required_coverage:
+  fechacreacion: 0.85
+freq: weekly
 url: https://www.datos.gov.co/d/mfmm-jqmq
-notes: ''
+notes: 'Colombia: SECOP Contract Execution (4.4M rows). Per-line execution status
+  and delivery confirmation. Operator runs initial full ingest off-hours; incremental
+  thereafter.'

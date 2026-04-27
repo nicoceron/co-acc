@@ -7,10 +7,27 @@ join_keys:
   - id_contrato
   entity:
   - codigo_entidad
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_factura
+partition_column: fecha_factura
+columns_map:
+  codigo_entidad: codigo_entidad
+  estado: estado
+  fecha_de_entrega: fecha_de_entrega
+  fecha_estiamda_de_pago: fecha_estiamda_de_pago
+  fecha_factura: fecha_factura
+  id_contrato: id_contrato
+  id_pago: id_pago
+  notas: notas
+  numero_de_factura: numero_de_factura
+  pago_confirmado: pago_confirmado
+  radicado: radicado
+  usuario_pago: usuario_pago
+  valor_a_pagar: valor_a_pagar
+  valor_neto: valor_neto
+  valor_total: valor_total
+required_coverage:
+  fecha_factura: 0.85
+freq: weekly
 url: https://www.datos.gov.co/d/ibyt-yi2f
-notes: ''
+notes: 'Colombia: SECOP Invoices (20.3M rows). One invoice per row, joined to contracts
+  via id_contrato. Operator runs initial full ingest off-hours.'

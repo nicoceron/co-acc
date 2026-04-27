@@ -7,10 +7,23 @@ join_keys:
   - nit_entidad
   nit:
   - nit_entidad
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_carga
+partition_column: fecha_carga
+columns_map:
+  descripci_n: descripci_n
+  entidad: entidad
+  extensi_n: extensi_n
+  fecha_carga: fecha_carga
+  id_documento: id_documento
+  nit_entidad: nit_entidad
+  nombre_archivo: nombre_archivo
+  proceso: proceso
+  tamanno_archivo: tamanno_archivo
+  url_descarga_documento: url_descarga_documento
+required_coverage:
+  fecha_carga: 0.85
+freq: weekly
 url: https://www.datos.gov.co/d/dmgg-8hin
-notes: ''
+notes: 'Colombia: SECOP Document Archives (18.8M rows). One row per attached document
+  (PDF, etc.) on a SECOP process. Operator runs initial full ingest off-hours; incremental
+  thereafter.'

@@ -5,10 +5,37 @@ tier: core
 join_keys:
   nit:
   - nit
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_creacion
+partition_column: fecha_creacion
+columns_map:
+  codigo: codigo
+  codigo_categoria_principal: codigo_categoria_principal
+  correo: correo
+  correo_representante_legal: correo_representante_legal
+  departamento: departamento
+  descripcion_categoria_principal: descripcion_categoria_principal
+  direccion: direccion
+  es_entidad: es_entidad
+  es_grupo: es_grupo
+  espyme: espyme
+  esta_activa: esta_activa
+  fax: fax
+  fecha_creacion: fecha_creacion
+  municipio: municipio
+  n_mero_doc_representante_legal: n_mero_doc_representante_legal
+  nit: nit
+  nombre: nombre
+  nombre_representante_legal: nombre_representante_legal
+  pais: pais
+  sitio_web: sitio_web
+  telefono: telefono
+  telefono_representante_legal: telefono_representante_legal
+  tipo_doc_representante_legal: tipo_doc_representante_legal
+  tipo_empresa: tipo_empresa
+  ubicacion: ubicacion
+required_coverage:
+  fecha_creacion: 0.85
+freq: weekly
 url: https://www.datos.gov.co/d/qmzu-gj57
-notes: ''
+notes: 'Colombia: SECOP Suppliers (1.5M rows). Registered sellers / providers. Operator
+  runs initial full ingest off-hours; incremental thereafter.'

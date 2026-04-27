@@ -5,10 +5,20 @@ tier: core
 join_keys:
   contract:
   - id_contrato
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_de_creacion
+partition_column: fecha_de_creacion
+columns_map:
+  fecha_de_aprobacion: fecha_de_aprobacion
+  fecha_de_creacion: fecha_de_creacion
+  fecha_de_fin_del_contrato: fecha_de_fin_del_contrato
+  fecha_de_inicio_del_contrato: fecha_de_inicio_del_contrato
+  id_contrato: id_contrato
+  proposito_de_la_modificacion: proposito_de_la_modificacion
+  tipo: tipo
+required_coverage:
+  fecha_de_creacion: 0.85
+freq: weekly
 url: https://www.datos.gov.co/d/u99c-7mfm
-notes: ''
+notes: 'Colombia: SECOP Contract Suspensions (454k rows). Subset of modifications
+  limited to formal suspensions. Operator runs initial full ingest off-hours; incremental
+  thereafter.'

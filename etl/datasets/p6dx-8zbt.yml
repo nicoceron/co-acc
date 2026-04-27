@@ -11,10 +11,64 @@ join_keys:
   - nit_del_proveedor_adjudicado
   process:
   - id_adjudicacion
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_de_publicacion_del
+partition_column: fecha_de_publicacion_del
+columns_map:
+  adjudicado: adjudicado
+  categorias_adicionales: categorias_adicionales
+  ciudad_de_la_unidad_de: ciudad_de_la_unidad_de
+  ciudad_entidad: ciudad_entidad
+  ciudad_proveedor: ciudad_proveedor
+  codigo_entidad: codigo_entidad
+  codigo_pci: codigo_pci
+  codigo_principal_de_categoria: codigo_principal_de_categoria
+  codigoproveedor: codigoproveedor
+  conteo_de_respuestas_a_ofertas: conteo_de_respuestas_a_ofertas
+  departamento_entidad: departamento_entidad
+  departamento_proveedor: departamento_proveedor
+  descripci_n_del_procedimiento: descripci_n_del_procedimiento
+  duracion: duracion
+  entidad: entidad
+  estado_de_apertura_del_proceso: estado_de_apertura_del_proceso
+  estado_del_procedimiento: estado_del_procedimiento
+  estado_resumen: estado_resumen
+  fase: fase
+  fecha_de_publicacion_del: fecha_de_publicacion_del
+  fecha_de_publicacion_fase_3: fecha_de_publicacion_fase_3
+  fecha_de_ultima_publicaci: fecha_de_ultima_publicaci
+  id_adjudicacion: id_adjudicacion
+  id_del_portafolio: id_del_portafolio
+  id_del_proceso: id_del_proceso
+  id_estado_del_procedimiento: id_estado_del_procedimiento
+  justificaci_n_modalidad_de: justificaci_n_modalidad_de
+  modalidad_de_contratacion: modalidad_de_contratacion
+  nit_del_proveedor_adjudicado: nit_del_proveedor_adjudicado
+  nit_entidad: nit_entidad
+  nombre_de_la_unidad_de: nombre_de_la_unidad_de
+  nombre_del_adjudicador: nombre_del_adjudicador
+  nombre_del_procedimiento: nombre_del_procedimiento
+  nombre_del_proveedor: nombre_del_proveedor
+  numero_de_lotes: numero_de_lotes
+  ordenentidad: ordenentidad
+  ppi: ppi
+  precio_base: precio_base
+  proveedores_con_invitacion: proveedores_con_invitacion
+  proveedores_invitados: proveedores_invitados
+  proveedores_que_manifestaron: proveedores_que_manifestaron
+  proveedores_unicos_con: proveedores_unicos_con
+  referencia_del_proceso: referencia_del_proceso
+  respuestas_al_procedimiento: respuestas_al_procedimiento
+  respuestas_externas: respuestas_externas
+  subtipo_de_contrato: subtipo_de_contrato
+  tipo_de_contrato: tipo_de_contrato
+  unidad_de_duracion: unidad_de_duracion
+  urlproceso: urlproceso
+  valor_total_adjudicacion: valor_total_adjudicacion
+  visualizaciones_del: visualizaciones_del
+required_coverage:
+  fecha_de_publicacion_del: 0.85
+freq: weekly
 url: https://www.datos.gov.co/d/p6dx-8zbt
-notes: ''
+notes: 'Colombia: SECOP II Processes (8.4M rows). The pre-award process records that
+  lead to contracts in jbjy-vk9h. Operator runs initial full ingest off-hours; incremental
+  thereafter.'

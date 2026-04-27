@@ -5,10 +5,18 @@ tier: core
 join_keys:
   contract:
   - id_contrato
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecharegistro
+partition_column: fecharegistro
+columns_map:
+  descripcion: descripcion
+  fecharegistro: fecharegistro
+  id_contrato: id_contrato
+  identificador: identificador
+  tipo: tipo
+required_coverage:
+  fecharegistro: 0.85
+freq: weekly
 url: https://www.datos.gov.co/d/cb9c-h8sn
-notes: ''
+notes: 'Colombia: SECOP Contract Additions (17.8M rows). Each row is one modification
+  adding scope/value/time to a contract. Operator runs initial full ingest off-hours;
+  incremental thereafter.'
