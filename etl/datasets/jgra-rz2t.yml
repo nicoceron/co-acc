@@ -6,10 +6,38 @@ join_keys:
   nit:
   - can_identificacion
   - ing_identificacion
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: ing_fecha_comprobante
+partition_column: ing_fecha_comprobante
+columns_map:
+  candidate_id: can_identificacion
+  cco_id: cco_id
+  class_name: cla_nombre
+  cnd_name: cnd_nombre
+  department_name: dep_nombre
+  income_act: ing_acta
+  income_voucher: ing_comprobante
+  income_concept: ing_concepto
+  voucher_date: ing_fecha_comprobante
+  income_party_id: ing_identificacion
+  income_amount: ing_valor
+  locality_name: loc_nombre
+  municipality_name: mun_nombre
+  candidate_name: nombre_candidato
+  person_name: nombre_persona
+  organization_name: org_nombre
+  party_coalition: partido_coalicion
+  tdo_name: tdo_nombre
+  tid_name: tid_nombre
+  tpe_name: tpe_nombre
+required_coverage:
+  can_identificacion: 0.99
+  ing_identificacion: 0.99
+  ing_fecha_comprobante: 0.99
+  ing_valor: 0.95
+freq: yearly
 url: https://www.datos.gov.co/d/jgra-rz2t
-notes: ''
+notes: 'Colombia: Cuentas Claras 2019 — campaign-finance income transactions
+  for the 2019 local elections (CNE). 188k rows, fixed historical dataset.
+  ing_fecha_comprobante (voucher date) is the watermark; some rows carry
+  bogus dates (e.g. year 9201) which land as outlier partitions. Strong
+  signal: links candidates to donors via NIT/identification.'

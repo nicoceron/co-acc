@@ -39,6 +39,18 @@ def spec_is_ingest_ready(catalog: dict, dataset_id: str) -> bool:
     return bool(spec and spec.is_ingest_ready())
 
 
+_DEFERRED_BACKLOG = {
+    # Not Socrata; lives at mapainversiones.dnp.gov.co. Will land under
+    # ingest/custom/ in Wave 4.B as a NotImplementedError shell, or be
+    # purged from the legacy CSV in Wave 6.
+    "mapa_inversiones_projects",
+    # Socrata mzgh-shtp but has no per-row timestamp column — cannot be
+    # made ingest-ready under the current generic-Socrata model. Pending a
+    # full-refresh-only mode for snapshot-style datasets.
+    "sgr_projects",
+}
+
+
 def test_source_registry_pipeline_ids_resolve_to_known_pipelines() -> None:
     registry_path = REPO_ROOT / "docs" / "source_registry_co_v1.csv"
     with registry_path.open(encoding="utf-8", newline="") as csv_file:
@@ -52,7 +64,9 @@ def test_source_registry_pipeline_ids_resolve_to_known_pipelines() -> None:
     available_pipelines = set(list_pipeline_names())
     migrated = _migrated_pipeline_ids()
 
-    missing = sorted(documented_pipeline_ids - available_pipelines - migrated)
+    missing = sorted(
+        documented_pipeline_ids - available_pipelines - migrated - _DEFERRED_BACKLOG
+    )
     assert missing == [], (
         f"source_registry rows with no pipeline and no YAML contract: {missing}"
     )

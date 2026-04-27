@@ -1,4 +1,0 @@
-TipoProyecto,SectorProyecto,EntidadResponsable,Ocad,Bpin,NombreProyecto,EstadoProyecto,ValorTotalProyecto,ValorSolicitadoProyecto,ValorEjecutadoProyecto,AvanceFisico,AvanceFinanciero,HorizonteProyecto,SubEstadoProyecto,Beneficiarios
-Territorio,Salud,"Villavicencio,Meta",, '2024500010001,Construccion Centro De Salud En Villavicencio,En Ejecucion,"1,250,000,000","1,100,000,000","150,000,000","12,5","10,0",2024-2026,Contratado,25000
-Territorio,Educacion,"Villavicencio,Meta",, '2024500010002,Dotacion Tecnologica Para Colegios Oficiales,Aprobado,"800,000,000","800,000,000","0","0","0",2025-2026,Viable,18000
-SGR,Transporte,"Medellin,Antioquia",Ocad Antioquia,'2023020003001,Mejoramiento Vial Rural En Medellin,En Ejecucion,"2,500,000,000","2,750,000,000","875,000,000","45","35",2023-2027,Contratado en ejecucion,4200
