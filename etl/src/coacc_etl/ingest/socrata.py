@@ -241,6 +241,7 @@ _FALLBACK_FORMATS = (
     "%d/%m/%Y %H:%M:%S",
     "%Y%m%d",           # YYYYMMDD compact (e.g. SGR period codes)
     "%Y%m",             # YYYYMM
+    "%Y",               # YYYY only (annual datasets like enrollment)
 )
 
 

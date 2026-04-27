@@ -48,6 +48,11 @@ _DEFERRED_BACKLOG = {
     # made ingest-ready under the current generic-Socrata model. Pending a
     # full-refresh-only mode for snapshot-style datasets.
     "sgr_projects",
+    # Socrata muyy-6yw9 directors of higher-ed institutions — low signal
+    # value (each row is just a contact entry for an existing university),
+    # not in catalog.signed.csv. Bespoke pipeline retired with no YAML
+    # contract; can be promoted to a YAML if a downstream signal needs it.
+    "higher_ed_directors",
 }
 
 

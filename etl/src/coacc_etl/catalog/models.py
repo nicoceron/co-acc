@@ -60,7 +60,11 @@ class DatasetSpec(BaseModel):
         return value
 
     def is_ingest_ready(self) -> bool:
-        """True when this spec has enough detail for the generic ingester."""
-        if self.tier != "core":
-            return False
+        """True when this spec has the bits the generic ingester requires.
+
+        Checks shape only — any tier may be ingest-ready. The CLI's
+        ``ingest-all`` is what filters to ``tier=core``; the per-dataset
+        ``ingest <id>`` accepts any ingest-ready spec, including
+        ``tier=context`` enrichment datasets the operator opts into.
+        """
         return bool(self.watermark_column and self.partition_column and self.columns_map)

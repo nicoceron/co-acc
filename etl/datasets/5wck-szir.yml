@@ -8,10 +8,46 @@ join_keys:
   - c_digo_del_municipio_ies
   - c_digo_del_departamento_programa
   - c_digo_del_municipio_programa
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+  entity:
+  - c_digo_de_la_instituci_n
+watermark_column: a_o
+partition_column: a_o
+columns_map:
+  year: a_o
+  institution_code: c_digo_de_la_instituci_n
+  ies_department_code: c_digo_del_departamento_ies
+  program_department_code: c_digo_del_departamento_programa
+  ies_municipality_code: c_digo_del_municipio_ies
+  program_municipality_code: c_digo_del_municipio_programa
+  snies_program_code: c_digo_snies_delprograma
+  ies_domicile_department: departamento_de_domicilio_de_la_ies
+  program_offer_department: departamento_de_oferta_del_programa
+  area_id: id_area
+  character_id: id_caracter
+  gender_id: id_g_nero
+  methodology_id: id_metodologia
+  level_id: id_nivel
+  formation_level_id: id_nivel_formacion
+  core_id: id_nucleo
+  sector_id: id_sector
+  parent_ies: ies_padre
+  ies_name: instituci_n_de_educaci_n_superior_ies
+  enrollees_2015: matriculados_2015
+  program_offer_municipality: municipio_de_oferta_del_programa
+  ies_domicile_municipality: municipio_dedomicilio_de_la_ies
+  basic_knowledge_core: n_cleo_b_sico_del_conocimiento_nbc
+  primary_or_seccional: principal_oseccional
+  academic_program: programa_acad_mico
+  semester: semestre
+required_coverage:
+  a_o: 0.99
+  c_digo_de_la_instituci_n: 0.99
+  c_digo_snies_delprograma: 0.99
+  semestre: 0.99
+freq: yearly
 url: https://www.datos.gov.co/d/5wck-szir
-notes: ''
+notes: 'Colombia: MEN Matricula Estadística — higher-ed enrollment counts by
+  institution / program / semester. 391k rows, last year 2021. tier=context
+  (enrichment, not direct corruption signal). a_o (year) is YYYY-only — the
+  ingester fallback parser returns datetime(year, 1, 1) so all rows for a
+  year land in year=YYYY/month=01.'

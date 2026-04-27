@@ -5,13 +5,41 @@ tier: core
 join_keys:
   divipola:
   - cod_departamento
-  - cod_municipio
   entity:
   - c_digo_instituci_n
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+  nit:
+  - n_mero_identificaci_n
+watermark_column: fecha_actualizacion
+partition_column: fecha_actualizacion
+columns_map:
+  high_quality_accredited: acreditada_alta_calidad
+  institution_code: c_digo_instituci_n
+  academic_character: car_cter_acad_mico
+  department_code: cod_departamento
+  domicile_department: departamento_domicilio
+  domicile_address: direcci_n_domicilio
+  status: estado
+  accreditation_date: fecha_acreditaci_n
+  update_date: fecha_actualizacion
+  creation_norm_date: fecha_norma_de_creaci_n
+  domicile_municipality: municipio_domicilio
+  document_id: n_mero_identificaci_n
+  legal_nature: naturaleza_jur_dica
+  institution_name: nombre_instituci_n
+  creation_norm: norma_de_creaci_n
+  website: p_gina_web
+  primary_or_seccional: principal_seccional
+  accreditation_resolution: resoluci_n_de_la_acreditaci
+  sector: sector
+  domicile_phone: tel_fono_domicilio
+  accreditation_validity: vigencia_de_la_acreditaci
+required_coverage:
+  c_digo_instituci_n: 0.99
+  n_mero_identificaci_n: 0.99
+  nombre_instituci_n: 0.99
+  fecha_actualizacion: 0.99
+freq: yearly
 url: https://www.datos.gov.co/d/n5yy-8nav
-notes: ''
+notes: 'Colombia: MEN Instituciones de Educación Superior — registry of all
+  Colombian higher-ed institutions (361 rows as of 2026-04-25, last update
+  2022). fecha_actualizacion is fully populated date-only ISO format.'
