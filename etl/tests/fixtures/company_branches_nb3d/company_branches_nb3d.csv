@@ -1,3 +1,0 @@
-codigo_camara,camara_comercio,matricula,ultimo_ano_renovado,fecha_renovacion,razon_social,codigo_estado_matricula,estado_matricula,cod_ciiu_act_econ_pri,fecha_cancelacion,codigo_clase_identificacion,clase_identificacion,numero_identificacion,nit_propietario,digito_verificacion,codigo_camara_propietario,camara_comercio_propitario,matr_cula_propietario,codigo_tipo_propietario,tipo_propietario,categoria_matricula,fecha_matricula
-11,100,200,2024,20240310,TIENDA CENTRAL,01,ACTIVA,4711,,01,CEDULA DE CIUDADANIA,52123456,00000052123456,0,11,BOGOTA,1000,1,PROPIETARIO ÚNICO,ESTABLECIMIENTO DE COMERCIO,20200115
-11,101,201,2024,20240310,SUCURSAL INDUSTRIAL,01,ACTIVA,4659,,03,NIT,900123456,000000900123456,7,11,BOGOTA,1001,3,SOCIEDAD COMERCIAL,ESTABLECIMIENTO DE COMERCIO,20210120

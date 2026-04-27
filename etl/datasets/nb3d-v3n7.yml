@@ -6,10 +6,32 @@ join_keys:
   nit:
   - numero_identificacion
   - nit_propietario
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_matricula
+partition_column: fecha_matricula
+columns_map:
+  camara_comercio: camara_comercio
+  camara_comercio_propitario: camara_comercio_propitario
+  categoria_matricula: categoria_matricula
+  clase_identificacion: clase_identificacion
+  cod_ciiu_act_econ_pri: cod_ciiu_act_econ_pri
+  codigo_camara: codigo_camara
+  codigo_camara_propietario: codigo_camara_propietario
+  codigo_clase_identificacion: codigo_clase_identificacion
+  codigo_estado_matricula: codigo_estado_matricula
+  codigo_tipo_propietario: codigo_tipo_propietario
+  estado_matricula: estado_matricula
+  fecha_cancelacion: fecha_cancelacion
+  fecha_matricula: fecha_matricula
+  matr_cula_propietario: matr_cula_propietario
+  matricula: matricula
+  numero_identificacion: numero_identificacion
+  razon_social: razon_social
+  tipo_propietario: tipo_propietario
+  ultimo_ano_renovado: ultimo_ano_renovado
+required_coverage:
+  fecha_matricula: 0.95
+freq: monthly
 url: https://www.datos.gov.co/d/nb3d-v3n7
-notes: ''
+notes: 'Colombia: RUES Establecimientos / Sucursales — 6.3M registered branches and
+  establishments. fecha_matricula (YYYYMMDD) is the registration date. Operator runs
+  initial full ingest off-hours.'

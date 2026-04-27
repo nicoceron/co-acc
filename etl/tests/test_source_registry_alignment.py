@@ -68,6 +68,14 @@ _DEFERRED_BACKLOG = {
     # on probe; YAMLs left as placeholders pending a re-probe.
     "secop_offers",                   # wi7w-2nvm
     "secop_payment_plans",            # uymx-8p3j
+    # DNP project tables: snapshot-style relational tables on a project
+    # without their own row-level timestamp. Each row links a project (BPIN)
+    # to a beneficiary / location / executor; updates re-emit the snapshot.
+    # Pending the full_refresh_only mode.
+    "dnp_project_beneficiary_characterization",  # tmmn-mpqc
+    "dnp_project_beneficiary_locations",         # iuc2-3r6h
+    "dnp_project_executors",                     # epzv-8ck4
+    "dnp_project_locations",                     # xikz-44ja
 }
 
 

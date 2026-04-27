@@ -5,10 +5,34 @@ tier: context
 join_keys:
   divipola:
   - divipola
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_radica_texto
+partition_column: fecha_radica_texto
+columns_map:
+  categoria_ruralidad_2024: categoria_ruralidad_2024
+  cod_natujur: cod_natujur
+  count_a: count_a
+  count_de: count_de
+  departamento: departamento
+  dinamica_2024: dinamica_2024
+  divipola: divipola
+  documento_justificativo: documento_justificativo
+  fecha_apertura_texto: fecha_apertura_texto
+  fecha_radica_texto: fecha_radica_texto
+  matricula: matricula
+  municipio: municipio
+  nombre_natujur: nombre_natujur
+  num_anotacion: num_anotacion
+  orip: orip
+  pk: pk
+  predios_nuevos: predios_nuevos
+  tiene_mas_de_un_valor: tiene_mas_de_un_valor
+  tiene_valor: tiene_valor
+  tipo_predio_zona: tipo_predio_zona
+  year_radica: year_radica
+required_coverage:
+  fecha_radica_texto: 0.95
+freq: monthly
 url: https://www.datos.gov.co/d/7y2j-43cv
-notes: ''
+notes: 'Colombia: IGAC Property Transactions — 30.9M property registry events. fecha_radica_texto
+  is the filing date (100% coverage). Largest dataset in the catalog after rpmr-utcd.
+  Operator runs initial full ingest off-hours.'
