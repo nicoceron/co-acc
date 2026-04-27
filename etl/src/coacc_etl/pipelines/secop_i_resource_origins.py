@@ -10,10 +10,24 @@ import pandas as pd
 from coacc_etl.base import Pipeline
 from coacc_etl.loader import Neo4jBatchLoader
 from coacc_etl.pipelines.colombia_procurement import merge_limited_unique
-from coacc_etl.pipelines.colombia_shared import clean_text, parse_amount, read_csv_normalized
-from coacc_etl.pipelines.secop_i_historical_processes import secop_i_historical_summary_id
+from coacc_etl.pipelines.colombia_shared import (
+    clean_text,
+    parse_amount,
+    read_csv_normalized,
+    stable_id,
+)
 from coacc_etl.streaming import iter_csv_chunks
 from coacc_etl.transforms import deduplicate_rows, strip_document
+
+
+def secop_i_historical_summary_id(row: dict[str, Any]) -> str:
+    return stable_id(
+        "co_secop_i_hist",
+        row.get("id_adjudicacion"),
+        row.get("numero_de_constancia"),
+        row.get("numero_de_contrato"),
+        row.get("uid"),
+    )
 
 if TYPE_CHECKING:
     from neo4j import Driver

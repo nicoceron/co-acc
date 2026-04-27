@@ -3,16 +3,50 @@ name: SECOP Integrado
 sector: contracts
 tier: core
 join_keys:
+  contract:
+  - numero_del_contrato
+  - numero_de_proceso
   entity:
   - codigo_entidad_en_secop
   - nit_de_la_entidad
   nit:
   - nit_de_la_entidad
   - documento_proveedor
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_de_firma_del_contrato
+partition_column: fecha_de_firma_del_contrato
+columns_map:
+  entity_secop_code: codigo_entidad_en_secop
+  entity_department: departamento_entidad
+  supplier_document: documento_proveedor
+  process_status: estado_del_proceso
+  contract_signing_date: fecha_de_firma_del_contrato
+  contract_end_date: fecha_fin_ejecuci_n
+  contract_start_date: fecha_inicio_ejecuci_n
+  procurement_modality: modalidad_de_contrataci_n
+  entity_municipality: municipio_entidad
+  entity_nit: nit_de_la_entidad
+  entity_level: nivel_entidad
+  contractor_business_name: nom_raz_social_contratista
+  entity_name: nombre_de_la_entidad
+  process_number: numero_de_proceso
+  contract_number: numero_del_contrato
+  contract_object: objeto_a_contratar
+  process_object: objeto_del_proceso
+  origin: origen
+  contract_type: tipo_de_contrato
+  supplier_doc_type: tipo_documento_proveedor
+  contract_url: url_contrato
+  contract_value: valor_contrato
+required_coverage:
+  numero_del_contrato: 0.99
+  nit_de_la_entidad: 0.99
+  documento_proveedor: 0.95
+  fecha_de_firma_del_contrato: 0.85
+freq: weekly
 url: https://www.datos.gov.co/d/rpmr-utcd
-notes: ''
+notes: 'Colombia: SECOP Integrado — unified view across SECOP I + SECOP II
+  + TVEC. 21.7M rows as of 2026-04-25, the largest dataset in the catalog.
+  fecha_de_firma_del_contrato covers ~92% (some legacy migration rows
+  lack it; coverage threshold relaxed to 0.85). max date is 2099-12-30
+  (bogus future date; will land in an outlier partition). Operator runs
+  initial full ingest off-hours (~22h expected); incremental thereafter.'

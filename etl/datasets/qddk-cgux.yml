@@ -18,10 +18,96 @@ join_keys:
   - identific_representante_legal
   process:
   - id_adjudicacion
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_de_cargue_en_el_secop
+partition_column: fecha_de_cargue_en_el_secop
+columns_map:
+  secop_load_year: anno_cargue_secop
+  contract_signing_year: anno_firma_contrato
+  entity_code: c_digo_de_la_entidad
+  final_rating: calificacion_definitiva
+  other_modality_cause: causal_de_otras_formas_de
+  bpin_code: codigo_bpin
+  budget_commitment: compromiso_presupuestal
+  contract_amount: cuantia_contrato
+  process_amount: cuantia_proceso
+  meets_t302_ruling: cumple_sentencia_t302
+  meets_decree248: cumpledecreto248
+  entity_department: departamento_entidad
+  spending_destination: destino_gasto
+  contract_object_detail: detalle_del_objeto_a_contratar
+  contractor_dept_municipality: dpto_y_muni_contratista
+  is_pyme: es_mipyme
+  is_postconflict: es_postconflicto
+  process_status: estado_del_proceso
+  secop_load_date: fecha_de_cargue_en_el_secop
+  contract_signing_date: fecha_de_firma_del_contrato
+  contract_end_date: fecha_fin_ejec_contrato
+  contract_start_date: fecha_ini_ejec_contrato
+  award_id: id_adjudicacion
+  class_id: id_clase
+  family_id: id_familia
+  group_id: id_grupo
+  modality_id: id_modalidad
+  contract_object_id: id_objeto_a_contratar
+  contracting_regime_id: id_regimen_de_contratacion
+  executor_subunit_id: id_sub_unidad_ejecutora
+  legal_rep_id: identific_representante_legal
+  contractor_id: identificacion_del_contratista
+  includes_decree248_goods: incluyebienesdecreto248
+  additions_marker: marcacion_adiciones
+  procurement_modality: modalidad_de_contratacion
+  currency: moneda
+  delivery_municipality: municipio_de_entrega
+  obtaining_municipality: municipio_de_obtencion
+  entity_municipality: municipio_entidad
+  execution_municipalities: municipios_ejecucion
+  entity_nit: nit_de_la_entidad
+  entity_level: nivel_entidad
+  contractor_business_name: nom_razon_social_contratista
+  class_name: nombre_clase
+  legal_rep_name: nombre_del_represen_legal
+  entity_name: nombre_entidad
+  family_name: nombre_familia
+  group_name: nombre_grupo
+  contracting_regime_name: nombre_regimen_de_contratacion
+  budget_line_name: nombre_rubro
+  executor_subunit_name: nombre_sub_unidad_ejecutora
+  certificate_number: numero_de_constancia
+  contract_number: numero_de_contrato
+  process_number: numero_de_proceso
+  contract_object: objeto_a_contratar
+  contract_object_long: objeto_del_contrato_a_la
+  entity_order: orden_entidad
+  peace_pillar: pilar_acuerdo_paz
+  contract_term: plazo_de_ejec_del_contrato
+  type_pliegos: pliegos_tipo
+  budget_position: posicion_rubro
+  selected_proponents: proponentes_seleccionados
+  peace_point: punto_acuerdo_paz
+  contract_execution_range: rango_de_ejec_del_contrato
+  process_url_secop_i: ruta_proceso_en_secop_i
+  pliegos_sector: sector_pliegos_tipo
+  legal_rep_sex: sexo_replegal
+  pyme_size: tama_o_mipyme
+  additions_days: tiempo_adiciones_en_dias
+  additions_months: tiempo_adiciones_en_meses
+  contract_type: tipo_de_contrato
+  legal_rep_doc_type: tipo_doc_representante_legal
+  contractor_id_type: tipo_identifi_del_contratista
+  uid: uid
+  last_update: ultima_actualizacion
+  contract_value_with_additions: valor_contrato_con_adiciones
+  budget_line_value: valor_rubro
+  total_additions_value: valor_total_de_adiciones
+required_coverage:
+  numero_de_contrato: 0.99
+  nit_de_la_entidad: 0.99
+  fecha_de_cargue_en_el_secop: 0.99
+  cuantia_contrato: 0.95
+freq: yearly
 url: https://www.datos.gov.co/d/qddk-cgux
-notes: ''
+notes: 'Colombia: SECOP I — Procesos de Compra Pública Histórico. 6.1M rows
+  of historical pre-SECOP-II procurement processes (last upload 2017).
+  fecha_de_cargue_en_el_secop is the SECOP upload date and is fully
+  populated. Operator runs initial full ingest off-hours (~6h expected
+  at 1k-row pages). Static dataset, incremental thereafter.'
