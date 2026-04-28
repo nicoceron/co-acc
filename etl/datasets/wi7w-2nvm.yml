@@ -12,10 +12,29 @@ join_keys:
   - nit_del_proveedor
   process:
   - id_del_proceso_de_compra
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_de_registro
+partition_column: fecha_de_registro
+columns_map:
+  c_digo_entidad: c_digo_entidad
+  c_digo_proveedor: c_digo_proveedor
+  descripcion_del_procedimiento: descripcion_del_procedimiento
+  entidad_compradora: entidad_compradora
+  fecha_de_registro: fecha_de_registro
+  id_del_proceso_de_compra: id_del_proceso_de_compra
+  identificador_de_la_oferta: identificador_de_la_oferta
+  invitacion_directa: invitacion_directa
+  modalidad: modalidad
+  moneda: moneda
+  nit_del_proveedor: nit_del_proveedor
+  nit_entidad_compradora: nit_entidad_compradora
+  nombre_proveedor: nombre_proveedor
+  referencia_de_la_oferta: referencia_de_la_oferta
+  referencia_del_proceso: referencia_del_proceso
+  valor_de_la_oferta: valor_de_la_oferta
+required_coverage:
+  fecha_de_registro: 0.95
+freq: weekly
 url: https://www.datos.gov.co/d/wi7w-2nvm
-notes: ''
+notes: 'Colombia: SECOP Offers (41.9M rows — largest in catalog). Each row is one
+  supplier offer on a procurement process. fecha_de_registro fully populated, max
+  2026-04-21. Operator runs initial full ingest off-hours.'

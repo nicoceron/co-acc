@@ -8,8 +8,19 @@ join_keys:
   - referencia_contrato
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  anno: anno
+  codigo: codigo
+  id_contrato: id_contrato
+  identificador_compromiso: identificador_compromiso
+  identificador_item_compromiso: identificador_item_compromiso
+  identificador_unico: identificador_unico
+  nombre: nombre
+  referencia_contrato: referencia_contrato
+  valor_actual: valor_actual
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/cwhv-7fnp
-notes: ''
+notes: 'Colombia: SECOP Budget Items (5.9M rows). Snapshot — line items inside a commitment.
+  Operator runs full-refresh on cadence; each run lands under lake/raw/source=cwhv-7fnp/snapshot=<iso>/.'
+full_refresh_only: true

@@ -178,6 +178,53 @@ def test_coverage_report_standalone() -> None:
         assert_coverage("ds-id", frame, {"col_b": 0.5})
 
 
+def test_snapshot_mode_writes_to_snapshot_partition(
+    fake_client_factory,
+) -> None:
+    """full_refresh_only datasets land under snapshot=<iso>/, no watermark."""
+    spec = DatasetSpec(
+        id="snap-tst1",
+        name="Snapshot test",
+        tier="context",
+        columns_map={"contract_id": "id_contrato", "value": "valor"},
+        required_coverage={"id_contrato": 0.99},
+        full_refresh_only=True,
+        url="https://www.datos.gov.co/d/snap-tst1",
+    )
+    page = [
+        {"id_contrato": f"C{i}", "valor": str(i * 1000), ":id": str(i)}
+        for i in range(1, 6)
+    ]
+    client = fake_client_factory([page])
+
+    result = ingest(spec, client=client)
+
+    assert result.ingested
+    assert result.rows == 5
+    assert result.watermark_delta is None  # snapshot mode never advances
+    assert result.partitions == []  # no year/month partitions
+    # Snapshot path lives under snapshot=<iso>/, not year=/month=/.
+    assert len(result.parquet_paths) == 1
+    assert "snapshot=" in str(result.parquet_paths[0])
+    # Snapshot-mode call MUST NOT issue a $where clause.
+    assert client.requests[0]["where"] is None
+    assert client.requests[0]["order"] == ":id ASC"
+
+
+def test_snapshot_mode_requires_columns_map() -> None:
+    """A full_refresh_only spec without columns_map is not ingest-ready."""
+    spec = DatasetSpec(
+        id="snap-tst2",
+        name="Bad snapshot",
+        tier="context",
+        full_refresh_only=True,
+        url="https://www.datos.gov.co/d/snap-tst2",
+    )
+    assert not spec.is_ingest_ready()
+    with pytest.raises(IngestError, match="not ingest-ready"):
+        ingest(spec)
+
+
 def test_ingest_every_core_spec_in_catalog_is_either_placeholder_or_ready() -> None:
     """Wave 3 gate: either the YAML is a placeholder, or it is ingest-ready.
 

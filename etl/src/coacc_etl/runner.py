@@ -62,11 +62,15 @@ def ingest_cmd(dataset_id: str, full_refresh: bool) -> None:
     if not result.ingested:
         click.echo(f"{dataset_id}: {result.skipped_reason or 'no-op'}")
         return
-    click.echo(
-        f"{dataset_id}: wrote {result.rows:,} rows across "
-        f"{len(result.partitions)} partition(s); watermark -> "
-        f"{result.watermark_delta.last_seen_ts.isoformat() if result.watermark_delta else '-'}"
-    )
+    if spec.full_refresh_only:
+        snapshot = result.parquet_paths[0].parent.name if result.parquet_paths else "?"
+        click.echo(f"{dataset_id}: wrote {result.rows:,} rows to {snapshot}")
+    else:
+        click.echo(
+            f"{dataset_id}: wrote {result.rows:,} rows across "
+            f"{len(result.partitions)} partition(s); watermark -> "
+            f"{result.watermark_delta.last_seen_ts.isoformat() if result.watermark_delta else '-'}"
+        )
 
 
 @cli.command(name="ingest-all")

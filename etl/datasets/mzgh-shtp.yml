@@ -9,8 +9,25 @@ join_keys:
   - codejecutor
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  codejecutor: codejecutor
+  codigobpin: codigobpin
+  departamento: departamento
+  ejecucionfinanciera: ejecucionfinanciera
+  ejecucionfisica: ejecucionfisica
+  entidadejecutora: entidadejecutora
+  estado: estado
+  nombre: nombre
+  nomocad: nomocad
+  proyecto_covid: proyecto_covid
+  proyecto_grupo_etnico: proyecto_grupo_etnico
+  proyecto_paz: proyecto_paz
+  sector: sector
+  valortotal: valortotal
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/mzgh-shtp
-notes: ''
+notes: 'Colombia: DNP SGR Projects (35k rows). Snapshot — current state of every SGR
+  (royalties) project. No row-level timestamp. Operator runs full-refresh on cadence;
+  each run lands under lake/raw/source=mzgh-shtp/snapshot=<iso>/.'
+full_refresh_only: true

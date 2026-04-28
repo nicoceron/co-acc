@@ -41,6 +41,12 @@ class DatasetSpec(BaseModel):
     freq: str | None = None
     url: str
     notes: str = ""
+    # Snapshot mode for sources without a row-level timestamp. The ingester
+    # pulls every row, writes to ``lake/raw/source=<id>/snapshot=<iso>/``,
+    # and never advances a watermark. Use for child/relationship tables
+    # republished wholesale by the upstream system (DNP project links,
+    # SECOP extension tables, etc.).
+    full_refresh_only: bool = False
 
     @field_validator("id")
     @classmethod
@@ -66,5 +72,19 @@ class DatasetSpec(BaseModel):
         ``ingest-all`` is what filters to ``tier=core``; the per-dataset
         ``ingest <id>`` accepts any ingest-ready spec, including
         ``tier=context`` enrichment datasets the operator opts into.
+
+        Two valid shapes:
+
+        - **Incremental** (the default): ``watermark_column`` +
+          ``partition_column`` + ``columns_map`` all set. The ingester
+          uses ``$where`` against the watermark for incremental pulls.
+        - **Snapshot** (``full_refresh_only: true``): ``columns_map`` set;
+          watermark/partition columns are not required. The ingester
+          fetches every row and writes to a fresh ``snapshot=<iso>/``
+          partition. No watermark is advanced.
         """
-        return bool(self.watermark_column and self.partition_column and self.columns_map)
+        if not self.columns_map:
+            return False
+        if self.full_refresh_only:
+            return True
+        return bool(self.watermark_column and self.partition_column)

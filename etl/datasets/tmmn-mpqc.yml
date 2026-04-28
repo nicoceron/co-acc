@@ -7,8 +7,18 @@ join_keys:
   - bpin
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  bpin: bpin
+  cantidad: cantidad
+  caracteristicademografica: caracteristicademografica
+  entidadresponsable: entidadresponsable
+  nombreproyecto: nombreproyecto
+  sector: sector
+  totalbeneficiario: totalbeneficiario
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/tmmn-mpqc
-notes: ''
+notes: 'Colombia: DNP Project Beneficiary Characterization (1.7M rows). Snapshot —
+  links projects to beneficiary demographic characteristics. Operator runs full-refresh
+  on cadence; each run lands under lake/raw/source=tmmn-mpqc/snapshot=<iso>/.'
+full_refresh_only: true

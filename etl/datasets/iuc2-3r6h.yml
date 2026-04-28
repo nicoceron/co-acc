@@ -7,8 +7,18 @@ join_keys:
   - bpin
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  bpin: bpin
+  departamento: departamento
+  entidadresponsable: entidadresponsable
+  municipio: municipio
+  nombreproyecto: nombreproyecto
+  sector: sector
+  totalbeneficiario: totalbeneficiario
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/iuc2-3r6h
-notes: ''
+notes: 'Colombia: DNP Project Beneficiary Locations (648k rows). Snapshot — links
+  projects to beneficiary divipola codes. Operator runs full-refresh on cadence; each
+  run lands under lake/raw/source=iuc2-3r6h/snapshot=<iso>/.'
+full_refresh_only: true

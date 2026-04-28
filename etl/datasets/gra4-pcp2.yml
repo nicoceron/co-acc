@@ -14,8 +14,24 @@ join_keys:
   - documento_proveedor
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  codigo_entidad: codigo_entidad
+  codigo_proveedor: codigo_proveedor
+  documento_proveedor: documento_proveedor
+  id_contrato: id_contrato
+  localizaci_n: localizaci_n
+  nit_entidad: nit_entidad
+  nombre_entidad: nombre_entidad
+  proceso_de_compra: proceso_de_compra
+  proveedor_adjudicado: proveedor_adjudicado
+  referencia_del_contrato: referencia_del_contrato
+  tipodocproveedor: tipodocproveedor
+  ubicacion: ubicacion
+  urlproceso: urlproceso
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/gra4-pcp2
-notes: ''
+notes: 'Colombia: SECOP Execution Locations (6.0M rows). Snapshot — one row per municipio
+  of contract execution. Operator runs full-refresh on cadence; each run lands under
+  lake/raw/source=gra4-pcp2/snapshot=<iso>/.'
+full_refresh_only: true

@@ -7,8 +7,33 @@ join_keys:
   - numeroidentificacion
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  claseprestador: claseprestador
+  codigohabilitacionsede: codigohabilitacionsede
+  codigoprestador: codigoprestador
+  departamentodededesc: departamentodededesc
+  departamentoprestadordesc: departamentoprestadordesc
+  direcci_nsede: direcci_nsede
+  direccionprestador: direccionprestador
+  email_prestador: email_prestador
+  email_sede: email_sede
+  ese: ese
+  fecha_corte_reps: fecha_corte_reps
+  municipio_prestador: municipio_prestador
+  municipioprestadordesc: municipioprestadordesc
+  municipiosede: municipiosede
+  municipiosededesc: municipiosededesc
+  naturalezajuridica: naturalezajuridica
+  nombreprestador: nombreprestador
+  nombresede: nombresede
+  numeroidentificacion: numeroidentificacion
+  t_lefonosede: t_lefonosede
+  telefonoprestador: telefonoprestador
+  tipoid: tipoid
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/c36g-9fc2
-notes: ''
+notes: 'Colombia: REPS Registry of Health Providers (76.8k rows). Snapshot — fecha_corte_reps
+  is a dataset-wide cutoff string, not a per-row timestamp. Operator runs full-refresh
+  on cadence; each run lands under lake/raw/source=c36g-9fc2/snapshot=<iso>/.'
+full_refresh_only: true

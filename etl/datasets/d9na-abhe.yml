@@ -9,8 +9,17 @@ join_keys:
   - id_proceso
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  anno_bpin: anno_bpin
+  codigo_bpin: codigo_bpin
+  id_contracto: id_contracto
+  id_portafolio: id_portafolio
+  id_proceso: id_proceso
+  validacion_bpin: validacion_bpin
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/d9na-abhe
-notes: ''
+notes: 'Colombia: SECOP Process BPIN (2.4M rows). Snapshot — links SECOP processes
+  to DNP BPIN project codes. Operator runs full-refresh on cadence; each run lands
+  under lake/raw/source=d9na-abhe/snapshot=<iso>/.'
+full_refresh_only: true

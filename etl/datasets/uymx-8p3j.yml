@@ -12,10 +12,39 @@ join_keys:
   nit:
   - nit_entidad
   - documento_proveedor
-watermark_column: null
-partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+watermark_column: fecha_inicio_contrato
+partition_column: fecha_inicio_contrato
+columns_map:
+  aprobado_por: aprobado_por
+  codigo_entidad: codigo_entidad
+  compromiso_presupuestal: compromiso_presupuestal
+  cufe: cufe
+  documento_proveedor: documento_proveedor
+  documento_supervisor: documento_supervisor
+  estado: estado
+  fecha_inicio_contrato: fecha_inicio_contrato
+  id_de_pago: id_de_pago
+  id_del_contrato: id_del_contrato
+  n_mero_de_radicaci_n: n_mero_de_radicaci_n
+  nit_entidad: nit_entidad
+  nombre_entidad: nombre_entidad
+  nombre_proveedor: nombre_proveedor
+  nombre_supervisor: nombre_supervisor
+  notas: notas
+  numero_de_factura: numero_de_factura
+  obligado_a_facturar_electr: obligado_a_facturar_electr
+  plan_de_recepci_n: plan_de_recepci_n
+  referencia_contrato: referencia_contrato
+  tipo_documento_supervisor: tipo_documento_supervisor
+  valor_a_pagar: valor_a_pagar
+  valor_neto: valor_neto
+  valor_neto_de_la_factura: valor_neto_de_la_factura
+  valor_total: valor_total
+  valor_total_de_la_factura: valor_total_de_la_factura
+required_coverage:
+  fecha_inicio_contrato: 0.95
+freq: weekly
 url: https://www.datos.gov.co/d/uymx-8p3j
-notes: ''
+notes: 'Colombia: SECOP Payment Plans (17.5M rows). One row per payment plan line
+  item per contract. fecha_inicio_contrato 99.2% covered. Operator runs initial full
+  ingest off-hours.'

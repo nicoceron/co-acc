@@ -8,8 +8,23 @@ join_keys:
   - referencia_contrato
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  balance_compromiso: balance_compromiso
+  balance_vigencia_futura: balance_vigencia_futura
+  c_digo_item: c_digo_item
+  estado_integraci_n: estado_integraci_n
+  estado_integraci_n_item: estado_integraci_n_item
+  id_contrato: id_contrato
+  identificador_item: identificador_item
+  identificador_nico: identificador_nico
+  referencia_contrato: referencia_contrato
+  tipo_de_compromiso: tipo_de_compromiso
+  valor_a_liberar: valor_a_liberar
+  valor_item: valor_item
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/skc9-met7
-notes: ''
+notes: 'Colombia: SECOP Budget Commitments (5.9M rows). Snapshot — one row per budget
+  commitment line per contract. Operator runs full-refresh on cadence; each run lands
+  under lake/raw/source=skc9-met7/snapshot=<iso>/.'
+full_refresh_only: true

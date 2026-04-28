@@ -31,7 +31,7 @@ from coacc_etl.ingest.coverage import (
     write_coverage_report,
 )
 from coacc_etl.lakehouse import watermark as wm
-from coacc_etl.lakehouse.writer import append_parquet
+from coacc_etl.lakehouse.writer import append_parquet, write_snapshot_parquet
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -328,16 +328,15 @@ def ingest(
     """
     if not spec.is_ingest_ready():
         msg = (
-            f"{spec.id} is not ingest-ready: needs tier=core, watermark_column,"
-            f" partition_column, and columns_map (got tier={spec.tier!r},"
-            f" watermark_column={spec.watermark_column!r},"
-            f" partition_column={spec.partition_column!r},"
-            f" columns_map_keys={list(spec.columns_map)!r})"
+            f"{spec.id} is not ingest-ready: needs columns_map plus either "
+            f"(watermark_column + partition_column) for incremental mode "
+            f"or (full_refresh_only=True) for snapshot mode (got "
+            f"watermark_column={spec.watermark_column!r}, "
+            f"partition_column={spec.partition_column!r}, "
+            f"full_refresh_only={spec.full_refresh_only}, "
+            f"columns_map_keys={list(spec.columns_map)!r})"
         )
         raise IngestError(msg)
-    # is_ingest_ready guarantees these are non-None, narrow for the type checker.
-    assert spec.watermark_column is not None
-    assert spec.partition_column is not None
 
     started_at = datetime.now(tz=UTC)
     batch_id = uuid.uuid4().hex
@@ -347,6 +346,13 @@ def ingest(
         owned_client = True
 
     try:
+        if spec.full_refresh_only:
+            return _ingest_snapshot(spec, client, started_at, batch_id)
+
+        # is_ingest_ready guarantees these are non-None for incremental mode.
+        assert spec.watermark_column is not None
+        assert spec.partition_column is not None
+
         current = wm.get(spec.id) if not full_refresh else None
         where = (
             f"{spec.watermark_column} > '{_iso_for_where(current.last_seen_ts)}'"
@@ -458,3 +464,68 @@ def ingest(
     finally:
         if owned_client:
             client.close()
+
+
+def _ingest_snapshot(
+    spec: DatasetSpec,
+    client: SocrataClient,
+    started_at: datetime,
+    batch_id: str,
+) -> IngestResult:
+    """Snapshot-mode ingest for ``full_refresh_only`` datasets.
+
+    Pulls every row in ``:id`` order, enforces coverage, writes to
+    ``lake/raw/source=<id>/snapshot=YYYYMMDDTHHMMSSZ/``. No watermark is
+    advanced — these datasets have no row-level timestamp.
+    """
+    snapshot_id = started_at.strftime("%Y%m%dT%H%M%SZ")
+
+    collected: list[dict[str, object]] = []
+    for page in client.fetch(spec.id, where=None, order=":id ASC"):
+        collected.extend(page)
+
+    if not collected:
+        LOG.info("ingest %s: snapshot returned 0 rows", spec.id)
+        return IngestResult(
+            dataset_id=spec.id,
+            rows=0,
+            partitions=[],
+            parquet_paths=[],
+            watermark_delta=None,
+            coverage=None,
+            batch_id=batch_id,
+            started_at=started_at,
+            finished_at=datetime.now(tz=UTC),
+            skipped_reason="empty_snapshot",
+        )
+
+    frame = _rows_to_frame(collected)
+    coverage = assert_coverage(spec.id, frame, spec.required_coverage)
+    write_coverage_report(coverage)
+
+    if ":id" in frame.columns:
+        frame = frame.sort_values(":id", kind="mergesort").reset_index(drop=True)
+    elif "id" in frame.columns:
+        frame = frame.sort_values("id", kind="mergesort").reset_index(drop=True)
+
+    renamed = _apply_columns_map(frame, spec.columns_map)
+    path = write_snapshot_parquet(renamed, source=spec.id, snapshot=snapshot_id)
+
+    finished_at = datetime.now(tz=UTC)
+    LOG.info(
+        "ingest %s: snapshot %s wrote %s rows",
+        spec.id,
+        snapshot_id,
+        len(frame),
+    )
+    return IngestResult(
+        dataset_id=spec.id,
+        rows=len(frame),
+        partitions=[],
+        parquet_paths=[path],
+        watermark_delta=None,
+        coverage=coverage,
+        batch_id=batch_id,
+        started_at=started_at,
+        finished_at=finished_at,
+    )

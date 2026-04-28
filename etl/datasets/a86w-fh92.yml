@@ -18,8 +18,50 @@ join_keys:
   - id_proceso
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  a_o_bpin: a_o_bpin
+  acuerdo_marco: acuerdo_marco
+  bpin_codigo: bpin_codigo
+  bpin_validacion: bpin_validacion
+  c_digo: c_digo
+  c_digo_cdp: c_digo_cdp
+  ciudad: ciudad
+  codigo_unidad_ejecutora: codigo_unidad_ejecutora
+  departamento: departamento
+  destino_del_gasto: destino_del_gasto
+  entidad: entidad
+  entidad_bpin: entidad_bpin
+  estado_del_contrato: estado_del_contrato
+  estado_siif: estado_siif
+  fuente_de_los_recursos: fuente_de_los_recursos
+  id_contrato: id_contrato
+  id_portafolio: id_portafolio
+  id_proceso: id_proceso
+  id_siif: id_siif
+  nit: nit
+  nit_proveedor: nit_proveedor
+  pci_unidad_subejecutora: pci_unidad_subejecutora
+  pilar_acuerdo_paz: pilar_acuerdo_paz
+  presupuesto_general_estado: presupuesto_general_estado
+  proveedor: proveedor
+  recursos_de_credito: recursos_de_credito
+  recursos_propios: recursos_propios
+  recursos_propios_agri: recursos_propios_agri
+  referencia_contrato: referencia_contrato
+  referencia_del_proceso: referencia_del_proceso
+  registrado_en_siif: registrado_en_siif
+  saldo_cdp: saldo_cdp
+  saldo_total_a_comprometer: saldo_total_a_comprometer
+  saldo_vigencias_futuras: saldo_vigencias_futuras
+  sistema_general_de_regal_as: sistema_general_de_regal_as
+  sistema_nacional_participaciones: sistema_nacional_participaciones
+  tipo_vigencias_futuras: tipo_vigencias_futuras
+  ultima_consulta_siif: ultima_consulta_siif
+  valor_utilizado: valor_utilizado
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/a86w-fh92
-notes: ''
+notes: 'Colombia: SECOP CDP Requests (9.5M rows). Snapshot — Certificados de Disponibilidad
+  Presupuestal per contract. Operator runs full-refresh on cadence; each run lands
+  under lake/raw/source=a86w-fh92/snapshot=<iso>/.'
+full_refresh_only: true

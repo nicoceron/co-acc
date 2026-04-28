@@ -11,8 +11,22 @@ join_keys:
   - codigoentidadresponsable
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  bpin: bpin
+  codigodepartamento: codigodepartamento
+  codigoentidadresponsable: codigoentidadresponsable
+  codigomunicipio: codigomunicipio
+  departamento: departamento
+  entidadresponsable: entidadresponsable
+  idregion: idregion
+  municipio: municipio
+  nombreproyecto: nombreproyecto
+  region: region
+  sector: sector
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/xikz-44ja
-notes: ''
+notes: 'Colombia: DNP Project Locations (730k rows). Snapshot — links projects to
+  geographic divipola codes. Operator runs full-refresh on cadence; each run lands
+  under lake/raw/source=xikz-44ja/snapshot=<iso>/.'
+full_refresh_only: true

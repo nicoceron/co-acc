@@ -13,8 +13,22 @@ join_keys:
   - nit_entidad
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  ciudad: ciudad
+  ciudad_original: ciudad_original
+  codigo_entidad: codigo_entidad
+  departamento: departamento
+  departamento_original: departamento_original
+  direcci_n: direcci_n
+  direcci_n_original: direcci_n_original
+  id_contrato: id_contrato
+  nit_entidad: nit_entidad
+  nombre_entidad: nombre_entidad
+  referencia_contrato: referencia_contrato
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/wwhe-4sq8
-notes: ''
+notes: 'Colombia: SECOP Additional Contract Locations (5.7M rows). Snapshot child
+  table — one row per contract delivery location. Operator runs full-refresh on cadence;
+  each run lands under lake/raw/source=wwhe-4sq8/snapshot=<iso>/.'
+full_refresh_only: true

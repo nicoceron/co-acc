@@ -43,52 +43,24 @@ _DEFERRED_BACKLOG = {
     # ingest/custom/ in Wave 4.B as a NotImplementedError shell, or be
     # purged from the legacy CSV in Wave 6.
     "mapa_inversiones_projects",
-    # Socrata mzgh-shtp but has no per-row timestamp column — cannot be
-    # made ingest-ready under the current generic-Socrata model. Pending a
-    # full-refresh-only mode for snapshot-style datasets.
-    "sgr_projects",
     # Socrata muyy-6yw9 directors of higher-ed institutions — low signal
     # value (each row is just a contact entry for an existing university),
     # not in catalog.signed.csv. Bespoke pipeline retired with no YAML
     # contract; can be promoted to a YAML if a downstream signal needs it.
     "higher_ed_directors",
-    # SECOP extension/relationship tables: snapshots tied to contracts
-    # but without their own row-level timestamp. Need a full_refresh_only
-    # mode (planned) before the YAML can be made ingest-ready. YAMLs
-    # remain placeholders in catalog.signed.csv.
-    "secop_additional_locations",     # wwhe-4sq8
-    "secop_budget_commitments",       # skc9-met7
-    "secop_budget_items",             # cwhv-7fnp
-    "secop_cdp_requests",             # a86w-fh92
-    "secop_execution_locations",      # gra4-pcp2
-    "secop_i_resource_origins",       # 3xwx-53wt
-    "secop_process_bpin",             # d9na-abhe
-    # secop_offers and secop_payment_plans had Socrata IDs that timed out
-    # on probe; YAMLs left as placeholders pending a re-probe.
-    "secop_offers",                   # wi7w-2nvm
-    "secop_payment_plans",            # uymx-8p3j
-    # DNP project tables: snapshot-style relational tables on a project
-    # without their own row-level timestamp. Each row links a project (BPIN)
-    # to a beneficiary / location / executor; updates re-emit the snapshot.
-    # Pending the full_refresh_only mode.
-    "dnp_project_beneficiary_characterization",  # tmmn-mpqc
-    "dnp_project_beneficiary_locations",         # iuc2-3r6h
-    "dnp_project_executors",                     # epzv-8ck4
-    "dnp_project_locations",                     # xikz-44ja
     # Wave 4.B retired the bespoke Pipeline stack entirely. The following
-    # pipeline_ids are non-Socrata custom adapters (or Socrata datasets the
-    # ingester cannot handle yet) — the bespoke .py files are gone and they
-    # have no YAML contract. The legacy CSV row stays so the API service
-    # keeps reporting them as "known" sources; Wave 6 retires the CSV.
+    # pipeline_ids are non-Socrata custom adapters — the bespoke .py files
+    # are gone and they have no YAML contract. The legacy CSV row stays so
+    # the API service keeps reporting them as "known" sources; Wave 6
+    # retires the CSV.
     "dnp_project_contract_links",      # local://graph
-    "health_providers",                # c36g-9fc2 (no row-level timestamp)
     "official_case_bulletins",         # local://official_case_bulletins
     "paco_sanctions",                  # portal.paco.gov.co (custom)
     "pte_sector_commitments",          # pte-prueba.azurewebsites.net (custom)
     "pte_top_contracts",               # pte-prueba.azurewebsites.net (custom)
     "registraduria_death_status_checks",  # registraduria.gov.co (custom)
     "rues_chambers",                   # rues.org.co (custom)
-    "siri_antecedents",                # iaeu-rcn6 (DD/MM/YYYY string)
+    "siri_antecedents",                # iaeu-rcn6 (DD/MM/YYYY string-cmp)
     "supersoc_top_companies",          # supersociedades.gov.co (custom)
 }
 

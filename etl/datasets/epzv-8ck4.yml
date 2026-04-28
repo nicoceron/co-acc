@@ -9,8 +9,15 @@ join_keys:
   - codigoentidadejecutora
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  bpin: bpin
+  codigoentidadejecutora: codigoentidadejecutora
+  entidadejecutora: entidadejecutora
+  nombreproyecto: nombreproyecto
 required_coverage: {}
-freq: null
+freq: weekly
 url: https://www.datos.gov.co/d/epzv-8ck4
-notes: ''
+notes: 'Colombia: DNP Project Executors (314k rows). Snapshot — links projects to
+  executor entity codes. Operator runs full-refresh on cadence; each run lands under
+  lake/raw/source=epzv-8ck4/snapshot=<iso>/.'
+full_refresh_only: true
