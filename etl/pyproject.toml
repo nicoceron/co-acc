@@ -39,7 +39,7 @@ bigquery = [
 ]
 
 [project.scripts]
-coacc-etl = "coacc_etl.runner:cli"
+coacc-etl = "coacc_etl.cli:cli"
 coacc-source-qualification = "coacc_etl.source_qualification:main"
 
 [build-system]
