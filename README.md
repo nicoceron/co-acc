@@ -7,6 +7,8 @@
 
 ---
 
+<img width="2610" height="1962" alt="Screenshot 2026-04-30 at 1 56 56 PM" src="https://github.com/user-attachments/assets/7137ee4f-98c5-4298-b55c-b54c7fedd379" />
+
 ## 🚀 Overview
 
 `co/acc` (Colombia Acceleration) is a specialized graph-based platform re-engineered for the Colombian public data ecosystem. It transforms millions of disconnected records from official government portals ([datos.gov.co](https://www.datos.gov.co/)) into a unified "Knowledge Graph" where companies, people, contracts, and political office holders are linked by their official identifiers (NIT/Cédula).
