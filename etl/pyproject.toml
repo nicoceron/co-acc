@@ -40,7 +40,7 @@ bigquery = [
 
 [project.scripts]
 coacc-etl = "coacc_etl.cli:cli"
-coacc-source-qualification = "coacc_etl.source_qualification:main"
+coacc-source-qualification = "coacc_etl.qualification.cli:main"
 
 [build-system]
 requires = ["hatchling"]
