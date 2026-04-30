@@ -305,14 +305,14 @@ After all core Socrata-backed pipelines migrated:
 
 **Goal:** enact the target layout. Split the 2035-LOC qualification file.
 
-- [ ] **5.1** Split `etl/src/coacc_etl/source_qualification.py` into `etl/src/coacc_etl/qualification/` package (`inputs.py`, `socrata_probe.py`, `llm_review.py`, `promotion.py`, `report.py`). Keep public API stable via `qualification/__init__.py` re-exports.
-- [ ] **5.2** Rename `etl/src/coacc_etl/runner.py` → `etl/src/coacc_etl/cli.py`. Update entry points in `etl/pyproject.toml`.
-- [ ] **5.3** Create `coacc_etl.catalog` package (models, loader, signed) per target layout.
-- [ ] **5.4** Create `coacc_etl.ingest` package (socrata, coverage, watermark, custom/) per target layout.
-- [ ] **5.5** Move `Dockerfile`, `docker-compose.yml`, `docker-compose.prod.yml`, `docker-compose.prod.images.yml` → `infra/docker/`. Update CI + `Makefile` paths.
-- [ ] **5.6** Move `infra/Caddyfile` → `infra/caddy/Caddyfile`.
-- [ ] **5.7** Rename `config/signal_registry_co_v1.yml` → `config/signal_registry.yml`. Grep + update every reference.
-- [ ] **5.8** Update imports + tests + Makefile targets after every move. Each move = one commit.
+- [x] **5.1** Split `etl/src/coacc_etl/source_qualification.py` into `etl/src/coacc_etl/qualification/` package — six submodules (promotion 466 LOC, socrata_probe 277, llm_review 542, inputs 342, report 167, cli 341) plus `__init__.py` (105) re-exports. Legacy import path preserved as a 90-line back-compat shim so the existing 7 qualification tests pass unchanged.
+- [x] **5.2** `runner.py` → `cli.py`, entry point `coacc-etl = "coacc_etl.cli:cli"`. Trimmed Makefile from ~80 stale targets to ~12 working ones in the same commit (Wave 6.6 was overdue).
+- [x] **5.3** `coacc_etl.catalog` package — already done in Wave 2.
+- [x] **5.4** `coacc_etl.ingest` package — already done in Wave 3 + extended in Wave 4.C with snapshot mode.
+- [x] **5.5** Folder reorg: orphan root `Dockerfile` deleted (no consumers; per-workspace Dockerfiles handled CI + compose); `infra/docker-compose.prod.yml` + `…prod.images.yml` → `infra/docker/`. Dev `docker-compose.yml` stays at root by deliberate deviation — moving it would force every operator to `cd infra/docker` or use `-f`. Updated `infra/scripts/{deploy,backup-neo4j}.sh` paths.
+- [x] **5.6** `infra/Caddyfile` → `infra/caddy/Caddyfile`. Mount path in prod compose updated.
+- [x] **5.7** `config/signal_registry_co_v1.yml` → `config/signal_registry.yml`. Single internal consumer (`api/src/coacc/services/signal_registry.py`) repointed; 196 api unit tests + 73 etl tests green.
+- [x] **5.8** Imports / tests / Makefile updated per move; every step kept the suite green.
 
 **Sanity check 5:**
 - Every move preserves behavior: `pytest` green, `docker compose build` works, CI green.
