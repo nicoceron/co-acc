@@ -8,7 +8,7 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 mkdir -p "$BACKUP_DIR"
 
 echo "Backing up Neo4j database..."
-docker compose -f /opt/coacc/infra/docker-compose.prod.yml exec -T neo4j \
+docker compose -f /opt/coacc/infra/docker/docker-compose.prod.yml exec -T neo4j \
     neo4j-admin database dump neo4j --to-stdout > "$BACKUP_DIR/neo4j_${TIMESTAMP}.dump"
 
 echo "Pruning backups older than ${RETENTION_DAYS} days..."
