@@ -1,5 +1,15 @@
 # Datos al Ecosistema 2026 — Entry Plan (co/acc)
 
+> **Status update (Wave 6, 2026-05):** sections that reference
+> `etl/src/coacc_etl/pipelines/` describe the pre-refactor architecture.
+> The Wave 4 refactor retired the bespoke Pipeline stack; pipeline-per-dataset
+> bodies were replaced by per-dataset YAML contracts (`etl/datasets/<id>.yml`)
+> driving a single generic Socrata ingester (`coacc_etl.ingest.socrata.ingest`).
+> Custom non-Socrata adapters (PACO, RUES, Registraduría, etc.) are tracked
+> in `_KNOWN_DEFERRED_SOURCES` inside
+> `etl/tests/test_signal_source_alignment.py` and will land under
+> `coacc_etl.ingest.custom/` as they are built.
+
 **Canonical reference for our entry into MinTIC's "Datos al Ecosistema 2026: IA para Colombia" competition.** Every product, technical, and positioning decision on the competition-facing surface of co/acc checks against this document. If a change conflicts with anything here, either the change is wrong or this doc needs an explicit update commit — not both silently.
 
 **Source (operator paste, 2026-04-20):** MinTIC competition page — the "TÉRMINOS DE REFERENCIA DEL CONCURSO DATOS AL ECOSISTEMA 2026". Raw text archived in git history of this doc; treat that commit as the frozen reference.

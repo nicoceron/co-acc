@@ -1,5 +1,16 @@
 # co/acc Program Plan — Datos al Ecosistema 2026
 
+> **Status update (Wave 6, 2026-05):** the architecture sections below were
+> written before the Wave 4–5 refactor. The "generic Socrata pipeline" (R2)
+> shipped as `coacc_etl.ingest.socrata.ingest(spec)`, driven by per-dataset
+> YAML contracts under `etl/datasets/`. The bespoke `etl/src/coacc_etl/pipelines/`
+> directory and its per-pipeline tests under `etl/tests/pipelines/` are gone
+> — the equivalent contract tests now live in `etl/tests/test_ingest/`,
+> `etl/tests/test_catalog.py`, and `etl/tests/test_signal_source_alignment.py`.
+> Reality checks still flow through `coacc_etl.lakehouse.reality` +
+> `scripts/lake_reality.py`. Treat the WP contracts below as the original
+> intent; the runtime artifacts are the YAML catalog + ingest module.
+
 **Purpose:** the complete execution plan for the competition entry. Every work package is designed so another teammate can own it in parallel via a published interface contract and a committed stub; no work package blocks another on anything other than a schema.
 
 **How to read this:** this is the *program* plan. The *entry* plan (`datos_al_ecosistema_2026.md`) answers "what are we entering and why?". This document answers "who builds what, in what order, and how do we catch drift?"

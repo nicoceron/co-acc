@@ -326,15 +326,13 @@ After all core Socrata-backed pipelines migrated:
 
 **Goal:** prune test surface, align configs, refresh docs.
 
-- [ ] **6.1** Delete remaining per-pipeline test files replaced by the parameterised contract test.
-- [ ] **6.2** Prune `etl/tests/fixtures/` — keep only fixtures for datasets present in `catalog.signed.csv`.
-- [ ] **6.3** Align `config/signal_registry.yml` + `config/bootstrap_all_contract.yml` with `catalog.signed.csv`:
-  - Any `sources:` entry in `signal_source_deps.yml` that is not in the signed catalog → flag + escalate.
-  - Any signal that depends only on `tier: backlog` sources → mark `status: parked`.
-- [ ] **6.4** Update `docs/competition/program_plan.md` + `docs/competition/datos_al_ecosistema_2026.md` to reference new paths (quick grep + patch).
-- [ ] **6.5** Rewrite `README.md` — new ingest flow, YAML contract example, where the signed catalog lives.
-- [ ] **6.6** Trim `Makefile`: keep `qualify`, `ingest`, `ingest-all`, `lake-reality`, `test`, `lint`, `format`. Delete stale targets.
-- [ ] **6.7** (Optional) Write `docs/architecture/overview.md` — one-page "how data flows from audit JSON → signed catalog → YAML → lake → signals → API".
+- [x] **6.1** Per-pipeline test files: all gone (deleted across Wave 4.A + 4.B).
+- [x] **6.2** `etl/tests/fixtures/`: pruned to nothing in Wave 4.B (every fixture's pipeline was retired).
+- [x] **6.3** Signal registry/deps alignment shipped as 3 invariant tests in `etl/tests/test_signal_source_alignment.py`. One signal (`adverse_media_supplier_review_only`) marked `status: parked` because its required source has no ingest path. Audit found 24 aspirational sources never wired and 10 custom adapters known-deferred; both sets are explicit allow-lists in the test file.
+- [x] **6.4** Status-update banner added to `docs/competition/program_plan.md` + `datos_al_ecosistema_2026.md` pointing at the YAML catalog + `coacc_etl.ingest.socrata.ingest` instead of the retired Pipeline stack.
+- [x] **6.5** README rewritten — covers the YAML-contract flow, the two source classes (incremental + snapshot), the 3-command CLI, repo layout, where the Neo4j path went.
+- [x] **6.6** Makefile trim done in Wave 5.2 (~80 → ~12 working targets).
+- [x] **6.7** `docs/architecture/overview.md` — one-page trace from audit JSON → signed catalog → YAML → lake → API/signals, plus the two invariants (lake is canonical, watermarks derive from data) and "where to look for what" cheat-sheet.
 
 **Sanity check 6:**
 - Test file count drops dramatically (target: `etl/tests/` has < 15 `.py` test files vs current ~70).
