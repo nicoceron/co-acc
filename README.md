@@ -4,7 +4,7 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![Datasets in catalog: 148](https://img.shields.io/badge/catalog-148_datasets-green.svg)](docs/datasets/catalog.signed.csv)
-[![Ingest-ready: 32](https://img.shields.io/badge/ingest_ready-32-brightgreen.svg)](etl/datasets/)
+[![Ingest-ready: 42](https://img.shields.io/badge/ingest_ready-42-brightgreen.svg)](etl/datasets/)
 [![Ingester source classes: 2](https://img.shields.io/badge/ingester-incremental_+_snapshot-blue.svg)](etl/src/coacc_etl/ingest/socrata.py)
 
 ---
@@ -149,7 +149,7 @@ co-acc/
 │   │   ├── schemas/  transforms/  entity_resolution/
 │   │   ├── cli.py           # 3 commands: ingest, ingest-all, qualify
 │   │   └── source_qualification.py  # back-compat shim
-│   ├── datasets/            # 148 YAML contracts (32 ingest-ready)
+│   ├── datasets/            # 148 YAML contracts (42 ingest-ready)
 │   └── tests/               # 76 tests, all pass on a clean clone
 ├── api/                     # FastAPI service (separate uv workspace)
 ├── frontend/                # React/Vite UI
