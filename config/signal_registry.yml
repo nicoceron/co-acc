@@ -669,6 +669,8 @@ signals:
     description: Reviewer-only documentary media overlap against suppliers or officers.
     category: governance
     severity: medium
+    status: parked
+    parked_reason: "Required source `adverse_media` has no Socrata YAML and no ingest_ready custom adapter (Wave 4.B retired the bespoke Pipeline stack). Will activate once an adverse-media adapter ships under coacc_etl.ingest.custom."
     entity_types: [Company, Person]
     public_safe: false
     reviewer_only: true
