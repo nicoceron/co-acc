@@ -190,6 +190,34 @@ Logs go to stderr; structured artifacts go to `lake/meta/<topic>/<date>.json`.
 - Anthropic / OpenAI / Gemini keys are read via `os.environ`, never passed
   on the command line or written to `lake/`.
 
+### 2.8 Bounded-memory data contract
+
+The operator machine is assumed to be a laptop/dev box, not a warehouse
+cluster. No phase may require holding a full Phase 7 dataset, full join, or
+full graph projection in Python RAM.
+
+- **Download is still required**, but only as paged source pulls. Socrata
+  pages are written to parquet-backed staging/partitions as they arrive;
+  later phases reuse local parquet rather than re-querying Socrata.
+- **No unbounded materialization:** no `list.extend(page)` across an entire
+  source, no pandas `.concat()` across all partitions, and no DuckDB
+  `.df()`/`.fetchall()` on unbounded queries. Use projected columns, filters,
+  `fetchmany()`, Arrow record batches, or `COPY (SELECT ...) TO parquet`.
+- **Join discovery happens in DuckDB, not Python.** Validate join coverage
+  with aggregate SQL (`count`, `count where matched`, anti-join samples) and
+  materialize only the resulting edge/features parquet.
+- **Graph connectivity is batch-built:** load endpoint nodes first with
+  constraints/indexes, then create relationships in 1k-10k-row batches by
+  matching indexed keys (`entity_uid`, `contract_id`, `process_id`,
+  `nit_canonical`). Python only holds the current batch.
+- **Checkpoint every bounded unit:** page, source partition, curated builder,
+  graph builder. Failed runs resume from the last durable checkpoint rather
+  than replaying a multi-million-row in-memory object.
+- **Demo graph pruning is allowed and expected.** The finals/demo graph only
+  needs Phase 7 + `paco_sanctions` + the node/edge types required by the top
+  3-5 demo patterns. Loading all 148 YAML contracts into Neo4j is post-finals
+  unless a specific demo pattern needs them.
+
 ---
 
 ## 3. Phase 7 — Operational ingest of the 6 large datasets
@@ -225,26 +253,42 @@ than including it now.
 
 ### 3.2 Implementation steps
 
-1. **Disk budget.** Estimate compressed parquet size: SECOP II contracts
+1. **Bound the ingester before bulk runs.** The current shipped Socrata
+   ingester still accumulates every page into a Python `collected` list
+   before coverage/write. That is acceptable for tests, but **not** for
+   Phase 7 volumes (up to ~30.9M rows). Before starting the overnight
+   pulls, refactor incremental and snapshot ingest to:
+   - fetch pages with a configurable page size (`10k-50k` target, whatever
+     Socrata accepts reliably);
+   - write page/partition parquet to a staging area, not directly to final
+     raw paths until coverage passes;
+   - compute coverage as streaming counters (`non_null_count / row_count`);
+   - track `max(watermark_column)` incrementally;
+   - finalize staged parquet + advance watermark only after the full run
+     succeeds; on failure, leave a failure report and clean/ignore staging;
+   - configure `max_pages` from expected row count rather than relying on
+     the current `DEFAULT_PAGE_SIZE=1000` x `DEFAULT_MAX_PAGES=10000`
+     cap, which cannot cover SIGEP-scale datasets.
+2. **Disk budget.** Estimate compressed parquet size: SECOP II contracts
    averages ~150 bytes/row compressed → 5.6M ≈ 850 MB; SIGEP ~80 bytes/row
    → ~2.5 GB. Plan for **20–25 GB** of `lake/raw/` after Phase 7 lands,
    with headroom to 50 GB for Phase 9–10 datasets. Verify free disk:
    `df -h $(realpath lake/)` before starting.
-2. **Sequence the runs.** Smallest first to flush bugs:
+3. **Sequence the runs.** Smallest first to flush bugs:
    `wi7w-2nvm → jbjy-vk9h → qddk-cgux → c82u-588k → rpmr-utcd →
    7y2j-43cv`. (`wi7w-2nvm` first because it's the smallest at ~3M
    rows and confirms the new YAML works end-to-end before larger
    datasets commit hours of wall-clock.) Don't parallelize on the
    same Socrata domain — share the rate limiter, keep the operator
    log linear.
-3. **Run with full-refresh once per dataset:**
+4. **Run with full-refresh once per dataset:**
    ```bash
    make ingest DATASET=jbjy-vk9h FULL_REFRESH=1 2>&1 | tee \
      "lake/meta/runs/$(date -u +%Y%m%dT%H%M%SZ)-jbjy-vk9h.log"
    ```
    `FULL_REFRESH=1` propagates to `wm.advance(force=True)` so the watermark
    moves to the new data max even if a prior run advanced it.
-4. **Inspect after each run:**
+5. **Inspect after each run:**
    - `lake/meta/coverage/<id>/<ts>.json` — verify every required column
      meets its threshold.
    - `lake/meta/failures/<id>/<ts>.json` — must not exist on success.
@@ -255,10 +299,10 @@ than including it now.
      row count divided by total should be ≪1%. If it's >5%, escalate —
      either the YAML's watermark column is wrong or the upstream has a
      systemic NULL pattern worth investigating before proceeding.
-5. **Snapshot of run results.** Append one row per ingest to
+6. **Snapshot of run results.** Append one row per ingest to
    `docs/runbooks/ingest_log.md` with: dataset, start, end, rows in,
    rows out, coverage pass/fail, sentinel-partition fraction, operator note.
-6. **Commit the metadata, not the parquet.** Parquet stays gitignored;
+7. **Commit the metadata, not the parquet.** Parquet stays gitignored;
    metadata under `lake/meta/runs/*.log` is also gitignored. Commit only
    `docs/runbooks/ingest_log.md`.
 
@@ -266,6 +310,9 @@ than including it now.
 
 - [ ] All 6 datasets have at least one parquet file under
       `lake/raw/source=<id>/`.
+- [ ] Socrata ingest has no unbounded all-dataset `collected` list or full
+      DataFrame requirement; peak memory stays under the operator-configured
+      budget on the largest dataset.
 - [ ] All 6 have a fresh `lake/meta/coverage/<id>/<ts>.json` showing
       every required column ≥ its declared threshold.
 - [ ] No `lake/meta/failures/<id>/` row exists for any of them.
@@ -673,6 +720,9 @@ class SignalFeatureRow(BaseModel):
    `nit_canonical`, collect name variants, emit one row per canonical
    entity. Output: `lake/curated/dim_company/part-<ts>.parquet`.
    Idempotent (run twice → same output bytes modulo timestamp suffix).
+   Implementation must be DuckDB-first (`COPY (SELECT ...) TO parquet`
+   or Arrow record batches), not full pandas materialization of all
+   contributing raw datasets.
 3. **`dim_buyer` and `dim_person`:** mirror with appropriate sources.
    `dim_person` builder ships its own `canonical_cedula()` (variable
    length, no DV; pasaporte handled as `foreign_id`). `dim_person`
@@ -686,7 +736,10 @@ class SignalFeatureRow(BaseModel):
    - `procurement_supplier_concentration_across_entities`: per supplier,
      aggregate award value across distinct buyers in a 12-month window,
      emit when concentration ratio > threshold.
-   Add others incrementally; the demo only needs ~3–5.
+   Add others incrementally; the demo only needs ~3–5. Every builder first
+   emits a join-coverage report (`left_rows`, `matched_rows`,
+   `unmatched_sample`) so the operator knows whether keys connect before
+   graph loading.
 5. **Driver script.** `coacc-etl curate --all` walks every builder,
    writes its parquet, updates `lake/meta/curated_runs.parquet`.
 6. **Reality probe extension.** Phase 8's `make lake-reality` learns
@@ -700,6 +753,8 @@ class SignalFeatureRow(BaseModel):
 - Unit per canonicalizer, with property tests.
 - Contract test per builder: input fixtures → output parquet
   round-trips through the Pydantic/Pandera schema.
+- Bounded-memory smoke test: builder runs against many small parquet
+  partitions without converting the full DuckDB result to a pandas frame.
 - Idempotency: `coacc-etl curate --signal X` twice on a frozen lake
   produces byte-identical output (excluding the timestamp filename).
 - Cardinality sanity: `dim_company` row count ≤ sum of distinct NITs
@@ -763,6 +818,31 @@ The schema is derived from existing Cypher patterns under
 `api/src/coacc/queries/`. Inventory those first to lock the node and
 edge label set.
 
+### 7.2.1 Local-device loading strategy
+
+The graph loader is a projection builder, not a data warehouse import job.
+It must prove connectivity without loading every endpoint or relationship
+into application memory.
+
+1. **Project only needed columns from parquet.** DuckDB queries must select
+   stable IDs and edge properties only; no `SELECT *` from Phase 7 sources
+   on the graph path.
+2. **Load endpoint nodes before edges.** Create `Company`, `Buyer`,
+   `Contract`, `Process`, and `SignalHit` nodes in batches, with unique
+   constraints/indexes in place before the first relationship batch.
+3. **Create relationships by indexed keys.** Relationship builders emit
+   bounded rows like `{contract_id, supplier_uid}`; Neo4j matches indexed
+   endpoints and `MERGE`s the edge. Missing endpoints are counted and
+   written to `lake/meta/graph_loader/missing_endpoints/<ts>.json`.
+4. **Prune for the finals graph.** Default finals scope is the Phase 7
+   datasets, `paco_sanctions`, and the top 3-5 active demo patterns.
+   A `--scope finals` loader flag should skip unrelated source-specific
+   builders while preserving all entities/edges required by those patterns.
+5. **Keep expensive pattern precomputation in parquet.** Repeated
+   aggregations such as supplier concentration, single-bidder, and anomaly
+   features belong in `lake/curated/signals/`; Neo4j stores the resulting
+   `SignalHit` evidence graph.
+
 ### 7.3 Module layout
 
 ```
@@ -780,8 +860,10 @@ etl/src/coacc_etl/graph/
 ```
 
 `GraphLoader` properties:
-- Reads parquet via DuckDB.
-- Writes Cypher in 10k-row batches with `UNWIND $rows AS r MERGE …`.
+- Reads parquet via DuckDB using bounded `fetchmany()` / Arrow record-batch
+  iteration.
+- Writes Cypher in configurable 1k-10k-row batches with
+  `UNWIND $rows AS r MERGE …`.
 - Idempotent: same input → same graph (no duplicate edges).
 - Resumable: per-builder watermark in `lake/meta/graph_loader.parquet`
   records last loaded `(source, partition, file)`.
@@ -814,7 +896,8 @@ etl/src/coacc_etl/graph/
    - `signal_hits.py` → MERGE `:SignalHit` from `lake/curated/signals/`.
 5. **`coacc-etl graph load --builder all` CLI.** Subcommand of the
    existing CLI. Flags: `--builder <name>`, `--from-scratch`
-   (drop+recreate), `--resume` (default, uses watermark).
+   (drop+recreate), `--resume` (default, uses watermark),
+   `--scope finals|full`, `--batch-size <n>`.
 6. **Verify pass.** `etl/src/coacc_etl/graph/verify.py` reads parquet
    and compares aggregates: company count, contract count, total
    contract value, supplier-buyer pair count. Output:
@@ -832,6 +915,9 @@ etl/src/coacc_etl/graph/
 - `test_loader_idempotent.py` — load twice → no duplicate nodes/edges.
 - `test_loader_resumable.py` — kill mid-load → resume → final state
   matches end-to-end run.
+- `test_loader_bounded_memory.py` — synthetic many-partition input proves
+  the loader never calls unbounded `.df()`/`.fetchall()` and keeps batch
+  size at or below config.
 - `test_verify_parity.py` — synthetic divergence → reports drift.
 - Integration test `tests/integration/test_graph_full_load.py` (marker
   `live`, opt-in) loads a real subset of `jbjy-vk9h` through the
@@ -845,6 +931,9 @@ etl/src/coacc_etl/graph/
       box. Incremental reload (resume from watermark): **<30 min**.
       Sub-30-min full reload is a post-optimization target; do not
       block the phase on it.
+- [ ] `coacc-etl graph load --scope finals --from-scratch` builds the
+      pruned demo graph on the operator machine without exceeding the
+      configured memory budget.
 - [ ] `coacc-etl graph verify` ≤ 0.1% drift on every aggregate.
 - [ ] At least 5 existing Cypher patterns under `api/src/coacc/queries/`
       return non-empty results when run against the loaded graph.
@@ -1433,6 +1522,7 @@ reality.
 | R-L | `signal_materializer.py` (1023 LOC) hides dependencies on legacy CSV not surfaced by tests | Medium | Phase 11.5 EXPLAIN sweep + integration test catches structural breaks; semantic regressions caught by Phase 8 reality probe | Backend eng |
 | R-M | Anomaly model "scores public officials as risky" is reputation-sensitive | High | Narrator ethics guard rejects criminality verbs; model card cites `ETHICS.md`; UI labels scores as "patrón" not "fraude" | ML eng |
 | R-N | NIT canonicalization gets the verification digit wrong → bad joins everywhere | High | Hypothesis property tests + DIAN MOD-11 algorithm validated against 100 known-good NITs before Phase 10 lands | Data eng |
+| R-O | Operator laptop cannot hold Phase 7 datasets or graph projection in RAM | High | §2.8 bounded-memory contract; Phase 7 streaming ingest blocker; Phase 11 `--scope finals` pruned graph | Data eng |
 
 ---
 
@@ -1540,6 +1630,12 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   or selection; without it, the 2026 competition track stops. Links:
   [2026-04-28 registration cutoff](https://www.mintic.gov.co/portal/inicio/Sala-de-prensa/Noticias/437417:Ultimos-dias-para-activar-soluciones-de-impacto-social-con-Datos-al-Ecosistema-2026),
   [2026-05-06 technical stage + finals](https://www.mintic.gov.co/portal/inicio/Sala-de-prensa/Noticias/437759:Mas-de-1-000-participantes-de-todo-el-pais-avanzan-en-el-reto-de-convertir-datos-publicos-en-soluciones-reales).
+- **2026-05-15** — Bounded-memory contract added. Rationale: Phase 7
+  sources reach tens of millions of rows and the operator machine may not
+  fit full datasets or graph projections in RAM. The current Socrata
+  ingester's all-page `collected` list is now a Phase 7 blocker; graph
+  loading gets a `--scope finals` pruned path so patterns can be connected
+  from indexed IDs without loading all endpoints at once.
 
 (Append new decisions as they're made. One line per decision.)
 
