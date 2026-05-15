@@ -16,6 +16,7 @@ import click
 from coacc_etl.catalog import DatasetSpec, load_catalog
 from coacc_etl.ingest import IngestError
 from coacc_etl.ingest import ingest as socrata_ingest
+from coacc_etl.operations.phase7 import Phase7RunError, run_phase7
 
 
 @click.group()
@@ -163,6 +164,86 @@ def ingest_all_cmd(
     )
     if failed and not continue_on_error:
         raise click.ClickException(f"stopped on first failure: {failed[0][0]}")
+
+
+@cli.command(name="ingest-phase7")
+@click.option(
+    "--mode",
+    type=click.Choice(["smoke", "full"]),
+    default="smoke",
+    show_default=True,
+    help="Smoke seeds recent watermarks; full runs initial full-refresh ingests.",
+)
+@click.option(
+    "--dataset",
+    "dataset_ids",
+    multiple=True,
+    help="Run a subset of Phase 7 dataset ids; repeat for multiple ids.",
+)
+@click.option(
+    "--continue-on-error/--stop-on-error",
+    default=False,
+    help="Keep going if one dataset fails (default stops)",
+)
+@click.option(
+    "--min-free-gb",
+    type=click.FloatRange(min=0),
+    default=None,
+    help="Minimum free disk under COACC_LAKE_ROOT before starting.",
+)
+@click.option(
+    "--page-size",
+    type=click.IntRange(min=1),
+    default=None,
+    help="Socrata rows per page; mode-specific defaults are used when omitted.",
+)
+@click.option(
+    "--max-pages",
+    type=click.IntRange(min=1),
+    default=None,
+    help="Maximum Socrata pages per dataset; mode-specific defaults are used when omitted.",
+)
+@click.option(
+    "--smoke-days",
+    type=click.IntRange(min=1),
+    default=7,
+    show_default=True,
+    help="In smoke mode, seed to max(watermark)-N days when no watermark exists.",
+)
+def ingest_phase7_cmd(
+    mode: str,
+    dataset_ids: tuple[str, ...],
+    continue_on_error: bool,
+    min_free_gb: float | None,
+    page_size: int | None,
+    max_pages: int | None,
+    smoke_days: int,
+) -> None:
+    """Run the Phase 7 ingest sequence with disk checks and run logging."""
+    try:
+        records = run_phase7(
+            mode="full" if mode == "full" else "smoke",
+            dataset_ids=dataset_ids or None,
+            continue_on_error=continue_on_error,
+            min_free_gb=min_free_gb,
+            page_size=page_size,
+            max_pages=max_pages,
+            smoke_days=smoke_days,
+        )
+    except Phase7RunError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    ok = sum(1 for record in records if record.status == "ok")
+    skipped = sum(1 for record in records if record.status == "skipped")
+    failed = sum(1 for record in records if record.status == "failed")
+    for record in records:
+        click.echo(
+            f"{record.dataset_id}: {record.status} rows={record.rows:,} "
+            f"coverage={record.coverage} watermark={record.watermark}"
+        )
+    click.echo(f"phase7 {mode}: ok={ok}, skipped={skipped}, failed={failed}")
+    if failed:
+        raise click.ClickException(f"phase7 {mode}: {failed} dataset(s) failed")
 
 
 @cli.command(name="qualify", context_settings={"ignore_unknown_options": True})

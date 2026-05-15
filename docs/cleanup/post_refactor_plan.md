@@ -220,7 +220,7 @@ full graph projection in Python RAM.
 
 ---
 
-## 3. Phase 7 — Operational ingest of the 6 large datasets
+## 3. Phase 7 — Operational ingest of the core large datasets
 
 **Owner profile:** data engineer, comfortable with overnight runs and DuckDB.
 **Prereq:** none (the YAMLs and ingester are already shipped).
@@ -231,25 +231,27 @@ will trip a coverage-gate failure or watermark edge case, each costing
 
 ### 3.1 Goal
 
-Land actual rows for the highest-volume Socrata datasets in
+Land actual rows for the highest-value Socrata datasets in
 `etl/datasets/` so the lake stops being demo-empty and downstream phases
 have data to consume.
 
 | Dataset | YAML | ~rows | Why |
 |---|---|---|---|
+| `2jzx-383z` | SIGEP Conjunto servidores públicos | 265k | Donor → official → vendor loop |
 | `jbjy-vk9h` | SECOP II Contratos Electrónicos | 5.6M | Core of every signal |
-| `qddk-cgux` | SECOP II Procesos | 6.1M | Required by single-bidder, repeat-awards, supplier-concentration |
+| `qddk-cgux` | SECOP I Procesos Histórico | 6.1M | Historical procurement processes |
+| `p6dx-8zbt` | SECOP II Procesos de Contratación | 8.4M | Required by single-bidder, repeat-awards, supplier-concentration |
+| `c82u-588k` | RUES Personas Naturales/Jurídicas/ESAL | 9.2M | Company identity backbone |
 | `rpmr-utcd` | SECOP I Contratos | 21.7M | Historical procurement spine |
-| `c82u-588k` | SECOP I Procesos | 9.2M | Historical procurement processes |
-| `7y2j-43cv` | SIGEP servidores | 30.9M | Donor → official → vendor loop |
-| `wi7w-2nvm` | SECOP II Ofertas Por Proceso | ~3M est. | Required for `single_bidder` feature confirmation in Phase 13 |
+| `wi7w-2nvm` | SECOP II Ofertas Por Proceso | 41.9M | Required for `single_bidder` feature confirmation in Phase 13 |
 
 **Feature-set decision:** the originally proposed `supplier_win_rate_buyer`
 feature for Phase 13 requires offers data linked to processes. To keep
 scope manageable, that feature is **dropped from the MVP** (see §10.3).
 `wi7w-2nvm` still carries its weight via `single_bidder` confirmation
 and stays in Phase 7 because re-running ingest later is more expensive
-than including it now.
+than including it now, but it runs last because the YAML now records it
+as a 41.9M-row source.
 
 ### 3.2 Implementation steps
 
@@ -275,19 +277,18 @@ than including it now.
    with headroom to 50 GB for Phase 9–10 datasets. Verify free disk:
    `df -h $(realpath lake/)` before starting.
 3. **Sequence the runs.** Smallest first to flush bugs:
-   `wi7w-2nvm → jbjy-vk9h → qddk-cgux → c82u-588k → rpmr-utcd →
-   7y2j-43cv`. (`wi7w-2nvm` first because it's the smallest at ~3M
-   rows and confirms the new YAML works end-to-end before larger
-   datasets commit hours of wall-clock.) Don't parallelize on the
-   same Socrata domain — share the rate limiter, keep the operator
-   log linear.
-4. **Run with full-refresh once per dataset:**
+   `2jzx-383z → jbjy-vk9h → qddk-cgux → p6dx-8zbt → c82u-588k →
+   rpmr-utcd → wi7w-2nvm`. Don't parallelize on the same Socrata
+   domain — share the rate limiter, keep the operator log linear. Use
+   `make ingest-phase7-smoke` for the bounded live verification pass
+   and `make ingest-phase7-full` for the guarded full-refresh sequence.
+4. **Run with full-refresh once per dataset** via the Phase 7 runner:
    ```bash
-   make ingest DATASET=jbjy-vk9h FULL_REFRESH=1 2>&1 | tee \
-     "lake/meta/runs/$(date -u +%Y%m%dT%H%M%SZ)-jbjy-vk9h.log"
+   make ingest-phase7-full PHASE7_ARGS="--min-free-gb 80"
    ```
-   `FULL_REFRESH=1` propagates to `wm.advance(force=True)` so the watermark
-   moves to the new data max even if a prior run advanced it.
+   Full mode propagates `full_refresh=True` so the watermark moves to the
+   new data max even if a prior smoke run advanced it. The runner appends
+   every result to `docs/runbooks/ingest_log.md`.
 5. **Inspect after each run:**
    - `lake/meta/coverage/<id>/<ts>.json` — verify every required column
      meets its threshold.
@@ -308,19 +309,19 @@ than including it now.
 
 ### 3.3 Acceptance criteria / DoD
 
-- [ ] All 6 datasets have at least one parquet file under
+- [ ] All Phase 7 datasets have at least one parquet file under
       `lake/raw/source=<id>/`.
 - [ ] Socrata ingest has no unbounded all-dataset `collected` list or full
       DataFrame requirement; peak memory stays under the operator-configured
       budget on the largest dataset.
-- [ ] All 6 have a fresh `lake/meta/coverage/<id>/<ts>.json` showing
+- [ ] All Phase 7 datasets have a fresh `lake/meta/coverage/<id>/<ts>.json` showing
       every required column ≥ its declared threshold.
 - [ ] No `lake/meta/failures/<id>/` row exists for any of them.
 - [ ] `lake/meta/watermarks.parquet` lists each one with a non-null
-      `last_seen_ts` (verified 2026-05-08: all six are incremental,
+      `last_seen_ts` (verified 2026-05-15: all Phase 7 sources are incremental,
       none are `full_refresh_only`, so this applies uniformly).
 - [ ] `docs/runbooks/ingest_log.md` exists with one row per dataset
-      (six rows).
+      (one row per Phase 7 source).
 - [ ] Sentinel partition fraction ≤ 5% for each (or documented escalation).
 - [ ] `make lake-reality` runs without error against the ingested
       datasets (Phase 8 will sharpen what "green" means; Phase 7 just
@@ -698,7 +699,7 @@ class SignalFeatureRow(BaseModel):
 
 1. **NIT canonicalization (smallest first).** `canonical_nit.py`:
    - **Scope:** entity NITs only. Person identifiers (cédulas) come
-     from SIGEP servidores (`7y2j-43cv`) and are handled in
+     from SIGEP servidores (`2jzx-383z`) and are handled in
      `canonical_cedula.py` under `dim_person` (step 3 below) — they
      have a different structure (variable length, no DV, sometimes
      pasaporte alphanumeric for foreign nationals). Don't conflate.
@@ -726,7 +727,7 @@ class SignalFeatureRow(BaseModel):
 3. **`dim_buyer` and `dim_person`:** mirror with appropriate sources.
    `dim_person` builder ships its own `canonical_cedula()` (variable
    length, no DV; pasaporte handled as `foreign_id`). `dim_person`
-   sources include SIGEP servidores (`7y2j-43cv`) — the only Phase 7
+   sources include SIGEP servidores (`2jzx-383z`) — the only Phase 7
    source that's cédula-keyed. Add a contract test that no row in
    `dim_person` has a `nit_canonical` set (cross-pollination guard).
 4. **Signal feature builders.** Start with two:
@@ -1646,6 +1647,19 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   remains 10,000 (100M-row cap); operators can override with
   `COACC_SOCRATA_PAGE_SIZE`, `COACC_SOCRATA_MAX_PAGES`, `--page-size`,
   and `--max-pages`.
+- **2026-05-15** — Phase 7 runner added. `make ingest-phase7-smoke`
+  and `make ingest-phase7-full` now wrap the Phase 7 sequence with
+  disk preflight, smoke watermark seeding, mode-specific pagination,
+  stop/continue-on-error behavior, and append-only
+  `docs/runbooks/ingest_log.md` logging.
+- **2026-05-15** — Phase 7 source list corrected against YAML source of
+  truth. Earlier draft mislabeled `7y2j-43cv` as SIGEP servidores
+  (it is IGAC property transactions), mislabeled `c82u-588k` as SECOP I
+  processes (it is RUES identity), omitted the actual SECOP II processes
+  source `p6dx-8zbt`, and underestimated `wi7w-2nvm` at ~3M rows (YAML
+  says 41.9M). Runner order now follows corrected source semantics and
+  runs the largest source last, superseding the 2026-05-08 `wi7w-2nvm`
+  first decision.
 
 (Append new decisions as they're made. One line per decision.)
 

@@ -10,7 +10,7 @@ LAKE_ROOT ?= $(abspath $(CURDIR))/lake
 	lint type-check format \
 	test test-api test-etl test-frontend check \
 	lake-init lake-reality lake-compact \
-	qualify ingest ingest-all \
+	qualify ingest ingest-all ingest-phase7-smoke ingest-phase7-full \
 	materialize-deps materialize-all
 
 # ---------------------------------------------------------------------------
@@ -97,6 +97,15 @@ ingest:
 # Ingest every tier=core dataset that is YAML-ready, in dep-safe order.
 ingest-all:
 	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run coacc-etl ingest-all $(if $(FULL_REFRESH),--full-refresh,) $(if $(CONTINUE_ON_ERROR),--continue-on-error,)
+
+# Phase 7 operator wrappers. Pass extra flags via PHASE7_ARGS, e.g.
+#   make ingest-phase7-smoke PHASE7_ARGS="--dataset wi7w-2nvm --continue-on-error"
+#   make ingest-phase7-full PHASE7_ARGS="--min-free-gb 80"
+ingest-phase7-smoke: lake-init
+	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run coacc-etl ingest-phase7 --mode smoke --continue-on-error $(PHASE7_ARGS)
+
+ingest-phase7-full: lake-init
+	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run coacc-etl ingest-phase7 --mode full $(PHASE7_ARGS)
 
 # ---------------------------------------------------------------------------
 # Downstream signal materialization (still served from the API workspace)
