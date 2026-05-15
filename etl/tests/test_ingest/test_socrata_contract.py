@@ -17,7 +17,7 @@ import pyarrow.parquet as pq
 import pytest
 
 from coacc_etl.catalog import DatasetSpec
-from coacc_etl.ingest import IngestError, assert_coverage, ingest
+from coacc_etl.ingest import IngestError, SocrataClient, assert_coverage, ingest
 from coacc_etl.ingest.coverage import CoverageFailure
 from coacc_etl.lakehouse import watermark as wm
 from coacc_etl.lakehouse.paths import meta_path, raw_source_path
@@ -101,6 +101,25 @@ def test_ingest_incremental_skips_if_no_new_rows(
     stored = wm.get(hallazgos_spec.id)
     assert stored is not None
     assert stored.last_seen_ts == datetime(2030, 1, 1, tzinfo=UTC)
+
+
+def test_socrata_client_pagination_config_from_env(monkeypatch) -> None:
+    monkeypatch.setenv("COACC_SOCRATA_PAGE_SIZE", "12345")
+    monkeypatch.setenv("COACC_SOCRATA_MAX_PAGES", "678")
+
+    client = SocrataClient.from_env()
+    try:
+        assert client.page_size == 12345
+        assert client.max_pages == 678
+    finally:
+        client.close()
+
+
+def test_socrata_client_rejects_invalid_pagination_env(monkeypatch) -> None:
+    monkeypatch.setenv("COACC_SOCRATA_PAGE_SIZE", "0")
+
+    with pytest.raises(IngestError, match="COACC_SOCRATA_PAGE_SIZE"):
+        SocrataClient.from_env()
 
 
 def test_coverage_failure_blocks_watermark(

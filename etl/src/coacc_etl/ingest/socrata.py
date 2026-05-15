@@ -44,13 +44,32 @@ if TYPE_CHECKING:
 LOG = logging.getLogger(__name__)
 
 DEFAULT_DOMAIN = "www.datos.gov.co"
-DEFAULT_PAGE_SIZE = 1000
+DEFAULT_PAGE_SIZE = 10_000
 DEFAULT_MAX_PAGES = 10_000
 DEFAULT_TIMEOUT = 60.0
 
 
 class IngestError(RuntimeError):
     """Raised for unrecoverable ingest failures (HTTP, schema, watermark)."""
+
+
+def _positive_int(value: int, *, name: str) -> int:
+    if value < 1:
+        msg = f"{name} must be >= 1, got {value}"
+        raise IngestError(msg)
+    return value
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        msg = f"{name} must be an integer, got {raw!r}"
+        raise IngestError(msg) from exc
+    return _positive_int(value, name=name)
 
 
 @dataclass
@@ -111,12 +130,24 @@ class SocrataClient:
         *,
         domain: str = DEFAULT_DOMAIN,
         timeout: float = DEFAULT_TIMEOUT,
-        page_size: int = DEFAULT_PAGE_SIZE,
+        page_size: int | None = None,
+        max_pages: int | None = None,
     ) -> SocrataClient:
+        resolved_page_size = (
+            _positive_int(page_size, name="page_size")
+            if page_size is not None
+            else _env_int("COACC_SOCRATA_PAGE_SIZE", DEFAULT_PAGE_SIZE)
+        )
+        resolved_max_pages = (
+            _positive_int(max_pages, name="max_pages")
+            if max_pages is not None
+            else _env_int("COACC_SOCRATA_MAX_PAGES", DEFAULT_MAX_PAGES)
+        )
         return cls(
             http=_build_default_client(timeout=timeout),
             domain=domain,
-            page_size=page_size,
+            page_size=resolved_page_size,
+            max_pages=resolved_max_pages,
         )
 
     def close(self) -> None:
@@ -451,6 +482,8 @@ def ingest(
     *,
     client: SocrataClient | None = None,
     full_refresh: bool = False,
+    page_size: int | None = None,
+    max_pages: int | None = None,
 ) -> IngestResult:
     """Run one ingest pass for ``spec`` against Socrata.
 
@@ -480,7 +513,7 @@ def ingest(
     batch_id = uuid.uuid4().hex
     owned_client = False
     if client is None:
-        client = SocrataClient.from_env()
+        client = SocrataClient.from_env(page_size=page_size, max_pages=max_pages)
         owned_client = True
 
     try:

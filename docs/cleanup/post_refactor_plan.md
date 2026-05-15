@@ -261,11 +261,12 @@ than including it now.
    streaming counters, track `max(watermark_column)` incrementally, and
    only move staged parquet into `lake/raw/` after the run validates.
    Before starting overnight pulls:
-   - set a reliable Socrata page size (`10k-50k` target if the API accepts
-     it; keep smaller if rate limits or timeouts appear);
-   - set `max_pages` from expected row count rather than relying on
-     `DEFAULT_PAGE_SIZE=1000` x `DEFAULT_MAX_PAGES=10000`, which cannot
-     cover SIGEP-scale datasets;
+   - start with the default `DEFAULT_PAGE_SIZE=10000` and
+     `DEFAULT_MAX_PAGES=10000` (100M-row cap), or override with
+     `COACC_SOCRATA_PAGE_SIZE`, `COACC_SOCRATA_MAX_PAGES`,
+     `coacc-etl ingest --page-size`, and `--max-pages`;
+   - raise page size toward `50k` only if Socrata accepts it reliably;
+     lower it if rate limits, timeouts, or per-page memory pressure appear;
    - run the focused ingest tests and confirm failed coverage leaves no
      staged parquet and no final raw parquet.
 2. **Disk budget.** Estimate compressed parquet size: SECOP II contracts
@@ -1640,6 +1641,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   max timestamp tracking, and final raw parquet is published only after
   validation passes. Focused ingest/lakehouse tests cover multi-page
   staging and cleanup on coverage failure.
+- **2026-05-15** — Socrata pagination defaults raised/configured for
+  Phase 7 volumes. Default page size is now 10,000 rows and max pages
+  remains 10,000 (100M-row cap); operators can override with
+  `COACC_SOCRATA_PAGE_SIZE`, `COACC_SOCRATA_MAX_PAGES`, `--page-size`,
+  and `--max-pages`.
 
 (Append new decisions as they're made. One line per decision.)
 

@@ -13,7 +13,7 @@ import sys
 
 import click
 
-from coacc_etl.catalog import load_catalog
+from coacc_etl.catalog import DatasetSpec, load_catalog
 from coacc_etl.ingest import IngestError
 from coacc_etl.ingest import ingest as socrata_ingest
 
@@ -24,13 +24,13 @@ def cli() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
-def _dataset_core_order(specs: dict) -> list[str]:
+def _dataset_core_order(specs: dict[str, DatasetSpec]) -> list[str]:
     # Deterministic dep-safe order: contract- / entity- / nit-keyed first
     # (they anchor joins), then the rest. Within tiers, sort by dataset id.
     core = [s for s in specs.values() if s.tier == "core"]
     anchors = {"contract", "entity", "nit"}
 
-    def key(spec) -> tuple[int, str]:
+    def key(spec: DatasetSpec) -> tuple[int, str]:
         classes = set(spec.join_keys.keys())
         anchor_rank = 0 if classes & anchors else 1
         return (anchor_rank, spec.id)
@@ -45,7 +45,24 @@ def _dataset_core_order(specs: dict) -> list[str]:
     default=False,
     help="Ignore lake watermark and re-pull from the beginning",
 )
-def ingest_cmd(dataset_id: str, full_refresh: bool) -> None:
+@click.option(
+    "--page-size",
+    type=click.IntRange(min=1),
+    default=None,
+    help="Socrata rows per page (default: COACC_SOCRATA_PAGE_SIZE or 10,000)",
+)
+@click.option(
+    "--max-pages",
+    type=click.IntRange(min=1),
+    default=None,
+    help="Maximum Socrata pages to fetch (default: COACC_SOCRATA_MAX_PAGES or 10,000)",
+)
+def ingest_cmd(
+    dataset_id: str,
+    full_refresh: bool,
+    page_size: int | None,
+    max_pages: int | None,
+) -> None:
     """Ingest one ingest-ready dataset from Socrata into the lake."""
     specs = load_catalog()
     spec = specs.get(dataset_id)
@@ -55,7 +72,12 @@ def ingest_cmd(dataset_id: str, full_refresh: bool) -> None:
             f"(known: {len(specs)} datasets)"
         )
     try:
-        result = socrata_ingest(spec, full_refresh=full_refresh)
+        result = socrata_ingest(
+            spec,
+            full_refresh=full_refresh,
+            page_size=page_size,
+            max_pages=max_pages,
+        )
     except IngestError as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -84,7 +106,24 @@ def ingest_cmd(dataset_id: str, full_refresh: bool) -> None:
     default=False,
     help="Keep going if one dataset fails (default stops)",
 )
-def ingest_all_cmd(full_refresh: bool, continue_on_error: bool) -> None:
+@click.option(
+    "--page-size",
+    type=click.IntRange(min=1),
+    default=None,
+    help="Socrata rows per page (default: COACC_SOCRATA_PAGE_SIZE or 10,000)",
+)
+@click.option(
+    "--max-pages",
+    type=click.IntRange(min=1),
+    default=None,
+    help="Maximum Socrata pages to fetch (default: COACC_SOCRATA_MAX_PAGES or 10,000)",
+)
+def ingest_all_cmd(
+    full_refresh: bool,
+    continue_on_error: bool,
+    page_size: int | None,
+    max_pages: int | None,
+) -> None:
     """Ingest every ``tier: core`` dataset in dep-safe order."""
     specs = load_catalog()
     ids = _dataset_core_order(specs)
@@ -101,7 +140,12 @@ def ingest_all_cmd(full_refresh: bool, continue_on_error: bool) -> None:
             skipped.append(dataset_id)
             continue
         try:
-            result = socrata_ingest(spec, full_refresh=full_refresh)
+            result = socrata_ingest(
+                spec,
+                full_refresh=full_refresh,
+                page_size=page_size,
+                max_pages=max_pages,
+            )
             if result.ingested:
                 ok += 1
                 click.echo(f"  {dataset_id}: {result.rows:,} rows")
