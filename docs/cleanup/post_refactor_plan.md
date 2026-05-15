@@ -253,22 +253,21 @@ than including it now.
 
 ### 3.2 Implementation steps
 
-1. **Bound the ingester before bulk runs.** The current shipped Socrata
-   ingester still accumulates every page into a Python `collected` list
-   before coverage/write. That is acceptable for tests, but **not** for
-   Phase 7 volumes (up to ~30.9M rows). Before starting the overnight
-   pulls, refactor incremental and snapshot ingest to:
-   - fetch pages with a configurable page size (`10k-50k` target, whatever
-     Socrata accepts reliably);
-   - write page/partition parquet to a staging area, not directly to final
-     raw paths until coverage passes;
-   - compute coverage as streaming counters (`non_null_count / row_count`);
-   - track `max(watermark_column)` incrementally;
-   - finalize staged parquet + advance watermark only after the full run
-     succeeds; on failure, leave a failure report and clean/ignore staging;
-   - configure `max_pages` from expected row count rather than relying on
-     the current `DEFAULT_PAGE_SIZE=1000` x `DEFAULT_MAX_PAGES=10000`
-     cap, which cannot cover SIGEP-scale datasets.
+1. **Verify bounded ingest before bulk runs.** As of 2026-05-15,
+   `coacc_etl.ingest.socrata.ingest` no longer accumulates a full
+   source in a Python `collected` list: incremental and snapshot ingest
+   process one Socrata page at a time, write page-sized parquet under
+   `lake/meta/ingest_staging/<batch_id>/`, compute coverage with
+   streaming counters, track `max(watermark_column)` incrementally, and
+   only move staged parquet into `lake/raw/` after the run validates.
+   Before starting overnight pulls:
+   - set a reliable Socrata page size (`10k-50k` target if the API accepts
+     it; keep smaller if rate limits or timeouts appear);
+   - set `max_pages` from expected row count rather than relying on
+     `DEFAULT_PAGE_SIZE=1000` x `DEFAULT_MAX_PAGES=10000`, which cannot
+     cover SIGEP-scale datasets;
+   - run the focused ingest tests and confirm failed coverage leaves no
+     staged parquet and no final raw parquet.
 2. **Disk budget.** Estimate compressed parquet size: SECOP II contracts
    averages ~150 bytes/row compressed → 5.6M ≈ 850 MB; SIGEP ~80 bytes/row
    → ~2.5 GB. Plan for **20–25 GB** of `lake/raw/` after Phase 7 lands,
@@ -1632,10 +1631,15 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   [2026-05-06 technical stage + finals](https://www.mintic.gov.co/portal/inicio/Sala-de-prensa/Noticias/437759:Mas-de-1-000-participantes-de-todo-el-pais-avanzan-en-el-reto-de-convertir-datos-publicos-en-soluciones-reales).
 - **2026-05-15** — Bounded-memory contract added. Rationale: Phase 7
   sources reach tens of millions of rows and the operator machine may not
-  fit full datasets or graph projections in RAM. The current Socrata
-  ingester's all-page `collected` list is now a Phase 7 blocker; graph
-  loading gets a `--scope finals` pruned path so patterns can be connected
-  from indexed IDs without loading all endpoints at once.
+  fit full datasets or graph projections in RAM. Graph loading gets a
+  `--scope finals` pruned path so patterns can be connected from indexed
+  IDs without loading all endpoints at once.
+- **2026-05-15** — Socrata ingest bounded-memory blocker resolved in
+  `coacc_etl.ingest.socrata`: pages now land in lake-local staging,
+  coverage is counted incrementally, watermarks derive from incremental
+  max timestamp tracking, and final raw parquet is published only after
+  validation passes. Focused ingest/lakehouse tests cover multi-page
+  staging and cleanup on coverage failure.
 
 (Append new decisions as they're made. One line per decision.)
 

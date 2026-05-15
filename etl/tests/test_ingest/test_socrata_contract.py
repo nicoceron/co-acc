@@ -61,6 +61,25 @@ def test_ingest_writes_parquet_and_advances_watermark(
     assert stored.last_seen_ts == datetime(2025, 1, 15, tzinfo=UTC)
 
 
+def test_ingest_streams_multiple_pages_through_staging(
+    hallazgos_spec: DatasetSpec,
+    hallazgos_page: list[dict[str, object]],
+    fake_client_factory,
+) -> None:
+    pages = [[hallazgos_page[0]], hallazgos_page[1:]]
+    client = fake_client_factory(pages)
+
+    result = ingest(hallazgos_spec, client=client)
+
+    assert result.ingested
+    assert result.rows == 3
+    assert result.coverage is not None
+    assert result.coverage.rows == 3
+    assert {(y, m) for y, m in result.partitions} == {(2024, 12), (2025, 1)}
+    assert len(_read_all_parquets(hallazgos_spec.id)) == 3
+    assert not list((meta_path() / "ingest_staging").rglob("*.parquet"))
+
+
 def test_ingest_incremental_skips_if_no_new_rows(
     hallazgos_spec: DatasetSpec,
     fake_client_factory,
@@ -103,6 +122,8 @@ def test_coverage_failure_blocks_watermark(
     # Failure report persisted.
     failures = list((meta_path() / "failures" / hallazgos_spec.id).glob("*.json"))
     assert len(failures) == 1
+    # Staged parquet is cleaned and never appears as final raw data.
+    assert not list((meta_path() / "ingest_staging").rglob("*.parquet"))
 
 
 def test_partition_sentinel_for_unparseable_rows(

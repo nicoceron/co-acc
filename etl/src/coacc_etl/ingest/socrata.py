@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import os
+import shutil
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -26,12 +27,14 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator
 
 from coacc_etl.ingest.coverage import (
+    CoverageFailure,
     CoverageReport,
-    assert_coverage,
     write_coverage_report,
+    write_failure_report,
 )
 from coacc_etl.lakehouse import watermark as wm
-from coacc_etl.lakehouse.writer import append_parquet, write_snapshot_parquet
+from coacc_etl.lakehouse.paths import meta_path, raw_path, raw_snapshot_path
+from coacc_etl.lakehouse.writer import write_parquet_to_dir
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -197,7 +200,7 @@ def _parse_ts(value: object) -> datetime | None:
         return None
     # pandas StringDtype/Float64Dtype use pd.NA which raises on truthy/eq checks.
     try:
-        if pd.isna(value):  # type: ignore[arg-type]
+        if pd.isna(value):  # type: ignore[call-overload]
             return None
     except (TypeError, ValueError):
         pass
@@ -225,12 +228,13 @@ def _parse_ts(value: object) -> datetime | None:
             # If trailing chars after frac are all digits (extra precision), drop them.
             if tail.isdigit():
                 normalized = f"{head}.{digits}"
+        parsed: datetime | None
         try:
             parsed = datetime.fromisoformat(normalized)
         except ValueError:
             parsed = _parse_dmy(raw)
-            if parsed is None:
-                return None
+        if parsed is None:
+            return None
         return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
     return None
 
@@ -270,7 +274,7 @@ def _rows_to_frame(rows: Iterable[dict[str, object]]) -> pd.DataFrame:
 
 
 def _assign_partitions(
-    frame: pd.DataFrame, partition_column: str
+    frame: pd.DataFrame, partition_column: str, *, require_parseable: bool = True
 ) -> tuple[pd.DataFrame, list[tuple[int, int]]]:
     """Assign year/month partitions; rows without a parseable partition_column
     are routed to the sentinel ``year=0/month=0`` partition so they survive
@@ -279,7 +283,7 @@ def _assign_partitions(
     NULL, so the next incremental run cannot re-pull them.
     """
     parsed = frame[partition_column].map(_parse_ts)
-    if parsed.notna().sum() == 0:
+    if require_parseable and parsed.notna().sum() == 0:
         msg = (
             f"{partition_column} is unparseable for every row "
             f"({len(frame)}) — likely a column-name typo in the YAML"
@@ -306,6 +310,140 @@ def _apply_columns_map(
         if source in frame.columns
     }
     return frame.rename(columns=rename)
+
+
+@dataclass(frozen=True)
+class _StagedParquet:
+    path: Path
+    final_dir: Path
+
+
+@dataclass
+class _CoverageAccumulator:
+    dataset_id: str
+    required_coverage: dict[str, float]
+    rows: int = 0
+    non_null: dict[str, int] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        self.non_null = {column: 0 for column in self.required_coverage}
+
+    def update(self, frame: pd.DataFrame) -> None:
+        self.rows += len(frame)
+        for column in self.required_coverage:
+            if column not in frame.columns:
+                continue
+            series = frame[column]
+            present = series.notna() & (series.astype("string").str.len() > 0)
+            self.non_null[column] += int(present.sum())
+
+    def report(self) -> CoverageReport:
+        coverage = {
+            column: (float(self.non_null[column]) / float(self.rows) if self.rows else 0.0)
+            for column in self.required_coverage
+        }
+        failures = {
+            column: actual
+            for column, actual in coverage.items()
+            if actual < self.required_coverage[column]
+        }
+        return CoverageReport(
+            dataset_id=self.dataset_id,
+            rows=self.rows,
+            coverage=coverage,
+            thresholds=dict(self.required_coverage),
+            failures=failures,
+            checked_at=datetime.now(tz=UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        )
+
+    def assert_pass(self) -> CoverageReport:
+        report = self.report()
+        if report.failures:
+            write_failure_report(report)
+            failures = {
+                column: (actual, self.required_coverage[column])
+                for column, actual in report.failures.items()
+            }
+            raise CoverageFailure(self.dataset_id, failures)
+        return report
+
+
+def _stage_root(batch_id: str) -> Path:
+    return meta_path() / "ingest_staging" / batch_id
+
+
+def _stage_incremental_dir(source: str, batch_id: str, year: int, month: int) -> Path:
+    return (
+        _stage_root(batch_id)
+        / f"source={source}"
+        / f"year={int(year)}"
+        / f"month={int(month):02d}"
+    )
+
+
+def _stage_snapshot_dir(source: str, batch_id: str, snapshot: str) -> Path:
+    return _stage_root(batch_id) / f"source={source}" / f"snapshot={snapshot}"
+
+
+def _cleanup_stage(batch_id: str) -> None:
+    shutil.rmtree(_stage_root(batch_id), ignore_errors=True)
+
+
+def _finalize_staged(staged: list[_StagedParquet]) -> list[Path]:
+    final_paths: list[Path] = []
+    for item in staged:
+        item.final_dir.mkdir(parents=True, exist_ok=True)
+        final = item.final_dir / item.path.name
+        if final.exists():
+            final = item.final_dir / f"{item.path.stem}-{uuid.uuid4().hex[:8]}.parquet"
+        item.path.rename(final)
+        final_paths.append(final)
+    return final_paths
+
+
+def _parsed_timestamps(frame: pd.DataFrame, column: str) -> list[datetime | None]:
+    if column not in frame.columns:
+        return [None] * len(frame)
+    return frame[column].map(_parse_ts).tolist()
+
+
+def _stage_incremental_frame(
+    spec: DatasetSpec,
+    frame: pd.DataFrame,
+    batch_id: str,
+) -> tuple[list[tuple[int, int]], list[_StagedParquet]]:
+    assert spec.partition_column is not None
+    frame, partitions = _assign_partitions(
+        frame, spec.partition_column, require_parseable=False
+    )
+
+    sort_cols: list[str] = []
+    if spec.watermark_column and spec.watermark_column in frame.columns:
+        sort_cols.append(spec.watermark_column)
+    sort_cols.extend(column for column in (":id", "id") if column in frame.columns)
+    if sort_cols:
+        frame = frame.sort_values(sort_cols, kind="mergesort").reset_index(drop=True)
+
+    renamed = _apply_columns_map(
+        frame.drop(columns=["__year", "__month"]), spec.columns_map
+    )
+    renamed["__year"] = frame["__year"].values
+    renamed["__month"] = frame["__month"].values
+
+    staged: list[_StagedParquet] = []
+    for year, month in partitions:
+        mask = (renamed["__year"] == year) & (renamed["__month"] == month)
+        chunk = renamed.loc[mask].drop(columns=["__year", "__month"])
+        if chunk.empty:
+            continue
+        path = write_parquet_to_dir(
+            chunk,
+            _stage_incremental_dir(spec.id, batch_id, year, month),
+        )
+        staged.append(
+            _StagedParquet(path=path, final_dir=raw_path(spec.id, year, month))
+        )
+    return partitions, staged
 
 
 def ingest(
@@ -361,98 +499,106 @@ def ingest(
         )
         order = f"{spec.watermark_column} ASC, :id ASC"
 
-        collected: list[dict[str, object]] = []
-        for page in client.fetch(spec.id, where=where, order=order):
-            collected.extend(page)
-
-        if not collected:
-            LOG.info("ingest %s: no new rows since %s", spec.id, current)
-            return IngestResult(
-                dataset_id=spec.id,
-                rows=0,
-                partitions=[],
-                parquet_paths=[],
-                watermark_delta=None,
-                coverage=None,
-                batch_id=batch_id,
-                started_at=started_at,
-                finished_at=datetime.now(tz=UTC),
-                skipped_reason="no_new_rows",
-            )
-
-        frame = _rows_to_frame(collected)
-
-        coverage = assert_coverage(spec.id, frame, spec.required_coverage)
-        write_coverage_report(coverage)
-
-        # Parse watermark column — we need the max BEFORE column rename.
-        # Rows with unparseable watermark survive (see _assign_partitions) but
-        # don't contribute to max(); if every row is unparseable, refuse to
-        # advance because the column is almost certainly misnamed.
-        parsed_wm = frame[spec.watermark_column].map(_parse_ts)
-        parseable = [ts for ts in parsed_wm.tolist() if ts is not None]
-        if not parseable:
-            msg = (
-                f"{spec.id}: zero rows have a parseable "
-                f"{spec.watermark_column!r} — likely a column-name typo"
-            )
-            raise IngestError(msg)
-        unparseable = len(parsed_wm) - len(parseable)
-        if unparseable:
-            LOG.warning(
-                "ingest %s: %s of %s rows have unparseable %s and will land in "
-                "the year=0/month=0 sentinel partition",
-                spec.id,
-                unparseable,
-                len(parsed_wm),
-                spec.watermark_column,
-            )
-        max_ts = max(parseable)
-
-        frame, partitions = _assign_partitions(frame, spec.partition_column)
-
-        # Deterministic sort: by watermark column asc, then :id if present.
-        sort_cols = [spec.watermark_column]
-        if ":id" in frame.columns:
-            sort_cols.append(":id")
-        elif "id" in frame.columns:
-            sort_cols.append("id")
-        frame = frame.sort_values(sort_cols, kind="mergesort").reset_index(drop=True)
-
-        renamed = _apply_columns_map(
-            frame.drop(columns=["__year", "__month"]), spec.columns_map
-        )
-        renamed["__year"] = frame["__year"].values
-        renamed["__month"] = frame["__month"].values
-
+        rows = 0
+        parseable_count = 0
+        unparseable = 0
+        max_ts: datetime | None = None
+        partitions_seen: set[tuple[int, int]] = set()
+        staged: list[_StagedParquet] = []
         parquet_paths: list[Path] = []
-        for year, month in partitions:
-            mask = (renamed["__year"] == year) & (renamed["__month"] == month)
-            chunk = renamed.loc[mask].drop(columns=["__year", "__month"])
-            if chunk.empty:
-                continue
-            path = append_parquet(chunk, source=spec.id, year=year, month=month)
-            parquet_paths.append(path)
+        coverage: CoverageReport | None = None
+        delta: wm.WatermarkDelta | None = None
+        coverage_acc = _CoverageAccumulator(spec.id, spec.required_coverage)
 
-        delta = wm.advance(
-            source=spec.id,
-            rows=len(frame),
-            batch_id=batch_id,
-            last_seen_ts=max_ts,
-            force=full_refresh,
-        )
+        try:
+            for page in client.fetch(spec.id, where=where, order=order):
+                frame = _rows_to_frame(page)
+                if frame.empty:
+                    continue
+
+                rows += len(frame)
+                coverage_acc.update(frame)
+
+                parsed_wm = _parsed_timestamps(frame, spec.watermark_column)
+                page_parseable = [ts for ts in parsed_wm if ts is not None]
+                parseable_count += len(page_parseable)
+                unparseable += len(parsed_wm) - len(page_parseable)
+                if page_parseable:
+                    page_max = max(page_parseable)
+                    max_ts = page_max if max_ts is None else max(max_ts, page_max)
+
+                partitions, page_staged = _stage_incremental_frame(
+                    spec, frame, batch_id
+                )
+                partitions_seen.update(partitions)
+                staged.extend(page_staged)
+
+            if rows == 0:
+                _cleanup_stage(batch_id)
+                LOG.info("ingest %s: no new rows since %s", spec.id, current)
+                return IngestResult(
+                    dataset_id=spec.id,
+                    rows=0,
+                    partitions=[],
+                    parquet_paths=[],
+                    watermark_delta=None,
+                    coverage=None,
+                    batch_id=batch_id,
+                    started_at=started_at,
+                    finished_at=datetime.now(tz=UTC),
+                    skipped_reason="no_new_rows",
+                )
+
+            coverage = coverage_acc.assert_pass()
+            write_coverage_report(coverage)
+
+            # Rows with unparseable watermark survive in sentinel partitions,
+            # but at least one parseable row is required to advance safely.
+            if parseable_count == 0 or max_ts is None:
+                msg = (
+                    f"{spec.id}: zero rows have a parseable "
+                    f"{spec.watermark_column!r} — likely a column-name typo"
+                )
+                raise IngestError(msg)
+            if unparseable:
+                LOG.warning(
+                    "ingest %s: %s of %s rows have unparseable %s and will land "
+                    "in the year=0/month=0 sentinel partition",
+                    spec.id,
+                    unparseable,
+                    rows,
+                    spec.watermark_column,
+                )
+
+            parquet_paths = _finalize_staged(staged)
+            delta = wm.advance(
+                source=spec.id,
+                rows=rows,
+                batch_id=batch_id,
+                last_seen_ts=max_ts,
+                force=full_refresh,
+            )
+        except Exception:
+            _cleanup_stage(batch_id)
+            raise
+        else:
+            _cleanup_stage(batch_id)
 
         finished_at = datetime.now(tz=UTC)
+        partitions = sorted(partitions_seen)
+        assert max_ts is not None
+        assert coverage is not None
+        assert delta is not None
         LOG.info(
             "ingest %s: %s rows across %s partitions (watermark %s)",
             spec.id,
-            len(frame),
+            rows,
             len(partitions),
             max_ts.isoformat(),
         )
         return IngestResult(
             dataset_id=spec.id,
-            rows=len(frame),
+            rows=rows,
             partitions=partitions,
             parquet_paths=parquet_paths,
             watermark_delta=delta,
@@ -480,49 +626,74 @@ def _ingest_snapshot(
     """
     snapshot_id = started_at.strftime("%Y%m%dT%H%M%SZ")
 
-    collected: list[dict[str, object]] = []
-    for page in client.fetch(spec.id, where=None, order=":id ASC"):
-        collected.extend(page)
+    rows = 0
+    staged: list[_StagedParquet] = []
+    parquet_paths: list[Path] = []
+    coverage: CoverageReport | None = None
+    coverage_acc = _CoverageAccumulator(spec.id, spec.required_coverage)
 
-    if not collected:
-        LOG.info("ingest %s: snapshot returned 0 rows", spec.id)
-        return IngestResult(
-            dataset_id=spec.id,
-            rows=0,
-            partitions=[],
-            parquet_paths=[],
-            watermark_delta=None,
-            coverage=None,
-            batch_id=batch_id,
-            started_at=started_at,
-            finished_at=datetime.now(tz=UTC),
-            skipped_reason="empty_snapshot",
-        )
+    try:
+        for page in client.fetch(spec.id, where=None, order=":id ASC"):
+            frame = _rows_to_frame(page)
+            if frame.empty:
+                continue
+            rows += len(frame)
+            coverage_acc.update(frame)
 
-    frame = _rows_to_frame(collected)
-    coverage = assert_coverage(spec.id, frame, spec.required_coverage)
-    write_coverage_report(coverage)
+            sort_cols = [column for column in (":id", "id") if column in frame.columns]
+            if sort_cols:
+                frame = frame.sort_values(sort_cols, kind="mergesort").reset_index(
+                    drop=True
+                )
+            renamed = _apply_columns_map(frame, spec.columns_map)
+            path = write_parquet_to_dir(
+                renamed,
+                _stage_snapshot_dir(spec.id, batch_id, snapshot_id),
+            )
+            staged.append(
+                _StagedParquet(
+                    path=path,
+                    final_dir=raw_snapshot_path(spec.id, snapshot_id),
+                )
+            )
 
-    if ":id" in frame.columns:
-        frame = frame.sort_values(":id", kind="mergesort").reset_index(drop=True)
-    elif "id" in frame.columns:
-        frame = frame.sort_values("id", kind="mergesort").reset_index(drop=True)
+        if rows == 0:
+            _cleanup_stage(batch_id)
+            LOG.info("ingest %s: snapshot returned 0 rows", spec.id)
+            return IngestResult(
+                dataset_id=spec.id,
+                rows=0,
+                partitions=[],
+                parquet_paths=[],
+                watermark_delta=None,
+                coverage=None,
+                batch_id=batch_id,
+                started_at=started_at,
+                finished_at=datetime.now(tz=UTC),
+                skipped_reason="empty_snapshot",
+            )
 
-    renamed = _apply_columns_map(frame, spec.columns_map)
-    path = write_snapshot_parquet(renamed, source=spec.id, snapshot=snapshot_id)
+        coverage = coverage_acc.assert_pass()
+        write_coverage_report(coverage)
+        parquet_paths = _finalize_staged(staged)
+    except Exception:
+        _cleanup_stage(batch_id)
+        raise
+    else:
+        _cleanup_stage(batch_id)
 
     finished_at = datetime.now(tz=UTC)
     LOG.info(
         "ingest %s: snapshot %s wrote %s rows",
         spec.id,
         snapshot_id,
-        len(frame),
+        rows,
     )
     return IngestResult(
         dataset_id=spec.id,
-        rows=len(frame),
+        rows=rows,
         partitions=[],
-        parquet_paths=[path],
+        parquet_paths=parquet_paths,
         watermark_delta=None,
         coverage=coverage,
         batch_id=batch_id,
