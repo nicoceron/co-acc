@@ -17,7 +17,7 @@ import shutil
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 import httpx
@@ -47,6 +47,7 @@ DEFAULT_DOMAIN = "www.datos.gov.co"
 DEFAULT_PAGE_SIZE = 10_000
 DEFAULT_MAX_PAGES = 10_000
 DEFAULT_TIMEOUT = 60.0
+DEFAULT_WATERMARK_FUTURE_GRACE_DAYS = 1
 
 
 class IngestError(RuntimeError):
@@ -56,6 +57,13 @@ class IngestError(RuntimeError):
 def _positive_int(value: int, *, name: str) -> int:
     if value < 1:
         msg = f"{name} must be >= 1, got {value}"
+        raise IngestError(msg)
+    return value
+
+
+def _non_negative_int(value: int, *, name: str) -> int:
+    if value < 0:
+        msg = f"{name} must be >= 0, got {value}"
         raise IngestError(msg)
     return value
 
@@ -70,6 +78,18 @@ def _env_int(name: str, default: int) -> int:
         msg = f"{name} must be an integer, got {raw!r}"
         raise IngestError(msg) from exc
     return _positive_int(value, name=name)
+
+
+def _env_non_negative_int(name: str, default: int) -> int:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        msg = f"{name} must be an integer, got {raw!r}"
+        raise IngestError(msg) from exc
+    return _non_negative_int(value, name=name)
 
 
 @dataclass
@@ -294,6 +314,23 @@ def _iso_for_where(dt: datetime) -> str:
     return dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.000")
 
 
+def _as_utc(dt: datetime) -> datetime:
+    return dt.astimezone(UTC) if dt.tzinfo else dt.replace(tzinfo=UTC)
+
+
+def _future_watermark_cutoff(*, now: datetime | None = None) -> datetime:
+    grace_days = _env_non_negative_int(
+        "COACC_WATERMARK_FUTURE_GRACE_DAYS",
+        DEFAULT_WATERMARK_FUTURE_GRACE_DAYS,
+    )
+    base = _as_utc(now or datetime.now(tz=UTC))
+    return base + timedelta(days=grace_days)
+
+
+def _is_after_cutoff(ts: datetime, cutoff: datetime | None) -> bool:
+    return cutoff is not None and _as_utc(ts) > _as_utc(cutoff)
+
+
 def _rows_to_frame(rows: Iterable[dict[str, object]]) -> pd.DataFrame:
     frame = pd.DataFrame(list(rows))
     if frame.empty:
@@ -305,15 +342,24 @@ def _rows_to_frame(rows: Iterable[dict[str, object]]) -> pd.DataFrame:
 
 
 def _assign_partitions(
-    frame: pd.DataFrame, partition_column: str, *, require_parseable: bool = True
+    frame: pd.DataFrame,
+    partition_column: str,
+    *,
+    require_parseable: bool = True,
+    max_partition_ts: datetime | None = None,
 ) -> tuple[pd.DataFrame, list[tuple[int, int]]]:
     """Assign year/month partitions; rows without a parseable partition_column
-    are routed to the sentinel ``year=0/month=0`` partition so they survive
-    incremental ingest. Rejecting them entirely would lose data permanently —
-    Socrata's ``$where`` on a date column never returns rows whose value is
-    NULL, so the next incremental run cannot re-pull them.
+    or with an implausibly future partition timestamp are routed to the sentinel
+    ``year=0/month=0`` partition so they survive incremental ingest. Rejecting
+    them entirely would lose data permanently — Socrata's ``$where`` on a date
+    column never returns rows whose value is NULL, so the next incremental run
+    cannot re-pull them.
     """
     parsed = frame[partition_column].map(_parse_ts)
+    if max_partition_ts is not None:
+        parsed = parsed.map(
+            lambda d: None if d is not None and _is_after_cutoff(d, max_partition_ts) else d
+        )
     if require_parseable and parsed.notna().sum() == 0:
         msg = (
             f"{partition_column} is unparseable for every row "
@@ -442,10 +488,15 @@ def _stage_incremental_frame(
     spec: DatasetSpec,
     frame: pd.DataFrame,
     batch_id: str,
+    *,
+    max_partition_ts: datetime | None,
 ) -> tuple[list[tuple[int, int]], list[_StagedParquet]]:
     assert spec.partition_column is not None
     frame, partitions = _assign_partitions(
-        frame, spec.partition_column, require_parseable=False
+        frame,
+        spec.partition_column,
+        require_parseable=False,
+        max_partition_ts=max_partition_ts,
     )
 
     sort_cols: list[str] = []
@@ -535,7 +586,9 @@ def ingest(
         rows = 0
         parseable_count = 0
         unparseable = 0
+        future_timestamps = 0
         max_ts: datetime | None = None
+        max_plausible_ts = _future_watermark_cutoff()
         partitions_seen: set[tuple[int, int]] = set()
         staged: list[_StagedParquet] = []
         parquet_paths: list[Path] = []
@@ -553,7 +606,14 @@ def ingest(
                 coverage_acc.update(frame)
 
                 parsed_wm = _parsed_timestamps(frame, spec.watermark_column)
-                page_parseable = [ts for ts in parsed_wm if ts is not None]
+                page_parseable: list[datetime] = []
+                for ts in parsed_wm:
+                    if ts is None:
+                        continue
+                    if _is_after_cutoff(ts, max_plausible_ts):
+                        future_timestamps += 1
+                        continue
+                    page_parseable.append(_as_utc(ts))
                 parseable_count += len(page_parseable)
                 unparseable += len(parsed_wm) - len(page_parseable)
                 if page_parseable:
@@ -561,7 +621,10 @@ def ingest(
                     max_ts = page_max if max_ts is None else max(max_ts, page_max)
 
                 partitions, page_staged = _stage_incremental_frame(
-                    spec, frame, batch_id
+                    spec,
+                    frame,
+                    batch_id,
+                    max_partition_ts=max_plausible_ts,
                 )
                 partitions_seen.update(partitions)
                 staged.extend(page_staged)
@@ -593,14 +656,26 @@ def ingest(
                     f"{spec.watermark_column!r} — likely a column-name typo"
                 )
                 raise IngestError(msg)
-            if unparseable:
+            unparseable_only = unparseable - future_timestamps
+            if unparseable_only:
                 LOG.warning(
                     "ingest %s: %s of %s rows have unparseable %s and will land "
                     "in the year=0/month=0 sentinel partition",
                     spec.id,
-                    unparseable,
+                    unparseable_only,
                     rows,
                     spec.watermark_column,
+                )
+            if future_timestamps:
+                LOG.warning(
+                    "ingest %s: %s of %s rows have future %s after %s and will "
+                    "land in the year=0/month=0 sentinel partition without "
+                    "advancing the watermark",
+                    spec.id,
+                    future_timestamps,
+                    rows,
+                    spec.watermark_column,
+                    max_plausible_ts.isoformat(),
                 )
 
             parquet_paths = _finalize_staged(staged)

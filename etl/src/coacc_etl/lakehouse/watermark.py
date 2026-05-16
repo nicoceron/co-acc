@@ -3,11 +3,11 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
+import pyarrow as pa  # type: ignore[import-untyped]
+import pyarrow.parquet as pq  # type: ignore[import-untyped]
 
 from coacc_etl.lakehouse.paths import meta_path
 
@@ -52,7 +52,7 @@ def _utc(value: datetime) -> datetime:
 def _read_frame(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
-    return pq.read_table(path).to_pandas()
+    return cast("pd.DataFrame", pq.read_table(path).to_pandas())
 
 
 def _write_frame_atomic(frame: pd.DataFrame, path: Path) -> None:

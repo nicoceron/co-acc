@@ -13,7 +13,6 @@ import os
 import re
 import time
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 
 import httpx
 
@@ -22,9 +21,6 @@ from coacc_etl.qualification.promotion import (
     _find_join_keys,
     _normalize_col,
 )
-
-if TYPE_CHECKING:
-    pass
 
 LOG = logging.getLogger("source_qualification")
 

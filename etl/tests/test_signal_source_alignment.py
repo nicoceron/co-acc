@@ -118,7 +118,7 @@ def test_every_signal_source_resolves_to_yaml_or_known_backlog() -> None:
 
     deps = _load_signal_deps()
     referenced = set()
-    for sig_id, payload in deps.items():
+    for payload in deps.values():
         for key in ("sources", "required", "optional"):
             referenced.update(payload.get(key) or [])
 

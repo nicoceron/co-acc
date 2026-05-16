@@ -267,6 +267,9 @@ as a 41.9M-row source.
      `DEFAULT_MAX_PAGES=10000` (100M-row cap), or override with
      `COACC_SOCRATA_PAGE_SIZE`, `COACC_SOCRATA_MAX_PAGES`,
      `coacc-etl ingest --page-size`, and `--max-pages`;
+   - keep `COACC_WATERMARK_FUTURE_GRACE_DAYS=1` unless a source-specific
+     investigation justifies changing it; timestamps beyond that ceiling
+     are preserved in the sentinel partition but do not advance watermarks;
    - raise page size toward `50k` only if Socrata accepts it reliably;
      lower it if rate limits, timeouts, or per-page memory pressure appear;
    - run the focused ingest tests and confirm failed coverage leaves no
@@ -296,10 +299,11 @@ as a 41.9M-row source.
    - Partition spread: `find lake/raw/source=<id>/year=*/month=*/ -type d
      | wc -l` should match the dataset's date range (e.g. SECOP I goes
      back to 2011 → ~180 partitions).
-   - `year=0/month=00/` partition (sentinel for unparseable timestamps):
-     row count divided by total should be ≪1%. If it's >5%, escalate —
-     either the YAML's watermark column is wrong or the upstream has a
-     systemic NULL pattern worth investigating before proceeding.
+   - `year=0/month=00/` partition (sentinel for unparseable or
+     implausibly future timestamps): row count divided by total should be
+     ≪1%. If it's >5%, escalate — either the YAML's watermark column is
+     wrong or the upstream has a systemic NULL/future-date pattern worth
+     investigating before proceeding.
 6. **Snapshot of run results.** Append one row per ingest to
    `docs/runbooks/ingest_log.md` with: dataset, start, end, rows in,
    rows out, coverage pass/fail, sentinel-partition fraction, operator note.
@@ -338,6 +342,10 @@ as a 41.9M-row source.
 - **Schema drift mid-run:** Socrata occasionally adds columns. The
   ingester writes via `union_by_name`, so a new column lands as NULL in
   prior partitions. Note in `ingest_log.md` and proceed.
+- **Bogus future dates:** upstream rows can carry dates like 2099. The
+  ingester preserves those rows in `year=0/month=00/` and excludes them
+  from watermark advancement, so a single bad date cannot poison future
+  incremental runs.
 
 ### 3.5 Rollback
 
@@ -1660,6 +1668,14 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   says 41.9M). Runner order now follows corrected source semantics and
   runs the largest source last, superseding the 2026-05-08 `wi7w-2nvm`
   first decision.
+- **2026-05-15** — Phase 7 live smoke exposed a future-date watermark
+  hazard in `rpmr-utcd`: 109 of 14,865 smoke rows had
+  `fecha_de_firma_del_contrato` beyond the plausible future window,
+  including far-future years. The Socrata ingester now preserves those
+  rows in `year=0/month=00/`, excludes them from watermark advancement,
+  and documents the configurable `COACC_WATERMARK_FUTURE_GRACE_DAYS`
+  ceiling. Corrected smoke for `rpmr-utcd` advanced to
+  `2026-05-15T00:00:00+00:00` instead of the corrupt 2099 value.
 
 (Append new decisions as they're made. One line per decision.)
 

@@ -172,11 +172,12 @@ def append_ingest_log(record: Phase7RunRecord, *, log_path: Path | None = None) 
             "|---|---|---|---:|---:|---|---|---|\n",
             encoding="utf-8",
         )
+    note = record.note.replace("|", "/").replace("\r", " ").replace("\n", " ")
     line = (
         f"| {record.finished_at.astimezone(UTC).isoformat()} "
         f"| `{record.dataset_id}` | {record.mode} | {record.status} "
         f"| {record.rows} | {record.coverage} | {record.watermark} "
-        f"| {record.note.replace('|', '/')} |\n"
+        f"| {note} |\n"
     )
     with path.open("a", encoding="utf-8") as handle:
         handle.write(line)

@@ -132,7 +132,7 @@ def test_phase7_disk_budget_blocks_before_ingest() -> None:
 
 def test_phase7_failure_is_logged_and_raises(tmp_path: Path) -> None:
     def fake_ingest(_spec, **_kwargs) -> IngestResult:
-        raise RuntimeError("boom")
+        raise RuntimeError("boom\nwith | separator")
 
     log_path = tmp_path / "ingest_log.md"
     with pytest.raises(Phase7RunError):
@@ -146,4 +146,5 @@ def test_phase7_failure_is_logged_and_raises(tmp_path: Path) -> None:
 
     text = log_path.read_text(encoding="utf-8")
     assert "failed" in text
-    assert "boom" in text
+    assert "boom with / separator" in text
+    assert "boom\nwith" not in text

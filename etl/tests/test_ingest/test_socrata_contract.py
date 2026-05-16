@@ -169,6 +169,26 @@ def test_partition_sentinel_for_unparseable_rows(
     assert result.watermark_delta.last_seen_ts == datetime(2025, 1, 15, tzinfo=UTC)
 
 
+def test_future_watermark_rows_do_not_poison_state(
+    hallazgos_spec: DatasetSpec,
+    hallazgos_page: list[dict[str, object]],
+    fake_client_factory,
+) -> None:
+    """Implausible future source dates survive without advancing state."""
+    page = list(hallazgos_page)
+    page[1] = dict(page[1], fecha_recibo_traslado="2099-12-30T00:00:00.000")
+    client = fake_client_factory([page])
+
+    result = ingest(hallazgos_spec, client=client)
+
+    assert result.rows == 3
+    assert set(result.partitions) == {(0, 0), (2024, 12), (2025, 1)}
+    assert result.watermark_delta is not None
+    assert result.watermark_delta.last_seen_ts == datetime(2025, 1, 15, tzinfo=UTC)
+    assert wm.get(hallazgos_spec.id) is not None
+    assert not list(raw_source_path(hallazgos_spec.id).glob("year=2099/**"))
+
+
 def test_partition_gate_rejects_when_all_rows_unparseable(
     hallazgos_spec: DatasetSpec,
     hallazgos_page: list[dict[str, object]],

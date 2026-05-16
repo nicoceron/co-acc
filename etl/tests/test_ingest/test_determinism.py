@@ -8,12 +8,16 @@ watermark deltas.
 """
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pandas as pd
 import pyarrow.parquet as pq
 
-from coacc_etl.catalog import DatasetSpec
 from coacc_etl.ingest import ingest
 from coacc_etl.lakehouse.paths import raw_source_path
+
+if TYPE_CHECKING:
+    from coacc_etl.catalog import DatasetSpec
 
 
 def _read_canonical_frame(source: str) -> pd.DataFrame:

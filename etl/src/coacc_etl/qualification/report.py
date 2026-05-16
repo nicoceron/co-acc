@@ -5,7 +5,7 @@ from __future__ import annotations
 import csv
 import logging
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from coacc_etl.qualification.promotion import (
     CATALOG_FIELDS,
@@ -32,7 +32,7 @@ def read_catalog(path: Path) -> list[TriageCatalogRow]:
                 for part in (r.get("probe_notes") or "").split(";")
                 if part.strip()
             ]
-            row_kwargs = {
+            row_kwargs: dict[str, Any] = {
                 field_name: r.get(field_name, "")
                 for field_name in CATALOG_FIELDS
                 if field_name != "probe_notes"

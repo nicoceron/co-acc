@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import os
 import sys
 
 from coacc_etl.streaming import _socrata_request
@@ -55,7 +54,11 @@ def main() -> None:
     )
     parser.add_argument("dataset_id", help="Socrata dataset ID (e.g. jbjy-vk9h)")
     parser.add_argument("--where", default=None, help="Optional $where clause")
-    parser.add_argument("--domain", default=None, help="Socrata domain (default: SOCRATA_DOMAIN env)")
+    parser.add_argument(
+        "--domain",
+        default=None,
+        help="Socrata domain (default: SOCRATA_DOMAIN env)",
+    )
     args = parser.parse_args()
 
     count = socrata_live_count(args.dataset_id, where=args.where, domain=args.domain)

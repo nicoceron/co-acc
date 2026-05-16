@@ -17,7 +17,7 @@ import json
 import logging
 import os
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import httpx
 
@@ -142,7 +142,7 @@ def _try_llm_review(
 def _load_cache(cache_path: Path | None) -> dict[str, dict[str, Any]]:
     if cache_path and cache_path.exists():
         with cache_path.open("r", encoding="utf-8") as f:
-            return json.load(f)
+            return cast("dict[str, dict[str, Any]]", json.load(f))
     return {}
 
 
@@ -155,7 +155,7 @@ def _save_cache(cache: dict[str, dict[str, Any]], cache_path: Path | None) -> No
 
 def _call_anthropic(prompt: str, *, model: str, api_key: str, max_tokens: int = 2048) -> str:
     try:
-        import anthropic
+        import anthropic  # type: ignore[import-not-found]
     except ImportError:
         LOG.error("anthropic package not installed. Run: pip install anthropic")
         raise
@@ -165,12 +165,12 @@ def _call_anthropic(prompt: str, *, model: str, api_key: str, max_tokens: int = 
         max_tokens=max_tokens,
         messages=[{"role": "user", "content": prompt}],
     )
-    return response.content[0].text
+    return cast("str", response.content[0].text)
 
 
 def _call_openai(prompt: str, *, model: str, api_key: str, max_tokens: int = 2048) -> str:
     try:
-        from openai import OpenAI
+        from openai import OpenAI  # type: ignore[import-not-found]
     except ImportError:
         LOG.error("openai package not installed. Run: pip install openai")
         raise
@@ -180,7 +180,7 @@ def _call_openai(prompt: str, *, model: str, api_key: str, max_tokens: int = 204
         max_tokens=max_tokens,
         messages=[{"role": "user", "content": prompt}],
     )
-    return response.choices[0].message.content
+    return cast("str", response.choices[0].message.content or "")
 
 
 def _call_gemini(

@@ -6,12 +6,15 @@ These tests never hit live Socrata. ``FakeSocrataClient`` satisfies the same
 from __future__ import annotations
 
 import os
-from collections.abc import Iterator
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 from coacc_etl.catalog import DatasetSpec
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from pathlib import Path
 
 
 @pytest.fixture(autouse=True)

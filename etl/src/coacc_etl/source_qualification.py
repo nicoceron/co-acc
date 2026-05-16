@@ -8,6 +8,7 @@ It also re-imports a handful of stdlib + third-party modules at top level
 because the legacy test suite monkey-patches them via this module
 (``triage.httpx``, ``triage.os``, ``triage.time``).
 """
+# ruff: noqa: I001
 from __future__ import annotations
 
 # Stdlib / third-party imports kept at module level for legacy monkeypatch
