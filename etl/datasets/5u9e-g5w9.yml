@@ -49,5 +49,5 @@ notes: 'Colombia: SIGEP Puestos Sensibles a la Corrupción — public servants i
   positions classified as corruption-sensitive (asesor, libre nombramiento,
   defense, etc.). 24k rows as of 2026-04-25, 100% coverage on join keys.
   fecha_vinculacion (hire date) is the watermark; some rows carry far-future
-  dates (e.g. 2887) that will land in dated partitions but the parquet write
-  remains correct.'
+  dates (e.g. 2887) that are preserved in the sentinel partition and excluded
+  from watermark advancement by the generic ingester.'

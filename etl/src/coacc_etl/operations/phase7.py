@@ -25,7 +25,8 @@ if TYPE_CHECKING:
 Phase7Mode = Literal["smoke", "full"]
 
 PHASE7_DATASET_IDS: tuple[str, ...] = (
-    "2jzx-383z",
+    "5u9e-g5w9",
+    "8tz7-h3eu",
     "jbjy-vk9h",
     "qddk-cgux",
     "p6dx-8zbt",
@@ -46,7 +47,8 @@ _REPO_ROOT = Path(__file__).resolve().parents[4]
 _DEFAULT_LOG_PATH = _REPO_ROOT / "docs" / "runbooks" / "ingest_log.md"
 
 _SMOKE_FALLBACK_SINCE: dict[str, datetime] = {
-    "2jzx-383z": datetime(2025, 12, 10, tzinfo=UTC),
+    "5u9e-g5w9": datetime(2022, 1, 1, tzinfo=UTC),
+    "8tz7-h3eu": datetime(2022, 12, 1, tzinfo=UTC),
     "jbjy-vk9h": datetime(2026, 4, 27, tzinfo=UTC),
     "qddk-cgux": datetime(2017, 12, 24, tzinfo=UTC),
     "p6dx-8zbt": datetime(2026, 5, 6, tzinfo=UTC),

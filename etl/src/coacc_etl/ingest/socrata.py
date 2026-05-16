@@ -311,7 +311,7 @@ def _parse_dmy(raw: str) -> datetime | None:
 
 
 def _iso_for_where(dt: datetime) -> str:
-    return dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.000")
+    return dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")
 
 
 def _as_utc(dt: datetime) -> datetime:
@@ -643,6 +643,27 @@ def ingest(
                     started_at=started_at,
                     finished_at=datetime.now(tz=UTC),
                     skipped_reason="no_new_rows",
+                )
+
+            if parseable_count == 0 and future_timestamps == rows:
+                _cleanup_stage(batch_id)
+                LOG.info(
+                    "ingest %s: %s rows are beyond plausible watermark cutoff %s",
+                    spec.id,
+                    rows,
+                    max_plausible_ts.isoformat(),
+                )
+                return IngestResult(
+                    dataset_id=spec.id,
+                    rows=0,
+                    partitions=[],
+                    parquet_paths=[],
+                    watermark_delta=None,
+                    coverage=None,
+                    batch_id=batch_id,
+                    started_at=started_at,
+                    finished_at=datetime.now(tz=UTC),
+                    skipped_reason="only_future_watermarks",
                 )
 
             coverage = coverage_acc.assert_pass()

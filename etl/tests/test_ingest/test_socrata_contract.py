@@ -19,6 +19,7 @@ import pytest
 from coacc_etl.catalog import DatasetSpec
 from coacc_etl.ingest import IngestError, SocrataClient, assert_coverage, ingest
 from coacc_etl.ingest.coverage import CoverageFailure
+from coacc_etl.ingest.socrata import _iso_for_where
 from coacc_etl.lakehouse import watermark as wm
 from coacc_etl.lakehouse.paths import meta_path, raw_source_path
 
@@ -122,6 +123,12 @@ def test_socrata_client_rejects_invalid_pagination_env(monkeypatch) -> None:
         SocrataClient.from_env()
 
 
+def test_incremental_where_preserves_fractional_seconds() -> None:
+    value = datetime(2022, 12, 13, 14, 57, 31, 146000, tzinfo=UTC)
+
+    assert _iso_for_where(value) == "2022-12-13T14:57:31.146000"
+
+
 def test_coverage_failure_blocks_watermark(
     hallazgos_spec: DatasetSpec,
     hallazgos_page: list[dict[str, object]],
@@ -187,6 +194,39 @@ def test_future_watermark_rows_do_not_poison_state(
     assert result.watermark_delta.last_seen_ts == datetime(2025, 1, 15, tzinfo=UTC)
     assert wm.get(hallazgos_spec.id) is not None
     assert not list(raw_source_path(hallazgos_spec.id).glob("year=2099/**"))
+
+
+def test_future_only_incremental_page_is_skipped(
+    hallazgos_spec: DatasetSpec,
+    fake_client_factory,
+) -> None:
+    wm.set(
+        wm.Watermark(
+            source=hallazgos_spec.id,
+            last_seen_ts=datetime(2025, 1, 15, tzinfo=UTC),
+            last_batch_id="seed",
+            row_count=3,
+        )
+    )
+    page = [
+        {
+            "nit": "891580016",
+            "nombre_sujeto": "GOBERNACION DEL CAUCA",
+            "fecha_recibo_traslado": "2099-12-30T00:00:00.000",
+            "radicado": "future-only",
+        }
+    ]
+    client = fake_client_factory([page])
+
+    result = ingest(hallazgos_spec, client=client)
+
+    assert result.rows == 0
+    assert result.skipped_reason == "only_future_watermarks"
+    stored = wm.get(hallazgos_spec.id)
+    assert stored is not None
+    assert stored.last_seen_ts == datetime(2025, 1, 15, tzinfo=UTC)
+    assert not list(raw_source_path(hallazgos_spec.id).rglob("*.parquet"))
+    assert not list((meta_path() / "ingest_staging").rglob("*.parquet"))
 
 
 def test_partition_gate_rejects_when_all_rows_unparseable(

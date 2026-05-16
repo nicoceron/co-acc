@@ -64,7 +64,7 @@ updates, and the inevitable coverage-gate or schema-drift surprise.
 
 | # | Phase | Effort | Critical for finals? | Depends on | Parallelizable with |
 |---|---|---|---|---|---|
-| 7  | Operational ingest (6 large datasets, see §3) | 4 days eng + 2–4 days wall-clock | **Yes** | — | — |
+| 7  | Operational ingest (8 active datasets, see §3) | 4 days eng + 2–4 days wall-clock | **Yes** | — | — |
 | 8  | Lake reality continuous monitoring | 7–9 days | **Yes** | 7 | 9.0, 12 |
 | 9.0 | `paco_sanctions` adapter (only) — labels for Phase 13 | 4–5 days | **Yes** (promoted from 9) | 7 | 8, 12 |
 | 9   | Remaining custom adapters | 2–3 days each | **Deferred post-finals** | 7 | — |
@@ -220,7 +220,7 @@ full graph projection in Python RAM.
 
 ---
 
-## 3. Phase 7 — Operational ingest of the core large datasets
+## 3. Phase 7 — Operational ingest of the active core datasets
 
 **Owner profile:** data engineer, comfortable with overnight runs and DuckDB.
 **Prereq:** none (the YAMLs and ingester are already shipped).
@@ -237,7 +237,8 @@ have data to consume.
 
 | Dataset | YAML | ~rows | Why |
 |---|---|---|---|
-| `2jzx-383z` | SIGEP Conjunto servidores públicos | 265k | Donor → official → vendor loop |
+| `5u9e-g5w9` | SIGEP Puestos Sensibles a la Corrupción | 24k | Person-level public officials in corruption-sensitive posts |
+| `8tz7-h3eu` | Declaración de activos patrimonial servidores públicos | 328k | Person-level asset disclosures / official identity signal |
 | `jbjy-vk9h` | SECOP II Contratos Electrónicos | 5.6M | Core of every signal |
 | `qddk-cgux` | SECOP I Procesos Histórico | 6.1M | Historical procurement processes |
 | `p6dx-8zbt` | SECOP II Procesos de Contratación | 8.4M | Required by single-bidder, repeat-awards, supplier-concentration |
@@ -252,6 +253,15 @@ scope manageable, that feature is **dropped from the MVP** (see §10.3).
 and stays in Phase 7 because re-running ingest later is more expensive
 than including it now, but it runs last because the YAML now records it
 as a 41.9M-row source.
+
+**SIGEP access decision:** `2jzx-383z` (full SIGEP public-servant registry)
+is parked from the active Phase 7 sequence because live Socrata API calls now
+return `403 Forbidden` even with configured Socrata credentials, and Socrata
+catalog discovery returns no public listing. It remains in YAML as a contract
+shell for future recovery. `h8rs-jxum` is public/current but aggregate
+entity-month characterization, not a person-level substitute, so it is not
+promoted into Phase 7. The active person-level substitutes are `5u9e-g5w9`
+and `8tz7-h3eu`.
 
 ### 3.2 Implementation steps
 
@@ -280,8 +290,8 @@ as a 41.9M-row source.
    with headroom to 50 GB for Phase 9–10 datasets. Verify free disk:
    `df -h $(realpath lake/)` before starting.
 3. **Sequence the runs.** Smallest first to flush bugs:
-   `2jzx-383z → jbjy-vk9h → qddk-cgux → p6dx-8zbt → c82u-588k →
-   rpmr-utcd → wi7w-2nvm`. Don't parallelize on the same Socrata
+   `5u9e-g5w9 → 8tz7-h3eu → jbjy-vk9h → qddk-cgux → p6dx-8zbt →
+   c82u-588k → rpmr-utcd → wi7w-2nvm`. Don't parallelize on the same Socrata
    domain — share the rate limiter, keep the operator log linear. Use
    `make ingest-phase7-smoke` for the bounded live verification pass
    and `make ingest-phase7-full` for the guarded full-refresh sequence.
@@ -345,7 +355,9 @@ as a 41.9M-row source.
 - **Bogus future dates:** upstream rows can carry dates like 2099. The
   ingester preserves those rows in `year=0/month=00/` and excludes them
   from watermark advancement, so a single bad date cannot poison future
-  incremental runs.
+  incremental runs. If an incremental page contains only future-dated rows,
+  the run is recorded as `only_future_watermarks` and skipped until those
+  dates become plausible.
 
 ### 3.5 Rollback
 
@@ -707,7 +719,8 @@ class SignalFeatureRow(BaseModel):
 
 1. **NIT canonicalization (smallest first).** `canonical_nit.py`:
    - **Scope:** entity NITs only. Person identifiers (cédulas) come
-     from SIGEP servidores (`2jzx-383z`) and are handled in
+     from the active Phase 7 SIGEP/person datasets (`5u9e-g5w9`,
+     `8tz7-h3eu`; `2jzx-383z` remains parked while gated) and are handled in
      `canonical_cedula.py` under `dim_person` (step 3 below) — they
      have a different structure (variable length, no DV, sometimes
      pasaporte alphanumeric for foreign nationals). Don't conflate.
@@ -735,8 +748,8 @@ class SignalFeatureRow(BaseModel):
 3. **`dim_buyer` and `dim_person`:** mirror with appropriate sources.
    `dim_person` builder ships its own `canonical_cedula()` (variable
    length, no DV; pasaporte handled as `foreign_id`). `dim_person`
-   sources include SIGEP servidores (`2jzx-383z`) — the only Phase 7
-   source that's cédula-keyed. Add a contract test that no row in
+   sources include `5u9e-g5w9` and `8tz7-h3eu` while `2jzx-383z`
+   remains gated. Add a contract test that no row in
    `dim_person` has a `nit_canonical` set (cross-pollination guard).
 4. **Signal feature builders.** Start with two:
    - `procurement_sanctioned_supplier_awarded`: inner-join SECOP II
@@ -1676,6 +1689,20 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   and documents the configurable `COACC_WATERMARK_FUTURE_GRACE_DAYS`
   ceiling. Corrected smoke for `rpmr-utcd` advanced to
   `2026-05-15T00:00:00+00:00` instead of the corrupt 2099 value.
+- **2026-05-16** — `2jzx-383z` parked from active Phase 7 after live
+  verification showed Socrata `403 Forbidden` on direct API reads with
+  and without configured credentials, plus no public catalog result for
+  the dataset id. Active person-level substitutes are now `5u9e-g5w9`
+  (SIGEP corruption-sensitive posts) and `8tz7-h3eu` (asset declarations).
+  `h8rs-jxum` was inspected but rejected as a Phase 7 substitute because
+  it is aggregate entity-month characterization, not person-level data.
+- **2026-05-16** — Incremental Socrata `$where` timestamps now preserve
+  microseconds. Rationale: `8tz7-h3eu` stores
+  `2022-12-13T14:57:31.146`; truncating the lake watermark to `.000`
+  re-pulled the same row on every smoke run. Future-only pages now skip
+  as `only_future_watermarks` instead of failing as a column-name typo;
+  this handles `5u9e-g5w9` and `rpmr-utcd` rows whose source dates are
+  beyond the one-day future grace window.
 
 (Append new decisions as they're made. One line per decision.)
 

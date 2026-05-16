@@ -49,4 +49,5 @@ notes: 'Colombia: SIGEP Conjunto servidores públicos — full registry of
   Note: catalog.proven.csv listed idmunicipioentidad as a join key but that
   column no longer exists in the current schema; corrected to use
   iddepartamentodenacimiento + idmunicipiodenacimiento for divipola joins
-  and codigosigep for entity.'
+  and codigosigep for entity. Parked from active Phase 7 on 2026-05-16 because
+  live Socrata reads return 403 Forbidden even with configured credentials.'
