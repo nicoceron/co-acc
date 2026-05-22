@@ -6,6 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 
 ---
 
+## [Unreleased]
+
+### Changed
+- Made Phase 7 full ingest more resilient for large Socrata sources with
+  adaptive request timeouts, retryable malformed JSON responses, sentinel
+  partitioning for missing date columns, and keyset pagination for the
+  multi-million-row core datasets.
+
 ## [v0.4.0] - 2026-03-02
 
 ### Added

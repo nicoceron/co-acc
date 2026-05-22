@@ -18,7 +18,7 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import httpx
 import pandas as pd
@@ -47,7 +47,10 @@ DEFAULT_DOMAIN = "www.datos.gov.co"
 DEFAULT_PAGE_SIZE = 10_000
 DEFAULT_MAX_PAGES = 10_000
 DEFAULT_TIMEOUT = 60.0
+DEFAULT_MAX_TIMEOUT = 240.0
 DEFAULT_WATERMARK_FUTURE_GRACE_DAYS = 1
+
+PaginationMode = Literal["offset", "keyset"]
 
 
 class IngestError(RuntimeError):
@@ -57,6 +60,13 @@ class IngestError(RuntimeError):
 def _positive_int(value: int, *, name: str) -> int:
     if value < 1:
         msg = f"{name} must be >= 1, got {value}"
+        raise IngestError(msg)
+    return value
+
+
+def _positive_float(value: float, *, name: str) -> float:
+    if value <= 0:
+        msg = f"{name} must be > 0, got {value}"
         raise IngestError(msg)
     return value
 
@@ -78,6 +88,18 @@ def _env_int(name: str, default: int) -> int:
         msg = f"{name} must be an integer, got {raw!r}"
         raise IngestError(msg) from exc
     return _positive_int(value, name=name)
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        value = float(raw)
+    except ValueError as exc:
+        msg = f"{name} must be a number, got {raw!r}"
+        raise IngestError(msg) from exc
+    return _positive_float(value, name=name)
 
 
 def _env_non_negative_int(name: str, default: int) -> int:
@@ -140,6 +162,8 @@ class SocrataClient:
     page_size: int = DEFAULT_PAGE_SIZE
     max_pages: int = DEFAULT_MAX_PAGES
     max_retries: int = 5
+    timeout: float = DEFAULT_TIMEOUT
+    max_timeout: float = DEFAULT_MAX_TIMEOUT
     initial_backoff: float = 1.0
     max_backoff: float = 30.0
     sleep_fn: Callable[[float], None] = field(default=time.sleep)
@@ -149,10 +173,27 @@ class SocrataClient:
         cls,
         *,
         domain: str = DEFAULT_DOMAIN,
-        timeout: float = DEFAULT_TIMEOUT,
+        timeout: float | None = None,
+        max_timeout: float | None = None,
         page_size: int | None = None,
         max_pages: int | None = None,
     ) -> SocrataClient:
+        resolved_timeout = (
+            _positive_float(timeout, name="timeout")
+            if timeout is not None
+            else _env_float("COACC_SOCRATA_TIMEOUT_SECONDS", DEFAULT_TIMEOUT)
+        )
+        resolved_max_timeout = (
+            _positive_float(max_timeout, name="max_timeout")
+            if max_timeout is not None
+            else _env_float("COACC_SOCRATA_MAX_TIMEOUT_SECONDS", DEFAULT_MAX_TIMEOUT)
+        )
+        if resolved_max_timeout < resolved_timeout:
+            msg = (
+                "max_timeout must be >= timeout "
+                f"(got {resolved_max_timeout} < {resolved_timeout})"
+            )
+            raise IngestError(msg)
         resolved_page_size = (
             _positive_int(page_size, name="page_size")
             if page_size is not None
@@ -164,10 +205,12 @@ class SocrataClient:
             else _env_int("COACC_SOCRATA_MAX_PAGES", DEFAULT_MAX_PAGES)
         )
         return cls(
-            http=_build_default_client(timeout=timeout),
+            http=_build_default_client(timeout=resolved_max_timeout),
             domain=domain,
             page_size=resolved_page_size,
             max_pages=resolved_max_pages,
+            timeout=resolved_timeout,
+            max_timeout=resolved_max_timeout,
         )
 
     def close(self) -> None:
@@ -183,8 +226,12 @@ class SocrataClient:
         backoff = self.initial_backoff
         last_error: Exception | None = None
         for attempt in range(1, self.max_retries + 1):
+            request_timeout = min(
+                self.timeout * (2 ** (attempt - 1)),
+                self.max_timeout,
+            )
             try:
-                response = self.http.get(url, params=params)
+                response = self.http.get(url, params=params, timeout=request_timeout)
                 if response.status_code in {429, 500, 502, 503, 504}:
                     raise httpx.HTTPStatusError(
                         f"retryable {response.status_code}",
@@ -192,7 +239,13 @@ class SocrataClient:
                         response=response,
                     )
                 response.raise_for_status()
-                payload = response.json()
+                try:
+                    payload = response.json()
+                except ValueError as exc:
+                    raise httpx.TransportError(
+                        f"invalid JSON response: {exc}",
+                        request=response.request,
+                    ) from exc
                 if not isinstance(payload, list):
                     msg = f"{url}: expected JSON array, got {type(payload).__name__}"
                     raise IngestError(msg)
@@ -206,10 +259,11 @@ class SocrataClient:
                 if attempt >= self.max_retries:
                     break
                 LOG.warning(
-                    "ingest retry %s attempt=%s/%s (%s)",
+                    "ingest retry %s attempt=%s/%s timeout=%ss (%s)",
                     url,
                     attempt,
                     self.max_retries,
+                    request_timeout,
                     exc,
                 )
                 self.sleep_fn(backoff)
@@ -223,9 +277,23 @@ class SocrataClient:
         *,
         where: str | None = None,
         order: str,
+        pagination: PaginationMode = "offset",
+        keyset_column: str | None = None,
     ) -> Iterator[list[dict[str, object]]]:
         """Yield successive pages of rows for ``dataset_id``."""
         url = f"https://{self.domain}/resource/{dataset_id}.json"
+        if pagination == "keyset":
+            if keyset_column is None:
+                msg = f"{dataset_id}: keyset pagination requires keyset_column"
+                raise IngestError(msg)
+            yield from self._fetch_keyset(
+                url,
+                where=where,
+                order=order,
+                keyset_column=keyset_column,
+            )
+            return
+
         offset = 0
         for _page in range(self.max_pages):
             params: dict[str, str | int] = {
@@ -243,6 +311,149 @@ class SocrataClient:
                 return
             offset += self.page_size
         msg = f"{dataset_id}: exceeded max_pages={self.max_pages}"
+        raise IngestError(msg)
+
+    def _fetch_keyset(
+        self,
+        url: str,
+        *,
+        where: str | None,
+        order: str,
+        keyset_column: str,
+    ) -> Iterator[list[dict[str, object]]]:
+        select = "*, :id"
+        if where is None:
+            yield from self._fetch_keyset_segment(
+                url,
+                where=f"{keyset_column} IS NULL",
+                order=":id ASC",
+                select=select,
+                keyset_column=None,
+            )
+            where = f"{keyset_column} IS NOT NULL"
+        else:
+            where = _and_where(where, f"{keyset_column} IS NOT NULL")
+
+        yield from self._fetch_keyset_segment(
+            url,
+            where=where,
+            order=order,
+            select=select,
+            keyset_column=keyset_column,
+        )
+
+    def _fetch_keyset_segment(
+        self,
+        url: str,
+        *,
+        where: str | None,
+        order: str,
+        select: str,
+        keyset_column: str | None,
+    ) -> Iterator[list[dict[str, object]]]:
+        if keyset_column is not None:
+            yield from self._fetch_ordered_keyset_segment(
+                url,
+                where=where,
+                order=order,
+                select=select,
+                keyset_column=keyset_column,
+            )
+            return
+
+        current_where = where
+        for _page in range(self.max_pages):
+            params: dict[str, str | int] = {
+                "$limit": self.page_size,
+                "$order": order,
+                "$select": select,
+            }
+            if current_where:
+                params["$where"] = current_where
+            batch = self._get(url, params)
+            if not batch:
+                return
+            yield batch
+            if len(batch) < self.page_size:
+                return
+
+            last = batch[-1]
+            last_id = last.get(":id")
+            if not last_id:
+                msg = f"{url}: keyset pagination requires :id in Socrata response"
+                raise IngestError(msg)
+            seek = f":id > '{_quote_soql(last_id)}'"
+            current_where = _and_where(where, seek)
+        msg = f"{url}: exceeded max_pages={self.max_pages}"
+        raise IngestError(msg)
+
+    def _fetch_ordered_keyset_segment(
+        self,
+        url: str,
+        *,
+        where: str | None,
+        order: str,
+        select: str,
+        keyset_column: str,
+    ) -> Iterator[list[dict[str, object]]]:
+        current_where = where
+        current_order = order
+        same_value_tail = False
+        last_value: object | None = None
+
+        for _page in range(self.max_pages):
+            params: dict[str, str | int] = {
+                "$limit": self.page_size,
+                "$order": current_order,
+                "$select": select,
+            }
+            if current_where:
+                params["$where"] = current_where
+            batch = self._get(url, params)
+            if not batch:
+                if same_value_tail and last_value is not None:
+                    current_where = _and_where(
+                        where,
+                        f"{keyset_column} > '{_quote_soql(last_value)}'",
+                    )
+                    current_order = order
+                    same_value_tail = False
+                    continue
+                return
+            yield batch
+
+            last = batch[-1]
+            last_id = last.get(":id")
+            last_value = last.get(keyset_column)
+            if not last_id:
+                msg = f"{url}: keyset pagination requires :id in Socrata response"
+                raise IngestError(msg)
+            if last_value is None:
+                msg = (
+                    f"{url}: keyset pagination requires non-null "
+                    f"{keyset_column!r} in non-null segment"
+                )
+                raise IngestError(msg)
+
+            if len(batch) < self.page_size:
+                if same_value_tail:
+                    current_where = _and_where(
+                        where,
+                        f"{keyset_column} > '{_quote_soql(last_value)}'",
+                    )
+                    current_order = order
+                    same_value_tail = False
+                    continue
+                return
+
+            current_where = _and_where(
+                where,
+                f"{keyset_column} = '{_quote_soql(last_value)}'",
+                f":id > '{_quote_soql(last_id)}'",
+            )
+            current_order = ":id ASC"
+            same_value_tail = True
+        msg = f"{url}: exceeded max_pages={self.max_pages}"
         raise IngestError(msg)
 
 
@@ -314,6 +525,17 @@ def _iso_for_where(dt: datetime) -> str:
     return dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")
 
 
+def _quote_soql(value: object) -> str:
+    return str(value).replace("'", "''")
+
+
+def _and_where(*clauses: str | None) -> str | None:
+    active = [clause for clause in clauses if clause]
+    if not active:
+        return None
+    return " AND ".join(f"({clause})" for clause in active)
+
+
 def _as_utc(dt: datetime) -> datetime:
     return dt.astimezone(UTC) if dt.tzinfo else dt.replace(tzinfo=UTC)
 
@@ -355,7 +577,10 @@ def _assign_partitions(
     column never returns rows whose value is NULL, so the next incremental run
     cannot re-pull them.
     """
-    parsed = frame[partition_column].map(_parse_ts)
+    if partition_column in frame.columns:
+        parsed = frame[partition_column].map(_parse_ts)
+    else:
+        parsed = pd.Series([None] * len(frame), index=frame.index)
     if max_partition_ts is not None:
         parsed = parsed.map(
             lambda d: None if d is not None and _is_after_cutoff(d, max_partition_ts) else d
@@ -535,6 +760,9 @@ def ingest(
     full_refresh: bool = False,
     page_size: int | None = None,
     max_pages: int | None = None,
+    timeout: float | None = None,
+    max_timeout: float | None = None,
+    pagination: PaginationMode = "offset",
 ) -> IngestResult:
     """Run one ingest pass for ``spec`` against Socrata.
 
@@ -564,7 +792,12 @@ def ingest(
     batch_id = uuid.uuid4().hex
     owned_client = False
     if client is None:
-        client = SocrataClient.from_env(page_size=page_size, max_pages=max_pages)
+        client = SocrataClient.from_env(
+            page_size=page_size,
+            max_pages=max_pages,
+            timeout=timeout,
+            max_timeout=max_timeout,
+        )
         owned_client = True
 
     try:
@@ -597,7 +830,15 @@ def ingest(
         coverage_acc = _CoverageAccumulator(spec.id, spec.required_coverage)
 
         try:
-            for page in client.fetch(spec.id, where=where, order=order):
+            for page in client.fetch(
+                spec.id,
+                where=where,
+                order=order,
+                pagination=pagination,
+                keyset_column=(
+                    spec.watermark_column if pagination == "keyset" else None
+                ),
+            ):
                 frame = _rows_to_frame(page)
                 if frame.empty:
                     continue

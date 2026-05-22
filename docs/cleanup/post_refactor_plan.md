@@ -277,6 +277,11 @@ and `8tz7-h3eu`.
      `DEFAULT_MAX_PAGES=10000` (100M-row cap), or override with
      `COACC_SOCRATA_PAGE_SIZE`, `COACC_SOCRATA_MAX_PAGES`,
      `coacc-etl ingest --page-size`, and `--max-pages`;
+   - keep the default Socrata timeout pair
+     `COACC_SOCRATA_TIMEOUT_SECONDS=60` and
+     `COACC_SOCRATA_MAX_TIMEOUT_SECONDS=240`, or pass
+     `--timeout-seconds <n>` for long Phase 7 runs; retry attempts double
+     the initial timeout up to the configured max timeout;
    - keep `COACC_WATERMARK_FUTURE_GRACE_DAYS=1` unless a source-specific
      investigation justifies changing it; timestamps beyond that ceiling
      are preserved in the sentinel partition but do not advance watermarks;
@@ -295,9 +300,12 @@ and `8tz7-h3eu`.
    domain — share the rate limiter, keep the operator log linear. Use
    `make ingest-phase7-smoke` for the bounded live verification pass
    and `make ingest-phase7-full` for the guarded full-refresh sequence.
+   Full mode automatically uses keyset pagination for the large sources
+   `qddk-cgux`, `p6dx-8zbt`, `c82u-588k`, `rpmr-utcd`, and `wi7w-2nvm`
+   so the runner does not depend on high Socrata offsets.
 4. **Run with full-refresh once per dataset** via the Phase 7 runner:
    ```bash
-   make ingest-phase7-full PHASE7_ARGS="--min-free-gb 80"
+   make ingest-phase7-full PHASE7_ARGS="--min-free-gb 80 --timeout-seconds 120"
    ```
    Full mode propagates `full_refresh=True` so the watermark moves to the
    new data max even if a prior smoke run advanced it. The runner appends

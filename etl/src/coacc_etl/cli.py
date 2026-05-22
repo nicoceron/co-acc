@@ -58,11 +58,21 @@ def _dataset_core_order(specs: dict[str, DatasetSpec]) -> list[str]:
     default=None,
     help="Maximum Socrata pages to fetch (default: COACC_SOCRATA_MAX_PAGES or 10,000)",
 )
+@click.option(
+    "--timeout-seconds",
+    type=click.FloatRange(min=0, min_open=True),
+    default=None,
+    help=(
+        "Initial Socrata request timeout; retries double up to "
+        "COACC_SOCRATA_MAX_TIMEOUT_SECONDS or 240 seconds"
+    ),
+)
 def ingest_cmd(
     dataset_id: str,
     full_refresh: bool,
     page_size: int | None,
     max_pages: int | None,
+    timeout_seconds: float | None,
 ) -> None:
     """Ingest one ingest-ready dataset from Socrata into the lake."""
     specs = load_catalog()
@@ -78,6 +88,7 @@ def ingest_cmd(
             full_refresh=full_refresh,
             page_size=page_size,
             max_pages=max_pages,
+            timeout=timeout_seconds,
         )
     except IngestError as exc:
         raise click.ClickException(str(exc)) from exc
@@ -119,11 +130,21 @@ def ingest_cmd(
     default=None,
     help="Maximum Socrata pages to fetch (default: COACC_SOCRATA_MAX_PAGES or 10,000)",
 )
+@click.option(
+    "--timeout-seconds",
+    type=click.FloatRange(min=0, min_open=True),
+    default=None,
+    help=(
+        "Initial Socrata request timeout; retries double up to "
+        "COACC_SOCRATA_MAX_TIMEOUT_SECONDS or 240 seconds"
+    ),
+)
 def ingest_all_cmd(
     full_refresh: bool,
     continue_on_error: bool,
     page_size: int | None,
     max_pages: int | None,
+    timeout_seconds: float | None,
 ) -> None:
     """Ingest every ``tier: core`` dataset in dep-safe order."""
     specs = load_catalog()
@@ -146,6 +167,7 @@ def ingest_all_cmd(
                 full_refresh=full_refresh,
                 page_size=page_size,
                 max_pages=max_pages,
+                timeout=timeout_seconds,
             )
             if result.ingested:
                 ok += 1
@@ -204,6 +226,15 @@ def ingest_all_cmd(
     help="Maximum Socrata pages per dataset; mode-specific defaults are used when omitted.",
 )
 @click.option(
+    "--timeout-seconds",
+    type=click.FloatRange(min=0, min_open=True),
+    default=None,
+    help=(
+        "Initial Socrata request timeout; retries double up to "
+        "COACC_SOCRATA_MAX_TIMEOUT_SECONDS or 240 seconds"
+    ),
+)
+@click.option(
     "--smoke-days",
     type=click.IntRange(min=1),
     default=7,
@@ -217,6 +248,7 @@ def ingest_phase7_cmd(
     min_free_gb: float | None,
     page_size: int | None,
     max_pages: int | None,
+    timeout_seconds: float | None,
     smoke_days: int,
 ) -> None:
     """Run the Phase 7 ingest sequence with disk checks and run logging."""
@@ -228,6 +260,7 @@ def ingest_phase7_cmd(
             min_free_gb=min_free_gb,
             page_size=page_size,
             max_pages=max_pages,
+            timeout_seconds=timeout_seconds,
             smoke_days=smoke_days,
         )
     except Phase7RunError as exc:

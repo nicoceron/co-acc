@@ -11,6 +11,8 @@ Never commit `.env`.
 | `COACC_LAKE_ROOT` | repo `lake/` via Make targets | Lake root for raw, curated, and metadata parquet. |
 | `COACC_SOCRATA_PAGE_SIZE` | `10000` | Rows requested per Socrata page when CLI flags do not override it. |
 | `COACC_SOCRATA_MAX_PAGES` | `10000` | Hard page cap per Socrata dataset when CLI flags do not override it. |
+| `COACC_SOCRATA_TIMEOUT_SECONDS` | `60` | Initial Socrata request timeout in seconds. The `ingest`, `ingest-all`, and `ingest-phase7` commands can override this with `--timeout-seconds`. |
+| `COACC_SOCRATA_MAX_TIMEOUT_SECONDS` | `240` | Maximum Socrata request timeout in seconds during retry backoff. Retries double the initial timeout up to this ceiling. |
 | `COACC_WATERMARK_FUTURE_GRACE_DAYS` | `1` | Maximum allowed timestamp lead before a row is treated as implausibly future-dated and routed to `year=0/month=00` without advancing the watermark. |
 
 ## External APIs

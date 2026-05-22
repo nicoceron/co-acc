@@ -116,6 +116,79 @@ def test_phase7_full_uses_full_refresh_and_full_pagination(tmp_path: Path) -> No
     ]
 
 
+def test_phase7_full_passes_timeout_and_keyset_for_large_datasets(
+    tmp_path: Path,
+) -> None:
+    calls: list[dict[str, object]] = []
+
+    def fake_ingest(spec, **kwargs) -> IngestResult:
+        calls.append({"id": spec.id, **kwargs})
+        return IngestResult(
+            dataset_id=spec.id,
+            rows=0,
+            partitions=[],
+            parquet_paths=[],
+            watermark_delta=None,
+            coverage=None,
+            batch_id="fake-batch",
+            started_at=datetime(2026, 5, 15, tzinfo=UTC),
+            finished_at=datetime(2026, 5, 15, tzinfo=UTC),
+            skipped_reason="no_new_rows",
+        )
+
+    run_phase7(
+        mode="full",
+        dataset_ids=["qddk-cgux", "p6dx-8zbt", "c82u-588k", "rpmr-utcd", "wi7w-2nvm"],
+        min_free_gb=0,
+        timeout_seconds=180,
+        log_path=tmp_path / "ingest_log.md",
+        ingest_fn=fake_ingest,
+    )
+
+    assert calls == [
+        {
+            "id": "qddk-cgux",
+            "full_refresh": True,
+            "page_size": 10_000,
+            "max_pages": 10_000,
+            "timeout": 180,
+            "pagination": "keyset",
+        },
+        {
+            "id": "p6dx-8zbt",
+            "full_refresh": True,
+            "page_size": 10_000,
+            "max_pages": 10_000,
+            "timeout": 180,
+            "pagination": "keyset",
+        },
+        {
+            "id": "c82u-588k",
+            "full_refresh": True,
+            "page_size": 10_000,
+            "max_pages": 10_000,
+            "timeout": 180,
+            "pagination": "keyset",
+        },
+        {
+            "id": "rpmr-utcd",
+            "full_refresh": True,
+            "page_size": 10_000,
+            "max_pages": 10_000,
+            "timeout": 180,
+            "pagination": "keyset",
+        },
+        {
+            "id": "wi7w-2nvm",
+            "full_refresh": True,
+            "page_size": 10_000,
+            "max_pages": 10_000,
+            "timeout": 180,
+            "pagination": "keyset",
+        },
+    ]
+
+
 def test_phase7_disk_budget_blocks_before_ingest() -> None:
     def fake_ingest(_spec, **_kwargs) -> IngestResult:
         raise AssertionError("ingest should not run")

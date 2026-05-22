@@ -42,6 +42,15 @@ DEFAULT_SMOKE_MAX_PAGES = 5
 DEFAULT_FULL_PAGE_SIZE = 10_000
 DEFAULT_FULL_MAX_PAGES = 10_000
 DEFAULT_SMOKE_DAYS = 7
+KEYSET_PAGINATION_DATASET_IDS: frozenset[str] = frozenset(
+    {
+        "qddk-cgux",
+        "p6dx-8zbt",
+        "c82u-588k",
+        "rpmr-utcd",
+        "wi7w-2nvm",
+    }
+)
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 _DEFAULT_LOG_PATH = _REPO_ROOT / "docs" / "runbooks" / "ingest_log.md"
@@ -214,6 +223,7 @@ def run_phase7(
     min_free_gb: float | None = None,
     page_size: int | None = None,
     max_pages: int | None = None,
+    timeout_seconds: float | None = None,
     smoke_days: int = DEFAULT_SMOKE_DAYS,
     log_path: Path | None = None,
     ingest_fn: Callable[..., IngestResult] = ingest,
@@ -232,7 +242,7 @@ def run_phase7(
 
     owned_client: SocrataClient | None = None
     if mode == "smoke" and max_lookup is None:
-        owned_client = SocrataClient.from_env()
+        owned_client = SocrataClient.from_env(timeout=timeout_seconds)
         max_lookup = lambda spec: fetch_max_watermark(spec, owned_client)  # noqa: E731
 
     try:
@@ -257,12 +267,16 @@ def run_phase7(
                     resolved_page_size = page_size or DEFAULT_FULL_PAGE_SIZE
                     resolved_max_pages = max_pages or DEFAULT_FULL_MAX_PAGES
 
-                result = ingest_fn(
-                    spec,
-                    full_refresh=full_refresh,
-                    page_size=resolved_page_size,
-                    max_pages=resolved_max_pages,
-                )
+                ingest_kwargs: dict[str, object] = {
+                    "full_refresh": full_refresh,
+                    "page_size": resolved_page_size,
+                    "max_pages": resolved_max_pages,
+                }
+                if timeout_seconds is not None:
+                    ingest_kwargs["timeout"] = timeout_seconds
+                if mode == "full" and dataset_id in KEYSET_PAGINATION_DATASET_IDS:
+                    ingest_kwargs["pagination"] = "keyset"
+                result = ingest_fn(spec, **ingest_kwargs)
                 status: Literal["ok", "skipped", "failed"] = (
                     "ok" if result.ingested else "skipped"
                 )

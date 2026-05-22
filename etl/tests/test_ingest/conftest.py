@@ -118,8 +118,18 @@ class FakeSocrataClient:
         *,
         where: str | None,
         order: str,
+        pagination: str = "offset",
+        keyset_column: str | None = None,
     ) -> Iterator[list[dict[str, object]]]:
-        self.requests.append({"dataset_id": dataset_id, "where": where, "order": order})
+        self.requests.append(
+            {
+                "dataset_id": dataset_id,
+                "where": where,
+                "order": order,
+                "pagination": pagination,
+                "keyset_column": keyset_column,
+            }
+        )
         yield from self._pages
 
     def close(self) -> None:

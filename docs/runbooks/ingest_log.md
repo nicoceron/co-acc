@@ -35,3 +35,72 @@
 | 2026-05-16T17:10:20.620269+00:00 | `c82u-588k` | smoke | skipped | 0 | - | - | smoke: using existing watermark 2026-05-04T12:17:08.880000+00:00; no_new_rows |
 | 2026-05-16T17:10:21.270795+00:00 | `rpmr-utcd` | smoke | skipped | 0 | - | - | smoke: using existing watermark 2026-05-15T00:00:00+00:00; only_future_watermarks |
 | 2026-05-16T17:10:21.913320+00:00 | `wi7w-2nvm` | smoke | skipped | 0 | - | - | smoke: using existing watermark 2026-04-21T00:00:00+00:00; no_new_rows |
+| 2026-05-21T04:41:57.301565+00:00 | `5u9e-g5w9` | full | ok | 24744 | pass | 2022-12-06T00:00:00+00:00 | - |
+| 2026-05-21T04:43:03.385432+00:00 | `8tz7-h3eu` | full | ok | 328799 | pass | 2022-12-13T14:57:31.146000+00:00 | - |
+| 2026-05-21T08:30:31.950006+00:00 | `jbjy-vk9h` | full | failed | 0 | - | - | 'fecha_de_firma' |
+| 2026-05-21T11:34:58.779586+00:00 | `jbjy-vk9h` | full | ok | 5614448 | pass | 2026-05-04T00:00:00+00:00 | - |
+| 2026-05-21T13:21:58.319543+00:00 | `qddk-cgux` | full | failed | 0 | - | - | exhausted retries for https://www.datos.gov.co/resource/qddk-cgux.json: The read operation timed out |
+| 2026-05-21T14:50:23.392625+00:00 | `qddk-cgux` | full | failed | 0 | - | - | exhausted retries for https://www.datos.gov.co/resource/qddk-cgux.json: The read operation timed out |
+| 2026-05-21T15:45:33.798810+00:00 | `qddk-cgux` | full | failed | 0 | - | - | Expecting value: line 8423 column 2 (char 28417403) |
+| 2026-05-21T19:05:45.224771+00:00 | `qddk-cgux` | full | ok | 6122519 | pass | 2017-12-31T00:00:00+00:00 | - |
+| 2026-05-21T20:31:48.056126+00:00 | `p6dx-8zbt` | full | ok | 8648158 | pass | 2026-05-21T00:00:00+00:00 | - |
+| 2026-05-21T21:06:03.663571+00:00 | `c82u-588k` | full | ok | 9264493 | pass | 2026-05-04T12:17:08.880000+00:00 | - |
+| 2026-05-21T23:18:07.703713+00:00 | `rpmr-utcd` | full | ok | 21869971 | pass | 2026-05-22T00:00:00+00:00 | - |
+| 2026-05-22T04:57:52.936457+00:00 | `wi7w-2nvm` | full | ok | 42264321 | pass | 2026-04-21T00:00:00+00:00 | - |
+
+## Operator evidence
+
+### 2026-05-21/22 resilient full ingest
+
+Command:
+
+```bash
+make ingest-phase7-full PHASE7_ARGS="--dataset rpmr-utcd --dataset wi7w-2nvm --min-free-gb 80 --timeout-seconds 120"
+```
+
+Results:
+
+- `rpmr-utcd`: `21,869,971` rows, coverage `pass`, watermark `2026-05-22T00:00:00+00:00`.
+- `wi7w-2nvm`: `42,264,321` rows, coverage `pass`, watermark `2026-04-21T00:00:00+00:00`.
+- Phase 7 summary: `ok=2`, `skipped=0`, `failed=0`.
+
+Observed resilience behavior:
+
+- `rpmr-utcd` completed after warning that `1,729,586` rows landed in the `year=0/month=0` sentinel partition due to unparseable `fecha_de_firma_del_contrato`, and `110` future-dated rows landed in the sentinel partition without advancing the watermark.
+- Keyset pagination was used for the large full-refresh datasets. `wi7w-2nvm` drained dense same-date buckets with `fecha_de_registro = <date> AND :id > <last_id>`, then returned to `fecha_de_registro > <date>` handoffs.
+- Retry handling recovered from Socrata 500/read-timeout responses during the full sequence; observed recoveries included `2024-11-28`, `2024-12-10`, `2025-06-05`, `2025-08-05`, `2025-08-11`, and `2025-08-19`.
+- Resource snapshots during `wi7w-2nvm` stayed bounded: disk remained about `212 GiB` free, staging grew from about `627 MiB` to about `961 MiB`, and the ingest process stayed roughly `253,200` to `390,672` KB RSS. Final staging was `0B`.
+
+Lake output checks after completion:
+
+- `lake/raw/source=qddk-cgux`: `1.4G`, `1,173` parquet files.
+- `lake/raw/source=p6dx-8zbt`: `1.3G`, `1,453` parquet files.
+- `lake/raw/source=c82u-588k`: `613M`, `1,052` parquet files.
+- `lake/raw/source=rpmr-utcd`: `3.2G`, `3,481` parquet files.
+- `lake/raw/source=wi7w-2nvm`: `1.0G`, `4,646` parquet files.
+
+## 2026-05-21/22 full ingest operator notes
+
+Command:
+
+```bash
+make ingest-phase7-full PHASE7_ARGS="--dataset rpmr-utcd --dataset wi7w-2nvm --min-free-gb 80 --timeout-seconds 120"
+```
+
+The resumed Phase 7 full ingest completed the remaining large sources with keyset pagination enabled for the allowlisted datasets. `rpmr-utcd` finished at `2026-05-21T23:18:07.703713+00:00` with 21,869,971 rows across 314 partitions and watermark `2026-05-22T00:00:00+00:00`. `wi7w-2nvm` finished at `2026-05-22T04:57:52.936457+00:00` with 42,264,321 rows and watermark `2026-04-21T00:00:00+00:00`.
+
+Recovered transient source failures:
+
+- `qddk-cgux` had prior failed full attempts on 2026-05-21 from Socrata read timeouts and one malformed JSON response, then completed successfully at `2026-05-21T19:05:45.224771+00:00` with 6,122,519 rows.
+- `wi7w-2nvm` recovered from transient Socrata 500/read-timeout events during the long keyset run. Notable recovered retries included handoffs after `2024-11-28`, `2024-12-10`, and a dense `2025-06-05` same-date cursor page.
+
+Data quality routing:
+
+- `rpmr-utcd`: 1,729,586 of 21,869,971 rows had unparseable `fecha_de_firma_del_contrato` and landed in the `year=0/month=0` sentinel partition.
+- `rpmr-utcd`: 110 rows had future `fecha_de_firma_del_contrato` values after the ingest run's `now` and landed in the sentinel partition without advancing the watermark.
+
+Resource evidence:
+
+- During `wi7w-2nvm`, resident memory stayed roughly in the 240-432 MB range while staging grew to about 1.0 GB before promotion.
+- Free disk stayed above 212 GiB, well above the `--min-free-gb 80` guard.
+- After promotion, `lake/meta/ingest_staging` returned to `0B`, `lake/raw` measured 8.7 GB, and source parquet counts were: `qddk-cgux` 1,173 files, `p6dx-8zbt` 1,453 files, `c82u-588k` 1,052 files, `rpmr-utcd` 3,481 files, `wi7w-2nvm` 4,646 files.

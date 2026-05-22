@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+import httpx
 import pandas as pd
 import pyarrow.parquet as pq
 import pytest
@@ -123,6 +124,252 @@ def test_socrata_client_rejects_invalid_pagination_env(monkeypatch) -> None:
         SocrataClient.from_env()
 
 
+def test_socrata_client_timeout_config_from_env(monkeypatch) -> None:
+    monkeypatch.setenv("COACC_SOCRATA_TIMEOUT_SECONDS", "90.5")
+    monkeypatch.setenv("COACC_SOCRATA_MAX_TIMEOUT_SECONDS", "300")
+
+    client = SocrataClient.from_env()
+    try:
+        assert client.timeout == 90.5
+        assert client.max_timeout == 300
+    finally:
+        client.close()
+
+
+def test_socrata_client_rejects_invalid_timeout() -> None:
+    with pytest.raises(IngestError, match="max_timeout"):
+        SocrataClient.from_env(timeout=300, max_timeout=60)
+
+
+def test_socrata_client_expands_timeout_between_retries() -> None:
+    request = httpx.Request("GET", "https://example.test/resource/foo.json")
+
+    class OkResponse:
+        status_code = 200
+
+        def __init__(self) -> None:
+            self.request = request
+
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> list[dict[str, str]]:
+            return [{"id": "1"}]
+
+    class FlakyHTTP:
+        def __init__(self) -> None:
+            self.timeouts: list[float] = []
+
+        def get(
+            self,
+            _url: str,
+            *,
+            params: dict[str, str | int],
+            timeout: float,
+        ) -> OkResponse:
+            del params
+            self.timeouts.append(timeout)
+            if len(self.timeouts) == 1:
+                raise httpx.ReadTimeout("slow page", request=request)
+            return OkResponse()
+
+        def close(self) -> None:
+            return None
+
+    http = FlakyHTTP()
+    client = SocrataClient(
+        http=http,  # type: ignore[arg-type]
+        timeout=60,
+        max_timeout=180,
+        sleep_fn=lambda _seconds: None,
+    )
+
+    assert client._get("https://example.test/resource/foo.json", {}) == [{"id": "1"}]
+    assert http.timeouts == [60, 120]
+
+
+def test_socrata_client_retries_invalid_json_response() -> None:
+    request = httpx.Request("GET", "https://example.test/resource/foo.json")
+
+    class Response:
+        status_code = 200
+
+        def __init__(self, *, malformed: bool) -> None:
+            self.malformed = malformed
+            self.request = request
+
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> list[dict[str, str]]:
+            if self.malformed:
+                raise ValueError("truncated JSON")
+            return [{"id": "1"}]
+
+    class FlakyHTTP:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def get(
+            self,
+            _url: str,
+            *,
+            params: dict[str, str | int],
+            timeout: float,
+        ) -> Response:
+            del params, timeout
+            self.calls += 1
+            return Response(malformed=self.calls == 1)
+
+        def close(self) -> None:
+            return None
+
+    http = FlakyHTTP()
+    client = SocrataClient(
+        http=http,  # type: ignore[arg-type]
+        sleep_fn=lambda _seconds: None,
+    )
+
+    assert client._get("https://example.test/resource/foo.json", {}) == [{"id": "1"}]
+    assert http.calls == 2
+
+
+def test_socrata_client_keyset_paginates_without_offset() -> None:
+    request = httpx.Request("GET", "https://example.test/resource/foo.json")
+
+    class OkResponse:
+        status_code = 200
+
+        def __init__(self, payload: list[dict[str, str]]) -> None:
+            self._payload = payload
+            self.request = request
+
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> list[dict[str, str]]:
+            return self._payload
+
+    class FakeHTTP:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, str | int]] = []
+
+        def get(
+            self,
+            _url: str,
+            *,
+            params: dict[str, str | int],
+            timeout: float,
+        ) -> OkResponse:
+            del timeout
+            self.calls.append(dict(params))
+            if len(self.calls) == 1:
+                return OkResponse([])
+            if len(self.calls) == 2:
+                return OkResponse(
+                    [
+                        {":id": "row-a", "wm": "2020-01-01T00:00:00.000"},
+                        {":id": "row-b", "wm": "2020-01-01T00:00:00.000"},
+                    ]
+                )
+            return OkResponse([])
+
+        def close(self) -> None:
+            return None
+
+    http = FakeHTTP()
+    client = SocrataClient(http=http, page_size=2, sleep_fn=lambda _seconds: None)  # type: ignore[arg-type]
+
+    pages = list(
+        client.fetch(
+            "abcd-1234",
+            where=None,
+            order="wm ASC, :id ASC",
+            pagination="keyset",
+            keyset_column="wm",
+        )
+    )
+
+    assert pages == [
+        [
+            {":id": "row-a", "wm": "2020-01-01T00:00:00.000"},
+            {":id": "row-b", "wm": "2020-01-01T00:00:00.000"},
+        ]
+    ]
+    assert all("$offset" not in call for call in http.calls)
+    assert http.calls[0]["$where"] == "wm IS NULL"
+    assert http.calls[0]["$order"] == ":id ASC"
+    assert http.calls[1]["$where"] == "wm IS NOT NULL"
+    assert http.calls[2]["$where"] == (
+        "(wm IS NOT NULL) AND "
+        "(wm = '2020-01-01T00:00:00.000') AND (:id > 'row-b')"
+    )
+    assert http.calls[2]["$order"] == ":id ASC"
+    assert http.calls[3]["$where"] == (
+        "(wm IS NOT NULL) AND (wm > '2020-01-01T00:00:00.000')"
+    )
+    assert http.calls[3]["$order"] == "wm ASC, :id ASC"
+    assert all(call["$select"] == "*, :id" for call in http.calls)
+
+
+def test_socrata_client_keyset_paginates_null_segment_by_id() -> None:
+    request = httpx.Request("GET", "https://example.test/resource/foo.json")
+
+    class OkResponse:
+        status_code = 200
+
+        def __init__(self, payload: list[dict[str, str]]) -> None:
+            self._payload = payload
+            self.request = request
+
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> list[dict[str, str]]:
+            return self._payload
+
+    class FakeHTTP:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, str | int]] = []
+
+        def get(
+            self,
+            _url: str,
+            *,
+            params: dict[str, str | int],
+            timeout: float,
+        ) -> OkResponse:
+            del timeout
+            self.calls.append(dict(params))
+            if len(self.calls) == 1:
+                return OkResponse([{":id": "row-null-a"}])
+            if len(self.calls) == 2:
+                return OkResponse([])
+            if len(self.calls) == 3:
+                return OkResponse([])
+            raise AssertionError("unexpected extra keyset request")
+
+        def close(self) -> None:
+            return None
+
+    http = FakeHTTP()
+    client = SocrataClient(http=http, page_size=1, sleep_fn=lambda _seconds: None)  # type: ignore[arg-type]
+
+    pages = list(
+        client.fetch(
+            "abcd-1234",
+            where=None,
+            order="wm ASC, :id ASC",
+            pagination="keyset",
+            keyset_column="wm",
+        )
+    )
+
+    assert pages == [[{":id": "row-null-a"}]]
+    assert http.calls[1]["$where"] == "(wm IS NULL) AND (:id > 'row-null-a')"
+    assert http.calls[2]["$where"] == "wm IS NOT NULL"
+
+
 def test_incremental_where_preserves_fractional_seconds() -> None:
     value = datetime(2022, 12, 13, 14, 57, 31, 146000, tzinfo=UTC)
 
@@ -174,6 +421,41 @@ def test_partition_sentinel_for_unparseable_rows(
     # Watermark = max parseable, ignoring the bad row.
     assert result.watermark_delta is not None
     assert result.watermark_delta.last_seen_ts == datetime(2025, 1, 15, tzinfo=UTC)
+
+
+def test_missing_partition_column_page_lands_in_sentinel(
+    hallazgos_spec: DatasetSpec,
+    hallazgos_page: list[dict[str, object]],
+    fake_client_factory,
+) -> None:
+    """Socrata omits keys that are NULL for every row on a page."""
+    spec = hallazgos_spec.model_copy(
+        update={
+            "required_coverage": {
+                "nit": 0.95,
+                "nombre_sujeto": 0.95,
+                "fecha_recibo_traslado": 0.50,
+            }
+        }
+    )
+    missing_date_page = [
+        {
+            "nit": "900000000",
+            "nombre_sujeto": "ENTIDAD SIN FECHA",
+            "radicado": "missing-date-page",
+        }
+    ]
+    client = fake_client_factory([hallazgos_page, missing_date_page])
+
+    result = ingest(spec, client=client)
+
+    assert result.rows == 4
+    assert (0, 0) in result.partitions
+    assert result.watermark_delta is not None
+    assert result.watermark_delta.last_seen_ts == datetime(2025, 1, 15, tzinfo=UTC)
+    df = _read_all_parquets(spec.id)
+    assert len(df) == 4
+    assert "missing-date-page" in set(df["radicado"].astype(str))
 
 
 def test_future_watermark_rows_do_not_poison_state(
