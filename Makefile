@@ -4,6 +4,14 @@ export $(shell sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' .env)
 endif
 
 LAKE_ROOT ?= $(abspath $(CURDIR))/lake
+LAKE_REALITY_ARGS = $(if $(DATASET),--dataset $(DATASET),) \
+	$(if $(DATASETS),--datasets "$(DATASETS)",) \
+	$(if $(WITH_LIVE),--with-live,) \
+	$(if $(BASELINE),--baseline $(BASELINE),) \
+	$(if $(REALITY_DATE),--date $(REALITY_DATE),) \
+	$(if $(REALITY_OUTPUT_DIR),--output-dir "$(REALITY_OUTPUT_DIR)",) \
+	$(if $(REALITY_THRESHOLDS),--thresholds "$(REALITY_THRESHOLDS)",) \
+	$(if $(CHANGED_YAMLS_ONLY),--changed-yamls-only,)
 
 .PHONY: setup-env dev stop api etl frontend \
 	clean-data \
@@ -78,7 +86,7 @@ lake-init:
 	mkdir -p $(LAKE_ROOT)/raw $(LAKE_ROOT)/curated $(LAKE_ROOT)/meta
 
 lake-reality:
-	PYTHONPATH=etl/src etl/.venv/bin/python scripts/lake_reality.py
+	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python ../scripts/lake_reality.py $(LAKE_REALITY_ARGS)
 
 lake-compact:
 	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python -m coacc_etl.lakehouse.compactor --older-than=30d

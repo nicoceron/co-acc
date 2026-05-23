@@ -1,0 +1,80 @@
+name: Lake Reality
+
+on:
+  workflow_dispatch:
+    inputs:
+      datasets:
+        description: "Optional comma-separated dataset IDs"
+        required: false
+        type: string
+      with_live:
+        description: "Probe Socrata live counts"
+        required: false
+        default: true
+        type: boolean
+  schedule:
+    # 04:00 America/Bogota.
+    - cron: "0 9 * * *"
+
+concurrency:
+  group: lake-reality-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  lake-reality:
+    name: Lake reality probe
+    runs-on: [self-hosted, coacc-lake]
+    timeout-minutes: 180
+    env:
+      LAKE_ROOT: ${{ vars.COACC_LAKE_ROOT || '/var/lib/coacc/lake' }}
+      DISCORD_OR_SLACK_WEBHOOK_URL: ${{ secrets.LAKE_REALITY_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run lake reality
+        env:
+          DATASETS: ${{ github.event.inputs.datasets }}
+          WITH_LIVE_INPUT: ${{ github.event.inputs.with_live }}
+        run: |
+          set -euo pipefail
+          args=(LAKE_ROOT="${LAKE_ROOT}")
+          if [ -n "${DATASETS:-}" ]; then
+            args+=(DATASETS="${DATASETS}")
+          fi
+          if [ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ] || [ "${WITH_LIVE_INPUT}" = "true" ]; then
+            args+=(WITH_LIVE=1)
+          fi
+          make lake-reality "${args[@]}"
+
+      - name: Upload reality artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lake-reality-${{ github.run_id }}
+          if-no-files-found: warn
+          path: |
+            ${{ env.LAKE_ROOT }}/meta/reality/*.json
+            ${{ env.LAKE_ROOT }}/meta/reality/*.diff.md
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          set -euo pipefail
+          if [ -z "${DISCORD_OR_SLACK_WEBHOOK_URL:-}" ]; then
+            exit 0
+          fi
+          curl -fsS \
+            -H "Content-Type: application/json" \
+            -d "{\"text\":\"Lake reality failed for ${GITHUB_REPOSITORY} run ${GITHUB_RUN_ID}\"}" \
+            "${DISCORD_OR_SLACK_WEBHOOK_URL}"

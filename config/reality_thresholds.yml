@@ -1,0 +1,9 @@
+defaults:
+  row_count_drop_ratio: 0.01
+  null_rate_margin: 0.01
+  dup_ratio_rise: 0.005
+  sentinel_fraction_rise: 0.01
+  partition_skew_rise_ratio: 0.20
+  partition_count_drop: 0
+  max_freshness_seconds: null
+datasets: {}

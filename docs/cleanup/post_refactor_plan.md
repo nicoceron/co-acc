@@ -447,7 +447,7 @@ vs the previous snapshot.
 5. **`make lake-reality` target:** today it shells to the old script
    with no args. Update to forward `DATASETS=` env to `--datasets`,
    and to forward `WITH_LIVE=1` to `--with-live`.
-6. **Pre-commit hook:** `scripts/ci/precommit_lake_reality.sh` invokes
+6. **Pre-commit hook:** `scripts/ci/lake_reality_precommit.sh` invokes
    `python scripts/lake_reality.py --changed-yamls-only`. Skips
    silently when no YAML is staged. Wire via the `pre-commit`
    framework with a config in `.pre-commit-config.yaml`.
@@ -461,6 +461,25 @@ vs the previous snapshot.
    - Posts to a Slack/Discord webhook on FAIL (env-gated).
    - Commits the JSON snapshot back to `main` via a bot account on a
      `lake-reality/<date>` branch + auto-PR if green.
+
+### 4.3.1 Implementation status — 2026-05-23
+
+- [x] Registry moved to `etl/datasets/*.yml`.
+- [x] `coacc_etl.lakehouse.reality` computes local parquet health with
+      DuckDB and resolves source YAML columns to canonical parquet columns.
+- [x] `coacc_etl.lakehouse.health_diff` adds findings, thresholds, and
+      Markdown diff rendering.
+- [x] `scripts/lake_reality.py` writes JSON snapshots and `.diff.md`
+      artifacts with exit codes `0/1/2`.
+- [x] `make lake-reality` forwards dataset, baseline, live-count, date,
+      output, threshold, and changed-YAML options.
+- [x] `config/reality_thresholds.yml`, `docs/runbooks/lake_reality.md`,
+      and `scripts/ci/lake_reality_precommit.sh` exist.
+- [x] Wire the helper into `.pre-commit-config.yaml`.
+- [x] Add the daily Action using a self-hosted runner with the authoritative
+      lake mounted locally.
+- [ ] Configure the `coacc-lake` runner/optional webhook and record three
+      consecutive green daily runs.
 
 ### 4.4 Tests
 

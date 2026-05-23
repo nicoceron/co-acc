@@ -1,47 +1,142 @@
 #!/usr/bin/env python3
-"""Lake-vs-live reality reconciler.
+"""Probe local lake parquet health and write reality snapshots."""
 
-Scans every source in lake/raw/, computes quality metrics, and outputs
-a CSV report to lake/meta/reality_report.csv. Compares lake row counts
-and column null percentages against the live Socrata source.
-
-If COACC_LAKE_ROOT is not set and ./lake exists relative to CWD, uses that.
-Otherwise exits 1 with a clear error.
-"""
 from __future__ import annotations
 
-import csv
+import argparse
+import json
 import logging
 import os
+import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-import duckdb
+from pydantic import BaseModel, ConfigDict, Field
 
+from coacc_etl.catalog import DatasetSpec, load_catalog
+from coacc_etl.lakehouse.health_diff import (
+    Finding,
+    diff_health,
+    findings_have_failures,
+    load_thresholds,
+    render_diff_markdown,
+    thresholds_for,
+)
 from coacc_etl.lakehouse.paths import lake_root, meta_path
-from coacc_etl.lakehouse.reader import source_files, source_view_name
-from coacc_etl.lakehouse.reality import socrata_live_count
+from coacc_etl.lakehouse.reality import DatasetHealth, RealityError, compute_all_health
 
 logger = logging.getLogger(__name__)
 
-SOCRATA_IDS: dict[str, str] = {
-    "secop_integrado": "jbjy-vk9h",
-}
 
-CRITICAL_COLUMNS: dict[str, list[str]] = {
-    "secop_integrado": [
-        "buyer_name",
-        "supplier_name",
-        "contract_value",
-        "supplier_document_id",
-        "buyer_document_id",
-    ],
-}
+class RealityCliError(RuntimeError):
+    """Operator-facing CLI error."""
 
-PK_COLUMNS: dict[str, str] = {
-    "secop_integrado": "id_contrato",
-}
+
+class RealitySnapshot(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    generated_at: datetime
+    snapshot_date: str
+    baseline_date: str | None = None
+    datasets: list[DatasetHealth] = Field(default_factory=list)
+    findings: list[Finding] = Field(default_factory=list)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Probe local lake parquet health and diff against the last snapshot."
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Scan every catalog dataset present in the local lake. This is the default.",
+    )
+    parser.add_argument(
+        "--dataset",
+        action="append",
+        default=[],
+        help="Dataset ID to scan. May be passed more than once.",
+    )
+    parser.add_argument(
+        "--datasets",
+        default=None,
+        help="Comma-separated dataset IDs to scan.",
+    )
+    parser.add_argument(
+        "--changed-yamls-only",
+        action="store_true",
+        help="Scan catalog YAML files changed in git, useful for local pre-commit checks.",
+    )
+    parser.add_argument(
+        "--with-live",
+        action="store_true",
+        help="Also call Socrata live counts. Local parquet metrics are always computed first.",
+    )
+    parser.add_argument(
+        "--baseline",
+        default=None,
+        help="Baseline date (YYYY-MM-DD) or JSON snapshot path. Defaults to latest older snapshot.",
+    )
+    parser.add_argument(
+        "--date",
+        default=None,
+        help="Snapshot date (YYYY-MM-DD). Defaults to today's UTC date.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Directory for JSON and Markdown outputs. Defaults to lake/meta/reality.",
+    )
+    parser.add_argument(
+        "--thresholds",
+        type=Path,
+        default=None,
+        help="Threshold YAML path. Defaults to config/reality_thresholds.yml.",
+    )
+    return parser.parse_args()
+
+
+def run_reality(args: argparse.Namespace) -> RealitySnapshot:
+    root = _ensure_lake_root()
+    catalog = load_catalog()
+    selected_ids = _select_dataset_ids(args, catalog, root)
+    selected_specs = [catalog[dataset_id] for dataset_id in selected_ids]
+    generated_at = datetime.now(tz=UTC)
+    snapshot_date = _snapshot_date(args.date, generated_at)
+    output_dir = args.output_dir or (meta_path() / "reality")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    baseline_date, previous = _load_baseline(output_dir, snapshot_date, args.baseline)
+    previous_by_id = {dataset.dataset_id: dataset for dataset in previous}
+    thresholds = load_thresholds(args.thresholds)
+    datasets: list[DatasetHealth] = []
+    findings: list[Finding] = []
+
+    if selected_specs:
+        logger.info("Probing %d dataset(s): %s", len(selected_specs), ", ".join(selected_ids))
+        datasets = compute_all_health(selected_specs, with_live=args.with_live, now=generated_at)
+        for dataset in datasets:
+            findings.extend(
+                diff_health(
+                    previous_by_id.get(dataset.dataset_id),
+                    dataset,
+                    thresholds_for(thresholds, dataset.dataset_id),
+                )
+            )
+    else:
+        logger.info("No datasets selected for lake reality probe.")
+
+    snapshot = RealitySnapshot(
+        generated_at=generated_at,
+        snapshot_date=snapshot_date,
+        baseline_date=baseline_date,
+        datasets=datasets,
+        findings=findings,
+    )
+    _write_snapshot(output_dir, snapshot)
+    return snapshot
 
 
 def _ensure_lake_root() -> Path:
@@ -52,226 +147,183 @@ def _ensure_lake_root() -> Path:
     if cwd_lake.exists() and cwd_lake.is_dir():
         os.environ["COACC_LAKE_ROOT"] = str(cwd_lake.resolve())
         return cwd_lake
-    print(
-        f"ERROR: No lake found. Set COACC_LAKE_ROOT or run from a directory "
-        f"containing ./lake. Checked: {root}, {cwd_lake}",
-        file=sys.stderr,
+    msg = (
+        "No lake found. Set COACC_LAKE_ROOT or run from a directory containing ./lake. "
+        f"Checked: {root}, {cwd_lake}"
     )
-    sys.exit(1)
+    raise RealityCliError(msg)
 
 
-def _discover_sources(raw_root: Path) -> list[str]:
+def _select_dataset_ids(
+    args: argparse.Namespace,
+    catalog: dict[str, DatasetSpec],
+    root: Path,
+) -> list[str]:
+    requested = set(args.dataset)
+    if args.datasets:
+        requested.update(item.strip() for item in args.datasets.split(",") if item.strip())
+    explicit_requested = bool(requested)
+    if args.changed_yamls_only:
+        requested.update(_changed_catalog_dataset_ids(catalog))
+
+    if requested:
+        unknown = sorted(dataset_id for dataset_id in requested if dataset_id not in catalog)
+        if unknown:
+            raise RealityCliError(f"Unknown dataset id(s): {', '.join(unknown)}")
+        return sorted(requested)
+
+    if args.changed_yamls_only and not explicit_requested:
+        return []
+
+    if args.all or not requested:
+        present = _local_catalog_dataset_ids(root, catalog)
+        if not present:
+            logger.info("No catalog-backed sources found under %s/raw", root)
+        return present
+    return []
+
+
+def _local_catalog_dataset_ids(root: Path, catalog: dict[str, DatasetSpec]) -> list[str]:
+    raw_root = root / "raw"
     if not raw_root.exists():
         return []
-    sources = set()
-    for path in raw_root.glob("source=*"):
+    ids: list[str] = []
+    for path in sorted(raw_root.glob("source=*")):
         if path.is_dir():
-            name = path.name.split("=", 1)[1]
-            sources.add(name)
-    return sorted(sources)
+            dataset_id = path.name.split("=", 1)[1]
+            if dataset_id in catalog:
+                ids.append(dataset_id)
+            else:
+                logger.warning("Skipping source=%s because it is not in the catalog", dataset_id)
+    return ids
 
 
-def _live_count_for_source(source: str) -> int | None:
-    socrata_id = SOCRATA_IDS.get(source)
-    if not socrata_id:
-        return None
+def _changed_catalog_dataset_ids(catalog: dict[str, DatasetSpec]) -> list[str]:
+    paths = set(_git_names(["diff", "--name-only", "--cached"]))
+    if not paths:
+        paths.update(_git_names(["diff", "--name-only", "HEAD~1..HEAD"]))
+    dataset_ids: list[str] = []
+    for path in paths:
+        p = Path(path)
+        if (
+            len(p.parts) == 3
+            and p.parts[0] == "etl"
+            and p.parts[1] == "datasets"
+            and p.suffix == ".yml"
+            and p.stem in catalog
+        ):
+            dataset_ids.append(p.stem)
+    return sorted(set(dataset_ids))
+
+
+def _git_names(args: list[str]) -> list[str]:
     try:
-        return socrata_live_count(socrata_id)
-    except Exception as exc:
-        logger.warning("live count failed for %s (%s): %s", source, socrata_id, exc)
-        return None
-
-
-def _compute_metrics(con: duckdb.DuckDBPyConnection, source: str) -> dict[str, object]:
-    view = source_view_name(source)
-    files = [str(p) for p in source_files(source)]
-    if not files:
-        return {}
-
-    con.execute(
-        f"CREATE OR REPLACE VIEW {view} AS "
-        f"SELECT * FROM read_parquet({files}, union_by_name=true, hive_partitioning=true)"
-    )
-
-    metrics: dict[str, object] = {"source": source, "dirty": False}
-
-    con.execute(f"SELECT count(*) FROM {view}")
-    metrics["lake_rows"] = con.fetchone()[0]
-
-    pk_col = PK_COLUMNS.get(source)
-    if pk_col:
-        col_norm = pk_col.lower().replace(" ", "_")
-        try:
-            con.execute(f"SELECT count(DISTINCT {col_norm}) FROM {view}")
-            metrics["lake_distinct_pk"] = con.fetchone()[0]
-        except Exception as exc:
-            logger.warning("[%s] lake_distinct_pk query failed: %s", source, exc)
-            metrics["lake_distinct_pk"] = None
-            metrics["dirty"] = True
-
-        try:
-            con.execute(
-                f"SELECT count(*) FROM (SELECT {col_norm}, count(*) AS cnt "
-                f"FROM {view} GROUP BY {col_norm} HAVING cnt > 1) AS dupes"
-            )
-            metrics["lake_distinct_pk_dupes"] = con.fetchone()[0]
-        except Exception as exc:
-            logger.warning("[%s] lake_distinct_pk_dupes query failed: %s", source, exc)
-            metrics["lake_distinct_pk_dupes"] = None
-            metrics["dirty"] = True
-
-    critical = CRITICAL_COLUMNS.get(source, [])
-    for col in critical:
-        col_norm = col.lower().replace(" ", "_")
-        col_display = col
-        try:
-            con.execute(
-                f"SELECT count(*) FROM {view} WHERE {col_norm} IS NULL "
-                f"OR CAST({col_norm} AS VARCHAR) = '' "
-                f"OR CAST({col_norm} AS VARCHAR) = 'None'"
-            )
-            null_count = con.fetchone()[0]
-            pct = round(100.0 * null_count / max(int(metrics["lake_rows"]), 1), 2)
-            metrics[f"{col_display}_null_pct"] = pct
-        except Exception as exc:
-            logger.warning("[%s] %s null_pct query failed: %s", source, col_display, exc)
-            metrics[f"{col_display}_null_pct"] = None
-            metrics["dirty"] = True
-
-    fecha_col = "fecha_de_firma"
-    try:
-        con.execute(
-            f"SELECT min(CAST({fecha_col} AS VARCHAR)), max(CAST({fecha_col} AS VARCHAR)) "
-            f"FROM {view} WHERE {fecha_col} IS NOT NULL AND CAST({fecha_col} AS VARCHAR) <> ''"
+        completed = subprocess.run(
+            ["git", *args],
+            check=False,
+            capture_output=True,
+            encoding="utf-8",
         )
-        row = con.fetchone()
-        metrics["earliest_firma"] = row[0] if row else None
-        metrics["latest_firma"] = row[1] if row else None
-    except Exception as exc:
-        logger.warning("[%s] fecha_de_firma range query failed: %s", source, exc)
-        metrics["earliest_firma"] = None
-        metrics["latest_firma"] = None
-        metrics["dirty"] = True
-
-    if metrics.get("earliest_firma"):
-        try:
-            con.execute(
-                f"SELECT count(*) FROM {view} "
-                f"WHERE {fecha_col} IS NULL OR CAST({fecha_col} AS VARCHAR) = ''"
-            )
-            null_firma = con.fetchone()[0]
-            metrics["null_firma_pct"] = round(
-                100.0 * null_firma / max(int(metrics["lake_rows"]), 1), 2
-            )
-        except Exception as exc:
-            logger.warning("[%s] null_firma_pct query failed: %s", source, exc)
-            metrics["null_firma_pct"] = None
-            metrics["dirty"] = True
-
-    return metrics
-
-
-def run_reality() -> list[dict[str, object]]:
-    _ensure_lake_root()
-    raw_root = lake_root() / "raw"
-    sources = _discover_sources(raw_root)
-    if not sources:
-        logger.info("No sources found in %s", raw_root)
+    except OSError:
         return []
+    if completed.returncode != 0:
+        return []
+    return [line.strip() for line in completed.stdout.splitlines() if line.strip()]
 
-    con = duckdb.connect(":memory:")
-    results: list[dict[str, object]] = []
 
-    for source in sources:
-        logger.info("Scanning source=%s ...", source)
-        metrics = _compute_metrics(con, source)
-        if not metrics:
-            logger.info("  no parquet files found")
-            continue
+def _snapshot_date(value: str | None, generated_at: datetime) -> str:
+    if value is None:
+        return generated_at.date().isoformat()
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except ValueError as exc:
+        raise RealityCliError("--date must be YYYY-MM-DD") from exc
+    return value
 
-        live = _live_count_for_source(source)
-        metrics["live_rows"] = live
 
-        if live is not None:
-            lake_rows = int(metrics.get("lake_rows", 0))
-            metrics["delta"] = live - lake_rows
-            metrics["delta_pct"] = round(
-                100.0 * (live - lake_rows) / max(live, 1), 4
-            )
-        else:
-            metrics["delta"] = None
-            metrics["delta_pct"] = None
-
-        metrics["probed_at"] = datetime.now(tz=UTC).isoformat()
-        results.append(metrics)
-        logger.info("  lake_rows=%s live_rows=%s", metrics.get("lake_rows"), live)
-
-    con.close()
-
-    report_path = meta_path() / "reality_report.csv"
-    report_path.parent.mkdir(parents=True, exist_ok=True)
-
-    if results:
-        fieldnames = list(results[0].keys())
-        for row in results:
-            for key in row:
-                if key not in fieldnames:
-                    fieldnames.append(key)
-
-        with report_path.open("w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            for row in results:
-                writer.writerow(row)
-
-        logger.info("Report written to %s", report_path)
+def _load_baseline(
+    output_dir: Path,
+    snapshot_date: str,
+    requested: str | None,
+) -> tuple[str | None, list[DatasetHealth]]:
+    path: Path | None
+    if requested:
+        requested_path = Path(requested)
+        path = requested_path if requested_path.exists() else output_dir / f"{requested}.json"
+        if not path.exists():
+            raise RealityCliError(f"Baseline snapshot not found: {path}")
     else:
-        logger.info("No results to report")
+        older = [
+            candidate
+            for candidate in output_dir.glob("*.json")
+            if candidate.stem < snapshot_date and _looks_like_date(candidate.stem)
+        ]
+        path = max(older, default=None)
 
-    return results
+    if path is None:
+        return None, []
+
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    snapshot = RealitySnapshot.model_validate(raw)
+    return snapshot.snapshot_date, snapshot.datasets
+
+
+def _looks_like_date(value: str) -> bool:
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except ValueError:
+        return False
+    return True
+
+
+def _write_snapshot(output_dir: Path, snapshot: RealitySnapshot) -> None:
+    json_path = output_dir / f"{snapshot.snapshot_date}.json"
+    diff_path = output_dir / f"{snapshot.snapshot_date}.diff.md"
+    json_path.write_text(
+        json.dumps(snapshot.model_dump(mode="json"), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    diff_path.write_text(
+        render_diff_markdown(
+            snapshot_date=snapshot.snapshot_date,
+            generated_at=snapshot.generated_at,
+            baseline_date=snapshot.baseline_date,
+            datasets=snapshot.datasets,
+            findings=snapshot.findings,
+        ),
+        encoding="utf-8",
+    )
+    logger.info("Wrote %s", json_path)
+    logger.info("Wrote %s", diff_path)
 
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-    results = run_reality()
+    args = parse_args()
+    try:
+        snapshot = run_reality(args)
+    except RealityCliError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(2)
+    except RealityError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(2)
 
-    if not results:
-        print("No sources found in lake.")
-        sys.exit(0)
+    failure_count = sum(1 for finding in snapshot.findings if finding.severity == "fail")
+    warning_count = sum(1 for finding in snapshot.findings if finding.severity == "warn")
+    print(
+        f"Lake reality {snapshot.snapshot_date}: "
+        f"{len(snapshot.datasets)} dataset(s), "
+        f"{failure_count} failure(s), {warning_count} warning(s)"
+    )
+    for finding in snapshot.findings:
+        if finding.severity in {"fail", "warn"}:
+            print(
+                f"{finding.severity.upper()} {finding.dataset_id} "
+                f"{finding.metric}: {finding.message}"
+            )
 
-    for row in results:
-        source = row.get("source", "?")
-        lake_rows = row.get("lake_rows", "?")
-        live_rows = row.get("live_rows", "?")
-        delta = row.get("delta", "?")
-        delta_pct = row.get("delta_pct", "?")
-        dirty = row.get("dirty", False)
-        print(f"\n{source}:")
-        print(f"  lake_rows:            {lake_rows}")
-        print(f"  live_rows:            {live_rows}")
-        print(f"  delta:                {delta}")
-        print(f"  delta_pct:            {delta_pct}%")
-        if dirty:
-            print(f"  ** report dirty: some metrics had query errors **")
-
-        for key, value in sorted(row.items()):
-            if key.endswith("_null_pct") and value is not None:
-                print(f"  {key}:  {value}%")
-            if key in ("lake_distinct_pk", "lake_distinct_pk_dupes", "earliest_firma", "latest_firma", "null_firma_pct"):
-                print(f"  {key}:  {value}")
-
-    failing = False
-    for row in results:
-        for key, value in row.items():
-            if key == "buyer_name_null_pct" and value is not None and value > 5:
-                print(f"\nFAIL: {row['source']} buyer_name null_pct = {value}% (threshold: 5%)")
-                failing = True
-            if key == "contract_value_null_pct" and value is not None and value > 30:
-                print(f"\nFAIL: {row['source']} contract_value null_pct = {value}% (threshold: 30%)")
-                failing = True
-
-    if failing:
-        sys.exit(1)
+    sys.exit(1 if findings_have_failures(snapshot.findings) else 0)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: lake-reality
+        name: lake reality for changed dataset YAML
+        entry: scripts/ci/lake_reality_precommit.sh
+        language: system
+        pass_filenames: false
+        files: ^etl/datasets/.*\.yml$

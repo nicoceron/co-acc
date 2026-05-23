@@ -8,6 +8,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 
 ## [Unreleased]
 
+### Added
+- Added Phase 8 lake reality snapshots: per-dataset local parquet health metrics,
+  JSON/Markdown diff artifacts, threshold config, runbook, and a pre-commit helper.
+
 ### Changed
 - Made Phase 7 full ingest more resilient for large Socrata sources with
   adaptive request timeouts, retryable malformed JSON responses, sentinel
