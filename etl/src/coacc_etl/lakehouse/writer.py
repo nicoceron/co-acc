@@ -4,10 +4,10 @@ import uuid
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-import pyarrow as pa
-import pyarrow.parquet as pq
+import pyarrow as pa  # type: ignore[import-untyped]
+import pyarrow.parquet as pq  # type: ignore[import-untyped]
 
-from coacc_etl.lakehouse.paths import raw_path
+from coacc_etl.lakehouse.paths import raw_path, raw_snapshot_path
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -28,8 +28,37 @@ def append_parquet(
 ) -> Path:
     table = _as_arrow_table(df)
     out = raw_path(source, year, month)
-    out.mkdir(parents=True, exist_ok=True)
+    return write_parquet_to_dir(table, out, compression)
 
+
+def write_snapshot_parquet(
+    df: pa.Table | object,
+    source: str,
+    snapshot: str,
+    compression: str = "zstd",
+) -> Path:
+    """Write the full result for a ``full_refresh_only`` ingest run."""
+    table = _as_arrow_table(df)
+    out = raw_snapshot_path(source, snapshot)
+    return write_parquet_to_dir(table, out, compression)
+
+
+def write_parquet_to_dir(
+    df: pa.Table | object,
+    out: Path,
+    compression: str = "zstd",
+) -> Path:
+    """Atomically write one parquet part under ``out``.
+
+    This is used by bounded-memory ingest to write page-sized staging parts
+    before moving them into final lake partitions after validation passes.
+    """
+    table = _as_arrow_table(df)
+    return _atomic_write(table, out, compression)
+
+
+def _atomic_write(table: pa.Table, out: Path, compression: str) -> Path:
+    out.mkdir(parents=True, exist_ok=True)
     tmp = out / f".inflight-{uuid.uuid4().hex}.parquet"
     final = out / (
         f"{datetime.now(tz=UTC).strftime('%Y%m%dT%H%M%SZ')}-"

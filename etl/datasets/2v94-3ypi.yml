@@ -1,0 +1,17 @@
+id: 2v94-3ypi
+name: MEN_PROGRAMAS EDUCACIÓN PARA EL TRABAJO Y EL DESARROLLO HUMANO
+sector: Education
+tier: core
+join_keys:
+  divipola:
+  - cod_dpto
+  - cod_mpio
+  entity:
+  - codigo_institucion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/2v94-3ypi
+notes: ''

@@ -6,7 +6,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
-import pyarrow.parquet as pq
+import pyarrow.parquet as pq  # type: ignore[import-untyped]
 
 from coacc_etl.lakehouse.paths import lake_root
 

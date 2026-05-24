@@ -1,0 +1,19 @@
+id: h7zv-k39x
+name: Universo de entidades
+sector: Agriculture and Rural Development Sector Roadmap
+tier: core
+join_keys:
+  divipola:
+  - idmunicipio
+  - iddepartamento
+  entity:
+  - dm_institucion_cod_institucion
+  nit:
+  - ccb_nit_inst
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/h7zv-k39x
+notes: ''

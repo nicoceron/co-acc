@@ -2,10 +2,10 @@
 set -euo pipefail
 
 DEPLOY_DIR="${DEPLOY_DIR:-/opt/coacc}"
-COMPOSE_BASE="$DEPLOY_DIR/infra/docker-compose.prod.yml"
+COMPOSE_BASE="$DEPLOY_DIR/infra/docker/docker-compose.prod.yml"
 # When USE_GHCR_IMAGES=true, use override that pulls images from GHCR (set REGISTRY_IMAGE_PREFIX and optional REGISTRY_IMAGE_TAG)
 if [ "${USE_GHCR_IMAGES:-false}" = "true" ]; then
-  COMPOSE_FILE="${COMPOSE_BASE}:${DEPLOY_DIR}/infra/docker-compose.prod.images.yml"
+  COMPOSE_FILE="${COMPOSE_BASE}:${DEPLOY_DIR}/infra/docker/docker-compose.prod.images.yml"
 else
   COMPOSE_FILE="$COMPOSE_BASE"
 fi
@@ -48,7 +48,7 @@ if [ "${USE_GHCR_IMAGES:-false}" = "true" ]; then
   if [ "$DRY_RUN" = true ]; then
     log "[DRY RUN] Would run: docker compose pull"
   else
-    docker compose -f "$COMPOSE_BASE" -f "$DEPLOY_DIR/infra/docker-compose.prod.images.yml" pull api frontend
+    docker compose -f "$COMPOSE_BASE" -f "$DEPLOY_DIR/infra/docker/docker-compose.prod.images.yml" pull api frontend
   fi
 else
   log "Pulling latest changes..."
@@ -70,7 +70,7 @@ if [ "$DRY_RUN" = true ]; then
   log "[DRY RUN] Would run: docker compose up -d"
 else
   if [ "${USE_GHCR_IMAGES:-false}" = "true" ]; then
-    docker compose -f "$COMPOSE_BASE" -f "$DEPLOY_DIR/infra/docker-compose.prod.images.yml" up -d
+    docker compose -f "$COMPOSE_BASE" -f "$DEPLOY_DIR/infra/docker/docker-compose.prod.images.yml" up -d
   else
     docker compose -f "$COMPOSE_FILE" up -d
   fi
@@ -85,7 +85,7 @@ if [ "$DRY_RUN" = false ]; then
     else
         log "Health check failed ($HEALTH_URL)!"
         if [ "${USE_GHCR_IMAGES:-false}" = "true" ]; then
-          docker compose -f "$COMPOSE_BASE" -f "$DEPLOY_DIR/infra/docker-compose.prod.images.yml" logs --tail=50
+          docker compose -f "$COMPOSE_BASE" -f "$DEPLOY_DIR/infra/docker/docker-compose.prod.images.yml" logs --tail=50
         else
           docker compose -f "$COMPOSE_FILE" logs --tail=50
         fi

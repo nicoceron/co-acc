@@ -1,0 +1,14 @@
+id: u5b4-ae3s
+name: SECOP I - Modificaciones a Adjudicaciones
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  process:
+  - id_adjudicacion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/u5b4-ae3s
+notes: ''

@@ -1,0 +1,86 @@
+path,category,size,last_commit_date,referenced_by,verdict,notes
+audit-results/,dumps,312K,2026-04-08,run_bootstrap_all.py,kill,Old investigation snapshots; producers also killed
+audit-results/bootstrap-all/,dumps,part,2026-04-08,run_bootstrap_all.py,kill,
+audit-results/data-population/,dumps,part,2026-04-05,,kill,
+audit-results/investigations/,dumps,part,2026-04-17,,kill,Empty
+audit-results/materialized-results/,dumps,part,2026-04-17,materialize_real_results.py,kill,Empty; producer killed
+audit-results/signal-source-compatibility/,dumps,part,2026-04-05,,kill,
+audit-results/source-probes/,dumps,part,2026-03-25,,kill,
+docs/br_acc_colombia_followup_2026-03-30.md,doc-investigation,8K,2026-03-30,,kill,One-off research
+docs/candidate_dataset_probe_2026-03-25.md,doc-investigation,24K,2026-03-28,,kill,Superseded by audit JSON
+docs/candidate_dataset_shortlist_2026-03-25.md,doc-investigation,4K,2026-03-28,,kill,Superseded by audit JSON
+docs/colombia_connection_opportunities_2026-03-14.md,doc-investigation,16K,2026-03-16,,kill,
+docs/colombia_corruption_functionality_report_2026-03-13.md,doc-investigation,12K,2026-03-16,,kill,
+docs/colombia_corruption_functionality_report_2026-03-14.md,doc-investigation,4K,2026-03-15,,kill,
+docs/colombia_corruption_practices_research_2026-03-19.md,doc-investigation,8K,2026-03-28,,kill,
+docs/current_case_coverage_review_2026-03-26.md,doc-investigation,16K,2026-03-28,,kill,
+docs/datos_abiertos_research_2026-03-18.md,doc-investigation,16K,2026-03-28,,kill,
+docs/education_credential_probe_2026-03-27.md,doc-investigation,4K,2026-03-28,,kill,
+docs/live_pattern_findings_2026-03-30.md,doc-investigation,8K,2026-03-30,,kill,
+docs/payroll_pensions_benchmarks_2026-03-21.md,doc-investigation,12K,2026-03-28,,kill,
+docs/periodismo_datos_corrupcion_metodos_2026-03-30.md,doc-investigation,20K,2026-03-30,,kill,
+docs/real_case_validation_2026-03-19.md,doc-investigation,4K,2026-03-28,,kill,
+docs/real_pattern_coverage_2026-03-21.md,doc-investigation,20K,2026-03-28,scripts/scan_real_pattern_coverage.py,kill,Producer killed
+docs/repo_implementation_gap_audit_2026-03-27.md,doc-investigation,8K,2026-03-28,,kill,
+docs/san_jose_network_research_2026-03-22.md,doc-investigation,16K,2026-03-28,,kill,
+docs/secop_archive_probe_2026-03-27.md,doc-investigation,4K,2026-03-28,,kill,
+docs/transmilenio_information_request_fields_2026-03-28.csv,doc-investigation,8K,2026-03-28,,kill,
+docs/transmilenio_information_request_package_2026-03-28.md,doc-investigation,8K,2026-03-28,,kill,
+docs/transmilenio_microdesfalco_research_2026-03-28.md,doc-investigation,8K,2026-03-28,,kill,
+docs/ungrd_drilldown_2026-03-27.md,doc-investigation,12K,2026-03-28,,kill,
+scripts/deep_discovery.py,script-discovery,4K,2026-03-16,,kill,Discovery spike
+scripts/deep_discovery2.py,script-discovery,4K,2026-03-16,,kill,Discovery spike
+scripts/hidden_discovery.py,script-discovery,4K,2026-03-16,,kill,Discovery spike
+scripts/semantic_discovery.py,script-discovery,4K,2026-03-16,,kill,Discovery spike
+scripts/probe_colombia_candidate_datasets.py,script-discovery,4K,2026-03-28,Makefile:probe-colombia-candidates,kill,Target dies with script
+scripts/collect_san_jose_public_osint.py,script-oneoff,12K,2026-03-28,,kill,One-off investigation
+scripts/collect_transmilenio_finance_public_evidence.py,script-oneoff,12K,2026-03-28,,kill,One-off
+scripts/collect_ungrd_public_evidence.py,script-oneoff,12K,2026-03-28,,kill,One-off
+scripts/parse_transmilenio_finance_public_evidence.py,script-oneoff,28K,2026-03-28,,kill,One-off
+scripts/parse_ungrd_public_evidence.py,script-oneoff,12K,2026-03-28,,kill,One-off
+scripts/generate_demo_dataset.py,script-demo,8K,2026-03-28,,kill,Synthetic demo; replaced by real-data plan
+scripts/materialize_real_results.py,script-demo,196K,2026-03-28,Makefile:materialize-results,kill,Huge hand-rolled materializer
+scripts/scan_real_pattern_coverage.py,script-demo,8K,2026-03-28,Makefile:scan-real-pattern-coverage,kill,Pattern-coverage probe obsolete
+scripts/run_bootstrap_all.py,script-bootstrap,20K,2026-03-15,.github/workflows/bootstrap-all-audit.yml,kill,Kill with workflow
+scripts/bootstrap_all/,script-bootstrap,72K,2026-03-15,run_bootstrap_all.py,kill,Adapters for killed script
+scripts/bootstrap_all_public.sh,script-bootstrap,339B,2026-03-12,Makefile:demo-national,kill,Wrapper
+scripts/bootstrap_public_demo.sh,script-bootstrap,3.2K,2026-03-15,,kill,Orphaned wrapper
+scripts/ingest_colombia_all.sh,script-bootstrap,3.2K,2026-03-13,,kill,Orphaned
+scripts/sync_colombia_portal_registry.py,script-registry,16K,2026-03-15,Makefile:sync-colombia-registry,kill,Registry migrates to datasets/catalog.csv Phase 2
+scripts/generate_pipeline_status.py,script-status,6.4K,2026-04-17,Makefile:generate-pipeline-status,kill,Auto-gen obsolete Phase 3
+scripts/generate_data_sources_summary.py,script-status,14K,2026-04-17,Makefile:generate-source-summary,kill,Auto-gen obsolete Phase 3
+scripts/check_compliance_pack.py,script-governance,4.7K,2026-03-12,unclear,decide,Governance leftover; grep CI refs
+scripts/check_open_core_boundary.py,script-governance,2.1K,2026-03-15,unclear,decide,
+scripts/check_pipeline_contracts.py,script-governance,2.2K,2026-03-12,unclear,decide,
+scripts/check_pipeline_inputs.py,script-governance,3.2K,2026-03-12,unclear,decide,
+scripts/check_public_claims.py,script-governance,6.2K,2026-03-15,unclear,decide,
+scripts/check_public_privacy.py,script-governance,2.1K,2026-03-19,unclear,decide,
+scripts/check_source_urls.py,script-governance,8.4K,2026-03-12,.github/workflows/source-url-audit.yml,decide,Registry changes Phase 2
+scripts/claude_merge_gate.py,script-governance,7.7K,2026-03-12,.github/workflows/claude-pr-governor.yml,decide,Whole governance layer question
+scripts/prompt_injection_scan.py,script-governance,5.9K,2026-03-12,.github/workflows/security.yml,keep,Security scan
+scripts/generate_reference_metrics.py,script-governance,2.5K,2026-03-12,docs/reference_metrics.md,decide,Small; check producer role
+scripts/roadmap_links.csv,data-roadmap,1.2M,2026-04-20,,decide,Move to docs/datasets/
+scripts/roadmap_links.json,data-roadmap,1.8M,2026-04-20,,decide,Move to docs/datasets/
+scripts/roadmap_socrata_datasets.csv,data-roadmap,72K,2026-04-20,,kill,Superseded by colombia_open_data_audit.json
+data/paco_sanctions/,data-demo,19M,2026-03-16,,kill,Demo payload; ingester rewrite replaces
+data/official_case_bulletins/,data-demo,12K,2026-03-28,,kill,Unused demo payload
+output/playwright/,empty,0B,,,kill,Empty
+logs/,empty,0B,,,kill,Empty
+.conductor/,empty,0B,,,kill,Empty
+lake/raw/source=secop_integrado/,lake-bad,2.0G,untracked,,kill,Broken normalizer output; rebuild Phase 3
+lake/meta/reality_report.csv,lake-bad,part-of-20K,untracked,,kill,Stale
+lake/meta/watermark_events.parquet,lake-bad,part-of-20K,untracked,,kill,Broken-pipeline state
+lake/meta/watermarks.parquet,lake-bad,part-of-20K,untracked,,kill,Broken-pipeline state
+lake/curated/,lake-bad,0B,untracked,,kill,Empty
+govt data roadmap/,roadmap-pdfs,34M,untracked,,decide,Superseded by audit JSON; user decides external backup
+skills-lock.json,root-misc,4K,2026-03-15,unclear,decide,Origin unknown
+docs/pipeline_status.md,doc-autogen,9.3K,2026-04-17,generate_pipeline_status.py,kill-with-producer,Auto-gen
+docs/data-sources.md,doc-autogen,14K,2026-04-17,generate_data_sources_summary.py,kill-with-producer,Auto-gen
+docs/source_registry_co_v1.csv,doc-registry,21K,2026-04-17,api/src/coacc/services/source_registry.py,keep,Load-bearing; migrate Phase 2
+docs/reference_metrics.md,doc-autogen,451B,2026-03-12,generate_reference_metrics.py,decide,
+.github/workflows/bootstrap-all-audit.yml,workflow,,,run_bootstrap_all.py,kill-with-producer,Workflow dies with script
+.github/workflows/source-url-audit.yml,workflow,,,check_source_urls.py,decide,
+.github/workflows/claude-pr-governor.yml,workflow,,,claude_merge_gate.py,decide,
+Makefile,build,28K,recent,many,keep-rewrite,Rewrite Phase 3 around config-driven ingester
+etl/src/coacc_etl/pipelines/secop_integrado.py,etl-pipeline,,recent,Makefile targets,keep-rewrite,Rewrite Phase 3
+etl/src/coacc_etl/streaming.py,etl-pipeline,,recent,ingester,keep-rewrite,Rewrite Phase 3

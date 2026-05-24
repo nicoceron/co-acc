@@ -1,0 +1,19 @@
+id: prdx-nxyp
+name: SECOP I - PAA Encabezado
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  divipola:
+  - codigo_municipio
+  entity:
+  - codigo_entidad
+  - nit_entidad
+  nit:
+  - nit_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/prdx-nxyp
+notes: ''

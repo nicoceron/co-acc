@@ -1,0 +1,17 @@
+id: j9sd-zau5
+name: MEN_SEDES_EDUCATIVAS_PREESCOLAR_BÁSICA_Y_MEDIA
+sector: Education Sector Roadmap
+tier: context
+join_keys:
+  divipola:
+  - cod_dane_departamento
+  - cod_dane_municipio
+  - codigo_dane
+  - codigo_dane_sede
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/j9sd-zau5
+notes: ''

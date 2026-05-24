@@ -1,0 +1,15 @@
+id: ux6v-gpit
+name: Población Intramural a Cargo del INPEC por Códigos DIVIPOLA
+sector: Justice and Law Sector Roadmap
+tier: context
+join_keys:
+  divipola:
+  - codigo_municipio
+  - codigo_departamento
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/ux6v-gpit
+notes: ''

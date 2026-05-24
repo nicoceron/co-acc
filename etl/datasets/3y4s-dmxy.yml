@@ -1,0 +1,15 @@
+id: 3y4s-dmxy
+name: MEN_INDICADORES_PRIMERA_INFANCIA
+sector: Education
+tier: context
+join_keys:
+  divipola:
+  - cod_dane_depto
+  - cod_dane_mun
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/3y4s-dmxy
+notes: ''

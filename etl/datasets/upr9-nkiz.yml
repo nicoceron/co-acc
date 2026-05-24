@@ -1,0 +1,17 @@
+id: upr9-nkiz
+name: MEN_PROGRAMAS_DE_EDUCACIÓN_SUPERIOR
+sector: Education
+tier: core
+join_keys:
+  divipola:
+  - codigomunicipioinstitucion
+  - codigomunicipioprograma
+  entity:
+  - codigoinstitucion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/upr9-nkiz
+notes: ''

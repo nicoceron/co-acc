@@ -27,6 +27,16 @@ def raw_path(source: str, year: int, month: int) -> Path:
     )
 
 
+def raw_snapshot_path(source: str, snapshot: str) -> Path:
+    """Snapshot-mode write target for full_refresh_only datasets."""
+    return (
+        lake_root()
+        / "raw"
+        / f"source={_clean_part(source)}"
+        / f"snapshot={_clean_part(snapshot)}"
+    )
+
+
 def raw_source_path(source: str) -> Path:
     return lake_root() / "raw" / f"source={_clean_part(source)}"
 

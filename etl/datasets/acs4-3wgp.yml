@@ -1,0 +1,15 @@
+id: acs4-3wgp
+name: Detección de Cultivos de Coca (hectáreas)
+sector: Justice and Law Sector Roadmap
+tier: context
+join_keys:
+  divipola:
+  - coddepto
+  - codmpio
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/acs4-3wgp
+notes: ''

@@ -4,6 +4,7 @@
 allow_broken_404_410: []
 
 allow_auth_or_rate_limited:
+  - sigep_public_servants
   - sigep_sensitive_positions
   - secop_invoices
   - secop_contract_execution

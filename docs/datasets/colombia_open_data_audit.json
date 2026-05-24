@@ -1,0 +1,4542 @@
+{
+  "summary": {
+    "total_unique_ids": 550,
+    "valid": 285,
+    "invalid_404": 208,
+    "forbidden_403": 57,
+    "pct_valid": 51.8,
+    "pct_dead": 37.8,
+    "pct_forbidden": 10.4
+  },
+  "valid_datasets_flat": [
+    {
+      "id": "24ny-2dhf",
+      "name": "SECTORES CRITICOS POR EXCESO DE VELOCIDAD",
+      "sector": "Transport Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/24ny-2dhf"
+    },
+    {
+      "id": "27ia-hnnb",
+      "name": "Artesanias de Colombia S.A. - BIC. Registro Activos de información",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/27ia-hnnb"
+    },
+    {
+      "id": "28vu-5tx7",
+      "name": "CERTIFICACIÓN DE LA FORMACIÓN PROFESIONAL INTEGRAL",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/28vu-5tx7"
+    },
+    {
+      "id": "2c7k-9iru",
+      "name": "CUPOS EN FORMACIÓN PROFESIONAL INTEGRAL POR TIPO DE POBLACIÓN",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/2c7k-9iru"
+    },
+    {
+      "id": "2fn4-ai3h",
+      "name": "Mesas Sectoriales SENA Base de Datos",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/2fn4-ai3h"
+    },
+    {
+      "id": "2iqs-g9cv",
+      "name": "Funcionarios del Cuerpo Diplomático y Consular acreditado en Colombia",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/2iqs-g9cv"
+    },
+    {
+      "id": "2v94-3ypi",
+      "name": "MEN_PROGRAMAS EDUCACIÓN PARA EL TRABAJO Y EL DESARROLLO HUMANO",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/2v94-3ypi"
+    },
+    {
+      "id": "2x55-9wxm",
+      "name": "Resultados Saber Pro Competencias Genericas 2019-2",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/2x55-9wxm"
+    },
+    {
+      "id": "2zn7-bez3",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/2zn7-bez3"
+    },
+    {
+      "id": "36ay-utxu",
+      "name": "UGPP - Tasa de Evasión Aportes al Sistema de la Protección Social",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/36ay-utxu"
+    },
+    {
+      "id": "36vw-pbq2",
+      "name": "SECOP I - Modificaciones a Procesos",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/36vw-pbq2"
+    },
+    {
+      "id": "3faq-g9ig",
+      "name": "Demandas de Protección al Consumidor admitidas y terminadas por la Delegatura para Asuntos Jurisdiccionales de la Superintendencia de Industria y Comercio",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/3faq-g9ig"
+    },
+    {
+      "id": "3fbf-wags",
+      "name": "Notificaciones por aviso y personales de la Superfinanciera",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/3fbf-wags"
+    },
+    {
+      "id": "3hdv-smhz",
+      "name": "TVEC - Compras por item",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/3hdv-smhz"
+    },
+    {
+      "id": "3wdf-ypyy",
+      "name": "Servicios de Calibración Prestados - Instituto Nacional de Metrología",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/3wdf-ypyy"
+    },
+    {
+      "id": "3xwx-53wt",
+      "name": "SECOP I - Origen de los Recursos",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/3xwx-53wt"
+    },
+    {
+      "id": "3y4s-dmxy",
+      "name": "MEN_INDICADORES_PRIMERA_INFANCIA",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/3y4s-dmxy"
+    },
+    {
+      "id": "489x-mu3c",
+      "name": "Número de Casos de Niños, Niñas y Adolescentes (NNA) reportados en SIRITI por cada Tipo de Vulnerabilidad a Nivel Nacional.",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/489x-mu3c"
+    },
+    {
+      "id": "4bku-d9az",
+      "name": "Actuaciones judiciales ante la Corte Constitucional realizadas por el Ministerio de Justicia y del Derecho",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/4bku-d9az"
+    },
+    {
+      "id": "4cym-4b76",
+      "name": "Directorio Consultorios Jurídicos de las Instituciones de Educación Superior",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/4cym-4b76"
+    },
+    {
+      "id": "4e7j-65ci",
+      "name": "Programa Escuelas Deportivas Para Todos",
+      "sector": "Sports Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/4e7j-65ci"
+    },
+    {
+      "id": "4ex9-j3n8",
+      "name": "SECOP II - Contacto Entidades y Proveedores",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/4ex9-j3n8"
+    },
+    {
+      "id": "4hrb-y62g",
+      "name": "MEN_ESTADISTICAS DE MATRICULA POR DEPARTAMENTOS_ES",
+      "sector": "Education Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/4hrb-y62g"
+    },
+    {
+      "id": "4iyy-8sme",
+      "name": "Consolidado Escenarios Mindeporte",
+      "sector": "Sports Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/4iyy-8sme"
+    },
+    {
+      "id": "4mka-qdvc",
+      "name": "Índice Información Clasificada Reservada",
+      "sector": "Culture Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/4mka-qdvc"
+    },
+    {
+      "id": "4n4q-k399",
+      "name": "Multas y Sanciones SECOP I",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/4n4q-k399"
+    },
+    {
+      "id": "4qkq-csdn",
+      "name": "Registro Único de Prestadores de Servicios Públicos-RUPS",
+      "sector": "National Planning",
+      "url": "https://www.datos.gov.co/d/4qkq-csdn"
+    },
+    {
+      "id": "4u2m-pguf",
+      "name": "Resultados Saber TyT Genericas 2019-2",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/4u2m-pguf"
+    },
+    {
+      "id": "4vvt-vbpv",
+      "name": "Patentes presentadas",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/4vvt-vbpv"
+    },
+    {
+      "id": "58aq-7nep",
+      "name": "Población Privada de la Libertad por Rango de Edades, Sexo y Situación Jurídica en Establecimientos de Reclusión",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/58aq-7nep"
+    },
+    {
+      "id": "58pz-wqvv",
+      "name": "Vista Inventario y Clasificación de Activos de Información - INVEMAR Macroproceso Procesos Gerenciales",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/58pz-wqvv"
+    },
+    {
+      "id": "5c2k-ahfc",
+      "name": "MEN_NÚMERO_BACHILLERES_POR_ETC",
+      "sector": "Education Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/5c2k-ahfc"
+    },
+    {
+      "id": "5dpu-htqu",
+      "name": "Reporte Índice de Calidad de Aguas Marinas y Costeras - ICAM",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/5dpu-htqu"
+    },
+    {
+      "id": "5n52-6rih",
+      "name": "Población Afiliada",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/5n52-6rih"
+    },
+    {
+      "id": "5phs-yqfw",
+      "name": "Información de Gastos del Presupuesto General de la Nación",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/5phs-yqfw"
+    },
+    {
+      "id": "5wck-szir",
+      "name": "MEN_MATRICULA_ESTADISTICA_ES",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/5wck-szir"
+    },
+    {
+      "id": "62tk-nxj5",
+      "name": "Presión Atmosférica",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/62tk-nxj5"
+    },
+    {
+      "id": "6arb-d547",
+      "name": "Alimentos del trópico para alimentación animal - AlimenTro",
+      "sector": "Agriculture and Rural Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/6arb-d547"
+    },
+    {
+      "id": "6cat-2gcs",
+      "name": "10.000 Empresas mas Grandes del País",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/6cat-2gcs"
+    },
+    {
+      "id": "6cta-vqaf",
+      "name": "Solicitudes de inscripción en el Registro Único de Retorno -RUR",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/6cta-vqaf"
+    },
+    {
+      "id": "6deq-vx84",
+      "name": "Averiguaciones Preliminares Iniciadas por Dirección Territorial",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/6deq-vx84"
+    },
+    {
+      "id": "6duu-4tms",
+      "name": "25 Hojas de Ruta Sectoriales de Datos Abiertos Estratégicos 2025 - 2026",
+      "sector": "Habitat and Housing Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/6duu-4tms"
+    },
+    {
+      "id": "6eyy-q57b",
+      "name": "Pre registros Estatuto Temporal de Protección para Migrantes Venezolanos",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/6eyy-q57b"
+    },
+    {
+      "id": "6gnm-kj8d",
+      "name": "Indice de Información Clasificada y Reservada Icfes 2022",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/6gnm-kj8d"
+    },
+    {
+      "id": "6hcf-xdqm",
+      "name": "Listado general del estado de las licencias de Cannabis Psicoactivo, No Psicoactivo y Semillas en Colombia",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/6hcf-xdqm"
+    },
+    {
+      "id": "6hqw-m3dm",
+      "name": "Estados Financieros NIIF- Carátula",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/6hqw-m3dm"
+    },
+    {
+      "id": "6kwm-9788",
+      "name": "Resultados Saber Pro Competencias Especificas 2019-2",
+      "sector": "Education Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/6kwm-9788"
+    },
+    {
+      "id": "7fix-nd37",
+      "name": "SECOP I - Adiciones",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/7fix-nd37"
+    },
+    {
+      "id": "7jfv-7spn",
+      "name": "Montos y número de créditos aprobados o desembolsados por cosechas",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/7jfv-7spn"
+    },
+    {
+      "id": "7p9a-zd9k",
+      "name": "Directorio de Centros de Conciliación, Arbitraje, Amigable Composición e Insolvencia",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/7p9a-zd9k"
+    },
+    {
+      "id": "7q36-mkp5",
+      "name": "Inscripciones Electorales en el exterior",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/7q36-mkp5"
+    },
+    {
+      "id": "7swi-ievq",
+      "name": "Costos Faena de Pesca año 2020",
+      "sector": "Agriculture and Rural Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/7swi-ievq"
+    },
+    {
+      "id": "832u-c3pg",
+      "name": "Consolidado acotamiento de Ronda Hídrica",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/832u-c3pg"
+    },
+    {
+      "id": "89wx-5p2g",
+      "name": "Registro de activos de Información",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/89wx-5p2g"
+    },
+    {
+      "id": "8cnh-7asj",
+      "name": "Georeferenciación Centros de Aprendizaje SENA",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/8cnh-7asj"
+    },
+    {
+      "id": "8dk5-vjaw",
+      "name": "Esquema de publicación",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/8dk5-vjaw"
+    },
+    {
+      "id": "8iut-hgij",
+      "name": "PQRSD Ministerio del Trabajo",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/8iut-hgij"
+    },
+    {
+      "id": "8pqf-rmzr",
+      "name": "Total Nacional inscritos en la agencia pública de empleo SENA",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/8pqf-rmzr"
+    },
+    {
+      "id": "96sh-4v8d",
+      "name": "Entradas de extranjeros a Colombia",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/96sh-4v8d"
+    },
+    {
+      "id": "9aan-wm8m",
+      "name": "Base de datos relacionada con madera movilizada proveniente de Plantaciones Forestales Comerciales",
+      "sector": "Agriculture and Rural Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/9aan-wm8m"
+    },
+    {
+      "id": "9m2f-pdxx",
+      "name": "Licencias de Cannabis otorgadas por el Ministerio de Justicia y del Derecho",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/9m2f-pdxx"
+    },
+    {
+      "id": "9n7g-3red",
+      "name": "Patentes publicadas",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/9n7g-3red"
+    },
+    {
+      "id": "9sue-ezhx",
+      "name": "SECOPII - Plan Anual De Adquisiciones Detalle",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/9sue-ezhx"
+    },
+    {
+      "id": "9xdg-hm6t",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/9xdg-hm6t"
+    },
+    {
+      "id": "9yh6-ggh4",
+      "name": "Iniciativas de Proyectos de Inversión en Agua Potable y Saneamiento Básico",
+      "sector": "Habitat and Housing Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/9yh6-ggh4"
+    },
+    {
+      "id": "9z8f-npmd",
+      "name": "Base de Datos en RNBD",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/9z8f-npmd"
+    },
+    {
+      "id": "9zpk-v2mx",
+      "name": "Registro Activos de Información Icfes 2023",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/9zpk-v2mx"
+    },
+    {
+      "id": "a65q-6den",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/a65q-6den"
+    },
+    {
+      "id": "a86w-fh92",
+      "name": "SECOP II - Solicitudes CDPs",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/a86w-fh92"
+    },
+    {
+      "id": "acs4-3wgp",
+      "name": "Detección de Cultivos de Coca (hectáreas)",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/acs4-3wgp"
+    },
+    {
+      "id": "afdg-3zpb",
+      "name": "Temperatura Mínima del Aire",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/afdg-3zpb"
+    },
+    {
+      "id": "ahbx-upcu",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ahbx-upcu"
+    },
+    {
+      "id": "azeg-sgqg",
+      "name": "SECOP I - PAA Detalle",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/azeg-sgqg"
+    },
+    {
+      "id": "b346-rc9m",
+      "name": "Consultas Verbales por Dirección Territorial",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/b346-rc9m"
+    },
+    {
+      "id": "b6m4-qgqv",
+      "name": "SECOP II - PAA - Encabezado",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/b6m4-qgqv"
+    },
+    {
+      "id": "bdmn-sqnh",
+      "name": "Nivel Instantáneo del rio",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/bdmn-sqnh"
+    },
+    {
+      "id": "bee9-sdwx",
+      "name": "Disparidad de Horas Trabajadas Hombres y Mujeres",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/bee9-sdwx"
+    },
+    {
+      "id": "bgt6-3icu",
+      "name": "Sanciones Ejecutoriadas y NO Ejecutoriadas por Conductas Atentatorias contra el derecho de asociación sindical",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/bgt6-3icu"
+    },
+    {
+      "id": "bign-27m7",
+      "name": "Paises que no exigen visa de turismo a colombianos",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/bign-27m7"
+    },
+    {
+      "id": "bmcc-69wd",
+      "name": "Directorio de Casas de Justicia y Centros de Convivencia Ciudadana.",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/bmcc-69wd"
+    },
+    {
+      "id": "bpij-5vy9",
+      "name": "Ejecución Presupuestal del Presupuesto General de la Nación detallada por Rubro Presupuestal",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/bpij-5vy9"
+    },
+    {
+      "id": "br9a-gygu",
+      "name": "Ejecución Financiera de Regalías",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/br9a-gygu"
+    },
+    {
+      "id": "btz9-gir8",
+      "name": "Solicitudes de Arbitraje",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/btz9-gir8"
+    },
+    {
+      "id": "bvqm-qcni",
+      "name": "Indice de Información Clasificada y Reservada - Ministerio de Justicia y del Derecho",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/bvqm-qcni"
+    },
+    {
+      "id": "bx26-pux4",
+      "name": "Registro_PQRS_Mindeportes",
+      "sector": "Sports Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/bx26-pux4"
+    },
+    {
+      "id": "cb9c-h8sn",
+      "name": "SECOP II - Adiciones",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/cb9c-h8sn"
+    },
+    {
+      "id": "ccvq-rp9s",
+      "name": "Temperatura Máxima del Aire",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ccvq-rp9s"
+    },
+    {
+      "id": "ceth-n4bn",
+      "name": "Grupos de Proveedores - SECOP II",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ceth-n4bn"
+    },
+    {
+      "id": "cf7h-nvwj",
+      "name": "Asistencias preventivas por Dirección Territorial",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/cf7h-nvwj"
+    },
+    {
+      "id": "cf9k-55fw",
+      "name": "DNP-proyectos_datos_basicos",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/cf9k-55fw"
+    },
+    {
+      "id": "cff6-j795",
+      "name": "Registro de activos de información 2022",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/cff6-j795"
+    },
+    {
+      "id": "cfw5-qzt5",
+      "name": "MEN_ESTABLECIMIENTOS_EDUCATIVOS_PREESCOLAR_BÁSICA_Y_MEDIA",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/cfw5-qzt5"
+    },
+    {
+      "id": "cgyu-cds3",
+      "name": "Perfil de aspirantes a la carrera diplomática y consular ",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/cgyu-cds3"
+    },
+    {
+      "id": "ch4u-f3i5",
+      "name": "Resultados de Análisis de Laboratorio Suelos en Colombia",
+      "sector": "Agriculture and Rural Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ch4u-f3i5"
+    },
+    {
+      "id": "cm2t-qreq",
+      "name": "Encuesta territorial de comportamiento en seguridad vial",
+      "sector": "Transport Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/cm2t-qreq"
+    },
+    {
+      "id": "cmgp-8z8t",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/cmgp-8z8t"
+    },
+    {
+      "id": "cnh8-i5yd",
+      "name": "Oficinas de expedición de trámites de Cancillería - Ministerio de Relaciones Exteriores",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/cnh8-i5yd"
+    },
+    {
+      "id": "cqdw-gd52",
+      "name": "Mesas Sectoriales SENA",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/cqdw-gd52"
+    },
+    {
+      "id": "ctcp-462n",
+      "name": "Estados Financieros NIIF- Estado de Flujo Efectivo",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/ctcp-462n"
+    },
+    {
+      "id": "cwhv-7fnp",
+      "name": "SECOP II - Rubros Presupuestales",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/cwhv-7fnp"
+    },
+    {
+      "id": "d5w5-gqs5",
+      "name": "Historial Memorias de Oficio",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/d5w5-gqs5"
+    },
+    {
+      "id": "d76u-8x6w",
+      "name": "Postulados según situación penitenciaria.",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/d76u-8x6w"
+    },
+    {
+      "id": "dd55-74ss",
+      "name": "SUJETOS OBLIGADOS",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/dd55-74ss"
+    },
+    {
+      "id": "dmgg-8hin",
+      "name": "SECOP II - Archivos Descarga Desde 2025",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/dmgg-8hin"
+    },
+    {
+      "id": "dr5c-eewa",
+      "name": "Mortalidad en vias",
+      "sector": "Transport Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/dr5c-eewa"
+    },
+    {
+      "id": "dvz4-4xcz",
+      "name": "Sistematizacion de tramites de VPD",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/dvz4-4xcz"
+    },
+    {
+      "id": "dwbg-geen",
+      "name": "Inventario documental de historias laborales de la Dirección Nacional de Estupefacientes - DNE",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/dwbg-geen"
+    },
+    {
+      "id": "e2u2-swiw",
+      "name": "SECOP II - Modificaciones a Procesos",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/e2u2-swiw"
+    },
+    {
+      "id": "e88h-vxzi",
+      "name": "Entidades Acreditadas Organizaciones Solidarias",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/e88h-vxzi"
+    },
+    {
+      "id": "e8s8-v85a",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/e8s8-v85a"
+    },
+    {
+      "id": "e967-4a8r",
+      "name": "Información estadística y financiera por ramos de seguros Formato 290",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/e967-4a8r"
+    },
+    {
+      "id": "e97j-vuf7",
+      "name": "Colombianos detenidos en el exterior",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/e97j-vuf7"
+    },
+    {
+      "id": "ef7j-amu8",
+      "name": "Registro de Activos de Información",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ef7j-amu8"
+    },
+    {
+      "id": "efw5-jiej",
+      "name": "Salidas de colombianos desde el territorio nacional",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/efw5-jiej"
+    },
+    {
+      "id": "egce-jd6s",
+      "name": "Directorio de funcionarios habilitados para conciliar",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/egce-jd6s"
+    },
+    {
+      "id": "enmx-7kvv",
+      "name": "MEN_MATRICULA_MIGRANTES_EN_EDUCACION_BASICA_Y_MEDIA",
+      "sector": "Education Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/enmx-7kvv"
+    },
+    {
+      "id": "epkg-mphw",
+      "name": "MEN_INDICADORES_PAE",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/epkg-mphw"
+    },
+    {
+      "id": "f4a5-ab9q",
+      "name": "Seguimiento a la Ejecución Presupuestal del Sector Justicia",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/f4a5-ab9q"
+    },
+    {
+      "id": "f789-7hwg",
+      "name": "SECOP I - Procesos de Compra Pública",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/f789-7hwg"
+    },
+    {
+      "id": "fd7n-f4jp",
+      "name": "USPEC Alimentación PPL",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/fd7n-f4jp"
+    },
+    {
+      "id": "fdir-hk5z",
+      "name": "Tratados internacionales de Colombia",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/fdir-hk5z"
+    },
+    {
+      "id": "feim-cysj",
+      "name": "Proyectos de ley del Senado de la Republica",
+      "sector": "Equality and Equity Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/feim-cysj"
+    },
+    {
+      "id": "ff7q-jcdw",
+      "name": "Comercialización Materiales de Referencia - Instituto Nacional de Metrología",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/ff7q-jcdw"
+    },
+    {
+      "id": "fiev-nid6",
+      "name": "Lista de normas cargadas en el Sistema Único de Información Normativa SUIN-Juriscol",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/fiev-nid6"
+    },
+    {
+      "id": "fn2v-r4gu",
+      "name": "Hoja de Ruta Nacional de datos abiertos estratégicos del estado colombiano",
+      "sector": "Sectoral Roadmaps 2025-2026",
+      "url": "https://www.datos.gov.co/d/fn2v-r4gu"
+    },
+    {
+      "id": "fr8e-58py",
+      "name": "Entidades Acreditadas SIIA",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/fr8e-58py"
+    },
+    {
+      "id": "fr9f-9g4b",
+      "name": "Encuesta Motociclistas",
+      "sector": "Transport Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/fr9f-9g4b"
+    },
+    {
+      "id": "fs36-azrv",
+      "name": "Registro de Sanciones Contadores",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/fs36-azrv"
+    },
+    {
+      "id": "fuyf-sb4r",
+      "name": "Procesos en Casas de Justicia",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/fuyf-sb4r"
+    },
+    {
+      "id": "fwf9-c4xb",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/fwf9-c4xb"
+    },
+    {
+      "id": "fz2j-qt75",
+      "name": "Probabilidad de accidentalidad",
+      "sector": "Transport Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/fz2j-qt75"
+    },
+    {
+      "id": "g7ps-wzb3",
+      "name": "Países que no requieren visa de turismo para ingresar a Colombia",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/g7ps-wzb3"
+    },
+    {
+      "id": "gaic-b8aw",
+      "name": "Exportaciones agrícolas no tradicionales y tradicionales",
+      "sector": "Agriculture and Rural Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/gaic-b8aw"
+    },
+    {
+      "id": "gi6t-dtvg",
+      "name": "Índice de información clasificada y reservada",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/gi6t-dtvg"
+    },
+    {
+      "id": "gium-im4r",
+      "name": "Recursos de Gobierno al Sistema de Naciones Unidas para el Desarrollo Sostenible",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/gium-im4r"
+    },
+    {
+      "id": "gjp9-cutm",
+      "name": "SECOP II - Garantias",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/gjp9-cutm"
+    },
+    {
+      "id": "gkbc-gw7x",
+      "name": "Desmovilizaciones colectivas e individuales",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/gkbc-gw7x"
+    },
+    {
+      "id": "gnut-8jsz",
+      "name": "Cantidad de pensionados de Colpensiones por tipo de pensión",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/gnut-8jsz"
+    },
+    {
+      "id": "h2yr-zfb2",
+      "name": "Subsidios De Vivienda Asignados",
+      "sector": "Habitat and Housing Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/h2yr-zfb2"
+    },
+    {
+      "id": "h468-umfj",
+      "name": "Registro de Activos de Información UGPP",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/h468-umfj"
+    },
+    {
+      "id": "h7zg-qcya",
+      "name": "Esquema de publicación de información INPEC",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/h7zg-qcya"
+    },
+    {
+      "id": "h7zv-k39x",
+      "name": "Universo de entidades",
+      "sector": "Agriculture and Rural Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/h7zv-k39x"
+    },
+    {
+      "id": "h8ui-2iee",
+      "name": "Número de pensionados de Colpensiones por rango salarial 2",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/h8ui-2iee"
+    },
+    {
+      "id": "h9p8-6xks",
+      "name": "Capacitaciones virtuales Archivo General de la Nación",
+      "sector": "Culture Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/h9p8-6xks"
+    },
+    {
+      "id": "hb3d-dyp7",
+      "name": "Entidades Acreditadas SIIA",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/hb3d-dyp7"
+    },
+    {
+      "id": "hd6e-hz7c",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/hd6e-hz7c"
+    },
+    {
+      "id": "hdnf-a76p",
+      "name": "Número de pensionados en Colpensiones desagregado por departamento y municipio",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/hdnf-a76p"
+    },
+    {
+      "id": "hex8-i6ry",
+      "name": "Unidades de las Áreas Coralinas (Polígonos)",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/hex8-i6ry"
+    },
+    {
+      "id": "hf6d-emrx",
+      "name": "Disparidad Salarial Hombres Mujeres",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/hf6d-emrx"
+    },
+    {
+      "id": "hgi6-6wh3",
+      "name": "Proponentes por Proceso SECOP II",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/hgi6-6wh3"
+    },
+    {
+      "id": "hjfm-ynaz",
+      "name": "Cantidad de Conciliadores en Equidad Nombrados por Municipio y Departamento",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/hjfm-ynaz"
+    },
+    {
+      "id": "htue-emaw",
+      "name": "Entidades Acreditadas SIIA",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/htue-emaw"
+    },
+    {
+      "id": "hxkn-cb2p",
+      "name": "Esquema de publicación de información - UGPP",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/hxkn-cb2p"
+    },
+    {
+      "id": "ibyt-yi2f",
+      "name": "SECOP II - Facturas",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ibyt-yi2f"
+    },
+    {
+      "id": "ivxt-5jyc",
+      "name": "1. Hoja de Ruta Nacional de Datos Abiertos 2025 -2026",
+      "sector": "Sectoral Roadmaps 2025-2026",
+      "url": "https://www.datos.gov.co/d/ivxt-5jyc"
+    },
+    {
+      "id": "j9sd-zau5",
+      "name": "MEN_SEDES_EDUCATIVAS_PREESCOLAR_BÁSICA_Y_MEDIA",
+      "sector": "Education Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/j9sd-zau5"
+    },
+    {
+      "id": "jbjy-vk9h",
+      "name": "SECOP II - Contratos Electrónicos",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/jbjy-vk9h"
+    },
+    {
+      "id": "jh3r-qtfq",
+      "name": "Sanciones no Ejecutoriadas y Ejecutoriadas por Dirección Territorial",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/jh3r-qtfq"
+    },
+    {
+      "id": "ji8i-4anb",
+      "name": "MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR, BÁSICA Y MEDIA_POR_DEPARTAMENTO",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/ji8i-4anb"
+    },
+    {
+      "id": "jvtd-3dgy",
+      "name": "Pensionados por entidad administradora de Colombia",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/jvtd-3dgy"
+    },
+    {
+      "id": "jzzx-knyw",
+      "name": "Entidades Acreditadas SIIA",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/jzzx-knyw"
+    },
+    {
+      "id": "k67a-zkz9",
+      "name": "Resultados Saber TyT Genéricas 2020-1",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/k67a-zkz9"
+    },
+    {
+      "id": "kccg-dij4",
+      "name": "Directorio de entidades avaladas para formación en conciliación y/o insolvencia",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/kccg-dij4"
+    },
+    {
+      "id": "kfcm-k5vw",
+      "name": "Seguimiento acumulado de actividades de participación MinJusticia",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/kfcm-k5vw"
+    },
+    {
+      "id": "kg2d-yfyg",
+      "name": "Listado de Entidades del Sector Solidario",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/kg2d-yfyg"
+    },
+    {
+      "id": "khhm-wccm",
+      "name": "Reporte por departamento y tipo de intermediario relacionados en el Registro Único de Intermediarios de seguros en el ramo de riesgos laborales (RUI) - Del Grupo de Promoción y prevención de la Dirección de Riesgos de Laborales del Ministerio del Trabajo",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/khhm-wccm"
+    },
+    {
+      "id": "ksje-ycct",
+      "name": "Expedición de trámites en el exterior",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ksje-ycct"
+    },
+    {
+      "id": "ksrx-5cr8",
+      "name": "Índice de Información Clasificada y Reservada",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ksrx-5cr8"
+    },
+    {
+      "id": "kzk3-8dnx",
+      "name": "Genero y nacimiento de contadores por ciudad",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/kzk3-8dnx"
+    },
+    {
+      "id": "m3fg-eigf",
+      "name": "Investigaciones Administrativas Iniciadas por Dirección Territorial",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/m3fg-eigf"
+    },
+    {
+      "id": "m4tv-4zwt",
+      "name": "Cuadro de clasificación documental",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/m4tv-4zwt"
+    },
+    {
+      "id": "m9r3-29qp",
+      "name": "Indice de Información Clasificada y Reservada",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/m9r3-29qp"
+    },
+    {
+      "id": "mfmm-jqmq",
+      "name": "SECOP II - Ejecución Contratos",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/mfmm-jqmq"
+    },
+    {
+      "id": "mj4p-5iuv",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/mj4p-5iuv"
+    },
+    {
+      "id": "mjt9-2zwc",
+      "name": "Población Privada de la Libertad por Nivel Académico, Sexo y Situación Jurídica en Establecimientos de Reclusión",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/mjt9-2zwc"
+    },
+    {
+      "id": "mqxk-srbz",
+      "name": "Control Administrativo de Sustancias y Productos Químicos ejercido por el Ministerio de Justicia y del Derecho",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/mqxk-srbz"
+    },
+    {
+      "id": "msu7-rjqd",
+      "name": "Solicitudes de insolvencia",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/msu7-rjqd"
+    },
+    {
+      "id": "mxk5-ce6w",
+      "name": "Información financiera con fines de supervisión – CUIF por moneda Entidades vigiladas",
+      "sector": "Finance",
+      "url": "https://www.datos.gov.co/d/mxk5-ce6w"
+    },
+    {
+      "id": "mxqg-ytrw",
+      "name": "MEN_INDICE_PARIDAD_POR_GENERO_PARA_ETNICOS",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/mxqg-ytrw"
+    },
+    {
+      "id": "mzgh-shtp",
+      "name": "DNP-ProyectosSGR",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/mzgh-shtp"
+    },
+    {
+      "id": "n5yy-8nav",
+      "name": "MEN_INSTITUCIONES EDUCACIÓN SUPERIOR",
+      "sector": "Education Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/n5yy-8nav"
+    },
+    {
+      "id": "nfdm-7zai",
+      "name": "Informes al congreso",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/nfdm-7zai"
+    },
+    {
+      "id": "nftv-7mae",
+      "name": "Esquema de Publicación de Información Migración Colombia - UAEMC",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/nftv-7mae"
+    },
+    {
+      "id": "np5z-haxm",
+      "name": "Cantidad de pensionados de Colpensiones por rango de edad",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/np5z-haxm"
+    },
+    {
+      "id": "npcj-hpw7",
+      "name": "Gestión de PQRS unificado Minjusticia",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/npcj-hpw7"
+    },
+    {
+      "id": "nudc-7mev",
+      "name": "MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR, BÁSICA Y MEDIA_POR_MUNICIPIO",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/nudc-7mev"
+    },
+    {
+      "id": "p62d-8cf3",
+      "name": "Asistencias brindadas a connacionales en el exterior",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/p62d-8cf3"
+    },
+    {
+      "id": "p6dx-8zbt",
+      "name": "SECOP II - Procesos de Contratación",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/p6dx-8zbt"
+    },
+    {
+      "id": "pfdp-zks5",
+      "name": "Estados Financieros NIIF- Estado de Situación Financiera",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/pfdp-zks5"
+    },
+    {
+      "id": "pgrh-8um9",
+      "name": "MEN_DOCENTES_OFICIALES_EPBM",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/pgrh-8um9"
+    },
+    {
+      "id": "pqdu-ej7f",
+      "name": "Predios Beneficiarios PIDAR",
+      "sector": "Agriculture and Rural Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/pqdu-ej7f"
+    },
+    {
+      "id": "prdx-nxyp",
+      "name": "SECOP I - PAA Encabezado",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/prdx-nxyp"
+    },
+    {
+      "id": "prwj-nzxa",
+      "name": "Estados Financieros NIIF- Estado de Resultado Integral",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/prwj-nzxa"
+    },
+    {
+      "id": "ps88-5e3v",
+      "name": "SECOP I - Archivos Descarga",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ps88-5e3v"
+    },
+    {
+      "id": "pt9a-aamx",
+      "name": "Nivel Mínimo del Rio",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/pt9a-aamx"
+    },
+    {
+      "id": "pvyw-9yqs",
+      "name": "Reportes Portal Nacional Datos Abiertos",
+      "sector": "Statistics Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/pvyw-9yqs"
+    },
+    {
+      "id": "pzu3-75kc",
+      "name": "Registo Activos Informacion FOGACOOP",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/pzu3-75kc"
+    },
+    {
+      "id": "qhpu-8ixx",
+      "name": "Rentabilidades de los Fondos de Inversión Colectiva (FIC)",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/qhpu-8ixx"
+    },
+    {
+      "id": "qmzu-gj57",
+      "name": "SECOP II - Proveedores Registrados",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/qmzu-gj57"
+    },
+    {
+      "id": "qr2y-27z8",
+      "name": "Inventario documental de historias laborales del Ministerio de Justicia y del Derecho",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/qr2y-27z8"
+    },
+    {
+      "id": "qwzh-2su3",
+      "name": "Índice de información clasificada y reservada",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/qwzh-2su3"
+    },
+    {
+      "id": "r29n-7bcm",
+      "name": "Sanciones Ejecutoriadas Y No Ejecutoriadas Por Intermediación Laboral Indebida por Dirección Territorial",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/r29n-7bcm"
+    },
+    {
+      "id": "r3d5-pipz",
+      "name": "Balance de entidades publicas vigiladas por la SFC.",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/r3d5-pipz"
+    },
+    {
+      "id": "rgxm-mmea",
+      "name": "Tienda Virtual del Estado Colombiano - Consolidado",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/rgxm-mmea"
+    },
+    {
+      "id": "rnvb-vnyh",
+      "name": "Saber 11° 2020-2",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/rnvb-vnyh"
+    },
+    {
+      "id": "rqjn-d9f5",
+      "name": "Censo Nacional de Archivos",
+      "sector": "Culture Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/rqjn-d9f5"
+    },
+    {
+      "id": "rs3u-8r4q",
+      "name": "SECTORES CRITICOS DE SINIESTRALIDAD VIAL",
+      "sector": "Transport Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/rs3u-8r4q"
+    },
+    {
+      "id": "rtck-inie",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/rtck-inie"
+    },
+    {
+      "id": "rtxu-twjm",
+      "name": "Distritos de Riego activos",
+      "sector": "Agriculture",
+      "url": "https://www.datos.gov.co/d/rtxu-twjm"
+    },
+    {
+      "id": "rues-vdf5",
+      "name": "Misiones acreditadas en Colombia",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/rues-vdf5"
+    },
+    {
+      "id": "rvii-eis8",
+      "name": "Distribución de cartera por producto",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/rvii-eis8"
+    },
+    {
+      "id": "s34r-vs6z",
+      "name": "Actos administrativos de formalización de los Sistemas Locales de Justicia",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/s34r-vs6z"
+    },
+    {
+      "id": "s44d-v5fw",
+      "name": "Desmovilizaciones por régimen legal",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/s44d-v5fw"
+    },
+    {
+      "id": "s484-c9k3",
+      "name": "SECOP - Convenios Interadministrativos",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/s484-c9k3"
+    },
+    {
+      "id": "s54a-sgyg",
+      "name": "Precipitación",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/s54a-sgyg"
+    },
+    {
+      "id": "s64k-xyiz",
+      "name": "Esquema de Publicación de Información- Ministerio del Trabajo",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/s64k-xyiz"
+    },
+    {
+      "id": "s87b-tjcc",
+      "name": "Estadísticas Solicitudes Restitución Discriminadas Municipios",
+      "sector": "Agriculture",
+      "url": "https://www.datos.gov.co/d/s87b-tjcc"
+    },
+    {
+      "id": "s97v-q3tx",
+      "name": "Superservicios - Inf. Comercial Usuarios NO Regulados",
+      "sector": "National Planning",
+      "url": "https://www.datos.gov.co/d/s97v-q3tx"
+    },
+    {
+      "id": "sasi-u68b",
+      "name": "Entidades Acreditadas Octubre 2023",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/sasi-u68b"
+    },
+    {
+      "id": "sbwg-7ju4",
+      "name": "Temperatura Ambiente del Aire",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/sbwg-7ju4"
+    },
+    {
+      "id": "sgfv-3yp8",
+      "name": "Velocidad del Viento",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/sgfv-3yp8"
+    },
+    {
+      "id": "sk9s-yxmi",
+      "name": "Afiliados al sistema general de pensiones de Colombia",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/sk9s-yxmi"
+    },
+    {
+      "id": "skc9-met7",
+      "name": "SECOP II - Compromisos Presupuestales",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/skc9-met7"
+    },
+    {
+      "id": "sr9n-792w",
+      "name": "Entidades  vigiladas por la Superfinanciera",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/sr9n-792w"
+    },
+    {
+      "id": "st4x-g6gz",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/st4x-g6gz"
+    },
+    {
+      "id": "tauh-5jvn",
+      "name": "SECOP I - Proponentes",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/tauh-5jvn"
+    },
+    {
+      "id": "thwd-ivmp",
+      "name": "Registro Nacional de Turismo - RNT",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/thwd-ivmp"
+    },
+    {
+      "id": "tic6-rbue",
+      "name": "Estados financieros de entidades solidarias desde 2017 – Actualidad",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/tic6-rbue"
+    },
+    {
+      "id": "tj5j-bwvg",
+      "name": "Registro de activos de información del Ministerio de Justicia y del Derecho",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/tj5j-bwvg"
+    },
+    {
+      "id": "tnbg-fy2n",
+      "name": "Producción de Bienes Nacionales",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/tnbg-fy2n"
+    },
+    {
+      "id": "tv9x-wfg5",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/tv9x-wfg5"
+    },
+    {
+      "id": "u37r-hjmu",
+      "name": "Resultados únicos Saber Pro",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/u37r-hjmu"
+    },
+    {
+      "id": "u4ze-bi7k",
+      "name": "DESERCION DE LA FORMACIÓN PROFESIONAL INTEGRAL",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/u4ze-bi7k"
+    },
+    {
+      "id": "u5b4-ae3s",
+      "name": "SECOP I - Modificaciones a Adjudicaciones",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/u5b4-ae3s"
+    },
+    {
+      "id": "u8du-s7mh",
+      "name": "Inventario de activos de información del MEN",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/u8du-s7mh"
+    },
+    {
+      "id": "u8iw-uggt",
+      "name": "Índice de Información Clasificada y Reservada de la Superfinanciera",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/u8iw-uggt"
+    },
+    {
+      "id": "u99c-7mfm",
+      "name": "SECOP II - Suspensiones de Contratos",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/u99c-7mfm"
+    },
+    {
+      "id": "uawh-cjvi",
+      "name": "Fondo de Pensiones Obligatorias y Cesantías C.P L.P",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/uawh-cjvi"
+    },
+    {
+      "id": "uds4-jdij",
+      "name": "DNP-plandesarrollo",
+      "sector": "National Planning",
+      "url": "https://www.datos.gov.co/d/uds4-jdij"
+    },
+    {
+      "id": "udsq-ti2d",
+      "name": "Inventario y Clasificación de Activos de Información - INVEMAR",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/udsq-ti2d"
+    },
+    {
+      "id": "uext-mhny",
+      "name": "Humedad del Aire",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/uext-mhny"
+    },
+    {
+      "id": "unak-3uez",
+      "name": "Fallecidos segun tramo y constructora",
+      "sector": "Transport Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/unak-3uez"
+    },
+    {
+      "id": "upd7-iccu",
+      "name": "Oferta Formativa en Metrología - Instituto Nacional de Metrología",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/upd7-iccu"
+    },
+    {
+      "id": "upr9-nkiz",
+      "name": "MEN_PROGRAMAS_DE_EDUCACIÓN_SUPERIOR",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/upr9-nkiz"
+    },
+    {
+      "id": "us2n-5jaf",
+      "name": "Desmovilizaciones por indulto o amnistía",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/us2n-5jaf"
+    },
+    {
+      "id": "usqp-5nsn",
+      "name": "TVEC - Items",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/usqp-5nsn"
+    },
+    {
+      "id": "ux6v-gpit",
+      "name": "Población Intramural a Cargo del INPEC por Códigos DIVIPOLA",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ux6v-gpit"
+    },
+    {
+      "id": "uzcf-b9dh",
+      "name": "Asset Inventory - Public",
+      "sector": "Agriculture and Rural Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/uzcf-b9dh"
+    },
+    {
+      "id": "v29c-fg4a",
+      "name": "Países que apostillan y legalizan documentos",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/v29c-fg4a"
+    },
+    {
+      "id": "v3rx-q7t3",
+      "name": "Densidad de Cultivos de Coca - Subdirección Estratégica y de Análisis - Ministerio de Justicia y del Derecho",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/v3rx-q7t3"
+    },
+    {
+      "id": "v488-qa3u",
+      "name": "MEN_INDICADORES_EDUCACION_MEDIA",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/v488-qa3u"
+    },
+    {
+      "id": "v5z5-e88h",
+      "name": "MEN_INDICE_PARIDAD_POR_GENERO_COBERTURA_BRUTA_ETC",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/v5z5-e88h"
+    },
+    {
+      "id": "v8sa-zb2t",
+      "name": "Unidades  de las Áreas Coralinas  (Punto)",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/v8sa-zb2t"
+    },
+    {
+      "id": "vbf6-6bqx",
+      "name": "USPEC Esquema de Publicación Información",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/vbf6-6bqx"
+    },
+    {
+      "id": "vbr4-v5x7",
+      "name": "Entidades Acreditadas",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/vbr4-v5x7"
+    },
+    {
+      "id": "vfth-yucv",
+      "name": "Nivel Máximo del Rio",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/vfth-yucv"
+    },
+    {
+      "id": "vv8g-8u9u",
+      "name": "PROGRAMACIÓN ESPECÍFICA DE CURSOS LARGOS, ESPECIALES Y EVENTOS POR REGIONAL Y CENTRO",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/vv8g-8u9u"
+    },
+    {
+      "id": "w8hf-jz4a",
+      "name": "Patentes concedidas",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/w8hf-jz4a"
+    },
+    {
+      "id": "wavk-2hmm",
+      "name": "Desmovilizaciones por grupo armado",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/wavk-2hmm"
+    },
+    {
+      "id": "wi7w-2nvm",
+      "name": "SECOPII - Ofertas Por Proceso",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/wi7w-2nvm"
+    },
+    {
+      "id": "wwhe-4sq8",
+      "name": "SECOP II - Ubicaciones Adicionales",
+      "sector": "National Planning Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/wwhe-4sq8"
+    },
+    {
+      "id": "wziy-gz47",
+      "name": "Asistencias técnicas Gestión Documental Archivo General de la Nación",
+      "sector": "Culture Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/wziy-gz47"
+    },
+    {
+      "id": "x7wx-67fu",
+      "name": "Activos de Información de la SFC",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/x7wx-67fu"
+    },
+    {
+      "id": "xbc7-65j4",
+      "name": "Listado de Errores Frecuentes de Calidad",
+      "sector": "Culture Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/xbc7-65j4"
+    },
+    {
+      "id": "xbk8-edux",
+      "name": "Reporte de movilización mensual Intermediario Financiero",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/xbk8-edux"
+    },
+    {
+      "id": "xcga-ji4i",
+      "name": "Reporte de movilización mensual por municipio y departamento",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/xcga-ji4i"
+    },
+    {
+      "id": "xfsi-rqje",
+      "name": "Número de afiliados a Colpensiones desagregado por departamento y municipio",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/xfsi-rqje"
+    },
+    {
+      "id": "xhzc-us2q",
+      "name": "Registros de Activos de la Información",
+      "sector": "MINCIT",
+      "url": "https://www.datos.gov.co/d/xhzc-us2q"
+    },
+    {
+      "id": "xjxk-qhsc",
+      "name": "Ejecución Presupuestal del Presupuesto General de la Nación",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/xjxk-qhsc"
+    },
+    {
+      "id": "xm4c-2rks",
+      "name": "Solicitudes de conciliación",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/xm4c-2rks"
+    },
+    {
+      "id": "xqsb-y246",
+      "name": "USPEC Plan Anual de Adquisiciones",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/xqsb-y246"
+    },
+    {
+      "id": "xs69-evan",
+      "name": "Estadisticas NNA Registrados en SIRITI Nivel Nacional Clasificados por Actividad Economica en la que se Encuentra Trabajando",
+      "sector": "Labor",
+      "url": "https://www.datos.gov.co/d/xs69-evan"
+    },
+    {
+      "id": "xyy7-rn7p",
+      "name": "Quejas interpuestas por los consumidores financieros en contra de las entidades vigiladas en la plataforma Smartsupervision",
+      "sector": "Finance and Public Credit Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/xyy7-rn7p"
+    },
+    {
+      "id": "y399-rzwf",
+      "name": "Connacionales inscritos en el Registro Ciudadano en Línea",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/y399-rzwf"
+    },
+    {
+      "id": "y3gh-x5g7",
+      "name": "Estados Financieros NIIF- Otro Resultado Integral",
+      "sector": "MINCIT Sectoral Roadmap 2026",
+      "url": "https://www.datos.gov.co/d/y3gh-x5g7"
+    },
+    {
+      "id": "y7va-ab6n",
+      "name": "Registro de activos de información",
+      "sector": "Sustainable Development Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/y7va-ab6n"
+    },
+    {
+      "id": "y9ga-zwzy",
+      "name": "MEN_ESTADISTICAS MATRICULA POR MUNICIPIOS_ES",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/y9ga-zwzy"
+    },
+    {
+      "id": "ybqk-8s42",
+      "name": "Sectores críticos mortalidad 2022",
+      "sector": "Transport Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/ybqk-8s42"
+    },
+    {
+      "id": "yd42-ttr4",
+      "name": "Mesas Sectoriales SENA",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/yd42-ttr4"
+    },
+    {
+      "id": "yh8b-89bi",
+      "name": "Caracterización de Personas en Casas de Justicia",
+      "sector": "Justice and Law Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/yh8b-89bi"
+    },
+    {
+      "id": "yix6-7yeh",
+      "name": "Población NINI Entre 18 Y 28 Años",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/yix6-7yeh"
+    },
+    {
+      "id": "yj6h-yjbu",
+      "name": "Comportamiento del trámite de expedición de visa colombiana a nacionales de Venezuela",
+      "sector": "Foreign Affairs Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/yj6h-yjbu"
+    },
+    {
+      "id": "yjvt-9cab",
+      "name": "Pensionados en Colombia",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/yjvt-9cab"
+    },
+    {
+      "id": "ykx8-9qcu",
+      "name": "Esquema de Publicación de Información ICFES 2022",
+      "sector": "Education",
+      "url": "https://www.datos.gov.co/d/ykx8-9qcu"
+    },
+    {
+      "id": "yn26-hitk",
+      "name": "Sanciones no Ejecutoriadas y Ejecutoriadas por sectores económicos",
+      "sector": "Labor Sector Roadmap",
+      "url": "https://www.datos.gov.co/d/yn26-hitk"
+    }
+  ],
+  "sectors": {
+    "Agriculture": {
+      "valid_datasets": [
+        {
+          "id": "rtxu-twjm",
+          "name": "Distritos de Riego activos",
+          "url": "https://www.datos.gov.co/d/rtxu-twjm",
+          "api_url": "https://www.datos.gov.co/api/views/rtxu-twjm"
+        },
+        {
+          "id": "s87b-tjcc",
+          "name": "Estadísticas Solicitudes Restitución Discriminadas Municipios",
+          "url": "https://www.datos.gov.co/d/s87b-tjcc",
+          "api_url": "https://www.datos.gov.co/api/views/s87b-tjcc"
+        }
+      ],
+      "dead_datasets_404": [],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 2,
+        "dead": 0,
+        "restricted": 0
+      }
+    },
+    "Agriculture and Rural Development Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "h7zv-k39x",
+          "name": "Universo de entidades",
+          "url": "https://www.datos.gov.co/d/h7zv-k39x",
+          "api_url": "https://www.datos.gov.co/api/views/h7zv-k39x"
+        },
+        {
+          "id": "uzcf-b9dh",
+          "name": "Asset Inventory - Public",
+          "url": "https://www.datos.gov.co/d/uzcf-b9dh",
+          "api_url": "https://www.datos.gov.co/api/views/uzcf-b9dh"
+        },
+        {
+          "id": "6arb-d547",
+          "name": "Alimentos del trópico para alimentación animal - AlimenTro",
+          "url": "https://www.datos.gov.co/d/6arb-d547",
+          "api_url": "https://www.datos.gov.co/api/views/6arb-d547"
+        },
+        {
+          "id": "7swi-ievq",
+          "name": "Costos Faena de Pesca año 2020",
+          "url": "https://www.datos.gov.co/d/7swi-ievq",
+          "api_url": "https://www.datos.gov.co/api/views/7swi-ievq"
+        },
+        {
+          "id": "9aan-wm8m",
+          "name": "Base de datos relacionada con madera movilizada proveniente de Plantaciones Forestales Comerciales",
+          "url": "https://www.datos.gov.co/d/9aan-wm8m",
+          "api_url": "https://www.datos.gov.co/api/views/9aan-wm8m"
+        },
+        {
+          "id": "ch4u-f3i5",
+          "name": "Resultados de Análisis de Laboratorio Suelos en Colombia",
+          "url": "https://www.datos.gov.co/d/ch4u-f3i5",
+          "api_url": "https://www.datos.gov.co/api/views/ch4u-f3i5"
+        },
+        {
+          "id": "gaic-b8aw",
+          "name": "Exportaciones agrícolas no tradicionales y tradicionales",
+          "url": "https://www.datos.gov.co/d/gaic-b8aw",
+          "api_url": "https://www.datos.gov.co/api/views/gaic-b8aw"
+        },
+        {
+          "id": "pqdu-ej7f",
+          "name": "Predios Beneficiarios PIDAR",
+          "url": "https://www.datos.gov.co/d/pqdu-ej7f",
+          "api_url": "https://www.datos.gov.co/api/views/pqdu-ej7f"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "m6bb-k2h4"
+        },
+        {
+          "id": "pzte-ddab"
+        },
+        {
+          "id": "ustw-qgb4"
+        },
+        {
+          "id": "ex27-cfy9"
+        },
+        {
+          "id": "2wvk-ve5b"
+        },
+        {
+          "id": "mb39-x5n7"
+        },
+        {
+          "id": "nfze-ebxz"
+        }
+      ],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 8,
+        "dead": 7,
+        "restricted": 0
+      }
+    },
+    "Culture Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "xbc7-65j4",
+          "name": "Listado de Errores Frecuentes de Calidad",
+          "url": "https://www.datos.gov.co/d/xbc7-65j4",
+          "api_url": "https://www.datos.gov.co/api/views/xbc7-65j4"
+        },
+        {
+          "id": "4mka-qdvc",
+          "name": "Índice Información Clasificada Reservada",
+          "url": "https://www.datos.gov.co/d/4mka-qdvc",
+          "api_url": "https://www.datos.gov.co/api/views/4mka-qdvc"
+        },
+        {
+          "id": "h9p8-6xks",
+          "name": "Capacitaciones virtuales Archivo General de la Nación",
+          "url": "https://www.datos.gov.co/d/h9p8-6xks",
+          "api_url": "https://www.datos.gov.co/api/views/h9p8-6xks"
+        },
+        {
+          "id": "rqjn-d9f5",
+          "name": "Censo Nacional de Archivos",
+          "url": "https://www.datos.gov.co/d/rqjn-d9f5",
+          "api_url": "https://www.datos.gov.co/api/views/rqjn-d9f5"
+        },
+        {
+          "id": "wziy-gz47",
+          "name": "Asistencias técnicas Gestión Documental Archivo General de la Nación",
+          "url": "https://www.datos.gov.co/d/wziy-gz47",
+          "api_url": "https://www.datos.gov.co/api/views/wziy-gz47"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "efv4-ibbr"
+        },
+        {
+          "id": "4d8c-6rts"
+        },
+        {
+          "id": "6paw-282h"
+        },
+        {
+          "id": "gdt3-vua2"
+        },
+        {
+          "id": "nxh3-txrz"
+        },
+        {
+          "id": "twn6-25p8"
+        },
+        {
+          "id": "ueix-s6gs"
+        },
+        {
+          "id": "wxd7-drge"
+        },
+        {
+          "id": "njuy-iarc"
+        }
+      ],
+      "restricted_datasets_403": [
+        {
+          "id": "cejn-it2r"
+        },
+        {
+          "id": "e2zs-eaui"
+        },
+        {
+          "id": "fh46-5jkd"
+        }
+      ],
+      "totals": {
+        "valid": 5,
+        "dead": 9,
+        "restricted": 3
+      }
+    },
+    "Education": {
+      "valid_datasets": [
+        {
+          "id": "rnvb-vnyh",
+          "name": "Saber 11° 2020-2",
+          "url": "https://www.datos.gov.co/d/rnvb-vnyh",
+          "api_url": "https://www.datos.gov.co/api/views/rnvb-vnyh"
+        },
+        {
+          "id": "ykx8-9qcu",
+          "name": "Esquema de Publicación de Información ICFES 2022",
+          "url": "https://www.datos.gov.co/d/ykx8-9qcu",
+          "api_url": "https://www.datos.gov.co/api/views/ykx8-9qcu"
+        },
+        {
+          "id": "2v94-3ypi",
+          "name": "MEN_PROGRAMAS EDUCACIÓN PARA EL TRABAJO Y EL DESARROLLO HUMANO",
+          "url": "https://www.datos.gov.co/d/2v94-3ypi",
+          "api_url": "https://www.datos.gov.co/api/views/2v94-3ypi"
+        },
+        {
+          "id": "2x55-9wxm",
+          "name": "Resultados Saber Pro Competencias Genericas 2019-2",
+          "url": "https://www.datos.gov.co/d/2x55-9wxm",
+          "api_url": "https://www.datos.gov.co/api/views/2x55-9wxm"
+        },
+        {
+          "id": "3y4s-dmxy",
+          "name": "MEN_INDICADORES_PRIMERA_INFANCIA",
+          "url": "https://www.datos.gov.co/d/3y4s-dmxy",
+          "api_url": "https://www.datos.gov.co/api/views/3y4s-dmxy"
+        },
+        {
+          "id": "4u2m-pguf",
+          "name": "Resultados Saber TyT Genericas 2019-2",
+          "url": "https://www.datos.gov.co/d/4u2m-pguf",
+          "api_url": "https://www.datos.gov.co/api/views/4u2m-pguf"
+        },
+        {
+          "id": "5wck-szir",
+          "name": "MEN_MATRICULA_ESTADISTICA_ES",
+          "url": "https://www.datos.gov.co/d/5wck-szir",
+          "api_url": "https://www.datos.gov.co/api/views/5wck-szir"
+        },
+        {
+          "id": "6gnm-kj8d",
+          "name": "Indice de Información Clasificada y Reservada Icfes 2022",
+          "url": "https://www.datos.gov.co/d/6gnm-kj8d",
+          "api_url": "https://www.datos.gov.co/api/views/6gnm-kj8d"
+        },
+        {
+          "id": "9zpk-v2mx",
+          "name": "Registro Activos de Información Icfes 2023",
+          "url": "https://www.datos.gov.co/d/9zpk-v2mx",
+          "api_url": "https://www.datos.gov.co/api/views/9zpk-v2mx"
+        },
+        {
+          "id": "cfw5-qzt5",
+          "name": "MEN_ESTABLECIMIENTOS_EDUCATIVOS_PREESCOLAR_BÁSICA_Y_MEDIA",
+          "url": "https://www.datos.gov.co/d/cfw5-qzt5",
+          "api_url": "https://www.datos.gov.co/api/views/cfw5-qzt5"
+        },
+        {
+          "id": "epkg-mphw",
+          "name": "MEN_INDICADORES_PAE",
+          "url": "https://www.datos.gov.co/d/epkg-mphw",
+          "api_url": "https://www.datos.gov.co/api/views/epkg-mphw"
+        },
+        {
+          "id": "ji8i-4anb",
+          "name": "MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR, BÁSICA Y MEDIA_POR_DEPARTAMENTO",
+          "url": "https://www.datos.gov.co/d/ji8i-4anb",
+          "api_url": "https://www.datos.gov.co/api/views/ji8i-4anb"
+        },
+        {
+          "id": "k67a-zkz9",
+          "name": "Resultados Saber TyT Genéricas 2020-1",
+          "url": "https://www.datos.gov.co/d/k67a-zkz9",
+          "api_url": "https://www.datos.gov.co/api/views/k67a-zkz9"
+        },
+        {
+          "id": "mxqg-ytrw",
+          "name": "MEN_INDICE_PARIDAD_POR_GENERO_PARA_ETNICOS",
+          "url": "https://www.datos.gov.co/d/mxqg-ytrw",
+          "api_url": "https://www.datos.gov.co/api/views/mxqg-ytrw"
+        },
+        {
+          "id": "nudc-7mev",
+          "name": "MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR, BÁSICA Y MEDIA_POR_MUNICIPIO",
+          "url": "https://www.datos.gov.co/d/nudc-7mev",
+          "api_url": "https://www.datos.gov.co/api/views/nudc-7mev"
+        },
+        {
+          "id": "pgrh-8um9",
+          "name": "MEN_DOCENTES_OFICIALES_EPBM",
+          "url": "https://www.datos.gov.co/d/pgrh-8um9",
+          "api_url": "https://www.datos.gov.co/api/views/pgrh-8um9"
+        },
+        {
+          "id": "u37r-hjmu",
+          "name": "Resultados únicos Saber Pro",
+          "url": "https://www.datos.gov.co/d/u37r-hjmu",
+          "api_url": "https://www.datos.gov.co/api/views/u37r-hjmu"
+        },
+        {
+          "id": "u8du-s7mh",
+          "name": "Inventario de activos de información del MEN",
+          "url": "https://www.datos.gov.co/d/u8du-s7mh",
+          "api_url": "https://www.datos.gov.co/api/views/u8du-s7mh"
+        },
+        {
+          "id": "upr9-nkiz",
+          "name": "MEN_PROGRAMAS_DE_EDUCACIÓN_SUPERIOR",
+          "url": "https://www.datos.gov.co/d/upr9-nkiz",
+          "api_url": "https://www.datos.gov.co/api/views/upr9-nkiz"
+        },
+        {
+          "id": "v488-qa3u",
+          "name": "MEN_INDICADORES_EDUCACION_MEDIA",
+          "url": "https://www.datos.gov.co/d/v488-qa3u",
+          "api_url": "https://www.datos.gov.co/api/views/v488-qa3u"
+        },
+        {
+          "id": "v5z5-e88h",
+          "name": "MEN_INDICE_PARIDAD_POR_GENERO_COBERTURA_BRUTA_ETC",
+          "url": "https://www.datos.gov.co/d/v5z5-e88h",
+          "api_url": "https://www.datos.gov.co/api/views/v5z5-e88h"
+        },
+        {
+          "id": "y9ga-zwzy",
+          "name": "MEN_ESTADISTICAS MATRICULA POR MUNICIPIOS_ES",
+          "url": "https://www.datos.gov.co/d/y9ga-zwzy",
+          "api_url": "https://www.datos.gov.co/api/views/y9ga-zwzy"
+        }
+      ],
+      "dead_datasets_404": [],
+      "restricted_datasets_403": [
+        {
+          "id": "ynam-yc42"
+        }
+      ],
+      "totals": {
+        "valid": 22,
+        "dead": 0,
+        "restricted": 1
+      }
+    },
+    "Education Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "5c2k-ahfc",
+          "name": "MEN_NÚMERO_BACHILLERES_POR_ETC",
+          "url": "https://www.datos.gov.co/d/5c2k-ahfc",
+          "api_url": "https://www.datos.gov.co/api/views/5c2k-ahfc"
+        },
+        {
+          "id": "enmx-7kvv",
+          "name": "MEN_MATRICULA_MIGRANTES_EN_EDUCACION_BASICA_Y_MEDIA",
+          "url": "https://www.datos.gov.co/d/enmx-7kvv",
+          "api_url": "https://www.datos.gov.co/api/views/enmx-7kvv"
+        },
+        {
+          "id": "4hrb-y62g",
+          "name": "MEN_ESTADISTICAS DE MATRICULA POR DEPARTAMENTOS_ES",
+          "url": "https://www.datos.gov.co/d/4hrb-y62g",
+          "api_url": "https://www.datos.gov.co/api/views/4hrb-y62g"
+        },
+        {
+          "id": "6kwm-9788",
+          "name": "Resultados Saber Pro Competencias Especificas 2019-2",
+          "url": "https://www.datos.gov.co/d/6kwm-9788",
+          "api_url": "https://www.datos.gov.co/api/views/6kwm-9788"
+        },
+        {
+          "id": "j9sd-zau5",
+          "name": "MEN_SEDES_EDUCATIVAS_PREESCOLAR_BÁSICA_Y_MEDIA",
+          "url": "https://www.datos.gov.co/d/j9sd-zau5",
+          "api_url": "https://www.datos.gov.co/api/views/j9sd-zau5"
+        },
+        {
+          "id": "n5yy-8nav",
+          "name": "MEN_INSTITUCIONES EDUCACIÓN SUPERIOR",
+          "url": "https://www.datos.gov.co/d/n5yy-8nav",
+          "api_url": "https://www.datos.gov.co/api/views/n5yy-8nav"
+        }
+      ],
+      "dead_datasets_404": [],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 6,
+        "dead": 0,
+        "restricted": 0
+      }
+    },
+    "Equality and Equity Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "feim-cysj",
+          "name": "Proyectos de ley del Senado de la Republica",
+          "url": "https://www.datos.gov.co/d/feim-cysj",
+          "api_url": "https://www.datos.gov.co/api/views/feim-cysj"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "md6u-xe2z"
+        }
+      ],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 1,
+        "dead": 1,
+        "restricted": 0
+      }
+    },
+    "Finance": {
+      "valid_datasets": [
+        {
+          "id": "mxk5-ce6w",
+          "name": "Información financiera con fines de supervisión – CUIF por moneda Entidades vigiladas",
+          "url": "https://www.datos.gov.co/d/mxk5-ce6w",
+          "api_url": "https://www.datos.gov.co/api/views/mxk5-ce6w"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "cms6-pym3"
+        },
+        {
+          "id": "m28x-wv5c"
+        },
+        {
+          "id": "m9ey-wa24"
+        },
+        {
+          "id": "mauy-89w2"
+        },
+        {
+          "id": "mhwv-mkdz"
+        },
+        {
+          "id": "g6m2-4x34"
+        }
+      ],
+      "restricted_datasets_403": [
+        {
+          "id": "m7my-7zup"
+        }
+      ],
+      "totals": {
+        "valid": 1,
+        "dead": 6,
+        "restricted": 1
+      }
+    },
+    "Finance and Public Credit Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "36ay-utxu",
+          "name": "UGPP - Tasa de Evasión Aportes al Sistema de la Protección Social",
+          "url": "https://www.datos.gov.co/d/36ay-utxu",
+          "api_url": "https://www.datos.gov.co/api/views/36ay-utxu"
+        },
+        {
+          "id": "3fbf-wags",
+          "name": "Notificaciones por aviso y personales de la Superfinanciera",
+          "url": "https://www.datos.gov.co/d/3fbf-wags",
+          "api_url": "https://www.datos.gov.co/api/views/3fbf-wags"
+        },
+        {
+          "id": "5phs-yqfw",
+          "name": "Información de Gastos del Presupuesto General de la Nación",
+          "url": "https://www.datos.gov.co/d/5phs-yqfw",
+          "api_url": "https://www.datos.gov.co/api/views/5phs-yqfw"
+        },
+        {
+          "id": "7jfv-7spn",
+          "name": "Montos y número de créditos aprobados o desembolsados por cosechas",
+          "url": "https://www.datos.gov.co/d/7jfv-7spn",
+          "api_url": "https://www.datos.gov.co/api/views/7jfv-7spn"
+        },
+        {
+          "id": "8dk5-vjaw",
+          "name": "Esquema de publicación",
+          "url": "https://www.datos.gov.co/d/8dk5-vjaw",
+          "api_url": "https://www.datos.gov.co/api/views/8dk5-vjaw"
+        },
+        {
+          "id": "bpij-5vy9",
+          "name": "Ejecución Presupuestal del Presupuesto General de la Nación detallada por Rubro Presupuestal",
+          "url": "https://www.datos.gov.co/d/bpij-5vy9",
+          "api_url": "https://www.datos.gov.co/api/views/bpij-5vy9"
+        },
+        {
+          "id": "br9a-gygu",
+          "name": "Ejecución Financiera de Regalías",
+          "url": "https://www.datos.gov.co/d/br9a-gygu",
+          "api_url": "https://www.datos.gov.co/api/views/br9a-gygu"
+        },
+        {
+          "id": "e967-4a8r",
+          "name": "Información estadística y financiera por ramos de seguros Formato 290",
+          "url": "https://www.datos.gov.co/d/e967-4a8r",
+          "api_url": "https://www.datos.gov.co/api/views/e967-4a8r"
+        },
+        {
+          "id": "h468-umfj",
+          "name": "Registro de Activos de Información UGPP",
+          "url": "https://www.datos.gov.co/d/h468-umfj",
+          "api_url": "https://www.datos.gov.co/api/views/h468-umfj"
+        },
+        {
+          "id": "hxkn-cb2p",
+          "name": "Esquema de publicación de información - UGPP",
+          "url": "https://www.datos.gov.co/d/hxkn-cb2p",
+          "api_url": "https://www.datos.gov.co/api/views/hxkn-cb2p"
+        },
+        {
+          "id": "kg2d-yfyg",
+          "name": "Listado de Entidades del Sector Solidario",
+          "url": "https://www.datos.gov.co/d/kg2d-yfyg",
+          "api_url": "https://www.datos.gov.co/api/views/kg2d-yfyg"
+        },
+        {
+          "id": "ksrx-5cr8",
+          "name": "Índice de Información Clasificada y Reservada",
+          "url": "https://www.datos.gov.co/d/ksrx-5cr8",
+          "api_url": "https://www.datos.gov.co/api/views/ksrx-5cr8"
+        },
+        {
+          "id": "m4tv-4zwt",
+          "name": "Cuadro de clasificación documental",
+          "url": "https://www.datos.gov.co/d/m4tv-4zwt",
+          "api_url": "https://www.datos.gov.co/api/views/m4tv-4zwt"
+        },
+        {
+          "id": "pzu3-75kc",
+          "name": "Registo Activos Informacion FOGACOOP",
+          "url": "https://www.datos.gov.co/d/pzu3-75kc",
+          "api_url": "https://www.datos.gov.co/api/views/pzu3-75kc"
+        },
+        {
+          "id": "qhpu-8ixx",
+          "name": "Rentabilidades de los Fondos de Inversión Colectiva (FIC)",
+          "url": "https://www.datos.gov.co/d/qhpu-8ixx",
+          "api_url": "https://www.datos.gov.co/api/views/qhpu-8ixx"
+        },
+        {
+          "id": "r3d5-pipz",
+          "name": "Balance de entidades publicas vigiladas por la SFC.",
+          "url": "https://www.datos.gov.co/d/r3d5-pipz",
+          "api_url": "https://www.datos.gov.co/api/views/r3d5-pipz"
+        },
+        {
+          "id": "rvii-eis8",
+          "name": "Distribución de cartera por producto",
+          "url": "https://www.datos.gov.co/d/rvii-eis8",
+          "api_url": "https://www.datos.gov.co/api/views/rvii-eis8"
+        },
+        {
+          "id": "sr9n-792w",
+          "name": "Entidades  vigiladas por la Superfinanciera",
+          "url": "https://www.datos.gov.co/d/sr9n-792w",
+          "api_url": "https://www.datos.gov.co/api/views/sr9n-792w"
+        },
+        {
+          "id": "tic6-rbue",
+          "name": "Estados financieros de entidades solidarias desde 2017 – Actualidad",
+          "url": "https://www.datos.gov.co/d/tic6-rbue",
+          "api_url": "https://www.datos.gov.co/api/views/tic6-rbue"
+        },
+        {
+          "id": "u8iw-uggt",
+          "name": "Índice de Información Clasificada y Reservada de la Superfinanciera",
+          "url": "https://www.datos.gov.co/d/u8iw-uggt",
+          "api_url": "https://www.datos.gov.co/api/views/u8iw-uggt"
+        },
+        {
+          "id": "uawh-cjvi",
+          "name": "Fondo de Pensiones Obligatorias y Cesantías C.P L.P",
+          "url": "https://www.datos.gov.co/d/uawh-cjvi",
+          "api_url": "https://www.datos.gov.co/api/views/uawh-cjvi"
+        },
+        {
+          "id": "x7wx-67fu",
+          "name": "Activos de Información de la SFC",
+          "url": "https://www.datos.gov.co/d/x7wx-67fu",
+          "api_url": "https://www.datos.gov.co/api/views/x7wx-67fu"
+        },
+        {
+          "id": "xbk8-edux",
+          "name": "Reporte de movilización mensual Intermediario Financiero",
+          "url": "https://www.datos.gov.co/d/xbk8-edux",
+          "api_url": "https://www.datos.gov.co/api/views/xbk8-edux"
+        },
+        {
+          "id": "xcga-ji4i",
+          "name": "Reporte de movilización mensual por municipio y departamento",
+          "url": "https://www.datos.gov.co/d/xcga-ji4i",
+          "api_url": "https://www.datos.gov.co/api/views/xcga-ji4i"
+        },
+        {
+          "id": "xjxk-qhsc",
+          "name": "Ejecución Presupuestal del Presupuesto General de la Nación",
+          "url": "https://www.datos.gov.co/d/xjxk-qhsc",
+          "api_url": "https://www.datos.gov.co/api/views/xjxk-qhsc"
+        },
+        {
+          "id": "xyy7-rn7p",
+          "name": "Quejas interpuestas por los consumidores financieros en contra de las entidades vigiladas en la plataforma Smartsupervision",
+          "url": "https://www.datos.gov.co/d/xyy7-rn7p",
+          "api_url": "https://www.datos.gov.co/api/views/xyy7-rn7p"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "2c5t-gyu8"
+        },
+        {
+          "id": "2dev-ctu8"
+        },
+        {
+          "id": "2pks-3xre"
+        },
+        {
+          "id": "2xng-m3hx"
+        },
+        {
+          "id": "35gt-f2xu"
+        },
+        {
+          "id": "35kf-b7d5"
+        },
+        {
+          "id": "399d-euk9"
+        },
+        {
+          "id": "3dfk-nu56"
+        },
+        {
+          "id": "3em3-iem6"
+        },
+        {
+          "id": "3vv8-4r5t"
+        },
+        {
+          "id": "3wu5-k7f8"
+        },
+        {
+          "id": "4n8q-3hdq"
+        },
+        {
+          "id": "4sr4-2um3"
+        },
+        {
+          "id": "4vss-k4pw"
+        },
+        {
+          "id": "4xsv-vram"
+        },
+        {
+          "id": "5fan-69z5"
+        },
+        {
+          "id": "5huk-qg5g"
+        },
+        {
+          "id": "5vvd-h8dq"
+        },
+        {
+          "id": "5ywc-ygzf"
+        },
+        {
+          "id": "696q-ihss"
+        },
+        {
+          "id": "6gis-m4wg"
+        },
+        {
+          "id": "6j9f-gxxj"
+        },
+        {
+          "id": "6s2y-rsi9"
+        },
+        {
+          "id": "6wew-an7r"
+        },
+        {
+          "id": "78xh-whcv"
+        },
+        {
+          "id": "78xz-k3hv"
+        },
+        {
+          "id": "7jmp-wjvj"
+        },
+        {
+          "id": "7zvb-vt48"
+        },
+        {
+          "id": "8kat-6hk8"
+        },
+        {
+          "id": "8rqm-izdz"
+        },
+        {
+          "id": "93et-7fzq"
+        },
+        {
+          "id": "9475-nnbr"
+        },
+        {
+          "id": "97rj-h937"
+        },
+        {
+          "id": "9ad7-6u5d"
+        },
+        {
+          "id": "9n4k-fp8g"
+        },
+        {
+          "id": "9sys-wnzu"
+        },
+        {
+          "id": "9ue3-ernm"
+        },
+        {
+          "id": "any6-kejg"
+        },
+        {
+          "id": "apww-paqd"
+        },
+        {
+          "id": "awr6-vmcz"
+        },
+        {
+          "id": "beyt-sx4n"
+        },
+        {
+          "id": "bfvn-guip"
+        },
+        {
+          "id": "bh9v-jrek"
+        },
+        {
+          "id": "bm3s-j9ci"
+        },
+        {
+          "id": "bqct-npdx"
+        },
+        {
+          "id": "cr9q-n6ua"
+        },
+        {
+          "id": "cucn-tiyn"
+        },
+        {
+          "id": "dxj7-iddv"
+        },
+        {
+          "id": "e37t-xwq5"
+        },
+        {
+          "id": "eqd2-95z3"
+        },
+        {
+          "id": "ew62-87bt"
+        },
+        {
+          "id": "f62j-zypy"
+        },
+        {
+          "id": "f7hi-2cgg"
+        },
+        {
+          "id": "ff4w-wj49"
+        },
+        {
+          "id": "fhgb-y83h"
+        },
+        {
+          "id": "fi6h-4rbt"
+        },
+        {
+          "id": "ggi6-6r8f"
+        },
+        {
+          "id": "h79s-3ats"
+        },
+        {
+          "id": "hkd5-x9he"
+        },
+        {
+          "id": "hy77-nq62"
+        },
+        {
+          "id": "i9mk-swyt"
+        },
+        {
+          "id": "iate-j2wa"
+        },
+        {
+          "id": "icqj-ds7j"
+        },
+        {
+          "id": "if7n-tbq3"
+        },
+        {
+          "id": "ifgc-d8iz"
+        },
+        {
+          "id": "irgu-au8v"
+        },
+        {
+          "id": "iwcb-f9vd"
+        },
+        {
+          "id": "ixc5-rqeb"
+        },
+        {
+          "id": "jin5-gdw5"
+        },
+        {
+          "id": "kfbb-h9se"
+        },
+        {
+          "id": "knrn-k7ym"
+        },
+        {
+          "id": "kntk-y2hm"
+        },
+        {
+          "id": "kpk8-ma3z"
+        },
+        {
+          "id": "kt4h-7iwy"
+        },
+        {
+          "id": "m9ak-53bz"
+        },
+        {
+          "id": "mcwt-mcys"
+        },
+        {
+          "id": "mh9q-bt7v"
+        },
+        {
+          "id": "n6fr-2kt6"
+        },
+        {
+          "id": "n9dw-66xu"
+        },
+        {
+          "id": "ngct-wdb2"
+        },
+        {
+          "id": "nubu-ns9j"
+        },
+        {
+          "id": "p95x-4fsk"
+        },
+        {
+          "id": "pfp8-baug"
+        },
+        {
+          "id": "pi9n-xuts"
+        },
+        {
+          "id": "pqxy-6h6n"
+        },
+        {
+          "id": "q3x8-4jji"
+        },
+        {
+          "id": "qnkr-gef3"
+        },
+        {
+          "id": "qqsq-4k9j"
+        },
+        {
+          "id": "qtys-ifjt"
+        },
+        {
+          "id": "qugs-t4f7"
+        },
+        {
+          "id": "qzqm-k4zw"
+        },
+        {
+          "id": "r63j-ypnq"
+        },
+        {
+          "id": "s3a8-kgin"
+        },
+        {
+          "id": "s7i7-6mx4"
+        },
+        {
+          "id": "scdj-8zys"
+        },
+        {
+          "id": "sdwh-8is6"
+        },
+        {
+          "id": "snr2-gixq"
+        },
+        {
+          "id": "stzp-uwbr"
+        },
+        {
+          "id": "t3rb-izh8"
+        },
+        {
+          "id": "thwr-6e5n"
+        },
+        {
+          "id": "tirb-9ia7"
+        },
+        {
+          "id": "twpt-6vsq"
+        },
+        {
+          "id": "u3iy-frg4"
+        },
+        {
+          "id": "u7hd-n9cn"
+        },
+        {
+          "id": "uc2h-futu"
+        },
+        {
+          "id": "ufkr-u44k"
+        },
+        {
+          "id": "uhwq-8vbb"
+        },
+        {
+          "id": "usdv-wbwv"
+        },
+        {
+          "id": "v29f-cgd4"
+        },
+        {
+          "id": "v4pj-ci4f"
+        },
+        {
+          "id": "v65q-bd7b"
+        },
+        {
+          "id": "vawh-ist9"
+        },
+        {
+          "id": "w69d-aukp"
+        },
+        {
+          "id": "w6he-etg5"
+        },
+        {
+          "id": "wqg2-h6x3"
+        },
+        {
+          "id": "ww2r-krza"
+        },
+        {
+          "id": "xa8v-ptke"
+        },
+        {
+          "id": "xd2e-srxr"
+        },
+        {
+          "id": "xp7c-pzvt"
+        },
+        {
+          "id": "xrs4-nfsp"
+        },
+        {
+          "id": "xsu6-rzp6"
+        },
+        {
+          "id": "y48j-cubw"
+        },
+        {
+          "id": "ya82-h6jd"
+        },
+        {
+          "id": "ymzk-pgni"
+        },
+        {
+          "id": "yq8k-pkeq"
+        },
+        {
+          "id": "yrfh-e5zm"
+        }
+      ],
+      "restricted_datasets_403": [
+        {
+          "id": "4nrb-mup8"
+        },
+        {
+          "id": "9dps-wh3y"
+        },
+        {
+          "id": "bbcv-ka4e"
+        },
+        {
+          "id": "ndpz-6pcm"
+        },
+        {
+          "id": "nj32-mhpj"
+        },
+        {
+          "id": "nqxv-4zrr"
+        },
+        {
+          "id": "nxgp-x9ir"
+        },
+        {
+          "id": "r4we-4499"
+        },
+        {
+          "id": "xyaf-pmni"
+        }
+      ],
+      "totals": {
+        "valid": 26,
+        "dead": 126,
+        "restricted": 9
+      }
+    },
+    "Foreign Affairs Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "2iqs-g9cv",
+          "name": "Funcionarios del Cuerpo Diplomático y Consular acreditado en Colombia",
+          "url": "https://www.datos.gov.co/d/2iqs-g9cv",
+          "api_url": "https://www.datos.gov.co/api/views/2iqs-g9cv"
+        },
+        {
+          "id": "6cta-vqaf",
+          "name": "Solicitudes de inscripción en el Registro Único de Retorno -RUR",
+          "url": "https://www.datos.gov.co/d/6cta-vqaf",
+          "api_url": "https://www.datos.gov.co/api/views/6cta-vqaf"
+        },
+        {
+          "id": "6eyy-q57b",
+          "name": "Pre registros Estatuto Temporal de Protección para Migrantes Venezolanos",
+          "url": "https://www.datos.gov.co/d/6eyy-q57b",
+          "api_url": "https://www.datos.gov.co/api/views/6eyy-q57b"
+        },
+        {
+          "id": "7q36-mkp5",
+          "name": "Inscripciones Electorales en el exterior",
+          "url": "https://www.datos.gov.co/d/7q36-mkp5",
+          "api_url": "https://www.datos.gov.co/api/views/7q36-mkp5"
+        },
+        {
+          "id": "96sh-4v8d",
+          "name": "Entradas de extranjeros a Colombia",
+          "url": "https://www.datos.gov.co/d/96sh-4v8d",
+          "api_url": "https://www.datos.gov.co/api/views/96sh-4v8d"
+        },
+        {
+          "id": "bign-27m7",
+          "name": "Paises que no exigen visa de turismo a colombianos",
+          "url": "https://www.datos.gov.co/d/bign-27m7",
+          "api_url": "https://www.datos.gov.co/api/views/bign-27m7"
+        },
+        {
+          "id": "cgyu-cds3",
+          "name": "Perfil de aspirantes a la carrera diplomática y consular ",
+          "url": "https://www.datos.gov.co/d/cgyu-cds3",
+          "api_url": "https://www.datos.gov.co/api/views/cgyu-cds3"
+        },
+        {
+          "id": "cnh8-i5yd",
+          "name": "Oficinas de expedición de trámites de Cancillería - Ministerio de Relaciones Exteriores",
+          "url": "https://www.datos.gov.co/d/cnh8-i5yd",
+          "api_url": "https://www.datos.gov.co/api/views/cnh8-i5yd"
+        },
+        {
+          "id": "e97j-vuf7",
+          "name": "Colombianos detenidos en el exterior",
+          "url": "https://www.datos.gov.co/d/e97j-vuf7",
+          "api_url": "https://www.datos.gov.co/api/views/e97j-vuf7"
+        },
+        {
+          "id": "ef7j-amu8",
+          "name": "Registro de Activos de Información",
+          "url": "https://www.datos.gov.co/d/ef7j-amu8",
+          "api_url": "https://www.datos.gov.co/api/views/ef7j-amu8"
+        },
+        {
+          "id": "efw5-jiej",
+          "name": "Salidas de colombianos desde el territorio nacional",
+          "url": "https://www.datos.gov.co/d/efw5-jiej",
+          "api_url": "https://www.datos.gov.co/api/views/efw5-jiej"
+        },
+        {
+          "id": "fdir-hk5z",
+          "name": "Tratados internacionales de Colombia",
+          "url": "https://www.datos.gov.co/d/fdir-hk5z",
+          "api_url": "https://www.datos.gov.co/api/views/fdir-hk5z"
+        },
+        {
+          "id": "g7ps-wzb3",
+          "name": "Países que no requieren visa de turismo para ingresar a Colombia",
+          "url": "https://www.datos.gov.co/d/g7ps-wzb3",
+          "api_url": "https://www.datos.gov.co/api/views/g7ps-wzb3"
+        },
+        {
+          "id": "gium-im4r",
+          "name": "Recursos de Gobierno al Sistema de Naciones Unidas para el Desarrollo Sostenible",
+          "url": "https://www.datos.gov.co/d/gium-im4r",
+          "api_url": "https://www.datos.gov.co/api/views/gium-im4r"
+        },
+        {
+          "id": "ksje-ycct",
+          "name": "Expedición de trámites en el exterior",
+          "url": "https://www.datos.gov.co/d/ksje-ycct",
+          "api_url": "https://www.datos.gov.co/api/views/ksje-ycct"
+        },
+        {
+          "id": "m9r3-29qp",
+          "name": "Indice de Información Clasificada y Reservada",
+          "url": "https://www.datos.gov.co/d/m9r3-29qp",
+          "api_url": "https://www.datos.gov.co/api/views/m9r3-29qp"
+        },
+        {
+          "id": "nfdm-7zai",
+          "name": "Informes al congreso",
+          "url": "https://www.datos.gov.co/d/nfdm-7zai",
+          "api_url": "https://www.datos.gov.co/api/views/nfdm-7zai"
+        },
+        {
+          "id": "nftv-7mae",
+          "name": "Esquema de Publicación de Información Migración Colombia - UAEMC",
+          "url": "https://www.datos.gov.co/d/nftv-7mae",
+          "api_url": "https://www.datos.gov.co/api/views/nftv-7mae"
+        },
+        {
+          "id": "p62d-8cf3",
+          "name": "Asistencias brindadas a connacionales en el exterior",
+          "url": "https://www.datos.gov.co/d/p62d-8cf3",
+          "api_url": "https://www.datos.gov.co/api/views/p62d-8cf3"
+        },
+        {
+          "id": "rues-vdf5",
+          "name": "Misiones acreditadas en Colombia",
+          "url": "https://www.datos.gov.co/d/rues-vdf5",
+          "api_url": "https://www.datos.gov.co/api/views/rues-vdf5"
+        },
+        {
+          "id": "v29c-fg4a",
+          "name": "Países que apostillan y legalizan documentos",
+          "url": "https://www.datos.gov.co/d/v29c-fg4a",
+          "api_url": "https://www.datos.gov.co/api/views/v29c-fg4a"
+        },
+        {
+          "id": "y399-rzwf",
+          "name": "Connacionales inscritos en el Registro Ciudadano en Línea",
+          "url": "https://www.datos.gov.co/d/y399-rzwf",
+          "api_url": "https://www.datos.gov.co/api/views/y399-rzwf"
+        },
+        {
+          "id": "yj6h-yjbu",
+          "name": "Comportamiento del trámite de expedición de visa colombiana a nacionales de Venezuela",
+          "url": "https://www.datos.gov.co/d/yj6h-yjbu",
+          "api_url": "https://www.datos.gov.co/api/views/yj6h-yjbu"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "ha9c-2der"
+        }
+      ],
+      "restricted_datasets_403": [
+        {
+          "id": "5ymd-ur4c"
+        }
+      ],
+      "totals": {
+        "valid": 23,
+        "dead": 1,
+        "restricted": 1
+      }
+    },
+    "Habitat and Housing Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "6duu-4tms",
+          "name": "25 Hojas de Ruta Sectoriales de Datos Abiertos Estratégicos 2025 - 2026",
+          "url": "https://www.datos.gov.co/d/6duu-4tms",
+          "api_url": "https://www.datos.gov.co/api/views/6duu-4tms"
+        },
+        {
+          "id": "9yh6-ggh4",
+          "name": "Iniciativas de Proyectos de Inversión en Agua Potable y Saneamiento Básico",
+          "url": "https://www.datos.gov.co/d/9yh6-ggh4",
+          "api_url": "https://www.datos.gov.co/api/views/9yh6-ggh4"
+        },
+        {
+          "id": "h2yr-zfb2",
+          "name": "Subsidios De Vivienda Asignados",
+          "url": "https://www.datos.gov.co/d/h2yr-zfb2",
+          "api_url": "https://www.datos.gov.co/api/views/h2yr-zfb2"
+        }
+      ],
+      "dead_datasets_404": [],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 3,
+        "dead": 0,
+        "restricted": 0
+      }
+    },
+    "Interior Sector Roadmap": {
+      "valid_datasets": [],
+      "dead_datasets_404": [
+        {
+          "id": "kuvt-p9vi"
+        }
+      ],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 0,
+        "dead": 1,
+        "restricted": 0
+      }
+    },
+    "Justice and Law Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "4bku-d9az",
+          "name": "Actuaciones judiciales ante la Corte Constitucional realizadas por el Ministerio de Justicia y del Derecho",
+          "url": "https://www.datos.gov.co/d/4bku-d9az",
+          "api_url": "https://www.datos.gov.co/api/views/4bku-d9az"
+        },
+        {
+          "id": "4cym-4b76",
+          "name": "Directorio Consultorios Jurídicos de las Instituciones de Educación Superior",
+          "url": "https://www.datos.gov.co/d/4cym-4b76",
+          "api_url": "https://www.datos.gov.co/api/views/4cym-4b76"
+        },
+        {
+          "id": "58aq-7nep",
+          "name": "Población Privada de la Libertad por Rango de Edades, Sexo y Situación Jurídica en Establecimientos de Reclusión",
+          "url": "https://www.datos.gov.co/d/58aq-7nep",
+          "api_url": "https://www.datos.gov.co/api/views/58aq-7nep"
+        },
+        {
+          "id": "6hcf-xdqm",
+          "name": "Listado general del estado de las licencias de Cannabis Psicoactivo, No Psicoactivo y Semillas en Colombia",
+          "url": "https://www.datos.gov.co/d/6hcf-xdqm",
+          "api_url": "https://www.datos.gov.co/api/views/6hcf-xdqm"
+        },
+        {
+          "id": "7p9a-zd9k",
+          "name": "Directorio de Centros de Conciliación, Arbitraje, Amigable Composición e Insolvencia",
+          "url": "https://www.datos.gov.co/d/7p9a-zd9k",
+          "api_url": "https://www.datos.gov.co/api/views/7p9a-zd9k"
+        },
+        {
+          "id": "9m2f-pdxx",
+          "name": "Licencias de Cannabis otorgadas por el Ministerio de Justicia y del Derecho",
+          "url": "https://www.datos.gov.co/d/9m2f-pdxx",
+          "api_url": "https://www.datos.gov.co/api/views/9m2f-pdxx"
+        },
+        {
+          "id": "acs4-3wgp",
+          "name": "Detección de Cultivos de Coca (hectáreas)",
+          "url": "https://www.datos.gov.co/d/acs4-3wgp",
+          "api_url": "https://www.datos.gov.co/api/views/acs4-3wgp"
+        },
+        {
+          "id": "bmcc-69wd",
+          "name": "Directorio de Casas de Justicia y Centros de Convivencia Ciudadana.",
+          "url": "https://www.datos.gov.co/d/bmcc-69wd",
+          "api_url": "https://www.datos.gov.co/api/views/bmcc-69wd"
+        },
+        {
+          "id": "btz9-gir8",
+          "name": "Solicitudes de Arbitraje",
+          "url": "https://www.datos.gov.co/d/btz9-gir8",
+          "api_url": "https://www.datos.gov.co/api/views/btz9-gir8"
+        },
+        {
+          "id": "bvqm-qcni",
+          "name": "Indice de Información Clasificada y Reservada - Ministerio de Justicia y del Derecho",
+          "url": "https://www.datos.gov.co/d/bvqm-qcni",
+          "api_url": "https://www.datos.gov.co/api/views/bvqm-qcni"
+        },
+        {
+          "id": "d76u-8x6w",
+          "name": "Postulados según situación penitenciaria.",
+          "url": "https://www.datos.gov.co/d/d76u-8x6w",
+          "api_url": "https://www.datos.gov.co/api/views/d76u-8x6w"
+        },
+        {
+          "id": "dwbg-geen",
+          "name": "Inventario documental de historias laborales de la Dirección Nacional de Estupefacientes - DNE",
+          "url": "https://www.datos.gov.co/d/dwbg-geen",
+          "api_url": "https://www.datos.gov.co/api/views/dwbg-geen"
+        },
+        {
+          "id": "egce-jd6s",
+          "name": "Directorio de funcionarios habilitados para conciliar",
+          "url": "https://www.datos.gov.co/d/egce-jd6s",
+          "api_url": "https://www.datos.gov.co/api/views/egce-jd6s"
+        },
+        {
+          "id": "f4a5-ab9q",
+          "name": "Seguimiento a la Ejecución Presupuestal del Sector Justicia",
+          "url": "https://www.datos.gov.co/d/f4a5-ab9q",
+          "api_url": "https://www.datos.gov.co/api/views/f4a5-ab9q"
+        },
+        {
+          "id": "fd7n-f4jp",
+          "name": "USPEC Alimentación PPL",
+          "url": "https://www.datos.gov.co/d/fd7n-f4jp",
+          "api_url": "https://www.datos.gov.co/api/views/fd7n-f4jp"
+        },
+        {
+          "id": "fiev-nid6",
+          "name": "Lista de normas cargadas en el Sistema Único de Información Normativa SUIN-Juriscol",
+          "url": "https://www.datos.gov.co/d/fiev-nid6",
+          "api_url": "https://www.datos.gov.co/api/views/fiev-nid6"
+        },
+        {
+          "id": "fuyf-sb4r",
+          "name": "Procesos en Casas de Justicia",
+          "url": "https://www.datos.gov.co/d/fuyf-sb4r",
+          "api_url": "https://www.datos.gov.co/api/views/fuyf-sb4r"
+        },
+        {
+          "id": "gkbc-gw7x",
+          "name": "Desmovilizaciones colectivas e individuales",
+          "url": "https://www.datos.gov.co/d/gkbc-gw7x",
+          "api_url": "https://www.datos.gov.co/api/views/gkbc-gw7x"
+        },
+        {
+          "id": "h7zg-qcya",
+          "name": "Esquema de publicación de información INPEC",
+          "url": "https://www.datos.gov.co/d/h7zg-qcya",
+          "api_url": "https://www.datos.gov.co/api/views/h7zg-qcya"
+        },
+        {
+          "id": "hjfm-ynaz",
+          "name": "Cantidad de Conciliadores en Equidad Nombrados por Municipio y Departamento",
+          "url": "https://www.datos.gov.co/d/hjfm-ynaz",
+          "api_url": "https://www.datos.gov.co/api/views/hjfm-ynaz"
+        },
+        {
+          "id": "kccg-dij4",
+          "name": "Directorio de entidades avaladas para formación en conciliación y/o insolvencia",
+          "url": "https://www.datos.gov.co/d/kccg-dij4",
+          "api_url": "https://www.datos.gov.co/api/views/kccg-dij4"
+        },
+        {
+          "id": "kfcm-k5vw",
+          "name": "Seguimiento acumulado de actividades de participación MinJusticia",
+          "url": "https://www.datos.gov.co/d/kfcm-k5vw",
+          "api_url": "https://www.datos.gov.co/api/views/kfcm-k5vw"
+        },
+        {
+          "id": "mjt9-2zwc",
+          "name": "Población Privada de la Libertad por Nivel Académico, Sexo y Situación Jurídica en Establecimientos de Reclusión",
+          "url": "https://www.datos.gov.co/d/mjt9-2zwc",
+          "api_url": "https://www.datos.gov.co/api/views/mjt9-2zwc"
+        },
+        {
+          "id": "mqxk-srbz",
+          "name": "Control Administrativo de Sustancias y Productos Químicos ejercido por el Ministerio de Justicia y del Derecho",
+          "url": "https://www.datos.gov.co/d/mqxk-srbz",
+          "api_url": "https://www.datos.gov.co/api/views/mqxk-srbz"
+        },
+        {
+          "id": "msu7-rjqd",
+          "name": "Solicitudes de insolvencia",
+          "url": "https://www.datos.gov.co/d/msu7-rjqd",
+          "api_url": "https://www.datos.gov.co/api/views/msu7-rjqd"
+        },
+        {
+          "id": "npcj-hpw7",
+          "name": "Gestión de PQRS unificado Minjusticia",
+          "url": "https://www.datos.gov.co/d/npcj-hpw7",
+          "api_url": "https://www.datos.gov.co/api/views/npcj-hpw7"
+        },
+        {
+          "id": "qr2y-27z8",
+          "name": "Inventario documental de historias laborales del Ministerio de Justicia y del Derecho",
+          "url": "https://www.datos.gov.co/d/qr2y-27z8",
+          "api_url": "https://www.datos.gov.co/api/views/qr2y-27z8"
+        },
+        {
+          "id": "s34r-vs6z",
+          "name": "Actos administrativos de formalización de los Sistemas Locales de Justicia",
+          "url": "https://www.datos.gov.co/d/s34r-vs6z",
+          "api_url": "https://www.datos.gov.co/api/views/s34r-vs6z"
+        },
+        {
+          "id": "s44d-v5fw",
+          "name": "Desmovilizaciones por régimen legal",
+          "url": "https://www.datos.gov.co/d/s44d-v5fw",
+          "api_url": "https://www.datos.gov.co/api/views/s44d-v5fw"
+        },
+        {
+          "id": "tj5j-bwvg",
+          "name": "Registro de activos de información del Ministerio de Justicia y del Derecho",
+          "url": "https://www.datos.gov.co/d/tj5j-bwvg",
+          "api_url": "https://www.datos.gov.co/api/views/tj5j-bwvg"
+        },
+        {
+          "id": "us2n-5jaf",
+          "name": "Desmovilizaciones por indulto o amnistía",
+          "url": "https://www.datos.gov.co/d/us2n-5jaf",
+          "api_url": "https://www.datos.gov.co/api/views/us2n-5jaf"
+        },
+        {
+          "id": "ux6v-gpit",
+          "name": "Población Intramural a Cargo del INPEC por Códigos DIVIPOLA",
+          "url": "https://www.datos.gov.co/d/ux6v-gpit",
+          "api_url": "https://www.datos.gov.co/api/views/ux6v-gpit"
+        },
+        {
+          "id": "v3rx-q7t3",
+          "name": "Densidad de Cultivos de Coca - Subdirección Estratégica y de Análisis - Ministerio de Justicia y del Derecho",
+          "url": "https://www.datos.gov.co/d/v3rx-q7t3",
+          "api_url": "https://www.datos.gov.co/api/views/v3rx-q7t3"
+        },
+        {
+          "id": "vbf6-6bqx",
+          "name": "USPEC Esquema de Publicación Información",
+          "url": "https://www.datos.gov.co/d/vbf6-6bqx",
+          "api_url": "https://www.datos.gov.co/api/views/vbf6-6bqx"
+        },
+        {
+          "id": "wavk-2hmm",
+          "name": "Desmovilizaciones por grupo armado",
+          "url": "https://www.datos.gov.co/d/wavk-2hmm",
+          "api_url": "https://www.datos.gov.co/api/views/wavk-2hmm"
+        },
+        {
+          "id": "xm4c-2rks",
+          "name": "Solicitudes de conciliación",
+          "url": "https://www.datos.gov.co/d/xm4c-2rks",
+          "api_url": "https://www.datos.gov.co/api/views/xm4c-2rks"
+        },
+        {
+          "id": "xqsb-y246",
+          "name": "USPEC Plan Anual de Adquisiciones",
+          "url": "https://www.datos.gov.co/d/xqsb-y246",
+          "api_url": "https://www.datos.gov.co/api/views/xqsb-y246"
+        },
+        {
+          "id": "yh8b-89bi",
+          "name": "Caracterización de Personas en Casas de Justicia",
+          "url": "https://www.datos.gov.co/d/yh8b-89bi",
+          "api_url": "https://www.datos.gov.co/api/views/yh8b-89bi"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "2sa3-g6vq"
+        },
+        {
+          "id": "3rv4-7k8i"
+        },
+        {
+          "id": "3wjc-c36t"
+        },
+        {
+          "id": "4ak6-6gru"
+        },
+        {
+          "id": "7fwq-t2yp"
+        },
+        {
+          "id": "7s7r-4ves"
+        },
+        {
+          "id": "85s7-mgmm"
+        },
+        {
+          "id": "8sny-y2px"
+        },
+        {
+          "id": "aty9-ik7t"
+        },
+        {
+          "id": "khuz-unh9"
+        },
+        {
+          "id": "n66v-zikv"
+        },
+        {
+          "id": "qk9h-8ujy"
+        },
+        {
+          "id": "vc2u-7558"
+        },
+        {
+          "id": "xk3k-7ijw"
+        }
+      ],
+      "restricted_datasets_403": [
+        {
+          "id": "6kau-hmea"
+        },
+        {
+          "id": "6mwg-ezc2"
+        },
+        {
+          "id": "7g6f-adky"
+        },
+        {
+          "id": "7swg-m5sa"
+        },
+        {
+          "id": "92ei-sn22"
+        },
+        {
+          "id": "9d2u-jc3x"
+        },
+        {
+          "id": "b4te-p6f4"
+        },
+        {
+          "id": "dnib-b9wr"
+        },
+        {
+          "id": "gt5e-hnrt"
+        },
+        {
+          "id": "hezn-3nrw"
+        },
+        {
+          "id": "jewr-pxmf"
+        },
+        {
+          "id": "kmxj-7zmy"
+        },
+        {
+          "id": "m3xh-raws"
+        },
+        {
+          "id": "m7dx-f6fs"
+        },
+        {
+          "id": "rbsa-r4yz"
+        },
+        {
+          "id": "tynb-yhk5"
+        },
+        {
+          "id": "w5u4-6ntu"
+        },
+        {
+          "id": "w8my-uyza"
+        },
+        {
+          "id": "wkir-zquz"
+        },
+        {
+          "id": "wqmn-u3ud"
+        },
+        {
+          "id": "xf4s-f2cq"
+        },
+        {
+          "id": "xxkm-hf7j"
+        }
+      ],
+      "totals": {
+        "valid": 38,
+        "dead": 14,
+        "restricted": 22
+      }
+    },
+    "Labor": {
+      "valid_datasets": [
+        {
+          "id": "qwzh-2su3",
+          "name": "Índice de información clasificada y reservada",
+          "url": "https://www.datos.gov.co/d/qwzh-2su3",
+          "api_url": "https://www.datos.gov.co/api/views/qwzh-2su3"
+        },
+        {
+          "id": "sk9s-yxmi",
+          "name": "Afiliados al sistema general de pensiones de Colombia",
+          "url": "https://www.datos.gov.co/d/sk9s-yxmi",
+          "api_url": "https://www.datos.gov.co/api/views/sk9s-yxmi"
+        },
+        {
+          "id": "28vu-5tx7",
+          "name": "CERTIFICACIÓN DE LA FORMACIÓN PROFESIONAL INTEGRAL",
+          "url": "https://www.datos.gov.co/d/28vu-5tx7",
+          "api_url": "https://www.datos.gov.co/api/views/28vu-5tx7"
+        },
+        {
+          "id": "489x-mu3c",
+          "name": "Número de Casos de Niños, Niñas y Adolescentes (NNA) reportados en SIRITI por cada Tipo de Vulnerabilidad a Nivel Nacional.",
+          "url": "https://www.datos.gov.co/d/489x-mu3c",
+          "api_url": "https://www.datos.gov.co/api/views/489x-mu3c"
+        },
+        {
+          "id": "6deq-vx84",
+          "name": "Averiguaciones Preliminares Iniciadas por Dirección Territorial",
+          "url": "https://www.datos.gov.co/d/6deq-vx84",
+          "api_url": "https://www.datos.gov.co/api/views/6deq-vx84"
+        },
+        {
+          "id": "89wx-5p2g",
+          "name": "Registro de activos de Información",
+          "url": "https://www.datos.gov.co/d/89wx-5p2g",
+          "api_url": "https://www.datos.gov.co/api/views/89wx-5p2g"
+        },
+        {
+          "id": "b346-rc9m",
+          "name": "Consultas Verbales por Dirección Territorial",
+          "url": "https://www.datos.gov.co/d/b346-rc9m",
+          "api_url": "https://www.datos.gov.co/api/views/b346-rc9m"
+        },
+        {
+          "id": "hdnf-a76p",
+          "name": "Número de pensionados en Colpensiones desagregado por departamento y municipio",
+          "url": "https://www.datos.gov.co/d/hdnf-a76p",
+          "api_url": "https://www.datos.gov.co/api/views/hdnf-a76p"
+        },
+        {
+          "id": "hf6d-emrx",
+          "name": "Disparidad Salarial Hombres Mujeres",
+          "url": "https://www.datos.gov.co/d/hf6d-emrx",
+          "api_url": "https://www.datos.gov.co/api/views/hf6d-emrx"
+        },
+        {
+          "id": "np5z-haxm",
+          "name": "Cantidad de pensionados de Colpensiones por rango de edad",
+          "url": "https://www.datos.gov.co/d/np5z-haxm",
+          "api_url": "https://www.datos.gov.co/api/views/np5z-haxm"
+        },
+        {
+          "id": "r29n-7bcm",
+          "name": "Sanciones Ejecutoriadas Y No Ejecutoriadas Por Intermediación Laboral Indebida por Dirección Territorial",
+          "url": "https://www.datos.gov.co/d/r29n-7bcm",
+          "api_url": "https://www.datos.gov.co/api/views/r29n-7bcm"
+        },
+        {
+          "id": "vbr4-v5x7",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/vbr4-v5x7",
+          "api_url": "https://www.datos.gov.co/api/views/vbr4-v5x7"
+        },
+        {
+          "id": "vv8g-8u9u",
+          "name": "PROGRAMACIÓN ESPECÍFICA DE CURSOS LARGOS, ESPECIALES Y EVENTOS POR REGIONAL Y CENTRO",
+          "url": "https://www.datos.gov.co/d/vv8g-8u9u",
+          "api_url": "https://www.datos.gov.co/api/views/vv8g-8u9u"
+        },
+        {
+          "id": "xs69-evan",
+          "name": "Estadisticas NNA Registrados en SIRITI Nivel Nacional Clasificados por Actividad Economica en la que se Encuentra Trabajando",
+          "url": "https://www.datos.gov.co/d/xs69-evan",
+          "api_url": "https://www.datos.gov.co/api/views/xs69-evan"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "swcz-vvdm"
+        },
+        {
+          "id": "2m5e-hjvb"
+        },
+        {
+          "id": "7hef-6xhw"
+        },
+        {
+          "id": "9nyh-pdxs"
+        },
+        {
+          "id": "gpmw-54pr"
+        },
+        {
+          "id": "k4uw-5cbj"
+        },
+        {
+          "id": "wgn3-wads"
+        }
+      ],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 14,
+        "dead": 7,
+        "restricted": 0
+      }
+    },
+    "Labor Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "2c7k-9iru",
+          "name": "CUPOS EN FORMACIÓN PROFESIONAL INTEGRAL POR TIPO DE POBLACIÓN",
+          "url": "https://www.datos.gov.co/d/2c7k-9iru",
+          "api_url": "https://www.datos.gov.co/api/views/2c7k-9iru"
+        },
+        {
+          "id": "2fn4-ai3h",
+          "name": "Mesas Sectoriales SENA Base de Datos",
+          "url": "https://www.datos.gov.co/d/2fn4-ai3h",
+          "api_url": "https://www.datos.gov.co/api/views/2fn4-ai3h"
+        },
+        {
+          "id": "5n52-6rih",
+          "name": "Población Afiliada",
+          "url": "https://www.datos.gov.co/d/5n52-6rih",
+          "api_url": "https://www.datos.gov.co/api/views/5n52-6rih"
+        },
+        {
+          "id": "8cnh-7asj",
+          "name": "Georeferenciación Centros de Aprendizaje SENA",
+          "url": "https://www.datos.gov.co/d/8cnh-7asj",
+          "api_url": "https://www.datos.gov.co/api/views/8cnh-7asj"
+        },
+        {
+          "id": "8iut-hgij",
+          "name": "PQRSD Ministerio del Trabajo",
+          "url": "https://www.datos.gov.co/d/8iut-hgij",
+          "api_url": "https://www.datos.gov.co/api/views/8iut-hgij"
+        },
+        {
+          "id": "8pqf-rmzr",
+          "name": "Total Nacional inscritos en la agencia pública de empleo SENA",
+          "url": "https://www.datos.gov.co/d/8pqf-rmzr",
+          "api_url": "https://www.datos.gov.co/api/views/8pqf-rmzr"
+        },
+        {
+          "id": "bgt6-3icu",
+          "name": "Sanciones Ejecutoriadas y NO Ejecutoriadas por Conductas Atentatorias contra el derecho de asociación sindical",
+          "url": "https://www.datos.gov.co/d/bgt6-3icu",
+          "api_url": "https://www.datos.gov.co/api/views/bgt6-3icu"
+        },
+        {
+          "id": "cf7h-nvwj",
+          "name": "Asistencias preventivas por Dirección Territorial",
+          "url": "https://www.datos.gov.co/d/cf7h-nvwj",
+          "api_url": "https://www.datos.gov.co/api/views/cf7h-nvwj"
+        },
+        {
+          "id": "e88h-vxzi",
+          "name": "Entidades Acreditadas Organizaciones Solidarias",
+          "url": "https://www.datos.gov.co/d/e88h-vxzi",
+          "api_url": "https://www.datos.gov.co/api/views/e88h-vxzi"
+        },
+        {
+          "id": "fr8e-58py",
+          "name": "Entidades Acreditadas SIIA",
+          "url": "https://www.datos.gov.co/d/fr8e-58py",
+          "api_url": "https://www.datos.gov.co/api/views/fr8e-58py"
+        },
+        {
+          "id": "fwf9-c4xb",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/fwf9-c4xb",
+          "api_url": "https://www.datos.gov.co/api/views/fwf9-c4xb"
+        },
+        {
+          "id": "gnut-8jsz",
+          "name": "Cantidad de pensionados de Colpensiones por tipo de pensión",
+          "url": "https://www.datos.gov.co/d/gnut-8jsz",
+          "api_url": "https://www.datos.gov.co/api/views/gnut-8jsz"
+        },
+        {
+          "id": "h8ui-2iee",
+          "name": "Número de pensionados de Colpensiones por rango salarial 2",
+          "url": "https://www.datos.gov.co/d/h8ui-2iee",
+          "api_url": "https://www.datos.gov.co/api/views/h8ui-2iee"
+        },
+        {
+          "id": "jh3r-qtfq",
+          "name": "Sanciones no Ejecutoriadas y Ejecutoriadas por Dirección Territorial",
+          "url": "https://www.datos.gov.co/d/jh3r-qtfq",
+          "api_url": "https://www.datos.gov.co/api/views/jh3r-qtfq"
+        },
+        {
+          "id": "jvtd-3dgy",
+          "name": "Pensionados por entidad administradora de Colombia",
+          "url": "https://www.datos.gov.co/d/jvtd-3dgy",
+          "api_url": "https://www.datos.gov.co/api/views/jvtd-3dgy"
+        },
+        {
+          "id": "jzzx-knyw",
+          "name": "Entidades Acreditadas SIIA",
+          "url": "https://www.datos.gov.co/d/jzzx-knyw",
+          "api_url": "https://www.datos.gov.co/api/views/jzzx-knyw"
+        },
+        {
+          "id": "m3fg-eigf",
+          "name": "Investigaciones Administrativas Iniciadas por Dirección Territorial",
+          "url": "https://www.datos.gov.co/d/m3fg-eigf",
+          "api_url": "https://www.datos.gov.co/api/views/m3fg-eigf"
+        },
+        {
+          "id": "rtck-inie",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/rtck-inie",
+          "api_url": "https://www.datos.gov.co/api/views/rtck-inie"
+        },
+        {
+          "id": "s64k-xyiz",
+          "name": "Esquema de Publicación de Información- Ministerio del Trabajo",
+          "url": "https://www.datos.gov.co/d/s64k-xyiz",
+          "api_url": "https://www.datos.gov.co/api/views/s64k-xyiz"
+        },
+        {
+          "id": "sasi-u68b",
+          "name": "Entidades Acreditadas Octubre 2023",
+          "url": "https://www.datos.gov.co/d/sasi-u68b",
+          "api_url": "https://www.datos.gov.co/api/views/sasi-u68b"
+        },
+        {
+          "id": "st4x-g6gz",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/st4x-g6gz",
+          "api_url": "https://www.datos.gov.co/api/views/st4x-g6gz"
+        },
+        {
+          "id": "tv9x-wfg5",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/tv9x-wfg5",
+          "api_url": "https://www.datos.gov.co/api/views/tv9x-wfg5"
+        },
+        {
+          "id": "u4ze-bi7k",
+          "name": "DESERCION DE LA FORMACIÓN PROFESIONAL INTEGRAL",
+          "url": "https://www.datos.gov.co/d/u4ze-bi7k",
+          "api_url": "https://www.datos.gov.co/api/views/u4ze-bi7k"
+        },
+        {
+          "id": "xfsi-rqje",
+          "name": "Número de afiliados a Colpensiones desagregado por departamento y municipio",
+          "url": "https://www.datos.gov.co/d/xfsi-rqje",
+          "api_url": "https://www.datos.gov.co/api/views/xfsi-rqje"
+        },
+        {
+          "id": "yd42-ttr4",
+          "name": "Mesas Sectoriales SENA",
+          "url": "https://www.datos.gov.co/d/yd42-ttr4",
+          "api_url": "https://www.datos.gov.co/api/views/yd42-ttr4"
+        },
+        {
+          "id": "yix6-7yeh",
+          "name": "Población NINI Entre 18 Y 28 Años",
+          "url": "https://www.datos.gov.co/d/yix6-7yeh",
+          "api_url": "https://www.datos.gov.co/api/views/yix6-7yeh"
+        },
+        {
+          "id": "yjvt-9cab",
+          "name": "Pensionados en Colombia",
+          "url": "https://www.datos.gov.co/d/yjvt-9cab",
+          "api_url": "https://www.datos.gov.co/api/views/yjvt-9cab"
+        },
+        {
+          "id": "yn26-hitk",
+          "name": "Sanciones no Ejecutoriadas y Ejecutoriadas por sectores económicos",
+          "url": "https://www.datos.gov.co/d/yn26-hitk",
+          "api_url": "https://www.datos.gov.co/api/views/yn26-hitk"
+        },
+        {
+          "id": "2zn7-bez3",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/2zn7-bez3",
+          "api_url": "https://www.datos.gov.co/api/views/2zn7-bez3"
+        },
+        {
+          "id": "9xdg-hm6t",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/9xdg-hm6t",
+          "api_url": "https://www.datos.gov.co/api/views/9xdg-hm6t"
+        },
+        {
+          "id": "a65q-6den",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/a65q-6den",
+          "api_url": "https://www.datos.gov.co/api/views/a65q-6den"
+        },
+        {
+          "id": "ahbx-upcu",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/ahbx-upcu",
+          "api_url": "https://www.datos.gov.co/api/views/ahbx-upcu"
+        },
+        {
+          "id": "bee9-sdwx",
+          "name": "Disparidad de Horas Trabajadas Hombres y Mujeres",
+          "url": "https://www.datos.gov.co/d/bee9-sdwx",
+          "api_url": "https://www.datos.gov.co/api/views/bee9-sdwx"
+        },
+        {
+          "id": "cmgp-8z8t",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/cmgp-8z8t",
+          "api_url": "https://www.datos.gov.co/api/views/cmgp-8z8t"
+        },
+        {
+          "id": "cqdw-gd52",
+          "name": "Mesas Sectoriales SENA",
+          "url": "https://www.datos.gov.co/d/cqdw-gd52",
+          "api_url": "https://www.datos.gov.co/api/views/cqdw-gd52"
+        },
+        {
+          "id": "e8s8-v85a",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/e8s8-v85a",
+          "api_url": "https://www.datos.gov.co/api/views/e8s8-v85a"
+        },
+        {
+          "id": "hb3d-dyp7",
+          "name": "Entidades Acreditadas SIIA",
+          "url": "https://www.datos.gov.co/d/hb3d-dyp7",
+          "api_url": "https://www.datos.gov.co/api/views/hb3d-dyp7"
+        },
+        {
+          "id": "hd6e-hz7c",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/hd6e-hz7c",
+          "api_url": "https://www.datos.gov.co/api/views/hd6e-hz7c"
+        },
+        {
+          "id": "htue-emaw",
+          "name": "Entidades Acreditadas SIIA",
+          "url": "https://www.datos.gov.co/d/htue-emaw",
+          "api_url": "https://www.datos.gov.co/api/views/htue-emaw"
+        },
+        {
+          "id": "khhm-wccm",
+          "name": "Reporte por departamento y tipo de intermediario relacionados en el Registro Único de Intermediarios de seguros en el ramo de riesgos laborales (RUI) - Del Grupo de Promoción y prevención de la Dirección de Riesgos de Laborales del Ministerio del Trabajo",
+          "url": "https://www.datos.gov.co/d/khhm-wccm",
+          "api_url": "https://www.datos.gov.co/api/views/khhm-wccm"
+        },
+        {
+          "id": "mj4p-5iuv",
+          "name": "Entidades Acreditadas",
+          "url": "https://www.datos.gov.co/d/mj4p-5iuv",
+          "api_url": "https://www.datos.gov.co/api/views/mj4p-5iuv"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "gsyf-q83k"
+        },
+        {
+          "id": "jqrx-z7h4"
+        },
+        {
+          "id": "83xx-8rcw"
+        }
+      ],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 41,
+        "dead": 3,
+        "restricted": 0
+      }
+    },
+    "MINCIT": {
+      "valid_datasets": [
+        {
+          "id": "xhzc-us2q",
+          "name": "Registros de Activos de la Información",
+          "url": "https://www.datos.gov.co/d/xhzc-us2q",
+          "api_url": "https://www.datos.gov.co/api/views/xhzc-us2q"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "reym-ypum"
+        },
+        {
+          "id": "yq7j-b4p4"
+        }
+      ],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 1,
+        "dead": 2,
+        "restricted": 0
+      }
+    },
+    "MINCIT Sectoral Roadmap 2026": {
+      "valid_datasets": [
+        {
+          "id": "6cat-2gcs",
+          "name": "10.000 Empresas mas Grandes del País",
+          "url": "https://www.datos.gov.co/d/6cat-2gcs",
+          "api_url": "https://www.datos.gov.co/api/views/6cat-2gcs"
+        },
+        {
+          "id": "9z8f-npmd",
+          "name": "Base de Datos en RNBD",
+          "url": "https://www.datos.gov.co/d/9z8f-npmd",
+          "api_url": "https://www.datos.gov.co/api/views/9z8f-npmd"
+        },
+        {
+          "id": "ff7q-jcdw",
+          "name": "Comercialización Materiales de Referencia - Instituto Nacional de Metrología",
+          "url": "https://www.datos.gov.co/d/ff7q-jcdw",
+          "api_url": "https://www.datos.gov.co/api/views/ff7q-jcdw"
+        },
+        {
+          "id": "upd7-iccu",
+          "name": "Oferta Formativa en Metrología - Instituto Nacional de Metrología",
+          "url": "https://www.datos.gov.co/d/upd7-iccu",
+          "api_url": "https://www.datos.gov.co/api/views/upd7-iccu"
+        },
+        {
+          "id": "3faq-g9ig",
+          "name": "Demandas de Protección al Consumidor admitidas y terminadas por la Delegatura para Asuntos Jurisdiccionales de la Superintendencia de Industria y Comercio",
+          "url": "https://www.datos.gov.co/d/3faq-g9ig",
+          "api_url": "https://www.datos.gov.co/api/views/3faq-g9ig"
+        },
+        {
+          "id": "kzk3-8dnx",
+          "name": "Genero y nacimiento de contadores por ciudad",
+          "url": "https://www.datos.gov.co/d/kzk3-8dnx",
+          "api_url": "https://www.datos.gov.co/api/views/kzk3-8dnx"
+        },
+        {
+          "id": "w8hf-jz4a",
+          "name": "Patentes concedidas",
+          "url": "https://www.datos.gov.co/d/w8hf-jz4a",
+          "api_url": "https://www.datos.gov.co/api/views/w8hf-jz4a"
+        },
+        {
+          "id": "4vvt-vbpv",
+          "name": "Patentes presentadas",
+          "url": "https://www.datos.gov.co/d/4vvt-vbpv",
+          "api_url": "https://www.datos.gov.co/api/views/4vvt-vbpv"
+        },
+        {
+          "id": "9n7g-3red",
+          "name": "Patentes publicadas",
+          "url": "https://www.datos.gov.co/d/9n7g-3red",
+          "api_url": "https://www.datos.gov.co/api/views/9n7g-3red"
+        },
+        {
+          "id": "tnbg-fy2n",
+          "name": "Producción de Bienes Nacionales",
+          "url": "https://www.datos.gov.co/d/tnbg-fy2n",
+          "api_url": "https://www.datos.gov.co/api/views/tnbg-fy2n"
+        },
+        {
+          "id": "thwd-ivmp",
+          "name": "Registro Nacional de Turismo - RNT",
+          "url": "https://www.datos.gov.co/d/thwd-ivmp",
+          "api_url": "https://www.datos.gov.co/api/views/thwd-ivmp"
+        },
+        {
+          "id": "3wdf-ypyy",
+          "name": "Servicios de Calibración Prestados - Instituto Nacional de Metrología",
+          "url": "https://www.datos.gov.co/d/3wdf-ypyy",
+          "api_url": "https://www.datos.gov.co/api/views/3wdf-ypyy"
+        },
+        {
+          "id": "d5w5-gqs5",
+          "name": "Historial Memorias de Oficio",
+          "url": "https://www.datos.gov.co/d/d5w5-gqs5",
+          "api_url": "https://www.datos.gov.co/api/views/d5w5-gqs5"
+        },
+        {
+          "id": "6hqw-m3dm",
+          "name": "Estados Financieros NIIF- Carátula",
+          "url": "https://www.datos.gov.co/d/6hqw-m3dm",
+          "api_url": "https://www.datos.gov.co/api/views/6hqw-m3dm"
+        },
+        {
+          "id": "ctcp-462n",
+          "name": "Estados Financieros NIIF- Estado de Flujo Efectivo",
+          "url": "https://www.datos.gov.co/d/ctcp-462n",
+          "api_url": "https://www.datos.gov.co/api/views/ctcp-462n"
+        },
+        {
+          "id": "prwj-nzxa",
+          "name": "Estados Financieros NIIF- Estado de Resultado Integral",
+          "url": "https://www.datos.gov.co/d/prwj-nzxa",
+          "api_url": "https://www.datos.gov.co/api/views/prwj-nzxa"
+        },
+        {
+          "id": "pfdp-zks5",
+          "name": "Estados Financieros NIIF- Estado de Situación Financiera",
+          "url": "https://www.datos.gov.co/d/pfdp-zks5",
+          "api_url": "https://www.datos.gov.co/api/views/pfdp-zks5"
+        },
+        {
+          "id": "y3gh-x5g7",
+          "name": "Estados Financieros NIIF- Otro Resultado Integral",
+          "url": "https://www.datos.gov.co/d/y3gh-x5g7",
+          "api_url": "https://www.datos.gov.co/api/views/y3gh-x5g7"
+        },
+        {
+          "id": "dd55-74ss",
+          "name": "SUJETOS OBLIGADOS",
+          "url": "https://www.datos.gov.co/d/dd55-74ss",
+          "api_url": "https://www.datos.gov.co/api/views/dd55-74ss"
+        },
+        {
+          "id": "fs36-azrv",
+          "name": "Registro de Sanciones Contadores",
+          "url": "https://www.datos.gov.co/d/fs36-azrv",
+          "api_url": "https://www.datos.gov.co/api/views/fs36-azrv"
+        },
+        {
+          "id": "27ia-hnnb",
+          "name": "Artesanias de Colombia S.A. - BIC. Registro Activos de información",
+          "url": "https://www.datos.gov.co/d/27ia-hnnb",
+          "api_url": "https://www.datos.gov.co/api/views/27ia-hnnb"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "czek-rs6z"
+        },
+        {
+          "id": "qb6h-svnu"
+        },
+        {
+          "id": "pf44-w6k2"
+        },
+        {
+          "id": "jqjy-rhzv"
+        },
+        {
+          "id": "yaq9-5r9g"
+        },
+        {
+          "id": "78u4-cvyq"
+        },
+        {
+          "id": "2ugs-4kyn"
+        },
+        {
+          "id": "n42t-wuam"
+        },
+        {
+          "id": "bkar-zsub"
+        },
+        {
+          "id": "5tte-zjnm"
+        },
+        {
+          "id": "4pbq-pmju"
+        },
+        {
+          "id": "9hhn-fsuy"
+        },
+        {
+          "id": "frv6-9rf8"
+        },
+        {
+          "id": "k8pg-2kvr"
+        },
+        {
+          "id": "knyz-7r74"
+        }
+      ],
+      "restricted_datasets_403": [
+        {
+          "id": "9sj8-wcap"
+        },
+        {
+          "id": "xujw-v35z"
+        },
+        {
+          "id": "nmsd-pzam"
+        },
+        {
+          "id": "bsdb-fddv"
+        },
+        {
+          "id": "65gp-yrz3"
+        },
+        {
+          "id": "daza-qvkz"
+        },
+        {
+          "id": "xqhf-dttd"
+        },
+        {
+          "id": "7j4w-cujn"
+        }
+      ],
+      "totals": {
+        "valid": 21,
+        "dead": 15,
+        "restricted": 8
+      }
+    },
+    "MinTIC Sectoral Roadmap": {
+      "valid_datasets": [],
+      "dead_datasets_404": [
+        {
+          "id": "4py7-br84"
+        },
+        {
+          "id": "fut2-keu8"
+        }
+      ],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 0,
+        "dead": 2,
+        "restricted": 0
+      }
+    },
+    "National Planning": {
+      "valid_datasets": [
+        {
+          "id": "uds4-jdij",
+          "name": "DNP-plandesarrollo",
+          "url": "https://www.datos.gov.co/d/uds4-jdij",
+          "api_url": "https://www.datos.gov.co/api/views/uds4-jdij"
+        },
+        {
+          "id": "4qkq-csdn",
+          "name": "Registro Único de Prestadores de Servicios Públicos-RUPS",
+          "url": "https://www.datos.gov.co/d/4qkq-csdn",
+          "api_url": "https://www.datos.gov.co/api/views/4qkq-csdn"
+        },
+        {
+          "id": "s97v-q3tx",
+          "name": "Superservicios - Inf. Comercial Usuarios NO Regulados",
+          "url": "https://www.datos.gov.co/d/s97v-q3tx",
+          "api_url": "https://www.datos.gov.co/api/views/s97v-q3tx"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "vfr3-uxzh"
+        }
+      ],
+      "restricted_datasets_403": [
+        {
+          "id": "3u6j-kehn"
+        },
+        {
+          "id": "vhbh-byd2"
+        }
+      ],
+      "totals": {
+        "valid": 3,
+        "dead": 1,
+        "restricted": 2
+      }
+    },
+    "National Planning Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "wi7w-2nvm",
+          "name": "SECOPII - Ofertas Por Proceso",
+          "url": "https://www.datos.gov.co/d/wi7w-2nvm",
+          "api_url": "https://www.datos.gov.co/api/views/wi7w-2nvm"
+        },
+        {
+          "id": "ceth-n4bn",
+          "name": "Grupos de Proveedores - SECOP II",
+          "url": "https://www.datos.gov.co/d/ceth-n4bn",
+          "api_url": "https://www.datos.gov.co/api/views/ceth-n4bn"
+        },
+        {
+          "id": "4n4q-k399",
+          "name": "Multas y Sanciones SECOP I",
+          "url": "https://www.datos.gov.co/d/4n4q-k399",
+          "api_url": "https://www.datos.gov.co/api/views/4n4q-k399"
+        },
+        {
+          "id": "hgi6-6wh3",
+          "name": "Proponentes por Proceso SECOP II",
+          "url": "https://www.datos.gov.co/d/hgi6-6wh3",
+          "api_url": "https://www.datos.gov.co/api/views/hgi6-6wh3"
+        },
+        {
+          "id": "s484-c9k3",
+          "name": "SECOP - Convenios Interadministrativos",
+          "url": "https://www.datos.gov.co/d/s484-c9k3",
+          "api_url": "https://www.datos.gov.co/api/views/s484-c9k3"
+        },
+        {
+          "id": "7fix-nd37",
+          "name": "SECOP I - Adiciones",
+          "url": "https://www.datos.gov.co/d/7fix-nd37",
+          "api_url": "https://www.datos.gov.co/api/views/7fix-nd37"
+        },
+        {
+          "id": "ps88-5e3v",
+          "name": "SECOP I - Archivos Descarga",
+          "url": "https://www.datos.gov.co/d/ps88-5e3v",
+          "api_url": "https://www.datos.gov.co/api/views/ps88-5e3v"
+        },
+        {
+          "id": "u5b4-ae3s",
+          "name": "SECOP I - Modificaciones a Adjudicaciones",
+          "url": "https://www.datos.gov.co/d/u5b4-ae3s",
+          "api_url": "https://www.datos.gov.co/api/views/u5b4-ae3s"
+        },
+        {
+          "id": "36vw-pbq2",
+          "name": "SECOP I - Modificaciones a Procesos",
+          "url": "https://www.datos.gov.co/d/36vw-pbq2",
+          "api_url": "https://www.datos.gov.co/api/views/36vw-pbq2"
+        },
+        {
+          "id": "3xwx-53wt",
+          "name": "SECOP I - Origen de los Recursos",
+          "url": "https://www.datos.gov.co/d/3xwx-53wt",
+          "api_url": "https://www.datos.gov.co/api/views/3xwx-53wt"
+        },
+        {
+          "id": "azeg-sgqg",
+          "name": "SECOP I - PAA Detalle",
+          "url": "https://www.datos.gov.co/d/azeg-sgqg",
+          "api_url": "https://www.datos.gov.co/api/views/azeg-sgqg"
+        },
+        {
+          "id": "prdx-nxyp",
+          "name": "SECOP I - PAA Encabezado",
+          "url": "https://www.datos.gov.co/d/prdx-nxyp",
+          "api_url": "https://www.datos.gov.co/api/views/prdx-nxyp"
+        },
+        {
+          "id": "f789-7hwg",
+          "name": "SECOP I - Procesos de Compra Pública",
+          "url": "https://www.datos.gov.co/d/f789-7hwg",
+          "api_url": "https://www.datos.gov.co/api/views/f789-7hwg"
+        },
+        {
+          "id": "tauh-5jvn",
+          "name": "SECOP I - Proponentes",
+          "url": "https://www.datos.gov.co/d/tauh-5jvn",
+          "api_url": "https://www.datos.gov.co/api/views/tauh-5jvn"
+        },
+        {
+          "id": "cb9c-h8sn",
+          "name": "SECOP II - Adiciones",
+          "url": "https://www.datos.gov.co/d/cb9c-h8sn",
+          "api_url": "https://www.datos.gov.co/api/views/cb9c-h8sn"
+        },
+        {
+          "id": "4ex9-j3n8",
+          "name": "SECOP II - Contacto Entidades y Proveedores",
+          "url": "https://www.datos.gov.co/d/4ex9-j3n8",
+          "api_url": "https://www.datos.gov.co/api/views/4ex9-j3n8"
+        },
+        {
+          "id": "jbjy-vk9h",
+          "name": "SECOP II - Contratos Electrónicos",
+          "url": "https://www.datos.gov.co/d/jbjy-vk9h",
+          "api_url": "https://www.datos.gov.co/api/views/jbjy-vk9h"
+        },
+        {
+          "id": "mfmm-jqmq",
+          "name": "SECOP II - Ejecución Contratos",
+          "url": "https://www.datos.gov.co/d/mfmm-jqmq",
+          "api_url": "https://www.datos.gov.co/api/views/mfmm-jqmq"
+        },
+        {
+          "id": "ibyt-yi2f",
+          "name": "SECOP II - Facturas",
+          "url": "https://www.datos.gov.co/d/ibyt-yi2f",
+          "api_url": "https://www.datos.gov.co/api/views/ibyt-yi2f"
+        },
+        {
+          "id": "gjp9-cutm",
+          "name": "SECOP II - Garantias",
+          "url": "https://www.datos.gov.co/d/gjp9-cutm",
+          "api_url": "https://www.datos.gov.co/api/views/gjp9-cutm"
+        },
+        {
+          "id": "b6m4-qgqv",
+          "name": "SECOP II - PAA - Encabezado",
+          "url": "https://www.datos.gov.co/d/b6m4-qgqv",
+          "api_url": "https://www.datos.gov.co/api/views/b6m4-qgqv"
+        },
+        {
+          "id": "p6dx-8zbt",
+          "name": "SECOP II - Procesos de Contratación",
+          "url": "https://www.datos.gov.co/d/p6dx-8zbt",
+          "api_url": "https://www.datos.gov.co/api/views/p6dx-8zbt"
+        },
+        {
+          "id": "qmzu-gj57",
+          "name": "SECOP II - Proveedores Registrados",
+          "url": "https://www.datos.gov.co/d/qmzu-gj57",
+          "api_url": "https://www.datos.gov.co/api/views/qmzu-gj57"
+        },
+        {
+          "id": "cwhv-7fnp",
+          "name": "SECOP II - Rubros Presupuestales",
+          "url": "https://www.datos.gov.co/d/cwhv-7fnp",
+          "api_url": "https://www.datos.gov.co/api/views/cwhv-7fnp"
+        },
+        {
+          "id": "u99c-7mfm",
+          "name": "SECOP II - Suspensiones de Contratos",
+          "url": "https://www.datos.gov.co/d/u99c-7mfm",
+          "api_url": "https://www.datos.gov.co/api/views/u99c-7mfm"
+        },
+        {
+          "id": "9sue-ezhx",
+          "name": "SECOPII - Plan Anual De Adquisiciones Detalle",
+          "url": "https://www.datos.gov.co/d/9sue-ezhx",
+          "api_url": "https://www.datos.gov.co/api/views/9sue-ezhx"
+        },
+        {
+          "id": "3hdv-smhz",
+          "name": "TVEC - Compras por item",
+          "url": "https://www.datos.gov.co/d/3hdv-smhz",
+          "api_url": "https://www.datos.gov.co/api/views/3hdv-smhz"
+        },
+        {
+          "id": "usqp-5nsn",
+          "name": "TVEC - Items",
+          "url": "https://www.datos.gov.co/d/usqp-5nsn",
+          "api_url": "https://www.datos.gov.co/api/views/usqp-5nsn"
+        },
+        {
+          "id": "rgxm-mmea",
+          "name": "Tienda Virtual del Estado Colombiano - Consolidado",
+          "url": "https://www.datos.gov.co/d/rgxm-mmea",
+          "api_url": "https://www.datos.gov.co/api/views/rgxm-mmea"
+        },
+        {
+          "id": "dmgg-8hin",
+          "name": "SECOP II - Archivos Descarga Desde 2025",
+          "url": "https://www.datos.gov.co/d/dmgg-8hin",
+          "api_url": "https://www.datos.gov.co/api/views/dmgg-8hin"
+        },
+        {
+          "id": "e2u2-swiw",
+          "name": "SECOP II - Modificaciones a Procesos",
+          "url": "https://www.datos.gov.co/d/e2u2-swiw",
+          "api_url": "https://www.datos.gov.co/api/views/e2u2-swiw"
+        },
+        {
+          "id": "skc9-met7",
+          "name": "SECOP II - Compromisos Presupuestales",
+          "url": "https://www.datos.gov.co/d/skc9-met7",
+          "api_url": "https://www.datos.gov.co/api/views/skc9-met7"
+        },
+        {
+          "id": "a86w-fh92",
+          "name": "SECOP II - Solicitudes CDPs",
+          "url": "https://www.datos.gov.co/d/a86w-fh92",
+          "api_url": "https://www.datos.gov.co/api/views/a86w-fh92"
+        },
+        {
+          "id": "wwhe-4sq8",
+          "name": "SECOP II - Ubicaciones Adicionales",
+          "url": "https://www.datos.gov.co/d/wwhe-4sq8",
+          "api_url": "https://www.datos.gov.co/api/views/wwhe-4sq8"
+        },
+        {
+          "id": "cf9k-55fw",
+          "name": "DNP-proyectos_datos_basicos",
+          "url": "https://www.datos.gov.co/d/cf9k-55fw",
+          "api_url": "https://www.datos.gov.co/api/views/cf9k-55fw"
+        },
+        {
+          "id": "mzgh-shtp",
+          "name": "DNP-ProyectosSGR",
+          "url": "https://www.datos.gov.co/d/mzgh-shtp",
+          "api_url": "https://www.datos.gov.co/api/views/mzgh-shtp"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "gnxj-bape"
+        },
+        {
+          "id": "aimg-uskh"
+        },
+        {
+          "id": "8uyg-q2s6"
+        }
+      ],
+      "restricted_datasets_403": [
+        {
+          "id": "mz2m-m75w"
+        },
+        {
+          "id": "nuxh-53y2"
+        },
+        {
+          "id": "xvdy-vvsk"
+        },
+        {
+          "id": "9bm9-h3n4"
+        },
+        {
+          "id": "gdut-mu3c"
+        },
+        {
+          "id": "vzyx-b5wf"
+        },
+        {
+          "id": "792g-xj47"
+        }
+      ],
+      "totals": {
+        "valid": 36,
+        "dead": 3,
+        "restricted": 7
+      }
+    },
+    "Sectoral Roadmaps 2025-2026": {
+      "valid_datasets": [
+        {
+          "id": "fn2v-r4gu",
+          "name": "Hoja de Ruta Nacional de datos abiertos estratégicos del estado colombiano",
+          "url": "https://www.datos.gov.co/d/fn2v-r4gu",
+          "api_url": "https://www.datos.gov.co/api/views/fn2v-r4gu"
+        },
+        {
+          "id": "ivxt-5jyc",
+          "name": "1. Hoja de Ruta Nacional de Datos Abiertos 2025 -2026",
+          "url": "https://www.datos.gov.co/d/ivxt-5jyc",
+          "api_url": "https://www.datos.gov.co/api/views/ivxt-5jyc"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "ngh6-ckw5"
+        }
+      ],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 2,
+        "dead": 1,
+        "restricted": 0
+      }
+    },
+    "Sports": {
+      "valid_datasets": [],
+      "dead_datasets_404": [],
+      "restricted_datasets_403": [
+        {
+          "id": "886w-94ug"
+        }
+      ],
+      "totals": {
+        "valid": 0,
+        "dead": 0,
+        "restricted": 1
+      }
+    },
+    "Sports Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "4e7j-65ci",
+          "name": "Programa Escuelas Deportivas Para Todos",
+          "url": "https://www.datos.gov.co/d/4e7j-65ci",
+          "api_url": "https://www.datos.gov.co/api/views/4e7j-65ci"
+        },
+        {
+          "id": "4iyy-8sme",
+          "name": "Consolidado Escenarios Mindeporte",
+          "url": "https://www.datos.gov.co/d/4iyy-8sme",
+          "api_url": "https://www.datos.gov.co/api/views/4iyy-8sme"
+        },
+        {
+          "id": "bx26-pux4",
+          "name": "Registro_PQRS_Mindeportes",
+          "url": "https://www.datos.gov.co/d/bx26-pux4",
+          "api_url": "https://www.datos.gov.co/api/views/bx26-pux4"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "cybd-v39t"
+        },
+        {
+          "id": "ymh7-6t58"
+        }
+      ],
+      "restricted_datasets_403": [
+        {
+          "id": "8ved-7skw"
+        },
+        {
+          "id": "m5xp-39nw"
+        }
+      ],
+      "totals": {
+        "valid": 3,
+        "dead": 2,
+        "restricted": 2
+      }
+    },
+    "Statistics Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "pvyw-9yqs",
+          "name": "Reportes Portal Nacional Datos Abiertos",
+          "url": "https://www.datos.gov.co/d/pvyw-9yqs",
+          "api_url": "https://www.datos.gov.co/api/views/pvyw-9yqs"
+        }
+      ],
+      "dead_datasets_404": [],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 1,
+        "dead": 0,
+        "restricted": 0
+      }
+    },
+    "Sustainable Development Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "gi6t-dtvg",
+          "name": "Índice de información clasificada y reservada",
+          "url": "https://www.datos.gov.co/d/gi6t-dtvg",
+          "api_url": "https://www.datos.gov.co/api/views/gi6t-dtvg"
+        },
+        {
+          "id": "832u-c3pg",
+          "name": "Consolidado acotamiento de Ronda Hídrica",
+          "url": "https://www.datos.gov.co/d/832u-c3pg",
+          "api_url": "https://www.datos.gov.co/api/views/832u-c3pg"
+        },
+        {
+          "id": "sbwg-7ju4",
+          "name": "Temperatura Ambiente del Aire",
+          "url": "https://www.datos.gov.co/d/sbwg-7ju4",
+          "api_url": "https://www.datos.gov.co/api/views/sbwg-7ju4"
+        },
+        {
+          "id": "uext-mhny",
+          "name": "Humedad del Aire",
+          "url": "https://www.datos.gov.co/d/uext-mhny",
+          "api_url": "https://www.datos.gov.co/api/views/uext-mhny"
+        },
+        {
+          "id": "udsq-ti2d",
+          "name": "Inventario y Clasificación de Activos de Información - INVEMAR",
+          "url": "https://www.datos.gov.co/d/udsq-ti2d",
+          "api_url": "https://www.datos.gov.co/api/views/udsq-ti2d"
+        },
+        {
+          "id": "bdmn-sqnh",
+          "name": "Nivel Instantáneo del rio",
+          "url": "https://www.datos.gov.co/d/bdmn-sqnh",
+          "api_url": "https://www.datos.gov.co/api/views/bdmn-sqnh"
+        },
+        {
+          "id": "pt9a-aamx",
+          "name": "Nivel Mínimo del Rio",
+          "url": "https://www.datos.gov.co/d/pt9a-aamx",
+          "api_url": "https://www.datos.gov.co/api/views/pt9a-aamx"
+        },
+        {
+          "id": "vfth-yucv",
+          "name": "Nivel Máximo del Rio",
+          "url": "https://www.datos.gov.co/d/vfth-yucv",
+          "api_url": "https://www.datos.gov.co/api/views/vfth-yucv"
+        },
+        {
+          "id": "s54a-sgyg",
+          "name": "Precipitación",
+          "url": "https://www.datos.gov.co/d/s54a-sgyg",
+          "api_url": "https://www.datos.gov.co/api/views/s54a-sgyg"
+        },
+        {
+          "id": "62tk-nxj5",
+          "name": "Presión Atmosférica",
+          "url": "https://www.datos.gov.co/d/62tk-nxj5",
+          "api_url": "https://www.datos.gov.co/api/views/62tk-nxj5"
+        },
+        {
+          "id": "cff6-j795",
+          "name": "Registro de activos de información 2022",
+          "url": "https://www.datos.gov.co/d/cff6-j795",
+          "api_url": "https://www.datos.gov.co/api/views/cff6-j795"
+        },
+        {
+          "id": "y7va-ab6n",
+          "name": "Registro de activos de información",
+          "url": "https://www.datos.gov.co/d/y7va-ab6n",
+          "api_url": "https://www.datos.gov.co/api/views/y7va-ab6n"
+        },
+        {
+          "id": "5dpu-htqu",
+          "name": "Reporte Índice de Calidad de Aguas Marinas y Costeras - ICAM",
+          "url": "https://www.datos.gov.co/d/5dpu-htqu",
+          "api_url": "https://www.datos.gov.co/api/views/5dpu-htqu"
+        },
+        {
+          "id": "afdg-3zpb",
+          "name": "Temperatura Mínima del Aire",
+          "url": "https://www.datos.gov.co/d/afdg-3zpb",
+          "api_url": "https://www.datos.gov.co/api/views/afdg-3zpb"
+        },
+        {
+          "id": "ccvq-rp9s",
+          "name": "Temperatura Máxima del Aire",
+          "url": "https://www.datos.gov.co/d/ccvq-rp9s",
+          "api_url": "https://www.datos.gov.co/api/views/ccvq-rp9s"
+        },
+        {
+          "id": "hex8-i6ry",
+          "name": "Unidades de las Áreas Coralinas (Polígonos)",
+          "url": "https://www.datos.gov.co/d/hex8-i6ry",
+          "api_url": "https://www.datos.gov.co/api/views/hex8-i6ry"
+        },
+        {
+          "id": "v8sa-zb2t",
+          "name": "Unidades  de las Áreas Coralinas  (Punto)",
+          "url": "https://www.datos.gov.co/d/v8sa-zb2t",
+          "api_url": "https://www.datos.gov.co/api/views/v8sa-zb2t"
+        },
+        {
+          "id": "sgfv-3yp8",
+          "name": "Velocidad del Viento",
+          "url": "https://www.datos.gov.co/d/sgfv-3yp8",
+          "api_url": "https://www.datos.gov.co/api/views/sgfv-3yp8"
+        },
+        {
+          "id": "58pz-wqvv",
+          "name": "Vista Inventario y Clasificación de Activos de Información - INVEMAR Macroproceso Procesos Gerenciales",
+          "url": "https://www.datos.gov.co/d/58pz-wqvv",
+          "api_url": "https://www.datos.gov.co/api/views/58pz-wqvv"
+        },
+        {
+          "id": "dvz4-4xcz",
+          "name": "Sistematizacion de tramites de VPD",
+          "url": "https://www.datos.gov.co/d/dvz4-4xcz",
+          "api_url": "https://www.datos.gov.co/api/views/dvz4-4xcz"
+        }
+      ],
+      "dead_datasets_404": [
+        {
+          "id": "i6tc-86tx"
+        },
+        {
+          "id": "b9qa-5i7c"
+        },
+        {
+          "id": "eb4s-qy73"
+        }
+      ],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 20,
+        "dead": 3,
+        "restricted": 0
+      }
+    },
+    "Transport Sector Roadmap": {
+      "valid_datasets": [
+        {
+          "id": "fr9f-9g4b",
+          "name": "Encuesta Motociclistas",
+          "url": "https://www.datos.gov.co/d/fr9f-9g4b",
+          "api_url": "https://www.datos.gov.co/api/views/fr9f-9g4b"
+        },
+        {
+          "id": "cm2t-qreq",
+          "name": "Encuesta territorial de comportamiento en seguridad vial",
+          "url": "https://www.datos.gov.co/d/cm2t-qreq",
+          "api_url": "https://www.datos.gov.co/api/views/cm2t-qreq"
+        },
+        {
+          "id": "unak-3uez",
+          "name": "Fallecidos segun tramo y constructora",
+          "url": "https://www.datos.gov.co/d/unak-3uez",
+          "api_url": "https://www.datos.gov.co/api/views/unak-3uez"
+        },
+        {
+          "id": "dr5c-eewa",
+          "name": "Mortalidad en vias",
+          "url": "https://www.datos.gov.co/d/dr5c-eewa",
+          "api_url": "https://www.datos.gov.co/api/views/dr5c-eewa"
+        },
+        {
+          "id": "fz2j-qt75",
+          "name": "Probabilidad de accidentalidad",
+          "url": "https://www.datos.gov.co/d/fz2j-qt75",
+          "api_url": "https://www.datos.gov.co/api/views/fz2j-qt75"
+        },
+        {
+          "id": "rs3u-8r4q",
+          "name": "SECTORES CRITICOS DE SINIESTRALIDAD VIAL",
+          "url": "https://www.datos.gov.co/d/rs3u-8r4q",
+          "api_url": "https://www.datos.gov.co/api/views/rs3u-8r4q"
+        },
+        {
+          "id": "24ny-2dhf",
+          "name": "SECTORES CRITICOS POR EXCESO DE VELOCIDAD",
+          "url": "https://www.datos.gov.co/d/24ny-2dhf",
+          "api_url": "https://www.datos.gov.co/api/views/24ny-2dhf"
+        },
+        {
+          "id": "ybqk-8s42",
+          "name": "Sectores críticos mortalidad 2022",
+          "url": "https://www.datos.gov.co/d/ybqk-8s42",
+          "api_url": "https://www.datos.gov.co/api/views/ybqk-8s42"
+        }
+      ],
+      "dead_datasets_404": [],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 8,
+        "dead": 0,
+        "restricted": 0
+      }
+    },
+    "unknown": {
+      "valid_datasets": [],
+      "dead_datasets_404": [
+        {
+          "id": "q4hj-x6wb"
+        },
+        {
+          "id": "r4w6-jwgt"
+        },
+        {
+          "id": "r9g2-e8g8"
+        },
+        {
+          "id": "s9u5-d5x2"
+        }
+      ],
+      "restricted_datasets_403": [],
+      "totals": {
+        "valid": 0,
+        "dead": 4,
+        "restricted": 0
+      }
+    }
+  }
+}

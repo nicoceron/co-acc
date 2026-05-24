@@ -5,7 +5,6 @@ description = "Data ingestion pipelines for the CO-ACC open-source graph infrast
 requires-python = ">=3.12"
 license = "AGPL-3.0-or-later"
 dependencies = [
-    "neo4j>=5.27.0",
     "pandas>=2.2.0",
     "openpyxl>=3.1.5",
     "httpx>=0.28.0",
@@ -19,6 +18,7 @@ dependencies = [
     "defusedxml>=0.7.0",
     "pandera>=0.21.0",
     "python-dotenv>=1.2.2",
+    "pyyaml>=6.0.2",
 ]
 
 [project.optional-dependencies]
@@ -28,7 +28,6 @@ dev = [
     "mypy>=1.14.0",
     "ruff>=0.9.0",
     "pandas-stubs>=2.2.0",
-    "testcontainers[neo4j]>=4.0",
 ]
 resolution = [
     "splink>=4.0.0",
@@ -40,7 +39,8 @@ bigquery = [
 ]
 
 [project.scripts]
-coacc-etl = "coacc_etl.runner:cli"
+coacc-etl = "coacc_etl.cli:cli"
+coacc-source-qualification = "coacc_etl.qualification.cli:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -64,10 +64,6 @@ mypy_path = "src"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-m 'not integration'"
-markers = [
-    "integration: requires running Neo4j instance",
-]
 
 [dependency-groups]
 dev = [

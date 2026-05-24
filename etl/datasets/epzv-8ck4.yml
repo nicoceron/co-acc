@@ -1,0 +1,23 @@
+id: epzv-8ck4
+name: DNP - ejecutores de proyectos
+sector: budget
+tier: core
+join_keys:
+  bpin:
+  - bpin
+  entity:
+  - codigoentidadejecutora
+watermark_column: null
+partition_column: null
+columns_map:
+  bpin: bpin
+  codigoentidadejecutora: codigoentidadejecutora
+  entidadejecutora: entidadejecutora
+  nombreproyecto: nombreproyecto
+required_coverage: {}
+freq: weekly
+url: https://www.datos.gov.co/d/epzv-8ck4
+notes: 'Colombia: DNP Project Executors (314k rows). Snapshot — links projects to
+  executor entity codes. Operator runs full-refresh on cadence; each run lands under
+  lake/raw/source=epzv-8ck4/snapshot=<iso>/.'
+full_refresh_only: true

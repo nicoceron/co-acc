@@ -1,0 +1,14 @@
+id: cm2t-qreq
+name: Encuesta territorial de comportamiento en seguridad vial
+sector: Transport Sector Roadmap
+tier: context
+join_keys:
+  divipola:
+  - ik_divipola
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/cm2t-qreq
+notes: ''

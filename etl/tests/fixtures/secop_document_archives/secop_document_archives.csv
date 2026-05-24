@@ -1,4 +1,0 @@
-proceso,n_mero_de_contrato,id_documento,nombre_archivo,descripci_n,fecha_carga,url_descarga_documento,extensi_n
-CO1.BDOS.2001,CT-001,DOC-1001,DESIGNACION-SUPERVISOR.pdf,Designacion de supervisor,2025-01-25T08:00:00.000,https://community.secop.gov.co/document/1001,PDF
-CO1.BDOS.2001,CT-001,DOC-1002,SOPORTE-PAGO-1.pdf,Soporte de pago,2025-02-01T14:30:00.000,https://community.secop.gov.co/document/1002,PDF
-CO1.BDOS.2002,CT-002,DOC-2001,ACTA-INICIO.docx,,2025-02-20T09:15:00.000,https://community.secop.gov.co/document/2001,DOCX

@@ -1,0 +1,17 @@
+id: 3hdv-smhz
+name: TVEC - Compras por item
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - nit_entidad
+  nit:
+  - nit_entidad
+  - nit_proveedor
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/3hdv-smhz
+notes: ''

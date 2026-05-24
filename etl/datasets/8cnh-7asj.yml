@@ -1,0 +1,18 @@
+id: 8cnh-7asj
+name: Georeferenciación Centros de Aprendizaje SENA
+sector: Labor Sector Roadmap
+tier: core
+join_keys:
+  divipola:
+  - codigo_departamento
+  - codigo_municipio
+  entity:
+  - codigo_centro
+  - codigo_regional
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/8cnh-7asj
+notes: ''

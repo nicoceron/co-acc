@@ -1,0 +1,14 @@
+id: y9ga-zwzy
+name: MEN_ESTADISTICAS MATRICULA POR MUNICIPIOS_ES
+sector: Education
+tier: context
+join_keys:
+  divipola:
+  - c_digo_delmunicipio
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/y9ga-zwzy
+notes: ''

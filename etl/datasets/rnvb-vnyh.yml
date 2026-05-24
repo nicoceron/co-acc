@@ -1,0 +1,16 @@
+id: rnvb-vnyh
+name: Saber 11° 2020-2
+sector: Education
+tier: context
+join_keys:
+  divipola:
+  - estu_cod_reside_depto
+  - cole_cod_depto_ubicacion
+  - estu_cod_depto_presentacion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/rnvb-vnyh
+notes: ''

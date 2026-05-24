@@ -1,0 +1,15 @@
+id: nudc-7mev
+name: MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR, BÁSICA Y MEDIA_POR_MUNICIPIO
+sector: Education
+tier: context
+join_keys:
+  divipola:
+  - c_digo_municipio
+  - c_digo_departamento
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/nudc-7mev
+notes: ''

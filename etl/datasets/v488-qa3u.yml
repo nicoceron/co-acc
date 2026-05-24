@@ -1,0 +1,14 @@
+id: v488-qa3u
+name: MEN_INDICADORES_EDUCACION_MEDIA
+sector: Education
+tier: context
+join_keys:
+  divipola:
+  - cod_dane_depto
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/v488-qa3u
+notes: ''

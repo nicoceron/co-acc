@@ -1,0 +1,18 @@
+id: 2c7k-9iru
+name: CUPOS EN FORMACIÓN PROFESIONAL INTEGRAL POR TIPO DE POBLACIÓN
+sector: Labor Sector Roadmap
+tier: core
+join_keys:
+  divipola:
+  - codigo_departamento_curso
+  - codigo_municipio_curso
+  entity:
+  - codigo_regional
+  - codigo_centro
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/2c7k-9iru
+notes: ''

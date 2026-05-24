@@ -1,0 +1,14 @@
+id: 6cat-2gcs
+name: 10.000 Empresas mas Grandes del País
+sector: MINCIT Sectoral Roadmap 2026
+tier: core
+join_keys:
+  nit:
+  - nit
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/6cat-2gcs
+notes: ''

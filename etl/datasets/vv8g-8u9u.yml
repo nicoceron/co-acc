@@ -1,0 +1,19 @@
+id: vv8g-8u9u
+name: PROGRAMACIÓN ESPECÍFICA DE CURSOS LARGOS, ESPECIALES Y EVENTOS POR REGIONAL
+  Y CENTRO
+sector: Labor
+tier: core
+join_keys:
+  divipola:
+  - codigo_departamento_curso
+  - codigo_municipio_curso
+  entity:
+  - codigo_regional
+  - codigo_centro
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/vv8g-8u9u
+notes: ''

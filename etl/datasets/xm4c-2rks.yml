@@ -1,0 +1,14 @@
+id: xm4c-2rks
+name: Solicitudes de conciliación
+sector: Justice and Law Sector Roadmap
+tier: context
+join_keys:
+  divipola:
+  - sic_codigo_dane
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/xm4c-2rks
+notes: ''

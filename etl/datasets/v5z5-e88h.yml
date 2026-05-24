@@ -1,0 +1,14 @@
+id: v5z5-e88h
+name: MEN_INDICE_PARIDAD_POR_GENERO_COBERTURA_BRUTA_ETC
+sector: Education
+tier: context
+join_keys:
+  divipola:
+  - divipola_municipio
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/v5z5-e88h
+notes: ''

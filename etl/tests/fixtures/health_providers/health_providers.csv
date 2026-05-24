@@ -1,3 +1,0 @@
-codigoprestador,nombreprestador,codigohabilitacionsede,nombresede,numeroidentificacion,naturalezajuridica,ese,departamentoprestadordesc,municipioprestadordesc,direccionprestador,email_prestador,telefonoprestador,departamentodededesc,municipiosededesc,direcci_nsede,email_sede,t_lefonosede,claseprestador
-9100100019,HOSPITAL DE PRUEBA,912630001911,SEDE A,838000096,Pública,SI,Amazonas,LETICIA,Calle 1,a@hospital.example,3001111111,Amazonas,EL ENCANTO,Direccion A,a.sede@hospital.example,3001111112,IPS
-9100100019,HOSPITAL DE PRUEBA,914050001914,SEDE B,838000096,Pública,SI,Amazonas,LETICIA,Calle 1,a@hospital.example,3001111111,Amazonas,LA CHORRERA,Direccion B,b.sede@hospital.example,3001111113,IPS

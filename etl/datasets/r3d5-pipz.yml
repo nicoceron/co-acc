@@ -1,0 +1,14 @@
+id: r3d5-pipz
+name: Balance de entidades publicas vigiladas por la SFC.
+sector: Finance and Public Credit Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - codigo_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/r3d5-pipz
+notes: ''

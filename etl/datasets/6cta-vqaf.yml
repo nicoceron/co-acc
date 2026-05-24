@@ -1,0 +1,14 @@
+id: 6cta-vqaf
+name: Solicitudes de inscripción en el Registro Único de Retorno -RUR
+sector: Foreign Affairs Sector Roadmap
+tier: context
+join_keys:
+  divipola:
+  - c_digo_municipio_residencia
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/6cta-vqaf
+notes: ''

@@ -1,0 +1,15 @@
+id: uawh-cjvi
+name: Fondo de Pensiones Obligatorias y Cesantías C.P L.P
+sector: Finance and Public Credit Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - codigo_entidad
+  - codigo_patrimonio
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/uawh-cjvi
+notes: ''

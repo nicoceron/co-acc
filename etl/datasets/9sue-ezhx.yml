@@ -1,0 +1,17 @@
+id: 9sue-ezhx
+name: SECOPII - Plan Anual De Adquisiciones Detalle
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - codigo_entidad
+  - nit_entidad
+  nit:
+  - nit_entidad
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/9sue-ezhx
+notes: ''

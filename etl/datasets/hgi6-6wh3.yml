@@ -1,0 +1,21 @@
+id: hgi6-6wh3
+name: Proponentes por Proceso SECOP II
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  entity:
+  - nit_entidad
+  - codigo_entidad
+  - codigo_proveedor
+  nit:
+  - nit_entidad
+  - nit_proveedor
+  process:
+  - id_procedimiento
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/hgi6-6wh3
+notes: ''

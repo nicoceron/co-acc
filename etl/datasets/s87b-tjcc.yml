@@ -1,0 +1,14 @@
+id: s87b-tjcc
+name: Estadísticas Solicitudes Restitución Discriminadas Municipios
+sector: Agriculture
+tier: context
+join_keys:
+  divipola:
+  - codigodanemunicipiopredio
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/s87b-tjcc
+notes: ''

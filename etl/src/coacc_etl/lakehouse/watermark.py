@@ -3,11 +3,11 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
+import pyarrow as pa  # type: ignore[import-untyped]
+import pyarrow.parquet as pq  # type: ignore[import-untyped]
 
 from coacc_etl.lakehouse.paths import meta_path
 
@@ -22,6 +22,7 @@ class Watermark:
     last_batch_id: str
     row_count: int
     advanced_at: datetime | None = None
+    last_offset: int | None = None
 
 
 @dataclass(frozen=True)
@@ -31,6 +32,7 @@ class WatermarkDelta:
     batch_id: str
     advanced: bool
     last_seen_ts: datetime
+    last_offset: int | None = None
 
 
 def _latest_path() -> Path:
@@ -50,7 +52,7 @@ def _utc(value: datetime) -> datetime:
 def _read_frame(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
-    return pq.read_table(path).to_pandas()
+    return cast("pd.DataFrame", pq.read_table(path).to_pandas())
 
 
 def _write_frame_atomic(frame: pd.DataFrame, path: Path) -> None:
@@ -73,16 +75,22 @@ def _to_record(watermark: Watermark, advanced_at: datetime | None = None) -> dic
         "last_batch_id": watermark.last_batch_id,
         "row_count": int(watermark.row_count),
         "advanced_at": advanced,
+        "last_offset": (
+            int(watermark.last_offset) if watermark.last_offset is not None else None
+        ),
     }
 
 
 def _from_row(row: pd.Series) -> Watermark:
+    offset_raw = row.get("last_offset") if hasattr(row, "get") else None
+    last_offset = int(offset_raw) if offset_raw is not None and pd.notna(offset_raw) else None
     return Watermark(
         source=str(row["source"]),
         last_seen_ts=_utc(pd.Timestamp(row["last_seen_ts"]).to_pydatetime()),
         last_batch_id=str(row["last_batch_id"]),
         row_count=int(row["row_count"]),
         advanced_at=_utc(pd.Timestamp(row["advanced_at"]).to_pydatetime()),
+        last_offset=last_offset,
     )
 
 
@@ -97,10 +105,10 @@ def get(source: str) -> Watermark | None:
     return _from_row(rows.iloc[-1])
 
 
-def set(watermark: Watermark) -> None:  # noqa: A001
+def set(watermark: Watermark, *, force: bool = False) -> None:  # noqa: A001
     existing = get(watermark.source)
     next_seen = _utc(watermark.last_seen_ts)
-    if existing and next_seen < _utc(existing.last_seen_ts):
+    if not force and existing and next_seen < _utc(existing.last_seen_ts):
         raise ValueError(
             f"Watermark for {watermark.source} would regress from "
             f"{existing.last_seen_ts.isoformat()} to {next_seen.isoformat()}"
@@ -123,20 +131,32 @@ def advance(
     rows: int,
     batch_id: str | None = None,
     last_seen_ts: datetime | None = None,
+    last_offset: int | None = None,
+    force: bool = False,
 ) -> WatermarkDelta:
     seen = _utc(last_seen_ts or datetime.now(tz=UTC))
     current = get(source)
-    if current and seen < _utc(current.last_seen_ts):
+    if not force and current and seen < _utc(current.last_seen_ts):
         raise ValueError(
             f"Watermark for {source} would regress from "
             f"{current.last_seen_ts.isoformat()} to {seen.isoformat()}"
         )
     batch = batch_id or uuid.uuid4().hex
-    set(Watermark(source=source, last_seen_ts=seen, last_batch_id=batch, row_count=rows))
+    set(
+        Watermark(
+            source=source,
+            last_seen_ts=seen,
+            last_batch_id=batch,
+            row_count=rows,
+            last_offset=last_offset,
+        ),
+        force=force,
+    )
     return WatermarkDelta(
         source=source,
         rows=rows,
         batch_id=batch,
         advanced=current is None or seen > _utc(current.last_seen_ts) or rows > 0,
         last_seen_ts=seen,
+        last_offset=last_offset,
     )

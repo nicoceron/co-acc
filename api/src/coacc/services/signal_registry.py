@@ -8,7 +8,7 @@ import yaml
 from coacc.models.signal import SignalDefinition, SignalRegistry
 
 _REGISTRY_PATH = (
-    Path(__file__).resolve().parents[4] / "config" / "signal_registry_co_v1.yml"
+    Path(__file__).resolve().parents[4] / "config" / "signal_registry.yml"
 )
 
 

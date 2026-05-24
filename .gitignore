@@ -52,6 +52,9 @@ htmlcov/
 *.sqlite3
 !docs/source_registry_co_v1.csv
 !docs/release/public_boundary_matrix.csv
+!docs/reality/*.csv
+!docs/cleanup/*.csv
+!docs/datasets/*.csv
 *.tsv
 *.parquet
 *.dbc
@@ -90,6 +93,9 @@ data/comprasnet/
 data/rais/
 data/tse/
 
+# Colocated lakehouse (parquet + watermarks)
+lake/
+
 # Local MCP runtime config (keep example only)
 .mcp.json
 
@@ -97,3 +103,6 @@ data/tse/
 CLAUDE.md
 AGENTS.md
 AGENTS*.md
+
+# Government data roadmap (25 sector PDFs, 34M — keep on disk, not in git)
+govt data roadmap/

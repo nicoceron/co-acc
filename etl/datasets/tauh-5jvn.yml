@@ -1,0 +1,19 @@
+id: tauh-5jvn
+name: SECOP I - Proponentes
+sector: National Planning Sector Roadmap
+tier: core
+join_keys:
+  contract:
+  - numero_contrato
+  nit:
+  - num_doc_proponente
+  process:
+  - id_proceso
+  - id_adjudicacion
+watermark_column: null
+partition_column: null
+columns_map: {}
+required_coverage: {}
+freq: null
+url: https://www.datos.gov.co/d/tauh-5jvn
+notes: ''
