@@ -170,16 +170,25 @@ def _select_dataset_ids(
         unknown = sorted(dataset_id for dataset_id in requested if dataset_id not in catalog)
         if unknown:
             raise RealityCliError(f"Unknown dataset id(s): {', '.join(unknown)}")
+        if args.changed_yamls_only and not explicit_requested:
+            present = set(_local_catalog_dataset_ids(root, catalog))
+            skipped = sorted(requested - present)
+            for dataset_id in skipped:
+                logger.info(
+                    "Skipping changed dataset %s because no local parquet exists",
+                    dataset_id,
+                )
+            return sorted(requested & present)
         return sorted(requested)
 
     if args.changed_yamls_only and not explicit_requested:
         return []
 
     if args.all or not requested:
-        present = _local_catalog_dataset_ids(root, catalog)
-        if not present:
+        local_dataset_ids = _local_catalog_dataset_ids(root, catalog)
+        if not local_dataset_ids:
             logger.info("No catalog-backed sources found under %s/raw", root)
-        return present
+        return local_dataset_ids
     return []
 
 
@@ -199,9 +208,7 @@ def _local_catalog_dataset_ids(root: Path, catalog: dict[str, DatasetSpec]) -> l
 
 
 def _changed_catalog_dataset_ids(catalog: dict[str, DatasetSpec]) -> list[str]:
-    paths = set(_git_names(["diff", "--name-only", "--cached"]))
-    if not paths:
-        paths.update(_git_names(["diff", "--name-only", "HEAD~1..HEAD"]))
+    paths = _changed_paths()
     dataset_ids: list[str] = []
     for path in paths:
         p = Path(path)
@@ -214,6 +221,21 @@ def _changed_catalog_dataset_ids(catalog: dict[str, DatasetSpec]) -> list[str]:
         ):
             dataset_ids.append(p.stem)
     return sorted(set(dataset_ids))
+
+
+def _changed_paths() -> set[str]:
+    paths = set(_git_names(["diff", "--name-only", "--cached"]))
+    if paths or os.environ.get("COACC_REALITY_STAGED_ONLY") == "1":
+        return paths
+
+    github_base_ref = os.environ.get("GITHUB_BASE_REF")
+    if github_base_ref:
+        for base in (f"origin/{github_base_ref}", github_base_ref):
+            paths = set(_git_names(["diff", "--name-only", f"{base}...HEAD"]))
+            if paths:
+                return paths
+
+    return set(_git_names(["diff", "--name-only", "HEAD~1..HEAD"]))
 
 
 def _git_names(args: list[str]) -> list[str]:

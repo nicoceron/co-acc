@@ -1,6 +1,10 @@
 name: Lake Reality
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "etl/datasets/*.yml"
   workflow_dispatch:
     inputs:
       datasets:
@@ -33,6 +37,8 @@ jobs:
       DISCORD_OR_SLACK_WEBHOOK_URL: ${{ secrets.LAKE_REALITY_WEBHOOK_URL }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: astral-sh/setup-uv@v5
         with:
@@ -52,7 +58,10 @@ jobs:
           if [ -n "${DATASETS:-}" ]; then
             args+=(DATASETS="${DATASETS}")
           fi
-          if [ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ] || [ "${WITH_LIVE_INPUT}" = "true" ]; then
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            args+=(CHANGED_YAMLS_ONLY=1)
+          fi
+          if [ "${GITHUB_EVENT_NAME}" = "schedule" ] || { [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${WITH_LIVE_INPUT}" = "true" ]; }; then
             args+=(WITH_LIVE=1)
           fi
           make lake-reality "${args[@]}"

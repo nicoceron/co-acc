@@ -478,6 +478,8 @@ vs the previous snapshot.
 - [x] Wire the helper into `.pre-commit-config.yaml`.
 - [x] Add the daily Action using a self-hosted runner with the authoritative
       lake mounted locally.
+- [x] Route PRs touching `etl/datasets/*.yml` through the same self-hosted
+      Action with `--changed-yamls-only`.
 - [ ] Configure the `coacc-lake` runner/optional webhook and record three
       consecutive green daily runs.
 

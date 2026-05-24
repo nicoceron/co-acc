@@ -65,6 +65,11 @@ Repository settings:
 The workflow runs `make lake-reality WITH_LIVE=1` by default and uploads
 the JSON/Markdown artifacts from `lake/meta/reality/`.
 
+Pull requests that touch `etl/datasets/*.yml` run the same workflow with
+`CHANGED_YAMLS_ONLY=1` and without live Socrata counts. The self-hosted runner
+must therefore have the lake mounted before PR checks can pass. Changed datasets
+without local parquet are skipped because there is no lake state to compare yet.
+
 ## Exit Codes
 
 - `0`: probe completed with no failure-level findings
