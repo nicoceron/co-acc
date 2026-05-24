@@ -710,13 +710,16 @@ Build `lake/curated/` from `lake/raw/`. Three deliverables:
 
 **Started 2026-05-24:** the first narrow slice is live. `coacc-etl curate`
 builds `table=dim_subject_document`, `table=fct_procurement_contract_awards`,
-and `table=signal_feature_procurement_sanctioned_supplier_awarded` from SECOP
-II contracts (`jbjy-vk9h`, resolved through the `secop_ii_contracts` semantic
-alias) and `paco_sanctions`. On the local lake it produced 1,215,832 subject
-document rows, 5,442,058 award rows, and 20,184 PACO-backed signal feature
-rows. This is not full Phase 10 completion yet; it is the proof that the
-lake/DuckDB path can cross-reference public sanctions and procurement without
-loading the full graph or a full join into Python memory.
+`table=signal_feature_procurement_sanctioned_supplier_awarded`, and
+`table=signal_feature_procurement_supplier_concentration_across_entities`
+from SECOP II contracts (`jbjy-vk9h`, resolved through the
+`secop_ii_contracts` semantic alias) and, where required, `paco_sanctions`.
+On the local lake it produced 1,215,832 subject document rows, 5,442,058 award
+rows, 20,184 PACO-backed sanctioned-supplier signal rows, and 497 SECOP-only
+supplier-concentration signal rows. This is not full Phase 10 completion yet;
+it is the proof that the lake/DuckDB path can cross-reference public sanctions
+and procurement, and aggregate procurement patterns, without loading the full
+graph or a full join into Python memory.
 
 ### 6.2 Module layout
 
@@ -805,9 +808,13 @@ class SignalFeatureRow(BaseModel):
      It joins SECOP II contracts × `paco_sanctions` through normalized document
      match keys, including NIT-base matching for SECOP rows that include a
      verification digit while PACO omits it.
-   - `procurement_supplier_concentration_across_entities`: per supplier,
-     aggregate award value across distinct buyers in a 12-month window,
-     emit when concentration ratio > threshold.
+   - `procurement_supplier_concentration_across_entities`: **second slice
+     shipped 2026-05-24** as
+     `lake/curated/table=signal_feature_procurement_supplier_concentration_across_entities/`.
+     It is SECOP-only, aggregates awards per supplier across distinct public
+     buyers, and emits when a supplier has at least 25 contracts, 50 distinct
+     buyers, and COP 1B total awarded value. The local lake emits 497 rows,
+     with the top SECOP process URLs by contract value carried as evidence.
    Add others incrementally; the demo only needs ~3–5. Every builder first
      emits a join-coverage report (`left_rows`, `matched_rows`,
    `unmatched_sample`) so the operator knows whether keys connect before
@@ -863,10 +870,13 @@ not the foundation.
 
 **Started 2026-05-24:** `/api/v1/signals` and
 `/api/v1/signals/<signal_id>` now merge curated parquet counts/samples for
-shipped signal feature tables and can answer public requests when Neo4j is
-unavailable. This is a thin API projection slice, not full Phase 11 completion:
-entity detail, search, cases, graph expansion, and broader public pattern APIs
-still need lake-backed implementations or explicit graph-required behavior.
+the shipped signal feature tables and can answer public requests when Neo4j is
+unavailable. Current lake-backed signal IDs are
+`procurement_sanctioned_supplier_awarded` and
+`procurement_supplier_concentration_across_entities`. This is a thin API
+projection slice, not full Phase 11 completion: entity detail, search, cases,
+graph expansion, and broader public pattern APIs still need lake-backed
+implementations or explicit graph-required behavior.
 
 ### 7.1 Goal
 
@@ -1601,6 +1611,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   lake/DuckDB source-of-truth pivot against the project's core question
   (public sanction records connected to procurement awards) before expanding
   entity resolution or API rewires.
+- **2026-05-24** — Add SECOP-only supplier concentration as the second curated
+  signal before typed entity dimensions. Rationale: it proves the same
+  lake/DuckDB path can find high-volume cross-buyer procurement patterns from
+  one large public source with bounded memory, giving the API a second useful
+  public signal while canonical dimensions are still being designed.
 - **2026-05-06** — `paco_sanctions` adapter promoted from deferred
   Phase 9 to critical-path Phase 9.0 (3–4 days). Rationale: Phase 13
   supervised top-up needs sanctioned-supplier labels; without them

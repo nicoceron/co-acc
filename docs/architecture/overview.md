@@ -76,7 +76,7 @@ One-page trace of how data moves through co/acc, from raw audit JSON to API resp
         │                                                                      │
         │  curated/  DuckDB-built signal features and entity dimensions.       │
         │            table=dim_subject_document/, table=fct_procurement_...    │
-        │            and table=signal_feature_procurement_sanctioned_...       │
+        │            and table=signal_feature_procurement_*                    │
         └──────────────────────────────────────────────────────────────────────┘
                                             │
                        ┌────────────────────┼────────────────────┐
@@ -105,17 +105,18 @@ These two invariants together give us reproducibility: rerun ingest from an empt
 
 ## What's missing (deliberately)
 
-- **A DuckDB-backed signal API** — the source of truth is now lake/curated
-  parquet; the first curated feature table can already populate
-  `/api/v1/signals` counts and samples without Neo4j. Wider API rewires are
-  planned in Phase 11.
+- **A broader DuckDB-backed signal API** — the source of truth is now
+  lake/curated parquet; the first two curated feature tables can already
+  populate `/api/v1/signals` counts and samples without Neo4j. Wider API
+  rewires are planned in Phase 11.
 - **Optional graph projection** — Neo4j is useful for exploration, but not
   required for corruption-pattern detection correctness.
 - **More custom non-Socrata adapters** — PACO has landed; RUES,
   Registraduría, official_case_bulletins, etc. remain tracked in
   `_KNOWN_DEFERRED_SOURCES` (`etl/tests/test_signal_source_alignment.py`).
-- **More curated tables** — the first SECOP+PACO curation run exists; Phase 10
-  still needs typed company/person/buyer dimensions and more signal features.
+- **More curated tables** — the first SECOP+PACO and SECOP-only curation runs
+  exist; Phase 10 still needs typed company/person/buyer dimensions and more
+  signal features.
 
 ---
 

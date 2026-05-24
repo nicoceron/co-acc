@@ -49,6 +49,39 @@ def _write_curated_signal(root: Path) -> None:
     )
 
 
+def _write_curated_supplier_concentration(root: Path) -> None:
+    out = (
+        root
+        / "curated"
+        / "table=signal_feature_procurement_supplier_concentration_across_entities"
+    )
+    out.mkdir(parents=True)
+    pq.write_table(
+        pa.Table.from_pylist([
+            {
+                "signal_id": "procurement_supplier_concentration_across_entities",
+                "entity_id": "doc:900765432",
+                "entity_key": "900765432",
+                "entity_label": "Company",
+                "scope_key": "supplier:900765432",
+                "scope_type": "supplier",
+                "risk_signal": 0.8,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "supplier_name": "Proveedor Concentrado SAS",
+                "contract_count": 50,
+                "distinct_buyer_count": 50,
+                "total_contract_value": 5_000_000_000.0,
+                "evidence_refs": [
+                    "https://secop.example/CX-1",
+                    "https://secop.example/CX-2",
+                ],
+            }
+        ]),
+        out / "part-00000.parquet",
+    )
+
+
 @pytest.mark.anyio
 async def test_signal_detail_reads_curated_samples_without_neo4j(
     client: AsyncClient,
@@ -88,12 +121,40 @@ async def test_signal_list_counts_curated_hits_without_neo4j(
     monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
     app.state.neo4j_driver = None
     _write_curated_signal(tmp_path)
+    _write_curated_supplier_concentration(tmp_path)
 
     response = await client.get("/api/v1/signals/")
 
     assert response.status_code == 200
     signals = {row["id"]: row for row in response.json()["signals"]}
     assert signals["procurement_sanctioned_supplier_awarded"]["hit_count"] == 1
+    assert signals["procurement_supplier_concentration_across_entities"]["hit_count"] == 1
+
+
+@pytest.mark.anyio
+async def test_supplier_concentration_detail_reads_curated_sample_without_neo4j(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    app.state.neo4j_driver = None
+    _write_curated_supplier_concentration(tmp_path)
+
+    response = await client.get(
+        "/api/v1/signals/procurement_supplier_concentration_across_entities?limit=1"
+    )
+
+    assert response.status_code == 200
+    hit = response.json()["sample_hits"][0]
+    assert hit["entity_key"] == "900765432"
+    assert hit["sources"] == [
+        {"database": "secop_ii_contracts", "record_id": None, "extracted_at": None}
+    ]
+    assert hit["evidence_refs"] == [
+        "https://secop.example/CX-1",
+        "https://secop.example/CX-2",
+    ]
 
 
 @pytest.mark.anyio

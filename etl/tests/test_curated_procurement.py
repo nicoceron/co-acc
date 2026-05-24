@@ -70,6 +70,30 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 "contract_end_date": "2026-12-31",
                 "last_update": "2026-05-03T00:00:00",
             },
+            *[
+                {
+                    "contract_id": f"CX-{index}",
+                    "contract_reference": f"REF-X-{index}",
+                    "procurement_process": f"PX-{index}",
+                    "process_url": f"https://secop.example/CX-{index}",
+                    "supplier_document": "900765432-1",
+                    "supplier_doc_type": "NIT",
+                    "awarded_supplier": "Proveedor Concentrado SAS",
+                    "entity_nit": f"800{index:06d}",
+                    "entity_name": f"Comprador {index}",
+                    "department": "NARINO" if index % 2 else "CAUCA",
+                    "city": "TUMACO",
+                    "sector": "Infraestructura",
+                    "procurement_modality": "Licitacion",
+                    "contract_type": "Obra",
+                    "contract_value": "100000000",
+                    "signing_date": "2026-05-01",
+                    "contract_start_date": "2026-05-02",
+                    "contract_end_date": "2026-12-31",
+                    "last_update": "2026-05-03T00:00:00",
+                }
+                for index in range(50)
+            ],
         ],
     )
     _write_rows(
@@ -101,10 +125,12 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "dim_subject_document",
         "fct_procurement_contract_awards",
         "signal_feature_procurement_sanctioned_supplier_awarded",
+        "signal_feature_procurement_supplier_concentration_across_entities",
     }
     rows_by_table = {result.table: result.rows for result in results}
-    assert rows_by_table["fct_procurement_contract_awards"] == 2
+    assert rows_by_table["fct_procurement_contract_awards"] == 52
     assert rows_by_table["signal_feature_procurement_sanctioned_supplier_awarded"] == 1
+    assert rows_by_table["signal_feature_procurement_supplier_concentration_across_entities"] == 1
 
     con = duckdb.connect()
     try:
@@ -121,6 +147,19 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 )
             ],
         ).fetchall()
+        concentration_rows = con.execute(
+            "SELECT entity_key, contract_count, distinct_buyer_count, total_contract_value, "
+            "evidence_refs[1] "
+            "FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_procurement_supplier_concentration_across_entities"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
     finally:
         con.close()
     assert signal_rows == [
@@ -132,6 +171,9 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             1.0,
             "https://secop.example/C-1",
         )
+    ]
+    assert concentration_rows == [
+        ("900765432", 50, 50, 5_000_000_000.0, "https://secop.example/CX-0")
     ]
 
 

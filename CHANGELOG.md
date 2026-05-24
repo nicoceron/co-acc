@@ -14,6 +14,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Added the first DuckDB-curated parquet builder and CLI (`coacc-etl curate` /
   `make curate`) for subject documents, SECOP II contract awards, and the
   PACO-backed `procurement_sanctioned_supplier_awarded` signal feature table.
+- Added the SECOP-only
+  `procurement_supplier_concentration_across_entities` curated signal feature
+  table for supplier exposure across many public buyers.
 - Added the `paco_sanctions` custom ETL adapter, dataset contract, and tests
   so PACO public sanction feeds can land in the parquet lake without Neo4j.
 - Added Phase 8 lake reality snapshots: per-dataset local parquet health metrics,
