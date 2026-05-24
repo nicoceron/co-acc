@@ -462,9 +462,7 @@ def _build_person_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
     donation_count = int(record.get("donation_count") or 0)
     candidacy_count = int(record.get("candidacy_count") or 0)
     payment_supervision_count = int(record.get("payment_supervision_count") or 0)
-    payment_supervision_company_count = int(
-        record.get("payment_supervision_company_count") or 0
-    )
+    payment_supervision_company_count = int(record.get("payment_supervision_company_count") or 0)
     payment_supervision_risk_contract_count = int(
         record.get("payment_supervision_risk_contract_count") or 0
     )
@@ -481,13 +479,9 @@ def _build_person_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
         record.get("payment_supervision_archive_contract_count") or 0
     )
     archive_document_total = int(record.get("archive_document_total") or 0)
-    archive_supervision_document_total = int(
-        record.get("archive_supervision_document_total") or 0
-    )
+    archive_supervision_document_total = int(record.get("archive_supervision_document_total") or 0)
     archive_payment_document_total = int(record.get("archive_payment_document_total") or 0)
-    archive_assignment_document_total = int(
-        record.get("archive_assignment_document_total") or 0
-    )
+    archive_assignment_document_total = int(record.get("archive_assignment_document_total") or 0)
     official_case_bulletin_count = int(record.get("official_case_bulletin_count") or 0)
     official_case_bulletin_titles = [
         str(title)
@@ -583,9 +577,7 @@ def _build_person_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
         )
         reason_text += f" con {supplier_contract_count} contrato(s) registrados."
         if is_sensitive_overlap:
-            reason_text += (
-                f" {sensitive_office_count} cargo(s) están marcados como sensibles."
-            )
+            reason_text += f" {sensitive_office_count} cargo(s) están marcados como sensibles."
         alerts.append(
             _risk_alert(
                 alert_type=(
@@ -638,9 +630,7 @@ def _build_person_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
     ):
         sanction_parts: list[str] = []
         if disciplinary_sanction_count > 0:
-            sanction_parts.append(
-                f"{disciplinary_sanction_count} sanción(es) disciplinaria(s)"
-            )
+            sanction_parts.append(f"{disciplinary_sanction_count} sanción(es) disciplinaria(s)")
         if fiscal_responsibility_count > 0:
             sanction_parts.append(
                 f"{fiscal_responsibility_count} sanción(es) de responsabilidad fiscal"
@@ -648,17 +638,21 @@ def _build_person_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
         if not sanction_parts:
             sanction_parts.append(f"{person_sanction_count} sanción(es) registradas")
 
-        exposure_parts: list[str] = []
+        person_exposure_parts: list[str] = []
         if office_count > 0:
-            exposure_parts.append(f"{office_count} cargo(s) públicos")
+            person_exposure_parts.append(f"{office_count} cargo(s) públicos")
         if supplier_contract_count > 0:
-            exposure_parts.append(f"{supplier_contract_count} contrato(s) como proveedora o directiva")
+            person_exposure_parts.append(
+                f"{supplier_contract_count} contrato(s) como proveedora o directiva"
+            )
         if payment_supervision_count > 0:
-            exposure_parts.append(f"{payment_supervision_count} contrato(s) en supervisión de pago")
+            person_exposure_parts.append(
+                f"{payment_supervision_count} contrato(s) en supervisión de pago"
+            )
         if donation_count > 0:
-            exposure_parts.append(f"{donation_count} donación(es) electorales")
+            person_exposure_parts.append(f"{donation_count} donación(es) electorales")
         if candidacy_count > 0:
-            exposure_parts.append(f"{candidacy_count} candidatura(s)")
+            person_exposure_parts.append(f"{candidacy_count} candidatura(s)")
 
         source_list = ["SIRI / Responsabilidad Fiscal / PACO"]
         if office_count > 0:
@@ -689,7 +683,7 @@ def _build_person_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                     "La persona registra "
                     + ", ".join(sanction_parts)
                     + " en fuentes oficiales de control y además aparece con "
-                    + ", ".join(exposure_parts)
+                    + ", ".join(person_exposure_parts)
                     + "."
                 ),
                 evidence_refs=_clean_refs(
@@ -717,8 +711,10 @@ def _build_person_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
             )
         )
 
-    if payment_supervision_count > 0 and payment_supervision_risk_contract_count > 0 and (
-        office_count > 0 or donation_count > 0 or candidacy_count > 0
+    if (
+        payment_supervision_count > 0
+        and payment_supervision_risk_contract_count > 0
+        and (office_count > 0 or donation_count > 0 or candidacy_count > 0)
     ):
         stack_parts: list[str] = []
         if payment_supervision_discrepancy_contract_count > 0:
@@ -1026,17 +1022,10 @@ async def _validate_company_case(
     alerts = _build_company_alerts(normalized)
     observed_signals = [alert.alert_type for alert in alerts]
     status, matched_signals = _validation_status(case["expected_signals"], observed_signals)
-    summary = (
-        next(
-            (
-                alert.reason_text
-                for alert in alerts
-                if alert.alert_type in matched_signals
-            ),
-            None,
-        )
-        or (alerts[0].reason_text if alerts else "No se detectaron señales priorizadas.")
-    )
+    summary = next(
+        (alert.reason_text for alert in alerts if alert.alert_type in matched_signals),
+        None,
+    ) or (alerts[0].reason_text if alerts else "No se detectaron señales priorizadas.")
     return ValidationCaseResult(
         case_id=case["case_id"],
         title=case["title"],
@@ -1086,17 +1075,10 @@ async def _validate_person_case(
     alerts = _build_person_alerts(normalized)
     observed_signals = [alert.alert_type for alert in alerts]
     status, matched_signals = _validation_status(case["expected_signals"], observed_signals)
-    summary = (
-        next(
-            (
-                alert.reason_text
-                for alert in alerts
-                if alert.alert_type in matched_signals
-            ),
-            None,
-        )
-        or (alerts[0].reason_text if alerts else "No se detectaron señales priorizadas.")
-    )
+    summary = next(
+        (alert.reason_text for alert in alerts if alert.alert_type in matched_signals),
+        None,
+    ) or (alerts[0].reason_text if alerts else "No se detectaron señales priorizadas.")
     return ValidationCaseResult(
         case_id=case["case_id"],
         title=case["title"],
@@ -1138,20 +1120,11 @@ def _build_company_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
     split_contract_group_count = int(record.get("split_contract_group_count") or 0)
     archive_contract_count = int(record.get("archive_contract_count") or 0)
     archive_document_total = int(record.get("archive_document_total") or 0)
-    archive_supervision_contract_count = int(
-        record.get("archive_supervision_contract_count") or 0
-    )
-    archive_supervision_document_total = int(
-        record.get("archive_supervision_document_total") or 0
-    )
+    archive_supervision_contract_count = int(record.get("archive_supervision_contract_count") or 0)
+    archive_supervision_document_total = int(record.get("archive_supervision_document_total") or 0)
     archive_payment_contract_count = int(record.get("archive_payment_contract_count") or 0)
     archive_payment_document_total = int(record.get("archive_payment_document_total") or 0)
-    archive_assignment_contract_count = int(
-        record.get("archive_assignment_contract_count") or 0
-    )
-    archive_assignment_document_total = int(
-        record.get("archive_assignment_document_total") or 0
-    )
+    archive_assignment_document_total = int(record.get("archive_assignment_document_total") or 0)
     education_director_count = int(record.get("education_director_count") or 0)
     education_family_tie_count = int(record.get("education_family_tie_count") or 0)
     education_alias_count = int(record.get("education_alias_count") or 0)
@@ -1186,7 +1159,11 @@ def _build_company_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                     f"sanciones:{sanction_count}",
                     f"contratos:{record.get('contract_count')}",
                 ),
-                source_list=["SIRI / Responsabilidad Fiscal / PACO", "SECOP sanciones", "SECOP / SECOP II"],
+                source_list=[
+                    "SIRI / Responsabilidad Fiscal / PACO",
+                    "SECOP sanciones",
+                    "SECOP / SECOP II",
+                ],
                 what_is_unproven=(
                     "El antecedente sancionatorio no prueba una irregularidad en cada contrato"
                     " actual; requiere revisar causa, vigencia y comprador."
@@ -1228,7 +1205,11 @@ def _build_company_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                         if float(record.get("sanctioned_still_receiving_total") or 0.0) > 0.0
                         else None
                     ),
-                    f"contratos_archivo:{archive_contract_count}" if archive_contract_count else None,
+                    (
+                        f"contratos_archivo:{archive_contract_count}"
+                        if archive_contract_count
+                        else None
+                    ),
                     (
                         f"soportes_supervision:{archive_supervision_document_total}"
                         if archive_supervision_document_total
@@ -1308,7 +1289,11 @@ def _build_company_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                     f"nit:{document_id}" if document_id else None,
                     f"oficiales_sensibles:{sensitive_officer_count}",
                     f"roles_sensibles:{sensitive_role_count}",
-                    f"oficiales_relacionados:{official_officer_count}" if official_officer_count else None,
+                    (
+                        f"oficiales_relacionados:{official_officer_count}"
+                        if official_officer_count
+                        else None
+                    ),
                 ),
                 source_list=[
                     "SIGEP II",
@@ -1424,25 +1409,25 @@ def _build_company_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
         if interadmin_risk_contract_count > 0:
             stack_reasons.append("contratos con brechas de ejecución, compromiso o suspensión")
 
-        source_list: list[str] = [
+        interadmin_source_list: list[str] = [
             "SECOP II - Convenios Interadministrativos",
             "SECOP / SECOP II contratos",
         ]
         if official_officer_count > 0:
-            source_list.append("SIGEP II")
+            interadmin_source_list.append("SIGEP II")
         if sanction_count > 0:
-            source_list.append("PACO / SIRI")
+            interadmin_source_list.append("PACO / SIRI")
         if interadmin_risk_contract_count > 0:
             for source in discrepancy_sources:
-                if source not in source_list:
-                    source_list.append(source)
+                if source not in interadmin_source_list:
+                    interadmin_source_list.append(source)
         if (
             suspension_contract_count > 0
-            and "SECOP II - Suspensiones de Contratos" not in source_list
+            and "SECOP II - Suspensiones de Contratos" not in interadmin_source_list
         ):
-            source_list.append("SECOP II - Suspensiones de Contratos")
+            interadmin_source_list.append("SECOP II - Suspensiones de Contratos")
         if archive_contract_count > 0:
-            source_list.append("SECOP II - Archivos Descarga Desde 2025")
+            interadmin_source_list.append("SECOP II - Archivos Descarga Desde 2025")
 
         alerts.append(
             _risk_alert(
@@ -1480,9 +1465,13 @@ def _build_company_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                         else None
                     ),
                     f"valor_interadmin:{_compact_float(record.get('interadmin_total'))}",
-                    f"contratos_archivo:{archive_contract_count}" if archive_contract_count else None,
+                    (
+                        f"contratos_archivo:{archive_contract_count}"
+                        if archive_contract_count
+                        else None
+                    ),
                 ),
-                source_list=source_list,
+                source_list=interadmin_source_list,
                 what_is_unproven=(
                     "La coexistencia de convenio interadministrativo y contratación ordinaria"
                     " no prueba desvío por sí sola; requiere revisar objeto, subcontratación"
@@ -1540,8 +1529,9 @@ def _build_company_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                     f"Los contratos asociados muestran {discrepancy_phrase}."
                     + (
                         f" Ya hay {archive_contract_count} contrato(s) con "
-                        f"{archive_document_total} soporte(s) públicos para contrastar el expediente,"
-                        f" incluyendo {archive_supervision_contract_count} con documentos de supervisión"
+                        f"{archive_document_total} soporte(s) públicos para contrastar "
+                        "el expediente, incluyendo "
+                        f"{archive_supervision_contract_count} con documentos de supervisión"
                         f" y {archive_payment_contract_count} con documentos de pago."
                         if archive_contract_count > 0
                         else ""
@@ -1557,7 +1547,11 @@ def _build_company_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                         else None
                     ),
                     f"nit:{document_id}" if document_id else None,
-                    f"contratos_archivo:{archive_contract_count}" if archive_contract_count else None,
+                    (
+                        f"contratos_archivo:{archive_contract_count}"
+                        if archive_contract_count
+                        else None
+                    ),
                 ),
                 source_list=source_list,
                 what_is_unproven=(
@@ -1601,7 +1595,11 @@ def _build_company_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                     f"contratos_suspendidos:{suspension_contract_count}",
                     f"suspensiones:{suspension_event_count}" if suspension_event_count else None,
                     f"nit:{document_id}" if document_id else None,
-                    f"contratos_archivo:{archive_contract_count}" if archive_contract_count else None,
+                    (
+                        f"contratos_archivo:{archive_contract_count}"
+                        if archive_contract_count
+                        else None
+                    ),
                 ),
                 source_list=source_list,
                 what_is_unproven=(
@@ -1784,7 +1782,11 @@ def _build_buyer_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                     f"contratos_sancionados:{sanctioned_supplier_contract_count}",
                     f"valor:{_compact_float(record.get('sanctioned_supplier_value'))}",
                 ),
-                source_list=["SIRI / Responsabilidad Fiscal / PACO", "SECOP sanciones", "SECOP / SECOP II"],
+                source_list=[
+                    "SIRI / Responsabilidad Fiscal / PACO",
+                    "SECOP sanciones",
+                    "SECOP / SECOP II",
+                ],
                 what_is_unproven=(
                     "La exposición no prueba una irregularidad del comprador sin verificar"
                     " la vigencia de la sanción y el contexto del proceso."
@@ -1933,8 +1935,7 @@ def _build_territory_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
     execution_gap_contract_count = int(record.get("execution_gap_contract_count") or 0)
     commitment_gap_contract_count = int(record.get("commitment_gap_contract_count") or 0)
     uses_project_snapshot = (
-        int(record.get("supplier_count") or 0) == 0
-        and int(record.get("buyer_count") or 0) > 0
+        int(record.get("supplier_count") or 0) == 0 and int(record.get("buyer_count") or 0) > 0
     )
     discrepancy_phrase = _secop_discrepancy_phrase(
         execution_gap_contract_count,
@@ -2028,7 +2029,11 @@ def _build_territory_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                     f"contratos_sancionados:{sanctioned_supplier_contract_count}",
                     f"valor:{_compact_float(record.get('sanctioned_supplier_value'))}",
                 ),
-                source_list=["SIRI / Responsabilidad Fiscal / PACO", "SECOP sanciones", "SECOP / SECOP II"],
+                source_list=[
+                    "SIRI / Responsabilidad Fiscal / PACO",
+                    "SECOP sanciones",
+                    "SECOP / SECOP II",
+                ],
                 what_is_unproven=(
                     "El antecedente no prueba irregularidad en cada contrato del territorio;"
                     " requiere revisar vigencia y contexto."
@@ -2107,9 +2112,7 @@ def _build_territory_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
                         " avance financiero y avance físico."
                     )
                     if uses_project_snapshot
-                    else (
-                        f"En {territory_ref} hay contratos con señales de {discrepancy_phrase}."
-                    )
+                    else (f"En {territory_ref} hay contratos con señales de {discrepancy_phrase}.")
                 ),
                 evidence_refs=_clean_refs(
                     f"territorio:{territory_ref}" if territory_ref else None,
@@ -2151,8 +2154,7 @@ async def _load_registry_with_runtime_status(
     entries = load_source_registry()
     status_records = await execute_query(session, "meta_source_load_status", {})
     status_by_source = {
-        (record.get("source_id") or ""): (record.get("status") or "")
-        for record in status_records
+        (record.get("source_id") or ""): (record.get("status") or "") for record in status_records
     }
 
     updated_entries = []
@@ -2273,15 +2275,18 @@ async def prioritized_people_watchlist(
         records = snapshot_rows[:safe_limit]
     else:
         try:
-            records = await execute_query(
-                session,
-                "meta_prioritized_people",
-                {
-                    "limit": safe_limit,
-                    "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
-                },
-                timeout=8,
-            )
+            records = [
+                dict(record)
+                for record in await execute_query(
+                    session,
+                    "meta_prioritized_people",
+                    {
+                        "limit": safe_limit,
+                        "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
+                    },
+                    timeout=8,
+                )
+            ]
         except Exception:
             if snapshot_rows is None:
                 raise
@@ -2311,9 +2316,7 @@ async def prioritized_people_watchlist(
                 fiscal_responsibility_count=record.get("fiscal_responsibility_count", 0),
                 conflict_disclosure_count=record["conflict_disclosure_count"],
                 disclosure_reference_count=record["disclosure_reference_count"],
-                corporate_activity_disclosure_count=record[
-                    "corporate_activity_disclosure_count"
-                ],
+                corporate_activity_disclosure_count=record["corporate_activity_disclosure_count"],
                 donor_vendor_loop_count=record["donor_vendor_loop_count"],
                 payment_supervision_count=record.get("payment_supervision_count", 0),
                 payment_supervision_company_count=record.get(
@@ -2341,9 +2344,7 @@ async def prioritized_people_watchlist(
                 archive_supervision_document_total=record.get(
                     "archive_supervision_document_total", 0
                 ),
-                archive_payment_document_total=record.get(
-                    "archive_payment_document_total", 0
-                ),
+                archive_payment_document_total=record.get("archive_payment_document_total", 0),
                 archive_assignment_document_total=record.get(
                     "archive_assignment_document_total", 0
                 ),
@@ -2378,19 +2379,22 @@ async def prioritized_company_watchlist(
         records = snapshot_rows[:safe_limit]
     else:
         try:
-            records = await execute_query(
-                session,
-                "meta_prioritized_companies",
-                {
-                    "limit": safe_limit,
-                    "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
-                    "pattern_split_threshold_value": settings.pattern_split_threshold_value,
-                    "pattern_split_min_average_value": settings.pattern_split_min_average_value,
-                    "pattern_split_min_total_value": settings.pattern_split_min_total_value,
-                    "pattern_split_min_count": settings.pattern_split_min_count,
-                },
-                timeout=20,
-            )
+            records = [
+                dict(record)
+                for record in await execute_query(
+                    session,
+                    "meta_prioritized_companies",
+                    {
+                        "limit": safe_limit,
+                        "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
+                        "pattern_split_threshold_value": settings.pattern_split_threshold_value,
+                        "pattern_split_min_average_value": settings.pattern_split_min_average_value,
+                        "pattern_split_min_total_value": settings.pattern_split_min_total_value,
+                        "pattern_split_min_count": settings.pattern_split_min_count,
+                    },
+                    timeout=20,
+                )
+            ]
         except Exception:
             if snapshot_rows is None:
                 raise
@@ -2440,12 +2444,8 @@ async def prioritized_company_watchlist(
                 archive_supervision_document_total=record.get(
                     "archive_supervision_document_total", 0
                 ),
-                archive_payment_contract_count=record.get(
-                    "archive_payment_contract_count", 0
-                ),
-                archive_payment_document_total=record.get(
-                    "archive_payment_document_total", 0
-                ),
+                archive_payment_contract_count=record.get("archive_payment_contract_count", 0),
+                archive_payment_document_total=record.get("archive_payment_document_total", 0),
                 archive_assignment_contract_count=record.get(
                     "archive_assignment_contract_count", 0
                 ),
@@ -2479,15 +2479,18 @@ async def prioritized_buyer_watchlist(
         records = snapshot_rows[:safe_limit]
     else:
         try:
-            records = await execute_query(
-                session,
-                "meta_prioritized_buyers",
-                {
-                    "limit": safe_limit,
-                    "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
-                },
-                timeout=20,
-            )
+            records = [
+                dict(record)
+                for record in await execute_query(
+                    session,
+                    "meta_prioritized_buyers",
+                    {
+                        "limit": safe_limit,
+                        "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
+                    },
+                    timeout=20,
+                )
+            ]
         except Exception:
             if snapshot_rows is None:
                 raise
@@ -2542,15 +2545,18 @@ async def prioritized_territory_watchlist(
         records = snapshot_rows[:safe_limit]
     else:
         try:
-            records = await execute_query(
-                session,
-                "meta_prioritized_territories",
-                {
-                    "limit": safe_limit,
-                    "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
-                },
-                timeout=20,
-            )
+            records = [
+                dict(record)
+                for record in await execute_query(
+                    session,
+                    "meta_prioritized_territories",
+                    {
+                        "limit": safe_limit,
+                        "pattern_min_discrepancy_ratio": settings.pattern_min_discrepancy_ratio,
+                    },
+                    timeout=20,
+                )
+            ]
         except Exception:
             if snapshot_rows is None:
                 raise

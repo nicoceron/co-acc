@@ -112,7 +112,10 @@ async def get_current_reviewer(
     user: CurrentUser,
 ) -> UserResponse:
     if not can_access_reviewer_content(user):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Reviewer access required")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Reviewer access required",
+        )
     return user
 
 

@@ -2,28 +2,30 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
-from typing import cast
-
-from neo4j import AsyncSession
+from typing import TYPE_CHECKING
 
 from coacc.models.case import (
     CaseCreate,
-    CaseEvidenceBundle,
     CaseEventResponse,
+    CaseEvidenceBundle,
     CaseListResponse,
     CaseResponse,
     CaseSummary,
 )
-from coacc.models.investigation import InvestigationResponse
-from coacc.models.signal import SignalHitResponse
 from coacc.services import investigation_service
-from coacc.services.intelligence_provider import IntelligenceProvider
 from coacc.services.neo4j_service import execute_query, execute_query_single
 from coacc.services.signal_materializer import (
     _record_to_signal_hit,
     get_stored_entity_signals,
     refresh_entity_signals,
 )
+
+if TYPE_CHECKING:
+    from neo4j import AsyncSession
+
+    from coacc.models.investigation import InvestigationResponse
+    from coacc.models.signal import SignalHitResponse
+    from coacc.services.intelligence_provider import IntelligenceProvider
 
 
 def _case_from_investigation(
@@ -90,17 +92,23 @@ async def list_cases(
     )
     cases: list[CaseSummary] = []
     for investigation in investigations:
-        signal_count, public_signal_count, last_refreshed_at, last_run_id, stale = (
-            await _case_summary_meta(session, investigation.id, user_id)
+        (
+            signal_count,
+            public_signal_count,
+            last_refreshed_at,
+            last_run_id,
+            stale,
+        ) = await _case_summary_meta(session, investigation.id, user_id)
+        cases.append(
+            _case_from_investigation(
+                investigation,
+                signal_count=signal_count,
+                public_signal_count=public_signal_count,
+                last_refreshed_at=last_refreshed_at,
+                last_run_id=last_run_id,
+                stale=stale,
+            )
         )
-        cases.append(_case_from_investigation(
-            investigation,
-            signal_count=signal_count,
-            public_signal_count=public_signal_count,
-            last_refreshed_at=last_refreshed_at,
-            last_run_id=last_run_id,
-            stale=stale,
-        ))
     return CaseListResponse(cases=cases, total=total)
 
 
@@ -175,7 +183,7 @@ async def refresh_case(
                         "event_id": f"{case_id}:{hit.hit_id}",
                         "type": "signal_hit",
                         "label": hit.title,
-                        "date": cast("str", hit.last_seen_at or hit.created_at or refreshed_at),
+                        "date": hit.last_seen_at or hit.created_at or refreshed_at,
                         "entity_id": hit.entity_id,
                         "evidence_bundle_id": hit.evidence_bundle_id,
                     }
@@ -196,18 +204,19 @@ async def get_case(
     if investigation is None:
         return None
 
-    signal_count, public_signal_count, last_refreshed_at, last_run_id, stale = (
-        await _case_summary_meta(session, case_id, user_id)
-    )
+    (
+        signal_count,
+        public_signal_count,
+        last_refreshed_at,
+        last_run_id,
+        stale,
+    ) = await _case_summary_meta(session, case_id, user_id)
     signal_records = await execute_query(
         session,
         "case_signal_hits",
         {"case_id": case_id, "user_id": user_id},
     )
-    hits = [
-        _record_to_signal_hit(record)
-        for record in signal_records
-    ]
+    hits = [_record_to_signal_hit(record) for record in signal_records]
     hits = sorted(
         hits,
         key=lambda hit: (-_severity_rank(hit.severity), -hit.score, -hit.evidence_count, hit.title),
@@ -215,7 +224,7 @@ async def get_case(
 
     bundles = [
         CaseEvidenceBundle(
-            bundle_id=cast("str", hit.evidence_bundle_id or f"bundle:{hit.hit_id}"),
+            bundle_id=hit.evidence_bundle_id or f"bundle:{hit.hit_id}",
             headline=hit.title,
             source_list=[source.database for source in hit.sources],
             evidence_items=hit.evidence_items,

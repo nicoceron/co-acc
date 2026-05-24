@@ -312,19 +312,21 @@ def _build_evidence_items(
     rows: list[EvidenceItemResponse] = []
     for index, ref in enumerate(evidence_refs, start=1):
         is_url = ref.startswith("http://") or ref.startswith("https://")
-        rows.append(EvidenceItemResponse(
-            item_id=f"{hit_id}:{index}",
-            source_id=default_source,
-            record_id=None if is_url else ref,
-            url=ref if is_url else None,
-            label=derived_label or ref,
-            item_type=definition.evidence_mapping.item_type,
-            node_ref=node_ref,
-            observed_at=observed_at,
-            public_safe=public_safe,
-            identity_match_type=identity_match_type,
-            identity_quality=identity_quality,
-        ))
+        rows.append(
+            EvidenceItemResponse(
+                item_id=f"{hit_id}:{index}",
+                source_id=default_source,
+                record_id=None if is_url else ref,
+                url=ref if is_url else None,
+                label=derived_label or ref,
+                item_type=definition.evidence_mapping.item_type,
+                node_ref=node_ref,
+                observed_at=observed_at,
+                public_safe=public_safe,
+                identity_match_type=identity_match_type,
+                identity_quality=identity_quality,
+            )
+        )
     return rows
 
 
@@ -391,19 +393,24 @@ def _build_hit(
         evidence_items=provisional_items,
     )
     evidence_items = [
-        item.model_copy(update={"public_safe": public_safe})
-        for item in provisional_items
+        item.model_copy(update={"public_safe": public_safe}) for item in provisional_items
     ]
 
     raw_score = data.get("risk_signal")
     try:
-        score = float(raw_score) if raw_score is not None else float(len(evidence_refs))
+        score = (
+            float(raw_score)
+            if isinstance(raw_score, str | int | float)
+            else float(len(evidence_refs))
+        )
     except (TypeError, ValueError):
         score = float(len(evidence_refs))
 
     raw_count = data.get("evidence_count")
     try:
-        evidence_count = int(raw_count) if raw_count is not None else len(evidence_refs)
+        evidence_count = (
+            int(raw_count) if isinstance(raw_count, str | int | float) else len(evidence_refs)
+        )
     except (TypeError, ValueError):
         evidence_count = len(evidence_refs)
 
@@ -701,10 +708,7 @@ async def _execute_signal_runner(
     return [
         {
             "data": _normalize_pattern_data({key: record[key] for key in record}),
-            "sources": [
-                SourceAttribution(database=source_id)
-                for source_id in source_ids
-            ],
+            "sources": [SourceAttribution(database=source_id) for source_id in source_ids],
             "description": definition.description,
         }
         for record in records
@@ -859,7 +863,7 @@ def _record_to_signal_hit(record: Record) -> SignalHitResponse:
         title=str(record["title"]),
         description=str(record["description"]),
         category=str(record["category"]),
-        severity=str(record["severity"]),  # type: ignore[arg-type]
+        severity=str(record["severity"]),
         public_safe=bool(record["public_safe"]),
         reviewer_only=bool(record["reviewer_only"]),
         entity_id=str(record["entity_id"]),
@@ -920,9 +924,7 @@ async def get_stored_entity_signals(
         total=len(hits),
         last_run_id=str(latest_run["run_id"]),
         last_refreshed_at=(
-            str(latest_run["finished_at"])
-            if latest_run["finished_at"] is not None
-            else None
+            str(latest_run["finished_at"]) if latest_run["finished_at"] is not None else None
         ),
         stale=bool(latest_run.get("status") != "completed"),
         signals=hits,
@@ -947,11 +949,13 @@ async def list_signal_summaries(session: AsyncSession) -> list[SignalListItem]:
     items: list[SignalListItem] = []
     for definition in list_signal_definitions():
         count_meta = counts_by_id.get(definition.id, {})
-        items.append(SignalListItem(
-            **definition.model_dump(),
-            hit_count=int(count_meta.get("hit_count", 0)),
-            last_seen_at=count_meta.get("last_seen_at"),
-        ))
+        items.append(
+            SignalListItem(
+                **definition.model_dump(),
+                hit_count=int(count_meta.get("hit_count") or 0),
+                last_seen_at=count_meta.get("last_seen_at"),
+            )
+        )
     return items
 
 

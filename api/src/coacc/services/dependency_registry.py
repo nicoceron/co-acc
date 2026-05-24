@@ -5,7 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from coacc.services import lakehouse_query
 
@@ -54,19 +54,13 @@ def signals_to_rerun(advanced_sources: set[str]) -> list[str]:
     if not advanced_sources:
         return []
     deps = load_deps()
-    return [
-        sig_id
-        for sig_id, cfg in deps.items()
-        if advanced_sources & set(cfg.sources)
-    ]
+    return [sig_id for sig_id, cfg in deps.items() if advanced_sources & set(cfg.sources)]
 
 
 def can_materialize(sig_id: str) -> tuple[bool, list[str]]:
     cfg = load_deps()[sig_id]
     missing_required = [
-        source
-        for source in cfg.required
-        if not lakehouse_query.watermark_exists(source)
+        source for source in cfg.required if not lakehouse_query.watermark_exists(source)
     ]
     return not missing_required, missing_required
 
@@ -76,9 +70,7 @@ def severity_for_sources(sig_id: str, base_severity: str) -> str:
     if not cfg.optional or not cfg.severity_on_partial:
         return base_severity
     missing_optional = [
-        source
-        for source in cfg.optional
-        if not lakehouse_query.watermark_exists(source)
+        source for source in cfg.optional if not lakehouse_query.watermark_exists(source)
     ]
     if not missing_optional:
         return base_severity

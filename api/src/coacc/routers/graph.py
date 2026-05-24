@@ -24,29 +24,104 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/graph", tags=["graph"])
 
 _GRAPH_PROPS = {
-    "name", "razon_social", "document_id", "nit", "cedula", "numero_documento",
-    "value", "date",
-    "type", "uf", "cargo", "partido", "org", "role_name", "office_id", "bid_id", "asset_id",
-    "finance_id", "finding_id", "radicado", "status", "amount", "audited_year", "report_date",
-    "process_name", "description", "observations", "publication_date", "start_date", "reference",
-    "doc_id", "title", "summary", "source_url", "document_url", "document_kind",
-    "archive_label", "archive_name", "uploaded_at", "process_id", "contract_reference",
-    "issuing_entity", "case_category", "case_domain", "event_date",
-    "case_id", "act_id", "gaceta_id", "requirement_id", "session_id", "order_id",
-    "project_id", "number", "year", "tema", "code", "aggregation", "entity_name",
-    "buyer_entity_name", "supplier_name", "subject_name", "search_text", "dispatch",
-    "document_type", "macro_case", "approval_date", "session_no", "project_name",
-    "cdp_request_count", "cdp_balance_total", "cdp_commit_available_total", "cdp_used_value_total",
-    "latest_siif_status", "latest_spending_destination", "registered_in_siif", "bpin_code",
-    "execution_location_count", "execution_locations",
-    "additional_location_count", "additional_locations",
-    "archive_document_count", "archive_document_names", "archive_document_urls",
-    "archive_document_refs", "archive_document_extensions", "archive_document_last_upload",
-    "archive_supervision_document_count", "archive_payment_document_count",
-    "archive_assignment_document_count", "archive_start_record_document_count",
-    "archive_resume_document_count", "archive_report_document_count",
-    "resource_origin_count", "resource_origins", "resource_origin_total",
-    "resource_origin_descriptions", "secop_platform", "historical",
+    "name",
+    "razon_social",
+    "document_id",
+    "nit",
+    "cedula",
+    "numero_documento",
+    "value",
+    "date",
+    "type",
+    "uf",
+    "cargo",
+    "partido",
+    "org",
+    "role_name",
+    "office_id",
+    "bid_id",
+    "asset_id",
+    "finance_id",
+    "finding_id",
+    "radicado",
+    "status",
+    "amount",
+    "audited_year",
+    "report_date",
+    "process_name",
+    "description",
+    "observations",
+    "publication_date",
+    "start_date",
+    "reference",
+    "doc_id",
+    "title",
+    "summary",
+    "source_url",
+    "document_url",
+    "document_kind",
+    "archive_label",
+    "archive_name",
+    "uploaded_at",
+    "process_id",
+    "contract_reference",
+    "issuing_entity",
+    "case_category",
+    "case_domain",
+    "event_date",
+    "case_id",
+    "act_id",
+    "gaceta_id",
+    "requirement_id",
+    "session_id",
+    "order_id",
+    "project_id",
+    "number",
+    "year",
+    "tema",
+    "code",
+    "aggregation",
+    "entity_name",
+    "buyer_entity_name",
+    "supplier_name",
+    "subject_name",
+    "search_text",
+    "dispatch",
+    "document_type",
+    "macro_case",
+    "approval_date",
+    "session_no",
+    "project_name",
+    "cdp_request_count",
+    "cdp_balance_total",
+    "cdp_commit_available_total",
+    "cdp_used_value_total",
+    "latest_siif_status",
+    "latest_spending_destination",
+    "registered_in_siif",
+    "bpin_code",
+    "execution_location_count",
+    "execution_locations",
+    "additional_location_count",
+    "additional_locations",
+    "archive_document_count",
+    "archive_document_names",
+    "archive_document_urls",
+    "archive_document_refs",
+    "archive_document_extensions",
+    "archive_document_last_upload",
+    "archive_supervision_document_count",
+    "archive_payment_document_count",
+    "archive_assignment_document_count",
+    "archive_start_record_document_count",
+    "archive_resume_document_count",
+    "archive_report_document_count",
+    "resource_origin_count",
+    "resource_origins",
+    "resource_origin_total",
+    "resource_origin_descriptions",
+    "secop_platform",
+    "historical",
 }
 
 _DEFAULT_LABEL_FILTER = "-User|-Investigation|-Annotation|-Tag"
@@ -120,7 +195,12 @@ def _extract_label(node: Any, labels: list[str]) -> str:
     if entity_type == "gacetaTerritorial":
         return str(props.get("title", props.get("number", props.get("gaceta_id", "Gaceta"))))
     if entity_type == "inquiryRequirement":
-        return str(props.get("title", props.get("code", props.get("requirement_id", "Requerimiento"))))
+        return str(
+            props.get(
+                "title",
+                props.get("code", props.get("requirement_id", "Requerimiento")),
+            )
+        )
     if entity_type == "inquirySession":
         return str(props.get("title", props.get("session_no", props.get("session_id", "Sesión"))))
     if entity_type == "tvecOrder":
@@ -180,7 +260,10 @@ async def get_graph(
 
     # Degree guard: cap depth to 1 for supernodes to prevent explosion
     degree_records = await execute_query(
-        session, "node_degree", {"entity_id": entity_id}, timeout=5,
+        session,
+        "node_degree",
+        {"entity_id": entity_id},
+        timeout=5,
     )
     if not degree_records:
         raise HTTPException(status_code=404, detail="Entity not found")
@@ -189,7 +272,8 @@ async def get_graph(
     if degree > 500:
         logger.info(
             "Supernode detected (degree=%d) for %s, capping depth to 1",
-            degree, entity_id,
+            degree,
+            entity_id,
         )
         depth = min(depth, 1)
 
@@ -270,16 +354,18 @@ async def get_graph(
         )
         document_id = str(doc_id) if doc_id else None
 
-        nodes.append(GraphNode(
-            id=node_id,
-            label=_extract_label(node, labels),
-            type=entity_type_for_label(labels[0] if labels else None),
-            document_id=document_id,
-            properties=sanitize_public_properties(_slim_props(props)),
-            sources=sources,
-            is_pep=_is_pep(props),
-            exposure_tier=infer_exposure_tier(labels),
-        ))
+        nodes.append(
+            GraphNode(
+                id=node_id,
+                label=_extract_label(node, labels),
+                type=entity_type_for_label(labels[0] if labels else None),
+                document_id=document_id,
+                properties=sanitize_public_properties(_slim_props(props)),
+                sources=sources,
+                is_pep=_is_pep(props),
+                exposure_tier=infer_exposure_tier(labels),
+            )
+        )
 
     # Parse edges — only between accepted nodes
     edges: list[GraphEdge] = []
@@ -306,15 +392,17 @@ async def get_graph(
         elif isinstance(rel_source_val, list):
             rel_sources = [SourceAttribution(database=s) for s in rel_source_val]
 
-        edges.append(GraphEdge(
-            id=rel_id,
-            source=source_id,
-            target=target_id,
-            type=rel.type,
-            properties=sanitize_public_properties(sanitize_props(rel_props)),
-            confidence=confidence,
-            sources=rel_sources,
-            exposure_tier="public_safe",
-        ))
+        edges.append(
+            GraphEdge(
+                id=rel_id,
+                source=source_id,
+                target=target_id,
+                type=rel.type,
+                properties=sanitize_public_properties(sanitize_props(rel_props)),
+                confidence=confidence,
+                sources=rel_sources,
+                exposure_tier="public_safe",
+            )
+        )
 
     return GraphResponse(nodes=nodes, edges=edges, center_id=center_id)

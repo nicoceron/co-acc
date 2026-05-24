@@ -3,13 +3,11 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from coacc.models.signal import SignalDefinition, SignalRegistry
 
-_REGISTRY_PATH = (
-    Path(__file__).resolve().parents[4] / "config" / "signal_registry.yml"
-)
+_REGISTRY_PATH = Path(__file__).resolve().parents[4] / "config" / "signal_registry.yml"
 
 
 @lru_cache(maxsize=1)

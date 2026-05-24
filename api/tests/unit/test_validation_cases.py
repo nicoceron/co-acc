@@ -221,7 +221,8 @@ async def test_known_case_validation_endpoint_returns_live_case_matches(
                 "fiscal_responsibility_count": 0,
                 "official_case_bulletin_count": 1,
                 "official_case_bulletin_titles": [
-                    "Procuraduria confirmo sancion a supervisor por omitir vigilancia de contrato en Pereira"
+                    "Procuraduria confirmo sancion a supervisor por omitir "
+                    "vigilancia de contrato en Pereira"
                 ],
                 "donor_vendor_loop_count": 0,
             }
@@ -252,7 +253,8 @@ async def test_known_case_validation_endpoint_returns_live_case_matches(
                 "fiscal_responsibility_count": 0,
                 "official_case_bulletin_count": 1,
                 "official_case_bulletin_titles": [
-                    "Procuraduria formulo cargos a contratista del SENA por extralimitacion en funciones de interventoria"
+                    "Procuraduria formulo cargos a contratista del SENA por "
+                    "extralimitacion en funciones de interventoria"
                 ],
                 "donor_vendor_loop_count": 0,
             }
@@ -283,7 +285,8 @@ async def test_known_case_validation_endpoint_returns_live_case_matches(
                 "fiscal_responsibility_count": 0,
                 "official_case_bulletin_count": 1,
                 "official_case_bulletin_titles": [
-                    "Procuraduria formulo cargos a funcionario de Aguas del Cesar por presuntas irregularidades en supervision"
+                    "Procuraduria formulo cargos a funcionario de Aguas del Cesar "
+                    "por presuntas irregularidades en supervision"
                 ],
                 "donor_vendor_loop_count": 0,
             }
@@ -314,7 +317,9 @@ async def test_known_case_validation_endpoint_returns_live_case_matches(
                 "fiscal_responsibility_count": 0,
                 "official_case_bulletin_count": 1,
                 "official_case_bulletin_titles": [
-                    "Nueva imputacion de cargos contra exdirectivos de la UNGRD, Olmedo Lopez y Sneyder Pinilla, por direccionamiento irregular de la contratacion en la entidad"
+                    "Nueva imputacion de cargos contra exdirectivos de la UNGRD, "
+                    "Olmedo Lopez y Sneyder Pinilla, por direccionamiento irregular "
+                    "de la contratacion en la entidad"
                 ],
                 "donor_vendor_loop_count": 0,
             }
@@ -345,7 +350,9 @@ async def test_known_case_validation_endpoint_returns_live_case_matches(
                 "fiscal_responsibility_count": 0,
                 "official_case_bulletin_count": 1,
                 "official_case_bulletin_titles": [
-                    "Nueva imputacion de cargos contra exdirectivos de la UNGRD, Olmedo Lopez y Sneyder Pinilla, por direccionamiento irregular de la contratacion en la entidad"
+                    "Nueva imputacion de cargos contra exdirectivos de la UNGRD, "
+                    "Olmedo Lopez y Sneyder Pinilla, por direccionamiento irregular "
+                    "de la contratacion en la entidad"
                 ],
                 "donor_vendor_loop_count": 0,
             }
@@ -376,7 +383,10 @@ async def test_known_case_validation_endpoint_returns_live_case_matches(
                 "fiscal_responsibility_count": 0,
                 "official_case_bulletin_count": 1,
                 "official_case_bulletin_titles": [
-                    "Acusado exdirector del Departamento Administrativo de Presidencia, Carlos Ramon Gonzalez Merchan, por presuntamente direccionar dadivas en favor de congresistas con recursos de la UNGRD"
+                    "Acusado exdirector del Departamento Administrativo de "
+                    "Presidencia, Carlos Ramon Gonzalez Merchan, por presuntamente "
+                    "direccionar dadivas en favor de congresistas con recursos de "
+                    "la UNGRD"
                 ],
                 "donor_vendor_loop_count": 0,
             }
@@ -407,7 +417,9 @@ async def test_known_case_validation_endpoint_returns_live_case_matches(
                 "fiscal_responsibility_count": 0,
                 "official_case_bulletin_count": 1,
                 "official_case_bulletin_titles": [
-                    "Exdirector de conocimiento de la UNGRD, Luis Carlos Barreto Gantiva, sera condenado mediante preacuerdo por direccionamiento de contratos en la entidad"
+                    "Exdirector de conocimiento de la UNGRD, Luis Carlos Barreto "
+                    "Gantiva, sera condenado mediante preacuerdo por "
+                    "direccionamiento de contratos en la entidad"
                 ],
                 "donor_vendor_loop_count": 0,
             }
@@ -438,7 +450,9 @@ async def test_known_case_validation_endpoint_returns_live_case_matches(
                 "fiscal_responsibility_count": 0,
                 "official_case_bulletin_count": 1,
                 "official_case_bulletin_titles": [
-                    "Acusada exconsejera presidencial para las regiones, Sandra Ortiz, por presuntamente trasladar dadivas relacionadas con actos de corrupcion en la UNGRD"
+                    "Acusada exconsejera presidencial para las regiones, Sandra "
+                    "Ortiz, por presuntamente trasladar dadivas relacionadas con "
+                    "actos de corrupcion en la UNGRD"
                 ],
                 "donor_vendor_loop_count": 0,
             }
@@ -469,7 +483,9 @@ async def test_known_case_validation_endpoint_returns_live_case_matches(
                 "fiscal_responsibility_count": 0,
                 "official_case_bulletin_count": 1,
                 "official_case_bulletin_titles": [
-                    "Imputada exasesora del Ministerio de Hacienda por su presunta intervencion en el direccionamiento de contratos en la UNGRD en favor de congresistas"
+                    "Imputada exasesora del Ministerio de Hacienda por su presunta "
+                    "intervencion en el direccionamiento de contratos en la UNGRD "
+                    "en favor de congresistas"
                 ],
                 "donor_vendor_loop_count": 0,
             }
@@ -516,7 +532,9 @@ async def test_known_case_validation_endpoint_returns_live_case_matches(
     assert san_jose["matched_signals"] == ["education_control_capture"]
 
     alejandro = next(
-        case for case in data["cases"] if case["case_id"] == "alejandro_ospina_coll_bulletin_exposure"
+        case
+        for case in data["cases"]
+        if case["case_id"] == "alejandro_ospina_coll_bulletin_exposure"
     )
     assert alejandro["status"] == "matched"
     assert alejandro["matched_signals"] == ["official_case_bulletin_exposure"]
