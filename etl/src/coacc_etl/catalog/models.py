@@ -11,17 +11,20 @@ the dataset's Socrata schema or existing ETL normalizer code
 are optional at the YAML level and enforced by the generic ingester in
 Wave 3 when ``tier == "core"``.
 """
+
 from __future__ import annotations
 
 import re
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Tier = Literal["core", "context", "backlog"]
 JoinKeyClass = Literal["nit", "contract", "process", "entity", "bpin", "divipola"]
+Adapter = Literal["socrata", "paco_sanctions"]
 
 _SOCRATA_ID_RE = re.compile(r"^[a-z0-9]{4}-[a-z0-9]{4}$")
+_CUSTOM_ID_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 
 
 class DatasetSpec(BaseModel):
@@ -33,6 +36,7 @@ class DatasetSpec(BaseModel):
     name: str
     sector: str = ""
     tier: Tier
+    adapter: Adapter = "socrata"
     join_keys: dict[JoinKeyClass, list[str]] = Field(default_factory=dict)
     watermark_column: str | None = None
     partition_column: str | None = None
@@ -50,11 +54,21 @@ class DatasetSpec(BaseModel):
 
     @field_validator("id")
     @classmethod
-    def _validate_socrata_id(cls, value: str) -> str:
-        if not _SOCRATA_ID_RE.fullmatch(value):
-            msg = f"dataset id {value!r} is not a Socrata 4x4 id"
+    def _validate_id_shape(cls, value: str) -> str:
+        if not (_SOCRATA_ID_RE.fullmatch(value) or _CUSTOM_ID_RE.fullmatch(value)):
+            msg = f"dataset id {value!r} is neither a Socrata 4x4 id nor a custom adapter slug"
             raise ValueError(msg)
         return value
+
+    @model_validator(mode="after")
+    def _validate_adapter_contract(self) -> DatasetSpec:
+        if self.adapter == "socrata" and not _SOCRATA_ID_RE.fullmatch(self.id):
+            msg = f"socrata dataset id {self.id!r} is not a Socrata 4x4 id"
+            raise ValueError(msg)
+        if self.adapter != "socrata" and not _CUSTOM_ID_RE.fullmatch(self.id):
+            msg = f"custom adapter id {self.id!r} must be a lowercase snake-case slug"
+            raise ValueError(msg)
+        return self
 
     @field_validator("required_coverage")
     @classmethod
@@ -81,7 +95,8 @@ class DatasetSpec(BaseModel):
         - **Snapshot** (``full_refresh_only: true``): ``columns_map`` set;
           watermark/partition columns are not required. The ingester
           fetches every row and writes to a fresh ``snapshot=<iso>/``
-          partition. No watermark is advanced.
+          partition. No watermark is advanced. Custom adapters use this
+          shape too; the adapter decides how to fetch source pages/files.
         """
         if not self.columns_map:
             return False

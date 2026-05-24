@@ -2,6 +2,7 @@
 
 | finished_at_utc | dataset | mode | status | rows | coverage | watermark | note |
 |---|---|---|---:|---:|---|---|---|
+| 2026-05-24T02:55:41+00:00 | `paco_sanctions` | full | ok | 54369 | pass | - | custom adapter snapshot `snapshot=20260524T025536Z`; lake reality green |
 | 2026-05-16T02:34:43.560517+00:00 | `2jzx-383z` | smoke | failed | 0 | - | - | exhausted retries for https://www.datos.gov.co/resource/2jzx-383z.json: Client error '403 Forbidden' for url 'https://www.datos.gov.co/resource/2jzx-383z.json?%24select=max%28fecha_de_vinculaci_n%29' For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403 |
 | 2026-05-16T02:34:46.244396+00:00 | `jbjy-vk9h` | smoke | ok | 842 | pass | 2026-05-04T00:00:00+00:00 | smoke: seeded watermark 2026-05-03T00:00:00+00:00 from max(fecha_de_firma) |
 | 2026-05-16T02:34:47.561504+00:00 | `qddk-cgux` | smoke | ok | 875 | pass | 2017-12-31T00:00:00+00:00 | smoke: seeded watermark 2017-12-30T00:00:00+00:00 from max(fecha_de_cargue_en_el_secop) |

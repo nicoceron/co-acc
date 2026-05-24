@@ -74,19 +74,19 @@ One-page trace of how data moves through co/acc, from raw audit JSON to API resp
         │  meta/coverage/<id>/<ts>.json    pass reports                        │
         │  meta/failures/<id>/<ts>.json    fail reports (no watermark)         │
         │                                                                      │
-        │  curated/  reserved for future curation passes (signal feature       │
-        │            engineering, entity resolution outputs).                  │
+        │  curated/  reserved for DuckDB signal features, entity dimensions,   │
+        │            evidence bundles, and later model outputs.                │
         └──────────────────────────────────────────────────────────────────────┘
                                             │
                        ┌────────────────────┼────────────────────┐
                        ▼                    ▼                    ▼
         ┌─────────────────────┐  ┌─────────────────────┐  ┌─────────────────────┐
-        │  lakehouse.reality  │  │  api/               │  │  signal materializer│
+        │  lakehouse.reality  │  │  api/               │  │  signal engine      │
         │  freshness +        │  │  FastAPI service    │  │  (api workspace)    │
-        │  coverage rollup    │  │  reads parquet via  │  │  reads parquet,     │
-        │  per dataset        │  │  duckdb + Cypher    │  │  emits signal rows  │
-        │  scripts/lake_      │  │  against Neo4j      │  │  per signal_        │
-        │  reality.py         │  │  (downstream)       │  │  registry.yml       │
+        │  coverage rollup    │  │  reads parquet via  │  │  reads parquet via  │
+        │  per dataset        │  │  DuckDB first;      │  │  DuckDB, emits      │
+        │  scripts/lake_      │  │  Neo4j optional     │  │  signal rows per    │
+        │  reality.py         │  │  projection only    │  │  signal_registry    │
         └─────────────────────┘  └─────────────────────┘  └─────────────────────┘
 ```
 
@@ -104,8 +104,13 @@ These two invariants together give us reproducibility: rerun ingest from an empt
 
 ## What's missing (deliberately)
 
-- **A graph loader** — Neo4j removal in Wave 4.B leaves no ETL→Neo4j path. The `api/` workspace still has Cypher queries; rebuilding the graph from parquet is a future downstream consumer, not part of this pipeline.
-- **Custom non-Socrata adapters** — PACO, RUES, Registraduría, official_case_bulletins, etc. Tracked in `_KNOWN_DEFERRED_SOURCES` (`etl/tests/test_signal_source_alignment.py`). Will land under `coacc_etl.ingest.custom/` as they're built.
+- **A DuckDB-backed signal API** — the source of truth is now lake/curated
+  parquet; API rewires are planned in Phase 11.
+- **Optional graph projection** — Neo4j is useful for exploration, but not
+  required for corruption-pattern detection correctness.
+- **More custom non-Socrata adapters** — PACO has landed; RUES,
+  Registraduría, official_case_bulletins, etc. remain tracked in
+  `_KNOWN_DEFERRED_SOURCES` (`etl/tests/test_signal_source_alignment.py`).
 - **A curated layer** — `lake/curated/` exists as a directory but no curation runs yet. Signal feature engineering and entity resolution outputs will land there.
 
 ---
@@ -115,7 +120,7 @@ These two invariants together give us reproducibility: rerun ingest from an empt
 | If you want to… | Look at |
 |---|---|
 | Add a Socrata dataset | `etl/datasets/<id>.yml` (incremental) or `full_refresh_only: true` (snapshot) |
-| Add a non-Socrata adapter | `coacc_etl.ingest.custom/` (TBD) + remove from `_KNOWN_DEFERRED_SOURCES` |
+| Add a non-Socrata adapter | `coacc_etl.ingest.custom/` + `etl/datasets/<adapter>.yml` + remove from `_KNOWN_DEFERRED_SOURCES` |
 | Re-probe Socrata | `make qualify QUALIFY_ARGS="--all-known --llm-review"` |
 | Add a signal | `config/signal_registry.yml` + `config/signal_source_deps.yml` |
 | Inspect a dataset's lake state | `lake/raw/source=<id>/`, `lake/meta/watermarks.parquet`, `lake/meta/coverage/<id>/` |

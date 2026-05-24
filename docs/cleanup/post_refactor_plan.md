@@ -34,9 +34,11 @@ The Wave 0–6 refactor is **complete**. Concretely:
   (29 incremental + 13 snapshot). 106 are contract shells with
   `columns_map: {}` and are not ingest-ready yet. YAML tiers are 118
   `core` + 30 `context`; tier alone does not mean ingest readiness.
-- **Ingester:** `coacc_etl.ingest.socrata.ingest(spec)`. Two source classes:
-  incremental (watermark via Socrata `$where`) and snapshot (`full_refresh_only: true`).
-  Coverage gate writes pass/fail reports, watermark advances only on success.
+- **Ingester:** `coacc_etl.ingest.ingest(spec)` dispatches by YAML
+  `adapter`. Socrata remains the default; `paco_sanctions` is the first
+  custom non-Socrata adapter. Source classes are incremental (watermark via
+  Socrata `$where`) and snapshot (`full_refresh_only: true`). Coverage gate
+  writes pass/fail reports, watermark advances only on success.
 - **Lake layout:** `lake/raw/source=<id>/year=YYYY/month=MM/...parquet` (incremental)
   or `snapshot=<iso>/...parquet` (snapshot). `lake/meta/{watermarks,coverage,
   failures}/` for ops metadata. `lake/curated/` exists as an empty directory.
@@ -46,13 +48,15 @@ The Wave 0–6 refactor is **complete**. Concretely:
   `make test-etl` before Phase 7 operations.
 - **Retired:** `Pipeline` base class, `pipeline_registry`, `Neo4jBatchLoader`,
   every `pipelines/*.py`, the `neo4j` Python dependency on the ETL side.
-- **Untouched:** `api/` workspace still queries Neo4j via 100+ Cypher templates.
-  Frontend still consumes that API. Both work today only because Neo4j still
-  holds whatever was loaded pre-refactor; **nothing currently repopulates it.**
+- **Compatibility debt:** `api/` workspace still queries Neo4j via 100+
+  Cypher templates and the frontend still consumes that API. Neo4j is now
+  explicitly a derived/optional projection, not the source of truth. The lake
+  + curated DuckDB signal outputs are the system of record.
 
 What this means in practice: the **plumbing is built, the pipes are dry**.
-The phases below fill the lake, monitor it, rebuild the graph from it, ship
-the AI components the competition rubric demands, and submit.
+The phases below fill the lake, monitor it, build curated DuckDB signal
+tables, rewire the API to those tables, optionally project a small graph for
+exploration, ship the AI components the competition rubric demands, and submit.
 
 ---
 
@@ -69,8 +73,8 @@ updates, and the inevitable coverage-gate or schema-drift surprise.
 | 9.0 | `paco_sanctions` adapter (only) — labels for Phase 13 | 4–5 days | **Yes** (promoted from 9) | 7 | 8, 12 |
 | 9   | Remaining custom adapters | 2–3 days each | **Deferred post-finals** | 7 | — |
 | 10 | Curated layer (NIT canonicalization + dim tables + signal features) | 10–12 days | **Yes** | 7, 8, 9.0 | — |
-| 11 | Graph loader (parquet → Neo4j) — **keystone** | 14–18 days | **Yes** | 10 | 13 (after week 1 of 11) |
-| 11.5 | API service rewires (`signal_materializer`, `score_service`, `case_service`) | 3–4 days | **Yes** | 11 | — |
+| 11 | DuckDB signal engine + API data projection — **keystone** | 10–14 days | **Yes** | 10 | 13 (after week 1 of 11) |
+| 11.5 | Optional graph projection (curated parquet → Neo4j) | 4–6 days | No, unless demo graph is required | 11 | 14, 15 |
 | 12 | API legacy CSV retirement (`source_registry_co_v1.csv`) | 3–4 days | Yes (surgical) | 7 | 8, 9.0 |
 | 13 | Anomaly model (R5 ML component) | 12–16 days | **Yes — rubric** | 10, 9.0 | 11 |
 | 14 | Generative narrator (R5 IA generativa, **DuckDB-backed**) | 7–9 days | **Yes — rubric** | 13 | 11.5, 15 (start) |
@@ -84,9 +88,9 @@ updates, and the inevitable coverage-gate or schema-drift surprise.
 W1:    Phase 7
 W2:    Phase 8 + Phase 9.0 + Phase 12         (3 small phases in parallel)
 W3-4:  Phase 10
-W5-7:  Phase 11 (keystone)
+W5-7:  Phase 11 DuckDB signal engine (keystone)
 W7-9:  Phase 13 (overlaps last week of 11; eats fresh time)
-W9:    Phase 11.5 + start Phase 14
+W9:    Phase 11.5 optional graph projection + start Phase 14
 W10:   Phase 14 + start Phase 15
 W11-12: Phase 15
 W13:   Phase 16 + dress rehearsal + finals trip prep
@@ -542,8 +546,8 @@ the R5 rubric cell. **Recommended: ship it.**
 
 > **Source-of-truth note.** YAML contracts under `etl/datasets/<id>.yml`
 > are the source of truth for what the lake ingests. `paco_sanctions.yml`
-> does **not** currently exist (verified 2026-05-08). Creating it is
-> step 0, not an afterthought. The schema (`DatasetSpec`) is
+> exists as of 2026-05-23. Creating it was step 0, not an afterthought.
+> The schema (`DatasetSpec`) is
 > `extra="forbid"`, so adding the new `adapter:` field is an explicit
 > schema change, not a free YAML key.
 
@@ -580,9 +584,9 @@ the R5 rubric cell. **Recommended: ship it.**
    The `IngestResult` type is `coacc_etl.ingest.socrata.IngestResult`
    (re-exported from `coacc_etl.ingest.__init__`). Custom adapters
    reuse the same return type rather than defining a parallel one.
-5. Drive ingestion through a new dispatcher:
-   `coacc_etl.ingest.dispatcher.ingest(spec, …)` reads
-   `spec.adapter` (added in step 1) and routes to either
+5. Drive ingestion through the package dispatcher:
+   `coacc_etl.ingest.ingest(spec, …)` reads `spec.adapter`
+   (added in step 1) and routes to either
    `coacc_etl.ingest.socrata.ingest` or
    `coacc_etl.ingest.custom.<adapter>.ingest`. The Makefile
    `make ingest` target switches to call the dispatcher rather
@@ -591,7 +595,8 @@ the R5 rubric cell. **Recommended: ship it.**
    `etl/tests/test_signal_source_alignment.py`.
 7. Coverage gate: reuse `coacc_etl.ingest.coverage` (the existing
    module under `etl/src/coacc_etl/ingest/coverage.py`). Required
-   columns: `nit`, `entity_name`, `sanction_type`, `sanction_date`.
+   columns for the raw snapshot: `subject_document_id`, `subject_name`;
+   stricter typed checks move to the curated sanctions table in Phase 10.
 8. Snapshot mode (`full_refresh_only: true`) — PACO republishes
    wholesale. Output partition: `snapshot=<iso>/`.
 9. Fixture under `etl/tests/fixtures/custom/paco_sanctions/`
@@ -605,7 +610,7 @@ the R5 rubric cell. **Recommended: ship it.**
 - [ ] `DatasetSpec` carries an `adapter` field; `_validate_socrata_id`
       is conditioned on `adapter == "socrata"`; existing 148 YAMLs
       still validate unchanged.
-- [ ] `coacc_etl.ingest.dispatcher.ingest(spec, …)` exists and
+- [ ] `coacc_etl.ingest.ingest(spec, …)` exists and
       routes by `spec.adapter`.
 - [ ] `lake/raw/source=paco_sanctions/snapshot=<iso>/` populated.
 - [ ] Coverage gate green on a live fetch.
@@ -696,10 +701,12 @@ Build `lake/curated/` from `lake/raw/`. Three deliverables:
 2. **Signal feature parquets.** One parquet per signal under
    `lake/curated/signals/<signal_id>/` containing the precomputed
    features the Cypher pattern would otherwise compute on the fly.
-   Phase 11's graph loader and Phase 13's anomaly model both read these.
+   Phase 11's DuckDB signal engine and Phase 13's anomaly model both
+   read these.
 3. **Entity dimension tables.** `lake/curated/dim_company/`,
    `dim_person/`, `dim_buyer/` — typed, deduplicated, with stable
-   `entity_uid`. These become Neo4j nodes in Phase 11.
+   `entity_uid`. These feed API lookup tables first; optional graph nodes
+   are a derived projection in Phase 11.5.
 
 ### 6.2 Module layout
 
@@ -788,9 +795,9 @@ class SignalFeatureRow(BaseModel):
      aggregate award value across distinct buyers in a 12-month window,
      emit when concentration ratio > threshold.
    Add others incrementally; the demo only needs ~3–5. Every builder first
-   emits a join-coverage report (`left_rows`, `matched_rows`,
+     emits a join-coverage report (`left_rows`, `matched_rows`,
    `unmatched_sample`) so the operator knows whether keys connect before
-   graph loading.
+   API exposure or optional graph projection.
 5. **Driver script.** `coacc-etl curate --all` walks every builder,
    writes its parquet, updates `lake/meta/curated_runs.parquet`.
 6. **Reality probe extension.** Phase 8's `make lake-reality` learns
@@ -830,247 +837,196 @@ class SignalFeatureRow(BaseModel):
 
 ---
 
-## 7. Phase 11 — Graph loader (parquet → Neo4j)
+## 7. Phase 11 — DuckDB signal engine + API data projection
 
-**Owner profile:** senior data engineer with Cypher experience.
+**Owner profile:** backend/data engineer comfortable with DuckDB-on-parquet.
 **Prereq:** Phase 10 green.
-**Effort:** **14–18 days.** This is the keystone and the single
-phase most likely to slip. `signal_materializer.py` already mixes
-DuckDB and Neo4j (1023 LOC, has `_duckdb_rows`, `_duckdb_entity_context`
-helpers) — that's an asset, not a blocker, since the loader can lean
-on existing parquet-reading code.
+**Effort:** **10–14 days.** This is now the keystone. The corruption
+detection problem is joins, aggregations, windows, and evidence tables; it
+does not require Neo4j. Neo4j remains a compatibility/visualization option,
+not the foundation.
 
 ### 7.1 Goal
 
-Repopulate Neo4j from `lake/curated/` so the existing 100+ Cypher
-patterns and the API service have something to query. The loader is
-**downstream of the lake**, not the other way around: lake is canonical,
-graph is a derived projection.
+Make the app functional from `lake/curated/` without requiring a graph
+database:
+
+1. Materialize corruption-pattern hits into parquet tables.
+2. Materialize evidence bundles that point back to raw/curated source rows.
+3. Rewire API read paths to DuckDB-backed repositories.
+4. Keep the existing Neo4j API routes alive only as compatibility shims until
+   their DuckDB equivalents are green.
 
 ### 7.2 Architecture
 
 ```
-lake/curated/dim_company/*.parquet  ──► MERGE (:Company {entity_uid})
-lake/curated/dim_person/*.parquet   ──► MERGE (:Person  {entity_uid})
-lake/curated/dim_buyer/*.parquet    ──► MERGE (:Buyer   {entity_uid})
-
-lake/raw/source=<id>/...parquet    ──► MERGE (:Contract {contract_id})
-                                    ──► MERGE (:Process {process_id})
-                                    ──► (Buyer)-[:AWARDED]->(Contract)
-                                    ──► (Contract)-[:WON_BY]->(Company)
-                                    ──► (Process)-[:RESULTED_IN]->(Contract)
-
-lake/curated/signals/<id>/...parquet ──► MERGE (:SignalHit {scope_key})
-                                      ──► (SignalHit)-[:ABOUT]->(Entity)
-                                      ──► (SignalHit)-[:CITES]->(Evidence)
+lake/raw/source=<id>/...parquet
+          │
+          ▼
+lake/curated/dim_company/*.parquet
+lake/curated/dim_person/*.parquet
+lake/curated/dim_buyer/*.parquet
+lake/curated/fact_contract/*.parquet
+lake/curated/fact_sanction/*.parquet
+          │
+          ▼
+DuckDB signal SQL / Python builders
+          │
+          ▼
+lake/curated/signal_hits/run_id=<run>/*.parquet
+lake/curated/evidence_bundles/run_id=<run>/*.parquet
+lake/meta/signal_runs/*.json
+          │
+          ▼
+API DuckDB repositories
 ```
 
-The schema is derived from existing Cypher patterns under
-`api/src/coacc/queries/`. Inventory those first to lock the node and
-edge label set.
+The signal registry remains the behavior contract. Existing Cypher files are
+migration inputs, not the target runtime: each active signal gets either a
+DuckDB SQL runner under `config/signals/sql/` or a bounded Python builder
+under `etl/src/coacc_etl/curate/builders/`.
 
-### 7.2.1 Local-device loading strategy
+### 7.2.1 Local-device execution strategy
 
-The graph loader is a projection builder, not a data warehouse import job.
-It must prove connectivity without loading every endpoint or relationship
-into application memory.
+The engine must prove connectivity without loading full sources, full joins,
+or full graph projections into Python memory.
 
-1. **Project only needed columns from parquet.** DuckDB queries must select
-   stable IDs and edge properties only; no `SELECT *` from Phase 7 sources
-   on the graph path.
-2. **Load endpoint nodes before edges.** Create `Company`, `Buyer`,
-   `Contract`, `Process`, and `SignalHit` nodes in batches, with unique
-   constraints/indexes in place before the first relationship batch.
-3. **Create relationships by indexed keys.** Relationship builders emit
-   bounded rows like `{contract_id, supplier_uid}`; Neo4j matches indexed
-   endpoints and `MERGE`s the edge. Missing endpoints are counted and
-   written to `lake/meta/graph_loader/missing_endpoints/<ts>.json`.
-4. **Prune for the finals graph.** Default finals scope is the Phase 7
-   datasets, `paco_sanctions`, and the top 3-5 active demo patterns.
-   A `--scope finals` loader flag should skip unrelated source-specific
-   builders while preserving all entities/edges required by those patterns.
-5. **Keep expensive pattern precomputation in parquet.** Repeated
-   aggregations such as supplier concentration, single-bidder, and anomaly
-   features belong in `lake/curated/signals/`; Neo4j stores the resulting
-   `SignalHit` evidence graph.
+1. **Project only needed columns from parquet.** DuckDB queries select stable
+   IDs, join keys, numeric measures, dates, and evidence refs only.
+2. **Join in DuckDB.** Validate connection density with aggregate SQL:
+   `left_rows`, `matched_rows`, `match_rate`, and bounded anti-join samples.
+3. **Write signal hits as parquet.** Do not hand large result sets to Python;
+   use `COPY (SELECT ...) TO ... (FORMAT PARQUET)` or Arrow record batches.
+4. **Evidence is first-class.** Every hit carries enough source refs to audit
+   the claim without needing a graph traversal.
+5. **Graph projection is optional.** If the UI needs graph exploration, Phase
+   11.5 exports only the top demo entities/signals from the same parquet
+   outputs.
 
 ### 7.3 Module layout
 
 ```
-etl/src/coacc_etl/graph/
+etl/src/coacc_etl/signals/
 ├── __init__.py
-├── schema.py           # node/edge label constants + index DDL
-├── loader.py           # GraphLoader class
+├── engine.py           # run registry entries against DuckDB
+├── contracts.py        # SignalHitRow, EvidenceBundleRow schemas
+├── repositories.py     # bounded DuckDB readers for API parity tests
 ├── builders/
-│   ├── companies.py
-│   ├── people.py
-│   ├── contracts.py
-│   ├── processes.py
-│   └── signal_hits.py
-└── verify.py           # post-load parity checks vs lake
-```
+│   ├── procurement_sanctioned_supplier_awarded.py
+│   ├── supplier_concentration.py
+│   └── ...
 
-`GraphLoader` properties:
-- Reads parquet via DuckDB using bounded `fetchmany()` / Arrow record-batch
-  iteration.
-- Writes Cypher in configurable 1k-10k-row batches with
-  `UNWIND $rows AS r MERGE …`.
-- Idempotent: same input → same graph (no duplicate edges).
-- Resumable: per-builder watermark in `lake/meta/graph_loader.parquet`
-  records last loaded `(source, partition, file)`.
-- Transactional per batch; failure rolls back the batch only.
-- Emits structured logs and a per-run report at
-  `lake/meta/graph_runs/<ts>.json`.
+api/src/coacc/services/lakehouse_signal_service.py
+api/src/coacc/services/lakehouse_case_service.py
+```
 
 ### 7.4 Implementation steps
 
-1. **Inventory Cypher patterns.** Walk `api/src/coacc/queries/*.cypher`,
-   extract every `MATCH`/`MERGE` to derive the canonical label/property
-   set. Output: `docs/architecture/graph_schema.md` listing every node
-   label, every edge label, every property. This is the contract the
-   loader must satisfy.
-2. **Index DDL first.** `etl/src/coacc_etl/graph/schema.py` exports
-   `INDEX_DDL: list[str]` — UNIQUE constraints on `(:Company {entity_uid})`,
-   `(:Contract {contract_id})`, etc. plus performance indices on edge
-   join keys. `coacc-etl graph init` runs them.
-3. **Reintroduce `neo4j` as an ETL dep behind an extra.** In
-   `etl/pyproject.toml`, add `[project.optional-dependencies] graph =
-   ["neo4j>=5.0,<6"]`. Default install stays Neo4j-free; graph loader
-   needs `uv sync --extra graph`.
-4. **Builders, smallest first.**
-   - `companies.py` → MERGE `:Company` from `dim_company.parquet`.
-     Verify after: `MATCH (c:Company) RETURN count(c)` matches parquet
-     row count.
-   - `contracts.py` → MERGE `:Contract` + `:WON_BY`/`:AWARDED` edges
-     from `secop_ii_contracts`. Verify edge count.
-   - `processes.py` → MERGE `:Process` + `:RESULTED_IN` edges.
-   - `signal_hits.py` → MERGE `:SignalHit` from `lake/curated/signals/`.
-5. **`coacc-etl graph load --builder all` CLI.** Subcommand of the
-   existing CLI. Flags: `--builder <name>`, `--from-scratch`
-   (drop+recreate), `--resume` (default, uses watermark),
-   `--scope finals|full`, `--batch-size <n>`.
-6. **Verify pass.** `etl/src/coacc_etl/graph/verify.py` reads parquet
-   and compares aggregates: company count, contract count, total
-   contract value, supplier-buyer pair count. Output:
-   `lake/meta/graph_parity/<ts>.json`. Phase 8 reality probe also reads
-   this and treats >0.1% drift as red.
-7. **Decommission cleanly.** Delete `infra/neo4j/` references from
-   any retired CI workflow; keep the dev `docker-compose.yml` Neo4j
-   service (the API still depends on it).
+1. **Define signal output contracts.** `SignalHitRow` must include
+   `run_id`, `signal_id`, `entity_uid`, `scope_key`, `severity`,
+   `score`, `title`, `description`, `public_safe`, `reviewer_only`,
+   `first_seen_at`, `last_seen_at`, and `evidence_bundle_id`.
+   `EvidenceBundleRow` must include `bundle_id`, `source_id`,
+   `record_id`, `parquet_path`, `row_selector`, `label`, and `url`.
+2. **Inventory active Cypher patterns as migration inputs.** For each
+   `status: active` signal in `config/signal_registry.yml`, record whether
+   the runner is already DuckDB or still Cypher. The phase is complete only
+   when the top 3-5 demo signals have DuckDB/lake runners.
+3. **Build the engine CLI.** Add `coacc-etl signals materialize --all`
+   and `--signal <id>`. Each run writes `lake/meta/signal_runs/<run>.json`
+   and partitioned parquet under `lake/curated/signal_hits/run_id=<run>/`.
+4. **Start with the sanctions path.** First builder:
+   `procurement_sanctioned_supplier_awarded`, joining SECOP contracts to
+   `paco_sanctions` / fiscal sanctions through `nit_canonical`.
+5. **Add API repositories.** `lakehouse_signal_service.py` reads latest
+   successful signal runs through DuckDB and returns the same public response
+   shape the current Neo4j materializer returns.
+6. **Rewire routes incrementally.** Start with `/api/v1/signals` and case
+   evidence bundle reads. Keep Neo4j fallbacks behind explicit feature flags
+   until route parity tests pass.
+7. **Score/narrative hooks.** `score_service` reads
+   `lake/curated/anomaly_scores/<run_id>.parquet` when Phase 13 produces it;
+   `case_service` attaches `lake/curated/narratives/<case_id>.md` when Phase
+   14 produces it.
 
 ### 7.5 Tests
 
-- `etl/tests/test_graph/test_loader_companies.py` — fixture parquet →
-  in-memory Neo4j (testcontainers or `neo4j:5-community` via Docker)
-  → asserts node count and properties.
-- `test_loader_idempotent.py` — load twice → no duplicate nodes/edges.
-- `test_loader_resumable.py` — kill mid-load → resume → final state
-  matches end-to-end run.
-- `test_loader_bounded_memory.py` — synthetic many-partition input proves
-  the loader never calls unbounded `.df()`/`.fetchall()` and keeps batch
-  size at or below config.
-- `test_verify_parity.py` — synthetic divergence → reports drift.
-- Integration test `tests/integration/test_graph_full_load.py` (marker
-  `live`, opt-in) loads a real subset of `jbjy-vk9h` through the
-  builder chain.
+- Contract tests for `SignalHitRow` and `EvidenceBundleRow`.
+- Builder fixture tests: tiny raw/curated parquet inputs → expected signal
+  hit/evidence parquet outputs.
+- Bounded-memory test proving builders use DuckDB `COPY`, Arrow batches, or
+  `fetchmany()` instead of unbounded `.df()` / `.fetchall()`.
+- API route parity tests comparing the old fixture response shape to the
+  DuckDB-backed service response.
+- Integration smoke: materialize the first PACO-backed sanctions signal from
+  local lake data and assert non-empty hits when matching contracts exist.
 
 ### 7.6 DoD
 
-- [ ] `coacc-etl graph init` creates indexes/constraints.
-- [ ] `coacc-etl graph load --from-scratch` reloads the entire graph
-      from `lake/curated/` + `lake/raw/` in **<6 hours** on the dev
-      box. Incremental reload (resume from watermark): **<30 min**.
-      Sub-30-min full reload is a post-optimization target; do not
-      block the phase on it.
-- [ ] `coacc-etl graph load --scope finals --from-scratch` builds the
-      pruned demo graph on the operator machine without exceeding the
-      configured memory budget.
-- [ ] `coacc-etl graph verify` ≤ 0.1% drift on every aggregate.
-- [ ] At least 5 existing Cypher patterns under `api/src/coacc/queries/`
-      return non-empty results when run against the loaded graph.
-- [ ] `docs/architecture/graph_schema.md` exists and matches the loaded
-      labels/properties exactly.
-- [ ] `docs/runbooks/graph_loader.md` exists with reload + recovery
-      instructions.
+- [ ] `coacc-etl signals materialize --all` writes signal hits and evidence
+      bundles from `lake/curated/` without Neo4j running.
+- [ ] At least 3 demo signals are non-empty, including one PACO-backed
+      sanctions signal.
+- [ ] `/api/v1/signals` and case evidence reads work from DuckDB-backed
+      repositories.
+- [ ] Existing response schemas stay compatible or OpenAPI snapshots are
+      updated with a documented breaking-change rationale.
+- [ ] `make check` green.
+- [ ] `docs/runbooks/signals.md` documents rebuild, recovery, and feature
+      flag behavior.
 
 ### 7.7 Risks / mitigations
 
-- **Cypher pattern churn:** the API queries are the de facto schema.
-  Don't "improve" them while building the loader; lock the schema doc
-  first, refactor patterns in a later phase.
-- **Performance:** Neo4j MERGE on hot paths is slow. Use APOC
-  `apoc.periodic.iterate` for hundreds-of-thousands-of-rows batches;
-  if APOC unavailable, fall back to UNWIND-MERGE in 10k chunks.
-- **Schema mismatch with API queries:** mitigated by the parity test
-  above. Add a CI step that runs every `.cypher` file with `EXPLAIN`
-  to catch missing labels.
+- **Migration scope creep:** do not port all 100+ Cypher files. Port the
+  signals required by the demo and active API routes first.
+- **Bad joins create false accusations:** every signal builder must emit
+  match-rate and anti-join samples before hits are treated as demo-ready.
+- **API churn:** route rewires must preserve existing response schemas unless
+  the same PR updates OpenAPI snapshots and frontend consumers.
 
 ---
 
-## 8. Phase 11.5 — API service rewires
+## 8. Phase 11.5 — Optional graph projection (curated parquet → Neo4j)
 
-**Owner profile:** backend engineer who knows the API surface.
-**Prereq:** Phase 11 green (graph reloaded from lake).
-**Effort:** 3–4 days.
+**Owner profile:** data engineer with Cypher experience.
+**Prereq:** Phase 11 green.
+**Effort:** 4–6 days.
 
 ### 8.1 Goal
 
-After Phase 11 reloads the graph from parquet, three API services need
-explicit rewiring or extension. None can be skipped without breaking
-existing routes.
+Project a small, inspectable graph for interactive exploration only. This
+phase is not part of corruption detection correctness: signal truth stays in
+DuckDB/lake parquet. Skip this phase if the case browser and evidence tables
+are sufficient for the demo.
 
-| Service | Current state | Required change |
-|---|---|---|
-| `signal_materializer.py` (1023 LOC) | Hybrid Neo4j + DuckDB; reads Cypher results, also has `_duckdb_rows` / `_duckdb_entity_context` helpers — already partially lake-aware | Verify every signal definition still resolves against the reloaded graph; switch any input that previously came from `source_registry_co_v1.csv` to `catalog.signed.csv` (or wait for Phase 12) |
-| `score_service.py` | Computes percentile-based scoring from in-memory ranks (`_conn_percentile`, `_fin_percentile`) | Add a `read_anomaly_scores(entity_uid: str)` path that reads `lake/curated/anomaly_scores/<run_id>.parquet` via DuckDB and joins by `entity_uid` |
-| `case_service.py` | Builds case responses from investigation entities | Extend to look up `lake/curated/narratives/<case_id>.md` (Phase 14 output) and attach to the response shape |
+### 8.2 Scope
 
-### 8.2 Implementation steps
+- Source: `lake/curated/dim_*`, `fact_*`, `signal_hits`, and
+  `evidence_bundles`.
+- Default scope: finals/demo entities, `paco_sanctions`, and the top 3-5
+  active demo signals.
+- Output: Neo4j nodes/relationships that mirror the already-materialized
+  evidence graph. No signal is computed inside Neo4j.
 
-1. **Cypher EXPLAIN sweep.** New script
-   `scripts/ci/cypher_explain_sweep.py` runs every `.cypher` file under
-   `api/src/coacc/queries/` through `EXPLAIN` against a Phase-11-loaded
-   Neo4j. Any query that errors (missing label, missing index, missing
-   property) → fix the loader or the query. This is the contract test
-   between Phase 11 and Phase 11.5.
-2. **`signal_materializer` smoke test.** Add
-   `api/tests/integration/test_signal_materializer_post_phase11.py`
-   marker `live` — runs every signal in `config/signal_registry.yml`
-   that's `status: active` and asserts non-empty hits or a documented
-   "expected zero" result.
-3. **`score_service.read_anomaly_scores` path.** New function reads
-   the latest `lake/models/anomaly/current.json` manifest (Phase 13
-   produces this), loads `lake/curated/anomaly_scores/<run_id>.parquet`,
-   exposes per-entity scores. Falls back to legacy percentile method
-   when no scores parquet present.
-4. **`case_service` narrative attachment.** New function
-   `attach_narrative(case_response)` reads
-   `lake/curated/narratives/<case_id>.md` and adds it to the response.
-   Returns response unchanged when no narrative exists.
-5. **API contract test.** `api/tests/test_api_contract.py` snapshots
-   the OpenAPI schema. Any breaking change requires a same-PR snapshot
-   update + a CHANGELOG entry.
+### 8.3 Implementation steps
 
-### 8.3 DoD
+1. Add `etl/src/coacc_etl/graph/schema.py` with optional projection labels
+   and indexes.
+2. Add `coacc-etl graph load --scope finals` that reads parquet through
+   DuckDB batches and writes bounded `UNWIND $rows` Cypher batches.
+3. Add `coacc-etl graph verify` that compares Neo4j counts against the
+   parquet source tables.
+4. Keep the dev `docker-compose.yml` Neo4j service for exploration, but do
+   not make API correctness depend on it again.
 
-- [ ] Cypher EXPLAIN sweep exits 0 on every `.cypher` file.
-- [ ] All existing API tests green against the Phase-11-loaded graph.
-- [ ] New signal materializer integration test green.
-- [ ] `score_service` returns anomaly-model scores when present, falls
-      back gracefully when absent.
-- [ ] `case_service` attaches narratives when present.
-- [ ] OpenAPI schema unchanged (no breaking changes to existing routes).
+### 8.4 DoD
 
-### 8.4 Risks / mitigations
-
-- **Hidden Cypher pattern dependencies on data that the loader doesn't
-  yet write.** The EXPLAIN sweep catches structural issues but not
-  semantic emptiness. Mitigation: add a "live result" assertion to the
-  signal materializer integration test for the 5 highest-priority
-  patterns.
-- **`signal_materializer.py` is 1023 LOC.** Don't rewrite it in this
-  phase. The minimum-change rule: every edit must be justified by a
-  failing test. Refactor goes to post-finals backlog.
+- [ ] Graph projection can be skipped without breaking signal APIs.
+- [ ] `coacc-etl graph load --scope finals` runs within the local memory
+      budget.
+- [ ] `coacc-etl graph verify` reports ≤0.1% drift from parquet.
+- [ ] `docs/runbooks/graph_loader.md` clearly states this is a derived cache,
+      not a source of truth.
 
 ---
 
@@ -1327,10 +1283,10 @@ available, else iforest only.
 ## 11. Phase 14 — Generative narrator
 
 **Owner profile:** ML engineer / prompt engineer.
-**Prereq:** Phase 13 (scores) green. **Phase 11 is NOT a prereq** —
-subgraph extraction reads from parquet via DuckDB, not from Neo4j.
-This decouples the narrator from the keystone, lets Phase 14 start
-as soon as Phase 13 produces scored cases.
+**Prereq:** Phase 13 (scores) green. **Phase 11.5 graph projection is NOT
+a prereq** — subgraph extraction reads from parquet via DuckDB, not from
+Neo4j. This decouples the narrator from optional graph work and lets Phase
+14 start as soon as Phase 13 produces scored cases.
 **Effort:** **7–9 days.**
 **Why required:** competition R5 IA generativa component.
 
@@ -1612,6 +1568,12 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   on the critical path. Alternate "rewrite all queries to DuckDB"
   rejected as too risky for the August 2026 deadline given 100+
   Cypher templates already exist.
+- **2026-05-23** — Supersede the 2026-05-06 Phase 11 decision: DuckDB/lake
+  signal materialization is now the keystone; Neo4j is optional graph
+  projection only. Rationale: the actual problem is corruption-pattern
+  cross-reference over public data, which DuckDB + parquet handles with
+  bounded memory and a clearer source of truth. Keeping Neo4j as mandatory
+  would add load/rebuild risk without improving detection correctness.
 - **2026-05-06** — `paco_sanctions` adapter promoted from deferred
   Phase 9 to critical-path Phase 9.0 (3–4 days). Rationale: Phase 13
   supervised top-up needs sanctioned-supplier labels; without them
@@ -1756,8 +1718,8 @@ generative narrator, ciudadano-agent UI.
 ### 18.2 80% confidence branch — drop the agent UI
 
 **Trigger:** 2026-06-12 missed Phase 10 start, or 2026-07-03 still has
-Phase 11 in flight. Also the default from 2026-05-15 if Phase 7 is not
-already green.
+Phase 11 DuckDB signal/API rewiring in flight. Also the default from
+2026-05-15 if Phase 7 is not already green.
 
 **Cuts:**
 - **Drop Phase 15.3 ciudadano-agent.** Frontend ships only the case
@@ -1778,7 +1740,7 @@ buffer for Phase 11 or Phase 13.
 ### 18.3 60% confidence branch — drop the narrator too
 
 **Trigger:** 2026-07-10 has Phase 13 still in flight, or Phase 11
-still not green.
+DuckDB signal/API rewiring still not green.
 
 **Cuts:**
 - **Drop Phase 14 generative narrator entirely.** Case detail page
@@ -1788,8 +1750,8 @@ still not green.
 - **Drop Phase 15 ciudadano-agent** (already cut in 80% branch).
 - **Phase 13 anomaly model stays** — without it the entry doesn't
   meet R5 and is disqualified. This is the floor.
-- **Phase 11 graph loader stays** — without it the API has no data
-  to surface.
+- **Phase 11 DuckDB signal/API path stays** — without it the API has no
+  signal/evidence data to surface.
 
 **Saves:** ~9 working days from Phases 14+15. Buys two weeks for
 Phase 11 + 13 stabilization.
@@ -1804,7 +1766,8 @@ target of 85.** Risky but submission-viable.
 
 - **Phase 7** — without the lake, nothing.
 - **Phase 8** — without monitoring, you don't know what's broken.
-- **Phase 11** — without the graph reload, the API serves nothing.
+- **Phase 11** — without DuckDB-backed signal/evidence APIs, the app serves
+  no corruption-detection results.
 - **Phase 13** — without the model, R5 is not satisfied.
 - **Phase 16** — without the inscripción, no entry.
 

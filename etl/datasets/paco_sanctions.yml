@@ -1,0 +1,32 @@
+id: paco_sanctions
+name: PACO - sanciones y red flags
+sector: sanctions
+tier: core
+adapter: paco_sanctions
+join_keys:
+  nit:
+    - subject_document_id
+full_refresh_only: true
+columns_map:
+  source_id: source_id
+  paco_feed: paco_feed
+  source_url: source_url
+  subject_document_id: subject_document_id
+  subject_name: subject_name
+  subject_type: subject_type
+  sanction_type: sanction_type
+  sanction_date: sanction_date
+  reference: reference
+  contract_id: contract_id
+  amount: amount
+  affected_entity: affected_entity
+required_coverage:
+  subject_document_id: 0.9
+  subject_name: 0.85
+freq: weekly
+url: https://portal.paco.gov.co/index.php?pagina=descargarDatos
+notes: >
+  Custom PACO adapter snapshot. Pulls public PACO CSV/ZIP feeds for SIRI
+  antecedentes, SECOP fines, fiscal responsibility records, and SIC collusion
+  sanctions into a bounded-memory raw lake snapshot with canonical document
+  and evidence columns for later DuckDB curation.

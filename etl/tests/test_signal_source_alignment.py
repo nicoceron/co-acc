@@ -22,6 +22,7 @@ Wave 6 retires ``source_registry_co_v1.csv`` and migrates the
 this test stays correct across that migration because the resolution
 goes through ``primary_url`` which lives on the YAML itself.
 """
+
 from __future__ import annotations
 
 import csv
@@ -51,9 +52,8 @@ _KNOWN_DEFERRED_SOURCES = {
     "pnis_beneficiarios",
     # In the legacy CSV but with non-Socrata URLs — bridge to a future
     # custom adapter, currently unwired.
-    "dnp_project_contract_links",      # local://graph derivation
-    "official_case_bulletins",         # local://official_case_bulletins
-    "paco_sanctions",                  # portal.paco.gov.co (web scrape)
+    "dnp_project_contract_links",  # local://graph derivation
+    "official_case_bulletins",  # local://official_case_bulletins
 }
 
 
@@ -182,6 +182,5 @@ def test_aspirational_sources_only_in_optional() -> None:
         if leaked:
             leaks.append(f"{sig_id}: {leaked}")
     assert not leaks, (
-        "Aspirational sources may only appear in `optional`, never in "
-        f"`required`: {leaks}"
+        f"Aspirational sources may only appear in `optional`, never in `required`: {leaks}"
     )

@@ -1,4 +1,5 @@
 """Catalog YAML contracts match the signed CSV and validate on load."""
+
 from __future__ import annotations
 
 import csv
@@ -7,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from coacc_etl.catalog import DatasetSpec, clear_cache, datasets_dir, load_catalog
+from coacc_etl.catalog import DatasetSpec, clear_cache, load_catalog
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PROVEN_CSV = REPO_ROOT / "docs" / "datasets" / "catalog.proven.csv"
@@ -29,30 +30,38 @@ def _reset_cache() -> None:
 
 def test_every_proven_row_has_a_yaml_contract() -> None:
     proven_ids = _proven_ids()
-    yaml_ids = {p.stem for p in datasets_dir().glob("*.yml") if not p.name.startswith("_")}
+    specs = load_catalog()
+    socrata_yaml_ids = {
+        dataset_id for dataset_id, spec in specs.items() if spec.adapter == "socrata"
+    }
 
-    missing = proven_ids - yaml_ids
-    orphan = yaml_ids - proven_ids
+    missing = proven_ids - socrata_yaml_ids
+    orphan = socrata_yaml_ids - proven_ids
 
     assert not missing, f"catalog.proven.csv ids without YAML contract: {sorted(missing)}"
-    assert not orphan, f"YAML contracts without catalog.proven.csv row: {sorted(orphan)}"
+    assert not orphan, f"Socrata YAML contracts without catalog.proven.csv row: {sorted(orphan)}"
 
 
 def test_catalog_loads_and_validates_every_yaml() -> None:
     specs = load_catalog()
 
-    assert len(specs) == len(_proven_ids())
+    assert len(specs) == len(_proven_ids()) + 1
+    custom_ids = {dataset_id for dataset_id, spec in specs.items() if spec.adapter != "socrata"}
+    assert custom_ids == {"paco_sanctions"}
     for dataset_id, spec in specs.items():
         assert isinstance(spec, DatasetSpec)
         assert spec.id == dataset_id
         assert spec.name
-        assert spec.url.startswith("https://www.datos.gov.co/d/")
+        if spec.adapter == "socrata":
+            assert spec.url.startswith("https://www.datos.gov.co/d/")
+        else:
+            assert spec.url.startswith("https://")
 
 
 def test_tier_distribution_matches_report() -> None:
     tiers = Counter(spec.tier for spec in load_catalog().values())
 
-    assert tiers["core"] == 118
+    assert tiers["core"] == 119
     assert tiers["context"] == 30
     assert tiers["backlog"] == 0
 
@@ -92,9 +101,7 @@ def test_yaml_is_either_placeholder_or_fully_ingest_ready() -> None:
         if spec.tier != "core":
             continue
         placeholder = (
-            spec.watermark_column is None
-            and spec.partition_column is None
-            and not spec.columns_map
+            spec.watermark_column is None and spec.partition_column is None and not spec.columns_map
         )
         assert placeholder or spec.is_ingest_ready(), (
             f"{dataset_id}: half-filled YAML — watermark_column="

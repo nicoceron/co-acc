@@ -1,13 +1,14 @@
 """coacc-etl CLI — lakehouse-only after Wave 4.B.
 
 The Neo4j-loading ``run`` / ``sources`` subcommands were retired alongside
-the bespoke Pipeline stack. Surviving subcommands all flow through the
-generic YAML-driven Socrata ingester:
+the bespoke Pipeline stack. Surviving subcommands all flow through
+YAML-declared lake ingesters:
 
-- ``coacc-etl ingest <id>``      — pull one tier=core dataset into the lake
+- ``coacc-etl ingest <id>``      — pull one ingest-ready dataset into the lake
 - ``coacc-etl ingest-all``       — pull every ingest-ready tier=core dataset
 - ``coacc-etl qualify ...``      — thin wrapper over ``coacc-source-qualification``
 """
+
 import logging
 import sys
 
@@ -15,13 +16,13 @@ import click
 
 from coacc_etl.catalog import DatasetSpec, load_catalog
 from coacc_etl.ingest import IngestError
-from coacc_etl.ingest import ingest as socrata_ingest
+from coacc_etl.ingest import ingest as run_ingest
 from coacc_etl.operations.phase7 import Phase7RunError, run_phase7
 
 
 @click.group()
 def cli() -> None:
-    """CO-ACC ETL — config-driven Socrata ingestion into the parquet lake."""
+    """CO-ACC ETL — config-driven ingestion into the parquet lake."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
@@ -50,7 +51,7 @@ def _dataset_core_order(specs: dict[str, DatasetSpec]) -> list[str]:
     "--page-size",
     type=click.IntRange(min=1),
     default=None,
-    help="Socrata rows per page (default: COACC_SOCRATA_PAGE_SIZE or 10,000)",
+    help="Rows per Socrata page or custom-adapter chunk",
 )
 @click.option(
     "--max-pages",
@@ -74,16 +75,15 @@ def ingest_cmd(
     max_pages: int | None,
     timeout_seconds: float | None,
 ) -> None:
-    """Ingest one ingest-ready dataset from Socrata into the lake."""
+    """Ingest one ingest-ready dataset into the lake."""
     specs = load_catalog()
     spec = specs.get(dataset_id)
     if spec is None:
         raise click.ClickException(
-            f"dataset_id {dataset_id!r} not in signed catalog "
-            f"(known: {len(specs)} datasets)"
+            f"dataset_id {dataset_id!r} not in signed catalog (known: {len(specs)} datasets)"
         )
     try:
-        result = socrata_ingest(
+        result = run_ingest(
             spec,
             full_refresh=full_refresh,
             page_size=page_size,
@@ -122,7 +122,7 @@ def ingest_cmd(
     "--page-size",
     type=click.IntRange(min=1),
     default=None,
-    help="Socrata rows per page (default: COACC_SOCRATA_PAGE_SIZE or 10,000)",
+    help="Rows per Socrata page or custom-adapter chunk",
 )
 @click.option(
     "--max-pages",
@@ -162,7 +162,7 @@ def ingest_all_cmd(
             skipped.append(dataset_id)
             continue
         try:
-            result = socrata_ingest(
+            result = run_ingest(
                 spec,
                 full_refresh=full_refresh,
                 page_size=page_size,
