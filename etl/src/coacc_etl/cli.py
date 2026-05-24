@@ -6,6 +6,7 @@ YAML-declared lake ingesters:
 
 - ``coacc-etl ingest <id>``      — pull one ingest-ready dataset into the lake
 - ``coacc-etl ingest-all``       — pull every ingest-ready tier=core dataset
+- ``coacc-etl curate``           — build curated DuckDB parquet outputs
 - ``coacc-etl qualify ...``      — thin wrapper over ``coacc-source-qualification``
 """
 
@@ -15,6 +16,7 @@ import sys
 import click
 
 from coacc_etl.catalog import DatasetSpec, load_catalog
+from coacc_etl.curated import CuratedBuildError, build_curated
 from coacc_etl.ingest import IngestError
 from coacc_etl.ingest import ingest as run_ingest
 from coacc_etl.operations.phase7 import Phase7RunError, run_phase7
@@ -277,6 +279,23 @@ def ingest_phase7_cmd(
     click.echo(f"phase7 {mode}: ok={ok}, skipped={skipped}, failed={failed}")
     if failed:
         raise click.ClickException(f"phase7 {mode}: {failed} dataset(s) failed")
+
+
+@cli.command(name="curate")
+@click.option(
+    "--table",
+    "tables",
+    multiple=True,
+    help="Curated table to rebuild; repeat for multiple tables. Defaults to all.",
+)
+def curate_cmd(tables: tuple[str, ...]) -> None:
+    """Build DuckDB-curated parquet tables from the raw lake."""
+    try:
+        results = build_curated(tables or None)
+    except CuratedBuildError as exc:
+        raise click.ClickException(str(exc)) from exc
+    for result in results:
+        click.echo(f"{result.table}: wrote {result.rows:,} rows to {result.path}")
 
 
 @cli.command(name="qualify", context_settings={"ignore_unknown_options": True})

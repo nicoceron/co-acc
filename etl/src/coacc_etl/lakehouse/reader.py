@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+import csv
 import re
+from functools import lru_cache
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     import duckdb
 
 from coacc_etl.lakehouse.paths import raw_source_path
 
 _SAFE_IDENTIFIER = re.compile(r"[^A-Za-z0-9_]+")
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+_CATALOG_PATH = _REPO_ROOT / "docs" / "datasets" / "catalog.proven.csv"
 
 
 def source_view_name(source: str) -> str:
@@ -18,15 +21,48 @@ def source_view_name(source: str) -> str:
     return f"src_{cleaned or 'unknown'}"
 
 
+@lru_cache(maxsize=1)
+def _source_aliases() -> dict[str, tuple[str, ...]]:
+    """Map semantic source ids from registries to raw dataset ids."""
+    if not _CATALOG_PATH.exists():
+        return {}
+    aliases: dict[str, list[str]] = {}
+    with _CATALOG_PATH.open(newline="", encoding="utf-8") as fh:
+        for row in csv.DictReader(fh):
+            dataset_id = (row.get("dataset_id") or "").strip()
+            source_refs = (row.get("source_refs") or "").strip()
+            if not dataset_id or not source_refs:
+                continue
+            for source_ref in source_refs.split("|"):
+                source_ref = source_ref.strip()
+                if not source_ref:
+                    continue
+                aliases.setdefault(source_ref, [])
+                if dataset_id not in aliases[source_ref]:
+                    aliases[source_ref].append(dataset_id)
+    return {key: tuple(value) for key, value in aliases.items()}
+
+
+def resolve_source_ids(source: str) -> tuple[str, ...]:
+    """Return raw lake source ids for a semantic or raw source id."""
+    direct = raw_source_path(source)
+    if direct.exists():
+        return (source,)
+    return _source_aliases().get(source, (source,))
+
+
 def source_files(source: str) -> list[Path]:
-    root = raw_source_path(source)
-    if not root.exists():
-        return []
-    return sorted(
-        path
-        for path in root.rglob("*.parquet")
-        if path.is_file() and not path.name.startswith(".inflight-")
-    )
+    files: list[Path] = []
+    for source_id in resolve_source_ids(source):
+        root = raw_source_path(source_id)
+        if not root.exists():
+            continue
+        files.extend(
+            path
+            for path in root.rglob("*.parquet")
+            if path.is_file() and not path.name.startswith(".inflight-")
+        )
+    return sorted(files)
 
 
 def _sql_list(values: list[str]) -> str:

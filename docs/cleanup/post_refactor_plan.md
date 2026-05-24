@@ -708,17 +708,28 @@ Build `lake/curated/` from `lake/raw/`. Three deliverables:
    `entity_uid`. These feed API lookup tables first; optional graph nodes
    are a derived projection in Phase 11.5.
 
+**Started 2026-05-24:** the first narrow slice is live. `coacc-etl curate`
+builds `table=dim_subject_document`, `table=fct_procurement_contract_awards`,
+and `table=signal_feature_procurement_sanctioned_supplier_awarded` from SECOP
+II contracts (`jbjy-vk9h`, resolved through the `secop_ii_contracts` semantic
+alias) and `paco_sanctions`. On the local lake it produced 1,215,832 subject
+document rows, 5,442,058 award rows, and 20,184 PACO-backed signal feature
+rows. This is not full Phase 10 completion yet; it is the proof that the
+lake/DuckDB path can cross-reference public sanctions and procurement without
+loading the full graph or a full join into Python memory.
+
 ### 6.2 Module layout
 
 ```
-etl/src/coacc_etl/curate/
+etl/src/coacc_etl/curated/
 ├── __init__.py
-├── canonical_nit.py       # canonicalize() + tests
-├── canonical_name.py      # accent-fold, lowercase, strip legal-form suffixes
-├── dim_company.py         # build dim_company.parquet from raw sources
-├── dim_person.py          # build dim_person.parquet
-├── dim_buyer.py
-├── signal_features.py     # dispatcher: signal_id → builder
+├── procurement.py         # current SECOP+PACO curated builder
+├── canonical_nit.py       # planned canonicalize() + tests
+├── canonical_name.py      # planned accent-fold/legal-form cleanup
+├── dim_company.py         # planned typed company dimension
+├── dim_person.py          # planned typed person dimension
+├── dim_buyer.py           # planned typed buyer dimension
+├── signal_features.py     # planned dispatcher: signal_id → builder
 └── builders/
     ├── procurement_sanctioned_supplier_awarded.py
     ├── procurement_supplier_concentration_across_entities.py
@@ -788,9 +799,12 @@ class SignalFeatureRow(BaseModel):
    remains gated. Add a contract test that no row in
    `dim_person` has a `nit_canonical` set (cross-pollination guard).
 4. **Signal feature builders.** Start with two:
-   - `procurement_sanctioned_supplier_awarded`: inner-join SECOP II
-     contracts × paco_sanctions (or sanctions stand-in) on
-     `nit_canonical`. One row per (contract, supplier) overlap.
+   - `procurement_sanctioned_supplier_awarded`: **first slice shipped
+     2026-05-24** as
+     `lake/curated/table=signal_feature_procurement_sanctioned_supplier_awarded/`.
+     It joins SECOP II contracts × `paco_sanctions` through normalized document
+     match keys, including NIT-base matching for SECOP rows that include a
+     verification digit while PACO omits it.
    - `procurement_supplier_concentration_across_entities`: per supplier,
      aggregate award value across distinct buyers in a 12-month window,
      emit when concentration ratio > threshold.
@@ -798,8 +812,9 @@ class SignalFeatureRow(BaseModel):
      emits a join-coverage report (`left_rows`, `matched_rows`,
    `unmatched_sample`) so the operator knows whether keys connect before
    API exposure or optional graph projection.
-5. **Driver script.** `coacc-etl curate --all` walks every builder,
-   writes its parquet, updates `lake/meta/curated_runs.parquet`.
+5. **Driver script.** `coacc-etl curate` rebuilds the shipped builder set and
+   `coacc-etl curate --table <name>` rebuilds one table. Current run metadata
+   is JSON under `lake/meta/curated/`; a parquet run ledger remains to do.
 6. **Reality probe extension.** Phase 8's `make lake-reality` learns
    to also probe `lake/curated/` directories with curated-specific
    thresholds (NIT canonicalization should match ≥99% of input rows;
@@ -1574,6 +1589,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   cross-reference over public data, which DuckDB + parquet handles with
   bounded memory and a clearer source of truth. Keeping Neo4j as mandatory
   would add load/rebuild risk without improving detection correctness.
+- **2026-05-24** — Start Phase 10 with the narrowest useful cross-source
+  proof: SECOP II contracts × PACO sanctions. Rationale: this validates the
+  lake/DuckDB source-of-truth pivot against the project's core question
+  (public sanction records connected to procurement awards) before expanding
+  entity resolution or API rewires.
 - **2026-05-06** — `paco_sanctions` adapter promoted from deferred
   Phase 9 to critical-path Phase 9.0 (3–4 days). Rationale: Phase 13
   supervised top-up needs sanctioned-supplier labels; without them
