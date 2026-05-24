@@ -11,7 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from coacc.config import settings
-from coacc.dependencies import close_driver, get_session, init_driver
+from coacc.dependencies import close_driver, get_optional_session, init_driver
 from coacc.middleware.rate_limit import limiter
 from coacc.middleware.security_headers import SecurityHeadersMiddleware
 from coacc.routers import (
@@ -28,6 +28,7 @@ from coacc.routers import (
     signals,
 )
 from coacc.services.neo4j_service import ensure_schema, execute_query_single
+from coacc.services.signal_materializer import get_latest_materializer_run
 
 _logger = logging.getLogger(__name__)
 
@@ -47,13 +48,24 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             _logger.critical(msg)
             raise RuntimeError(msg)
     app_env = settings.app_env.strip().lower()
-    if app_env not in {"dev", "test"} and settings.neo4j_password == "changeme":
+    if (
+        settings.neo4j_required
+        and app_env not in {"dev", "test"}
+        and settings.neo4j_password == "changeme"
+    ):
         msg = "Neo4j default password not allowed in production — set NEO4J_PASSWORD"
         _logger.critical(msg)
         raise RuntimeError(msg)
-    driver = await init_driver()
-    app.state.neo4j_driver = driver
-    await ensure_schema(driver)
+    try:
+        driver = await init_driver()
+    except Exception:
+        if settings.neo4j_required:
+            raise
+        _logger.exception("Neo4j unavailable; starting with graph-backed routes disabled")
+        app.state.neo4j_driver = None
+    else:
+        app.state.neo4j_driver = driver
+        await ensure_schema(driver)
     yield
     await close_driver()
 
@@ -95,11 +107,22 @@ app.include_router(cases.router)
 
 @app.get("/health")
 async def health(
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
 ) -> dict[str, str | int | None]:
+    if session is None:
+        latest_run_id, latest_run_at = await get_latest_materializer_run(None)
+        return {
+            "status": "ok",
+            "neo4j": "unavailable",
+            "last_signal_run_id": latest_run_id,
+            "last_signal_run_at": latest_run_at,
+            "last_signal_run_status": "curated" if latest_run_id else None,
+            "last_signal_hit_count": None,
+        }
     latest_run = await execute_query_single(session, "signal_latest_completed_run")
     return {
         "status": "ok",
+        "neo4j": "connected",
         "last_signal_run_id": (
             str(latest_run["run_id"]) if latest_run and latest_run["run_id"] is not None else None
         ),

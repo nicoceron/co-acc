@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncGenerator
 from typing import Annotated
 
@@ -11,6 +12,7 @@ from coacc.services import auth_service
 from coacc.services.intelligence_provider import IntelligenceProvider, get_default_provider
 
 _driver: AsyncDriver | None = None
+logger = logging.getLogger(__name__)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 
@@ -55,6 +57,21 @@ async def get_session(
         yield session
 
 
+async def get_optional_session(
+    request: Request,
+) -> AsyncGenerator[AsyncSession | None]:
+    driver: AsyncDriver | None = getattr(request.app.state, "neo4j_driver", None)
+    if driver is None:
+        yield None
+        return
+    try:
+        async with driver.session(database=settings.neo4j_database) as session:
+            yield session
+    except Exception:
+        logger.exception("Optional Neo4j session unavailable; continuing without graph data")
+        yield None
+
+
 def get_intelligence_provider() -> IntelligenceProvider:
     return get_default_provider()
 
@@ -97,6 +114,24 @@ async def get_optional_user(
     if user_id is None:
         return None
     return await auth_service.get_user_by_id(session, user_id)
+
+
+async def get_optional_user_without_database_required(
+    request: Request,
+    token: Annotated[str | None, Depends(oauth2_scheme)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
+) -> UserResponse | None:
+    resolved_token = _resolve_token(token, request)
+    if resolved_token is None or session is None:
+        return None
+    user_id = auth_service.decode_access_token(resolved_token)
+    if user_id is None:
+        return None
+    try:
+        return await auth_service.get_user_by_id(session, user_id)
+    except Exception:
+        logger.exception("Optional user lookup failed; continuing as public viewer")
+        return None
 
 
 CurrentUser = Annotated[UserResponse, Depends(get_current_user)]

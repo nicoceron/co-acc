@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     neo4j_user: str = "neo4j"
     neo4j_password: str = "changeme"  # nosec
     neo4j_database: str = "neo4j"
+    neo4j_required: bool = False
 
     api_host: str = "0.0.0.0"
     api_port: int = 8000

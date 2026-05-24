@@ -106,8 +106,9 @@ These two invariants together give us reproducibility: rerun ingest from an empt
 ## What's missing (deliberately)
 
 - **A DuckDB-backed signal API** — the source of truth is now lake/curated
-  parquet; the first curated feature table exists, and API rewires are planned
-  in Phase 11.
+  parquet; the first curated feature table can already populate
+  `/api/v1/signals` counts and samples without Neo4j. Wider API rewires are
+  planned in Phase 11.
 - **Optional graph projection** — Neo4j is useful for exploration, but not
   required for corruption-pattern detection correctness.
 - **More custom non-Socrata adapters** — PACO has landed; RUES,

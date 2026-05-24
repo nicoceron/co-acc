@@ -3,7 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from neo4j import AsyncSession
 
-from coacc.dependencies import can_access_reviewer_content, get_optional_user, get_session
+from coacc.dependencies import (
+    can_access_reviewer_content,
+    get_optional_session,
+    get_optional_user_without_database_required,
+)
 from coacc.models.signal import SignalDetailResponse, SignalListResponse
 from coacc.models.user import UserResponse
 from coacc.services.signal_materializer import (
@@ -19,8 +23,11 @@ router = APIRouter(prefix="/api/v1/signals", tags=["signals"])
 
 @router.get("/", response_model=SignalListResponse)
 async def list_signals(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    user: Annotated[UserResponse | None, Depends(get_optional_user)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
+    user: Annotated[
+        UserResponse | None,
+        Depends(get_optional_user_without_database_required),
+    ],
 ) -> SignalListResponse:
     registry = load_signal_registry()
     signals = await list_signal_summaries(session)
@@ -38,8 +45,11 @@ async def list_signals(
 @router.get("/{signal_id}", response_model=SignalDetailResponse)
 async def get_signal(
     signal_id: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    user: Annotated[UserResponse | None, Depends(get_optional_user)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
+    user: Annotated[
+        UserResponse | None,
+        Depends(get_optional_user_without_database_required),
+    ],
     limit: Annotated[int, Query(ge=1, le=25)] = 10,
 ) -> SignalDetailResponse:
     definition = get_signal_definition(signal_id)

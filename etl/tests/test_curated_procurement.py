@@ -32,7 +32,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 "contract_id": "C-1",
                 "contract_reference": "REF-1",
                 "procurement_process": "P-1",
-                "process_url": "https://secop.example/C-1",
+                "process_url": "{'url': 'https://secop.example/C-1'}",
                 "supplier_document": "900123456-7",
                 "supplier_doc_type": "NIT",
                 "awarded_supplier": "Proveedor Sancionado SAS",
@@ -53,7 +53,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 "contract_id": "C-2",
                 "contract_reference": "REF-2",
                 "procurement_process": "P-2",
-                "process_url": "https://secop.example/C-2",
+                "process_url": "{'url': 'https://secop.example/C-2'}",
                 "supplier_document": "1001234567",
                 "supplier_doc_type": "CC",
                 "awarded_supplier": "Persona No Nit",
@@ -109,7 +109,8 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     con = duckdb.connect()
     try:
         signal_rows = con.execute(
-            "SELECT entity_key, contract_id, paco_record_id, join_rule, risk_signal "
+            "SELECT entity_key, contract_id, paco_record_id, join_rule, risk_signal, "
+            "evidence_refs[1] "
             "FROM read_parquet(?)",
             [
                 str(
@@ -122,7 +123,16 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         ).fetchall()
     finally:
         con.close()
-    assert signal_rows == [("900123456", "C-1", "paco-1", "nit_base_to_subject", 1.0)]
+    assert signal_rows == [
+        (
+            "900123456",
+            "C-1",
+            "paco-1",
+            "nit_base_to_subject",
+            1.0,
+            "https://secop.example/C-1",
+        )
+    ]
 
 
 def test_build_curated_errors_when_required_sources_are_missing(

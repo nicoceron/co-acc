@@ -77,6 +77,18 @@ def _install_macros(con: duckdb.DuckDBPyConnection) -> None:
             )
         )
     """)
+    con.execute("""
+        CREATE OR REPLACE MACRO coacc_reference_url(value) AS (
+            CASE
+                WHEN value IS NULL THEN NULL
+                WHEN regexp_matches(cast(value AS VARCHAR), '''url'': ''https?://[^'']+''')
+                    THEN regexp_extract(cast(value AS VARCHAR), '''url'': ''(https?://[^'']+)''', 1)
+                WHEN regexp_matches(cast(value AS VARCHAR), 'https?://[^[:space:]''}]+')
+                    THEN regexp_extract(cast(value AS VARCHAR), '(https?://[^[:space:]''}]+)', 1)
+                ELSE nullif(trim(cast(value AS VARCHAR)), '')
+            END
+        )
+    """)
 
 
 def _create_views(con: duckdb.DuckDBPyConnection) -> None:
@@ -87,7 +99,7 @@ def _create_views(con: duckdb.DuckDBPyConnection) -> None:
             nullif(trim(contract_id), '') AS contract_id,
             nullif(trim(contract_reference), '') AS contract_reference,
             nullif(trim(procurement_process), '') AS process_id,
-            nullif(trim(process_url), '') AS process_url,
+            coacc_reference_url(process_url) AS process_url,
             coacc_doc_digits(supplier_document) AS supplier_document_digits,
             coacc_nit_base(supplier_document, supplier_doc_type) AS supplier_nit_base,
             coacc_document_key(supplier_document, supplier_doc_type) AS supplier_document_key,
@@ -273,7 +285,10 @@ def _create_views(con: duckdb.DuckDBPyConnection) -> None:
             p.amount AS sanction_amount,
             p.affected_entity,
             ak.join_rule,
-            ['secop_ii_contracts', 'paco_sanctions'] AS evidence_refs
+            [
+                coalesce(a.process_url, 'secop_ii_contracts:' || a.contract_id),
+                coalesce(p.source_url, 'paco_sanctions:' || p.paco_record_id)
+            ] AS evidence_refs
         FROM curated_award_match_keys ak
         JOIN curated_paco_match_keys pk
             ON ak.match_key = pk.match_key

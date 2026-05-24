@@ -39,6 +39,18 @@ The current builder requires:
 
 Semantic source names are resolved through `docs/datasets/catalog.proven.csv`.
 
+## API Exposure
+
+The API signal list/detail endpoints read curated signal feature tables when
+Neo4j has no matching materialized hits or is unavailable:
+
+- `GET /api/v1/signals/`
+- `GET /api/v1/signals/procurement_sanctioned_supplier_awarded`
+
+Set `NEO4J_REQUIRED=false` to allow API startup without a graph. In that mode,
+graph-backed routes still return 503, but lake-backed signal routes and
+`/health` remain available.
+
 ## Memory Posture
 
 The builder uses DuckDB `read_parquet` views and `COPY (SELECT ...) TO parquet`.

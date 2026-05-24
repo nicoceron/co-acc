@@ -861,6 +861,13 @@ detection problem is joins, aggregations, windows, and evidence tables; it
 does not require Neo4j. Neo4j remains a compatibility/visualization option,
 not the foundation.
 
+**Started 2026-05-24:** `/api/v1/signals` and
+`/api/v1/signals/<signal_id>` now merge curated parquet counts/samples for
+shipped signal feature tables and can answer public requests when Neo4j is
+unavailable. This is a thin API projection slice, not full Phase 11 completion:
+entity detail, search, cases, graph expansion, and broader public pattern APIs
+still need lake-backed implementations or explicit graph-required behavior.
+
 ### 7.1 Goal
 
 Make the app functional from `lake/curated/` without requiring a graph

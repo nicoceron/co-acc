@@ -9,6 +9,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 ## [Unreleased]
 
 ### Added
+- Added a lake-backed `/api/v1/signals` fallback so curated signal counts and
+  samples are available even when Neo4j is not running.
 - Added the first DuckDB-curated parquet builder and CLI (`coacc-etl curate` /
   `make curate`) for subject documents, SECOP II contract awards, and the
   PACO-backed `procurement_sanctioned_supplier_awarded` signal feature table.
@@ -18,6 +20,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   JSON/Markdown diff artifacts, threshold config, runbook, and a pre-commit helper.
 
 ### Changed
+- Made Neo4j optional at API startup via `NEO4J_REQUIRED=false`; graph-backed
+  routes still require Neo4j, while lake-backed signal routes can run without it.
 - Resolved semantic signal source ids such as `secop_ii_contracts` to raw lake
   dataset ids such as `jbjy-vk9h` through the signed catalog when registering
   DuckDB source views.

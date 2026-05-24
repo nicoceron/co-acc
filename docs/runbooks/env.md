@@ -27,6 +27,10 @@ Never commit `.env`.
 
 ## App Runtime
 
-The API, frontend, and Neo4j variables are listed in `.env.example`. Keep
-production secrets out of this repository and rotate any value that is ever
-printed or committed accidentally.
+| Variable | Default | Purpose |
+|---|---:|---|
+| `NEO4J_REQUIRED` | `false` | When `true`, API startup fails if Neo4j is unavailable. When `false`, graph-backed routes return 503 but lake-backed signal routes and `/health` can still run. |
+
+The remaining API, frontend, and Neo4j variables are listed in `.env.example`.
+Keep production secrets out of this repository and rotate any value that is
+ever printed or committed accidentally.

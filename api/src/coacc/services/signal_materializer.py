@@ -35,6 +35,7 @@ from coacc.services.signal_registry import (
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+    from pathlib import Path
 
     import duckdb
     from neo4j import AsyncSession, Record
@@ -520,6 +521,120 @@ def _duckdb_entity_context(row: Mapping[str, Any]) -> dict[str, str | None]:
     }
 
 
+def _sql_string(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
+def _curated_signal_dir(signal_id: str) -> Path:
+    return lakehouse_query.lake_root() / "curated" / f"table=signal_feature_{signal_id}"
+
+
+def _curated_signal_glob(signal_id: str) -> str | None:
+    table_dir = _curated_signal_dir(signal_id)
+    if not table_dir.exists():
+        return None
+    files = sorted(
+        path
+        for path in table_dir.glob("*.parquet")
+        if path.is_file() and not path.name.startswith(".inflight-")
+    )
+    if not files:
+        return None
+    return str(table_dir / "*.parquet")
+
+
+def _curated_observed_at(signal_id: str) -> str:
+    table_dir = _curated_signal_dir(signal_id)
+    files = [path for path in table_dir.glob("*.parquet") if path.is_file()]
+    if not files:
+        return _now_iso()
+    latest_mtime = max(path.stat().st_mtime for path in files)
+    return datetime.fromtimestamp(latest_mtime, UTC).isoformat()
+
+
+def _latest_curated_run() -> tuple[str | None, str | None]:
+    manifest_dir = lakehouse_query.lake_root() / "meta" / "curated"
+    if not manifest_dir.exists():
+        return None, None
+    manifests = sorted(path for path in manifest_dir.glob("*.json") if path.is_file())
+    if not manifests:
+        return None, None
+    latest = manifests[-1]
+    return f"curated:{latest.stem}", datetime.fromtimestamp(latest.stat().st_mtime, UTC).isoformat()
+
+
+def _curated_signal_count(signal_id: str) -> tuple[int, str | None]:
+    glob = _curated_signal_glob(signal_id)
+    if glob is None:
+        return 0, None
+    con = lakehouse_query.connect(read_only=True)
+    try:
+        row = con.execute(
+            f"SELECT count(*) FROM read_parquet({_sql_string(glob)})"
+        ).fetchone()
+    finally:
+        con.close()
+    return (int(row[0]) if row is not None else 0), _curated_observed_at(signal_id)
+
+
+def _curated_signal_counts() -> dict[str, tuple[int, str | None]]:
+    counts: dict[str, tuple[int, str | None]] = {}
+    for definition in list_signal_definitions():
+        count, observed_at = _curated_signal_count(definition.id)
+        if count:
+            counts[definition.id] = (count, observed_at)
+    return counts
+
+
+def _curated_rows(signal_id: str, limit: int) -> list[dict[str, Any]]:
+    glob = _curated_signal_glob(signal_id)
+    if glob is None:
+        return []
+    con = lakehouse_query.connect(read_only=True)
+    try:
+        cursor = con.execute(
+            f"""
+            SELECT *
+            FROM read_parquet({_sql_string(glob)})
+            ORDER BY
+                risk_signal DESC NULLS LAST,
+                scope_key ASC NULLS LAST
+            LIMIT {int(limit)}
+            """
+        )
+        columns = [item[0] for item in cursor.description or []]
+        return [dict(zip(columns, row, strict=False)) for row in cursor.fetchall()]
+    finally:
+        con.close()
+
+
+def _curated_signal_samples(signal_id: str, limit: int) -> list[SignalHitResponse]:
+    canonical_signal_id = resolve_signal_id(signal_id)
+    definition = get_signal_definition(canonical_signal_id)
+    if definition is None:
+        return []
+    observed_at = _curated_observed_at(canonical_signal_id)
+    run_id = f"curated:{canonical_signal_id}:{observed_at}"
+    sources = [
+        SourceAttribution(database=source)
+        for source in (definition.sources or definition.sources_required)
+    ]
+    hits: list[SignalHitResponse] = []
+    for row in _curated_rows(canonical_signal_id, limit):
+        normalized = _normalize_pattern_data(row)
+        hit = _build_hit(
+            definition,
+            _duckdb_entity_context(row),
+            normalized,
+            sources,
+            definition.description,
+            run_id,
+            observed_at,
+        )
+        hits.append(hit)
+    return hits[:limit]
+
+
 async def materialize_via_duckdb(
     session: AsyncSession,
     sig_id: str,
@@ -931,8 +1046,13 @@ async def get_stored_entity_signals(
     )
 
 
-async def list_signal_summaries(session: AsyncSession) -> list[SignalListItem]:
-    counts = await execute_query(session, "signal_hit_counts")
+async def list_signal_summaries(session: AsyncSession | None) -> list[SignalListItem]:
+    counts = []
+    if session is not None:
+        try:
+            counts = await execute_query(session, "signal_hit_counts")
+        except Exception:
+            logger.exception("Failed to load Neo4j signal counts; using curated counts only")
     counts_by_id: dict[str, dict[str, int | str | None]] = {}
     for row in counts:
         signal_id = resolve_signal_id(str(row["signal_id"]))
@@ -946,6 +1066,13 @@ async def list_signal_summaries(session: AsyncSession) -> list[SignalListItem]:
             meta["last_seen_at"] is None or row_last_seen > str(meta["last_seen_at"])
         ):
             meta["last_seen_at"] = row_last_seen
+    for signal_id, (hit_count, observed_at) in _curated_signal_counts().items():
+        meta = counts_by_id.setdefault(signal_id, {"hit_count": 0, "last_seen_at": None})
+        meta["hit_count"] = max(int(meta["hit_count"] or 0), hit_count)
+        if observed_at and (
+            meta["last_seen_at"] is None or observed_at > str(meta["last_seen_at"])
+        ):
+            meta["last_seen_at"] = observed_at
     items: list[SignalListItem] = []
     for definition in list_signal_definitions():
         count_meta = counts_by_id.get(definition.id, {})
@@ -960,19 +1087,29 @@ async def list_signal_summaries(session: AsyncSession) -> list[SignalListItem]:
 
 
 async def get_latest_materializer_run(
-    session: AsyncSession,
+    session: AsyncSession | None,
 ) -> tuple[str | None, str | None]:
-    record = await execute_query_single(session, "signal_latest_completed_run")
+    if session is None:
+        return _latest_curated_run()
+    try:
+        record = await execute_query_single(session, "signal_latest_completed_run")
+    except Exception:
+        logger.exception("Failed to load Neo4j latest signal run; using curated run only")
+        return _latest_curated_run()
     if record is None:
-        return None, None
-    return (
+        return _latest_curated_run()
+    graph_run = (
         str(record["run_id"]) if record["run_id"] is not None else None,
         str(record["finished_at"]) if record["finished_at"] is not None else None,
     )
+    curated_run = _latest_curated_run()
+    if curated_run[1] and (graph_run[1] is None or curated_run[1] > graph_run[1]):
+        return curated_run
+    return graph_run
 
 
 async def get_signal_samples(
-    session: AsyncSession,
+    session: AsyncSession | None,
     signal_id: str,
     limit: int = 10,
 ) -> list[SignalHitResponse]:
@@ -984,12 +1121,24 @@ async def get_signal_samples(
         if canonical_id == canonical_signal_id
     ]
     accepted_ids.append(canonical_signal_id)
-    records = await execute_query(
-        session,
-        "signal_hit_samples",
-        {"signal_ids": accepted_ids, "limit": limit},
-    )
-    return [_record_to_signal_hit(record) for record in records]
+    hits: list[SignalHitResponse] = []
+    if session is not None:
+        try:
+            records = await execute_query(
+                session,
+                "signal_hit_samples",
+                {"signal_ids": accepted_ids, "limit": limit},
+            )
+            hits.extend(_record_to_signal_hit(record) for record in records)
+        except Exception:
+            logger.exception("Failed to load Neo4j signal samples; using curated samples only")
+    if len(hits) < limit:
+        existing_hit_ids = {hit.hit_id for hit in hits}
+        for hit in _curated_signal_samples(canonical_signal_id, limit - len(hits)):
+            if hit.hit_id not in existing_hit_ids:
+                hits.append(hit)
+                existing_hit_ids.add(hit.hit_id)
+    return hits[:limit]
 
 
 def filter_signal_hits_for_viewer(
