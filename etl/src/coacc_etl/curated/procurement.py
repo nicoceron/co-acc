@@ -21,6 +21,7 @@ _DEFAULT_TABLES = (
     "fct_procurement_contract_awards",
     "signal_feature_procurement_sanctioned_supplier_awarded",
     "signal_feature_procurement_supplier_concentration_across_entities",
+    "signal_feature_procurement_repeat_awards_same_supplier",
 )
 _TABLE_SOURCES = {
     "dim_subject_document": ("secop_ii_contracts", "paco_sanctions"),
@@ -32,6 +33,7 @@ _TABLE_SOURCES = {
     "signal_feature_procurement_supplier_concentration_across_entities": (
         "secop_ii_contracts",
     ),
+    "signal_feature_procurement_repeat_awards_same_supplier": ("secop_ii_contracts",),
 }
 
 
@@ -478,6 +480,97 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
             AND r.distinct_buyer_count >= 50
             AND r.total_contract_value >= 1000000000
     """)
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_repeat_awards_same_supplier AS
+        WITH eligible AS (
+            SELECT
+                supplier_entity_id,
+                supplier_document_key,
+                supplier_name,
+                buyer_document_id,
+                buyer_name,
+                department,
+                contract_id,
+                process_url,
+                contract_value,
+                signing_date
+            FROM curated_contract_awards
+            WHERE supplier_document_key IS NOT NULL
+                AND buyer_document_id IS NOT NULL
+                AND contract_id IS NOT NULL
+                AND contract_value IS NOT NULL
+                AND contract_value > 0
+        ),
+        ranked_evidence AS (
+            SELECT
+                supplier_document_key,
+                buyer_document_id,
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id) AS evidence_ref,
+                contract_value,
+                row_number() OVER (
+                    PARTITION BY supplier_document_key, buyer_document_id
+                    ORDER BY contract_value DESC NULLS LAST, contract_id
+                ) AS evidence_rank
+            FROM eligible
+        ),
+        evidence AS (
+            SELECT
+                supplier_document_key,
+                buyer_document_id,
+                list(evidence_ref ORDER BY contract_value DESC, evidence_ref) AS evidence_refs
+            FROM ranked_evidence
+            WHERE evidence_rank <= 5
+            GROUP BY supplier_document_key, buyer_document_id
+        ),
+        pair_rollup AS (
+            SELECT
+                supplier_entity_id AS entity_id,
+                supplier_document_key AS entity_key,
+                buyer_document_id,
+                any_value(supplier_name) AS supplier_name,
+                any_value(buyer_name) AS buyer_name,
+                count(DISTINCT contract_id) AS contract_count,
+                count(DISTINCT department) AS distinct_department_count,
+                sum(contract_value) AS total_contract_value,
+                avg(contract_value) AS avg_contract_value,
+                min(signing_date) AS first_signing_date,
+                max(signing_date) AS last_signing_date
+            FROM eligible
+            GROUP BY supplier_entity_id, supplier_document_key, buyer_document_id
+        )
+        SELECT
+            'procurement_repeat_awards_same_supplier' AS signal_id,
+            r.entity_id,
+            r.entity_key,
+            'Company' AS entity_label,
+            'buyer:' || r.buyer_document_id AS scope_key,
+            'buyer' AS scope_type,
+            least(
+                1.0,
+                0.40
+                    + least(r.contract_count / 100.0, 0.35)
+                    + least(log10(greatest(r.total_contract_value, 1)) / 50.0, 0.25)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            r.supplier_name,
+            r.buyer_document_id,
+            r.buyer_name,
+            r.contract_count,
+            r.distinct_department_count,
+            r.total_contract_value,
+            r.avg_contract_value,
+            r.first_signing_date,
+            r.last_signing_date,
+            e.evidence_refs
+        FROM pair_rollup r
+        JOIN evidence e
+            ON e.supplier_document_key = r.entity_key
+            AND e.buyer_document_id = r.buyer_document_id
+        WHERE r.contract_count >= 10
+            AND r.total_contract_value >= 1000000000
+    """)
 
 
 def _table_sql(table: str) -> str:
@@ -489,6 +582,8 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_sanctioned_awards"
     if table == "signal_feature_procurement_supplier_concentration_across_entities":
         return "SELECT * FROM curated_supplier_concentration"
+    if table == "signal_feature_procurement_repeat_awards_same_supplier":
+        return "SELECT * FROM curated_repeat_awards_same_supplier"
     raise CuratedBuildError(f"unknown curated table: {table}")
 
 

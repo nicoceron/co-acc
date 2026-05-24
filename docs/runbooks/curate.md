@@ -17,6 +17,7 @@ Build one table:
 ```bash
 make curate TABLE=signal_feature_procurement_sanctioned_supplier_awarded
 make curate TABLE=signal_feature_procurement_supplier_concentration_across_entities
+make curate TABLE=signal_feature_procurement_repeat_awards_same_supplier
 ```
 
 `LAKE_ROOT` defaults to `./lake`. Override it when running against another
@@ -32,6 +33,7 @@ make curate LAKE_ROOT=/path/to/lake
 - `lake/curated/table=fct_procurement_contract_awards/`
 - `lake/curated/table=signal_feature_procurement_sanctioned_supplier_awarded/`
 - `lake/curated/table=signal_feature_procurement_supplier_concentration_across_entities/`
+- `lake/curated/table=signal_feature_procurement_repeat_awards_same_supplier/`
 - `lake/meta/curated/<timestamp>.json`
 
 The full default builder requires:
@@ -40,8 +42,9 @@ The full default builder requires:
 - `paco_sanctions`
 
 Table-specific builds only require their declared source inputs. For example,
-`signal_feature_procurement_supplier_concentration_across_entities` requires
-only `secop_ii_contracts`.
+`signal_feature_procurement_supplier_concentration_across_entities` and
+`signal_feature_procurement_repeat_awards_same_supplier` require only
+`secop_ii_contracts`.
 
 Semantic source names are resolved through `docs/datasets/catalog.proven.csv`.
 
@@ -53,6 +56,7 @@ Neo4j has no matching materialized hits or is unavailable:
 - `GET /api/v1/signals/`
 - `GET /api/v1/signals/procurement_sanctioned_supplier_awarded`
 - `GET /api/v1/signals/procurement_supplier_concentration_across_entities`
+- `GET /api/v1/signals/procurement_repeat_awards_same_supplier`
 
 Set `NEO4J_REQUIRED=false` to allow API startup without a graph. In that mode,
 graph-backed routes still return 503, but lake-backed signal routes and
@@ -66,6 +70,8 @@ small normalized match-key views so DuckDB can hash join on one key instead of
 evaluating broad multi-condition joins across the full SECOP contract table.
 Supplier concentration is a grouped DuckDB aggregation over SECOP contracts and
 uses `COPY (SELECT ...) TO parquet`; Python only receives table row counts.
+Repeat awards is likewise grouped in DuckDB by supplier document key and buyer
+document key, then written directly to parquet.
 
 ## Reality Notes
 
@@ -75,6 +81,7 @@ On the local lake generated during the 2026-05-24 run:
 - `fct_procurement_contract_awards`: 5,442,058 rows
 - `signal_feature_procurement_sanctioned_supplier_awarded`: 20,184 rows
 - `signal_feature_procurement_supplier_concentration_across_entities`: 497 rows
+- `signal_feature_procurement_repeat_awards_same_supplier`: 9,716 rows
 
 The first signal feature table joined 13,423 distinct SECOP contracts, 664
 distinct supplier document keys, and PACO evidence from `multas_secop`,
@@ -85,3 +92,7 @@ The supplier concentration feature emits supplier-level rows when a supplier
 has at least 25 contracts, 50 distinct public buyers, and COP 1B total awarded
 value in SECOP II contracts. Evidence refs are the top SECOP process URLs by
 contract value.
+
+The repeat-awards feature emits buyer/supplier pair rows when the same buyer
+awards at least 10 contracts and COP 1B total value to the same supplier.
+Evidence refs are the top SECOP process URLs by contract value.

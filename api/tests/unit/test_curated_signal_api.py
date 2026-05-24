@@ -82,6 +82,40 @@ def _write_curated_supplier_concentration(root: Path) -> None:
     )
 
 
+def _write_curated_repeat_awards(root: Path) -> None:
+    out = (
+        root
+        / "curated"
+        / "table=signal_feature_procurement_repeat_awards_same_supplier"
+    )
+    out.mkdir(parents=True)
+    pq.write_table(
+        pa.Table.from_pylist([
+            {
+                "signal_id": "procurement_repeat_awards_same_supplier",
+                "entity_id": "doc:901000111",
+                "entity_key": "901000111",
+                "entity_label": "Company",
+                "scope_key": "buyer:800999888",
+                "scope_type": "buyer",
+                "risk_signal": 0.75,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "supplier_name": "Proveedor Recurrente SAS",
+                "buyer_document_id": "800999888",
+                "buyer_name": "Comprador Recurrente",
+                "contract_count": 10,
+                "total_contract_value": 2_000_000_000.0,
+                "evidence_refs": [
+                    "https://secop.example/CR-1",
+                    "https://secop.example/CR-2",
+                ],
+            }
+        ]),
+        out / "part-00000.parquet",
+    )
+
+
 @pytest.mark.anyio
 async def test_signal_detail_reads_curated_samples_without_neo4j(
     client: AsyncClient,
@@ -122,6 +156,7 @@ async def test_signal_list_counts_curated_hits_without_neo4j(
     app.state.neo4j_driver = None
     _write_curated_signal(tmp_path)
     _write_curated_supplier_concentration(tmp_path)
+    _write_curated_repeat_awards(tmp_path)
 
     response = await client.get("/api/v1/signals/")
 
@@ -129,6 +164,7 @@ async def test_signal_list_counts_curated_hits_without_neo4j(
     signals = {row["id"]: row for row in response.json()["signals"]}
     assert signals["procurement_sanctioned_supplier_awarded"]["hit_count"] == 1
     assert signals["procurement_supplier_concentration_across_entities"]["hit_count"] == 1
+    assert signals["procurement_repeat_awards_same_supplier"]["hit_count"] == 1
 
 
 @pytest.mark.anyio
@@ -154,6 +190,33 @@ async def test_supplier_concentration_detail_reads_curated_sample_without_neo4j(
     assert hit["evidence_refs"] == [
         "https://secop.example/CX-1",
         "https://secop.example/CX-2",
+    ]
+
+
+@pytest.mark.anyio
+async def test_repeat_awards_detail_reads_curated_sample_without_neo4j(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    app.state.neo4j_driver = None
+    _write_curated_repeat_awards(tmp_path)
+
+    response = await client.get(
+        "/api/v1/signals/procurement_repeat_awards_same_supplier?limit=1"
+    )
+
+    assert response.status_code == 200
+    hit = response.json()["sample_hits"][0]
+    assert hit["entity_key"] == "901000111"
+    assert hit["scope_key"] == "buyer:800999888"
+    assert hit["sources"] == [
+        {"database": "secop_ii_contracts", "record_id": None, "extracted_at": None}
+    ]
+    assert hit["evidence_refs"] == [
+        "https://secop.example/CR-1",
+        "https://secop.example/CR-2",
     ]
 
 

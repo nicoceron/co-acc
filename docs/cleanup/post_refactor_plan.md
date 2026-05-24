@@ -714,16 +714,18 @@ Build `lake/curated/` from `lake/raw/`. Three deliverables:
 
 **Started 2026-05-24:** the first narrow slice is live. `coacc-etl curate`
 builds `table=dim_subject_document`, `table=fct_procurement_contract_awards`,
-`table=signal_feature_procurement_sanctioned_supplier_awarded`, and
-`table=signal_feature_procurement_supplier_concentration_across_entities`
+`table=signal_feature_procurement_sanctioned_supplier_awarded`,
+`table=signal_feature_procurement_supplier_concentration_across_entities`, and
+`table=signal_feature_procurement_repeat_awards_same_supplier`
 from SECOP II contracts (`jbjy-vk9h`, resolved through the
 `secop_ii_contracts` semantic alias) and, where required, `paco_sanctions`.
 On the local lake it produced 1,215,832 subject document rows, 5,442,058 award
 rows, 20,184 PACO-backed sanctioned-supplier signal rows, and 497 SECOP-only
-supplier-concentration signal rows. This is not full Phase 10 completion yet;
-it is the proof that the lake/DuckDB path can cross-reference public sanctions
-and procurement, and aggregate procurement patterns, without loading the full
-graph or a full join into Python memory.
+supplier-concentration signal rows, and 9,716 SECOP-only repeat-awards signal
+rows. This is not full Phase 10 completion yet; it is the proof that the
+lake/DuckDB path can cross-reference public sanctions and procurement, and
+aggregate procurement patterns, without loading the full graph or a full join
+into Python memory.
 
 ### 6.2 Module layout
 
@@ -740,6 +742,7 @@ etl/src/coacc_etl/curated/
 └── builders/
     ├── procurement_sanctioned_supplier_awarded.py
     ├── procurement_supplier_concentration_across_entities.py
+    ├── procurement_repeat_awards_same_supplier.py
     └── …  (one per signal that has both required sources ingested)
 ```
 
@@ -805,7 +808,7 @@ class SignalFeatureRow(BaseModel):
    sources include `5u9e-g5w9` and `8tz7-h3eu` while `2jzx-383z`
    remains gated. Add a contract test that no row in
    `dim_person` has a `nit_canonical` set (cross-pollination guard).
-4. **Signal feature builders.** Start with two:
+4. **Signal feature builders.** Start with three:
    - `procurement_sanctioned_supplier_awarded`: **first slice shipped
      2026-05-24** as
      `lake/curated/table=signal_feature_procurement_sanctioned_supplier_awarded/`.
@@ -819,6 +822,13 @@ class SignalFeatureRow(BaseModel):
      buyers, and emits when a supplier has at least 25 contracts, 50 distinct
      buyers, and COP 1B total awarded value. The local lake emits 497 rows,
      with the top SECOP process URLs by contract value carried as evidence.
+   - `procurement_repeat_awards_same_supplier`: **third slice shipped
+     2026-05-24** as
+     `lake/curated/table=signal_feature_procurement_repeat_awards_same_supplier/`.
+     It is SECOP-only, aggregates buyer/supplier pairs, and emits when the
+     same buyer awards at least 10 contracts and COP 1B total value to the
+     same supplier. The local lake emits 9,716 rows, with the top SECOP process
+     URLs by contract value carried as evidence.
    Add others incrementally; the demo only needs ~3–5. Every builder first
      emits a join-coverage report (`left_rows`, `matched_rows`,
    `unmatched_sample`) so the operator knows whether keys connect before
@@ -880,10 +890,11 @@ not the foundation.
 the shipped signal feature tables and can answer public requests when Neo4j is
 unavailable. Current lake-backed signal IDs are
 `procurement_sanctioned_supplier_awarded` and
-`procurement_supplier_concentration_across_entities`. This is a thin API
-projection slice, not full Phase 11 completion: entity detail, search, cases,
-graph expansion, and broader public pattern APIs still need lake-backed
-implementations or explicit graph-required behavior.
+`procurement_supplier_concentration_across_entities`, and
+`procurement_repeat_awards_same_supplier`. This is a thin API projection slice,
+not full Phase 11 completion: entity detail, search, cases, graph expansion,
+and broader public pattern APIs still need lake-backed implementations or
+explicit graph-required behavior.
 
 ### 7.1 Goal
 
@@ -1623,6 +1634,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   lake/DuckDB path can find high-volume cross-buyer procurement patterns from
   one large public source with bounded memory, giving the API a second useful
   public signal while canonical dimensions are still being designed.
+- **2026-05-24** — Add SECOP-only repeat awards as the third curated signal.
+  Rationale: a buyer repeatedly awarding high total value to the same supplier
+  is a simple, auditable procurement pattern that does not require additional
+  adapters and gives the public API another useful lake-backed route while
+  typed dimensions are still pending.
 - **2026-05-06** — `paco_sanctions` adapter promoted from deferred
   Phase 9 to critical-path Phase 9.0 (3–4 days). Rationale: Phase 13
   supervised top-up needs sanctioned-supplier labels; without them
