@@ -17,6 +17,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Added the SECOP-only
   `procurement_supplier_concentration_across_entities` curated signal feature
   table for supplier exposure across many public buyers.
+- Added curated-table coverage to `make lake-reality`, including row counts,
+  freshness, manifest reconciliation, schema hashes, and evidence-ref checks
+  for signal feature tables.
 - Added the `paco_sanctions` custom ETL adapter, dataset contract, and tests
   so PACO public sanction feeds can land in the parquet lake without Neo4j.
 - Added Phase 8 lake reality snapshots: per-dataset local parquet health metrics,

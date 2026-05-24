@@ -83,9 +83,9 @@ One-page trace of how data moves through co/acc, from raw audit JSON to API resp
                        ▼                    ▼                    ▼
         ┌─────────────────────┐  ┌─────────────────────┐  ┌─────────────────────┐
         │  lakehouse.reality  │  │  api/               │  │  signal engine      │
-        │  freshness +        │  │  FastAPI service    │  │  (api workspace)    │
-        │  coverage rollup    │  │  reads parquet via  │  │  reads parquet via  │
-        │  per dataset        │  │  DuckDB first;      │  │  DuckDB, emits      │
+        │  freshness,         │  │  FastAPI service    │  │  (api workspace)    │
+        │  coverage, manifest │  │  reads parquet via  │  │  reads parquet via  │
+        │  + evidence checks  │  │  DuckDB first;      │  │  DuckDB, emits      │
         │  scripts/lake_      │  │  Neo4j optional     │  │  signal rows per    │
         │  reality.py         │  │  projection only    │  │  signal_registry    │
         └─────────────────────┘  └─────────────────────┘  └─────────────────────┘

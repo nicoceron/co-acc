@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from coacc_etl.catalog import DatasetSpec, load_catalog
 from coacc_etl.lakehouse.health_diff import (
     Finding,
+    diff_curated_health,
     diff_health,
     findings_have_failures,
     load_thresholds,
@@ -24,7 +25,14 @@ from coacc_etl.lakehouse.health_diff import (
     thresholds_for,
 )
 from coacc_etl.lakehouse.paths import lake_root, meta_path
-from coacc_etl.lakehouse.reality import DatasetHealth, RealityError, compute_all_health
+from coacc_etl.lakehouse.reality import (
+    CuratedTableHealth,
+    DatasetHealth,
+    RealityError,
+    compute_all_curated_health,
+    compute_all_health,
+    local_curated_tables,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +48,7 @@ class RealitySnapshot(BaseModel):
     snapshot_date: str
     baseline_date: str | None = None
     datasets: list[DatasetHealth] = Field(default_factory=list)
+    curated_tables: list[CuratedTableHealth] = Field(default_factory=list)
     findings: list[Finding] = Field(default_factory=list)
 
 
@@ -67,6 +76,27 @@ def parse_args() -> argparse.Namespace:
         "--changed-yamls-only",
         action="store_true",
         help="Scan catalog YAML files changed in git, useful for local pre-commit checks.",
+    )
+    parser.add_argument(
+        "--curated-table",
+        action="append",
+        default=[],
+        help="Curated table to scan. May be passed more than once.",
+    )
+    parser.add_argument(
+        "--curated-tables",
+        default=None,
+        help="Comma-separated curated table names to scan.",
+    )
+    parser.add_argument(
+        "--skip-curated",
+        action="store_true",
+        help="Do not scan local lake/curated tables.",
+    )
+    parser.add_argument(
+        "--curated-only",
+        action="store_true",
+        help="Scan curated tables only; raw dataset probes are skipped.",
     )
     parser.add_argument(
         "--with-live",
@@ -101,17 +131,24 @@ def parse_args() -> argparse.Namespace:
 def run_reality(args: argparse.Namespace) -> RealitySnapshot:
     root = _ensure_lake_root()
     catalog = load_catalog()
-    selected_ids = _select_dataset_ids(args, catalog, root)
+    selected_ids = [] if args.curated_only else _select_dataset_ids(args, catalog, root)
+    selected_curated_tables = _select_curated_tables(args, root)
     selected_specs = [catalog[dataset_id] for dataset_id in selected_ids]
     generated_at = datetime.now(tz=UTC)
     snapshot_date = _snapshot_date(args.date, generated_at)
     output_dir = args.output_dir or (meta_path() / "reality")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    baseline_date, previous = _load_baseline(output_dir, snapshot_date, args.baseline)
+    baseline_date, previous, previous_curated = _load_baseline(
+        output_dir,
+        snapshot_date,
+        args.baseline,
+    )
     previous_by_id = {dataset.dataset_id: dataset for dataset in previous}
+    previous_curated_by_table = {table.table: table for table in previous_curated}
     thresholds = load_thresholds(args.thresholds)
     datasets: list[DatasetHealth] = []
+    curated_tables: list[CuratedTableHealth] = []
     findings: list[Finding] = []
 
     if selected_specs:
@@ -128,11 +165,30 @@ def run_reality(args: argparse.Namespace) -> RealitySnapshot:
     else:
         logger.info("No datasets selected for lake reality probe.")
 
+    if selected_curated_tables:
+        logger.info(
+            "Probing %d curated table(s): %s",
+            len(selected_curated_tables),
+            ", ".join(selected_curated_tables),
+        )
+        curated_tables = compute_all_curated_health(selected_curated_tables, now=generated_at)
+        for table in curated_tables:
+            findings.extend(
+                diff_curated_health(
+                    previous_curated_by_table.get(table.table),
+                    table,
+                    thresholds_for(thresholds, f"curated:{table.table}"),
+                )
+            )
+    else:
+        logger.info("No curated tables selected for lake reality probe.")
+
     snapshot = RealitySnapshot(
         generated_at=generated_at,
         snapshot_date=snapshot_date,
         baseline_date=baseline_date,
         datasets=datasets,
+        curated_tables=curated_tables,
         findings=findings,
     )
     _write_snapshot(output_dir, snapshot)
@@ -190,6 +246,34 @@ def _select_dataset_ids(
             logger.info("No catalog-backed sources found under %s/raw", root)
         return local_dataset_ids
     return []
+
+
+def _select_curated_tables(args: argparse.Namespace, root: Path) -> list[str]:
+    requested = set(args.curated_table)
+    if args.curated_tables:
+        requested.update(item.strip() for item in args.curated_tables.split(",") if item.strip())
+
+    if args.skip_curated:
+        if requested:
+            raise RealityCliError("--skip-curated cannot be combined with curated table filters")
+        if args.curated_only:
+            raise RealityCliError("--skip-curated cannot be combined with --curated-only")
+        return []
+
+    local_tables = set(local_curated_tables(root))
+    if requested:
+        missing = sorted(requested - local_tables)
+        if missing:
+            raise RealityCliError(f"Missing curated table(s): {', '.join(missing)}")
+        return sorted(requested)
+
+    if args.curated_only:
+        return sorted(local_tables)
+
+    raw_selection_requested = bool(args.dataset or args.datasets or args.changed_yamls_only)
+    if raw_selection_requested and not args.all:
+        return []
+    return sorted(local_tables)
 
 
 def _local_catalog_dataset_ids(root: Path, catalog: dict[str, DatasetSpec]) -> list[str]:
@@ -267,7 +351,7 @@ def _load_baseline(
     output_dir: Path,
     snapshot_date: str,
     requested: str | None,
-) -> tuple[str | None, list[DatasetHealth]]:
+) -> tuple[str | None, list[DatasetHealth], list[CuratedTableHealth]]:
     path: Path | None
     if requested:
         requested_path = Path(requested)
@@ -283,11 +367,11 @@ def _load_baseline(
         path = max(older, default=None)
 
     if path is None:
-        return None, []
+        return None, [], []
 
     raw = json.loads(path.read_text(encoding="utf-8"))
     snapshot = RealitySnapshot.model_validate(raw)
-    return snapshot.snapshot_date, snapshot.datasets
+    return snapshot.snapshot_date, snapshot.datasets, snapshot.curated_tables
 
 
 def _looks_like_date(value: str) -> bool:
@@ -311,6 +395,7 @@ def _write_snapshot(output_dir: Path, snapshot: RealitySnapshot) -> None:
             generated_at=snapshot.generated_at,
             baseline_date=snapshot.baseline_date,
             datasets=snapshot.datasets,
+            curated_tables=snapshot.curated_tables,
             findings=snapshot.findings,
         ),
         encoding="utf-8",
@@ -336,6 +421,7 @@ def main() -> None:
     print(
         f"Lake reality {snapshot.snapshot_date}: "
         f"{len(snapshot.datasets)} dataset(s), "
+        f"{len(snapshot.curated_tables)} curated table(s), "
         f"{failure_count} failure(s), {warning_count} warning(s)"
     )
     for finding in snapshot.findings:

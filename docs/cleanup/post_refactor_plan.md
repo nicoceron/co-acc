@@ -484,6 +484,10 @@ vs the previous snapshot.
       lake mounted locally.
 - [x] Route PRs touching `etl/datasets/*.yml` through the same self-hosted
       Action with `--changed-yamls-only`.
+- [x] 2026-05-24: `make lake-reality` also probes local curated tables by
+      default, records curated row counts/freshness/schema hashes, reconciles
+      the latest `lake/meta/curated/*.json` manifest row count, and fails
+      signal feature tables whose rows lack `evidence_refs`.
 - [ ] Configure the `coacc-lake` runner/optional webhook and record three
       consecutive green daily runs.
 
@@ -822,11 +826,13 @@ class SignalFeatureRow(BaseModel):
 5. **Driver script.** `coacc-etl curate` rebuilds the shipped builder set and
    `coacc-etl curate --table <name>` rebuilds one table. Current run metadata
    is JSON under `lake/meta/curated/`; a parquet run ledger remains to do.
-6. **Reality probe extension.** Phase 8's `make lake-reality` learns
-   to also probe `lake/curated/` directories with curated-specific
-   thresholds (NIT canonicalization should match ≥99% of input rows;
-   signal feature parquets should be non-empty for every dataset
-   intersection that's plausibly non-empty).
+6. **Reality probe extension.** **Shipped first slice 2026-05-24.** Phase 8's
+   `make lake-reality` now also probes local `lake/curated/table=*/`
+   directories by default, writes `curated_tables` into the reality snapshot,
+   reconciles latest curated manifests, tracks freshness/schema/row counts,
+   and fails signal feature tables with missing or empty `evidence_refs`.
+   Future typed dimensions still need table-specific thresholds, such as NIT
+   canonicalization matching ≥99% of input rows.
 
 ### 6.5 Tests
 
@@ -847,7 +853,8 @@ class SignalFeatureRow(BaseModel):
 - [ ] All curated outputs validate against contracts.
 - [ ] `coacc-etl curate --all` runs end-to-end in <10 minutes on the
       Phase 7 lake.
-- [ ] `make lake-reality` covers curated/ without errors.
+- [x] `make lake-reality` covers curated/ without errors for the shipped
+      curated tables.
 
 ### 6.7 Risks
 

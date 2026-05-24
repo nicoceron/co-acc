@@ -24,7 +24,7 @@ against Socrata field names, then writes renamed canonical columns to the lake.
 
 ## Run Commands
 
-Scan every catalog-backed source present in the local lake:
+Scan every catalog-backed source and curated table present in the local lake:
 
 ```bash
 make lake-reality
@@ -35,6 +35,25 @@ Scan one or more datasets:
 ```bash
 make lake-reality DATASET=8qxx-ubmq
 make lake-reality DATASETS=8qxx-ubmq,rpmr-utcd
+```
+
+Explicit dataset scans stay narrow. Scan one or more curated tables directly:
+
+```bash
+make lake-reality CURATED_TABLE=signal_feature_procurement_sanctioned_supplier_awarded
+make lake-reality CURATED_TABLES=signal_feature_procurement_sanctioned_supplier_awarded,signal_feature_procurement_supplier_concentration_across_entities
+```
+
+Skip curated-table checks when you only want raw-source reality:
+
+```bash
+make lake-reality SKIP_CURATED=1
+```
+
+Scan only curated tables:
+
+```bash
+make lake-reality CURATED_ONLY=1
 ```
 
 Use Socrata live counts as an extra check:
@@ -79,7 +98,7 @@ without local parquet are skipped because there is no lake state to compare yet.
 
 ## Metrics
 
-Each dataset snapshot includes:
+Each raw dataset snapshot includes:
 
 - `row_count`
 - `parquet_file_count`
@@ -93,10 +112,23 @@ Each dataset snapshot includes:
 - `freshness_seconds`
 - optional `live_count`
 
+Each curated-table snapshot includes:
+
+- `row_count`
+- `parquet_file_count`
+- `schema_hash`
+- `freshness_seconds`
+- manifest file/entry counts
+- latest manifest path, timestamp, and row count
+- whether manifest rows match parquet rows
+- evidence-ref row count, evidence-ref count, and evidence-ref coverage when
+  an `evidence_refs` column exists
+
 ## Thresholds
 
 Default thresholds live in `config/reality_thresholds.yml`. Per-dataset
-overrides can be added under `datasets.<dataset_id>`.
+overrides can be added under `datasets.<dataset_id>`. Curated-table overrides
+use the synthetic ID `curated:<table_name>`.
 
 Common overrides:
 
@@ -105,6 +137,8 @@ datasets:
   rpmr-utcd:
     sentinel_fraction_rise: 0.02
     row_count_drop_ratio: 0.005
+  "curated:signal_feature_procurement_supplier_concentration_across_entities":
+    max_freshness_seconds: 86400
 ```
 
 ## Operational Notes
@@ -113,3 +147,7 @@ The command scans local parquet in batches controlled by DuckDB and does not
 materialize complete datasets into Python memory. It does still need local
 parquet files. For a remote lake, restore or mount the needed parquet partitions
 first, then run the probe over that local path with `COACC_LAKE_ROOT`.
+
+For signal feature tables, `lake-reality` fails if `evidence_refs` is missing
+or any row lacks at least one evidence ref. That keeps public API samples
+auditable back to the source rows instead of becoming anonymous counts.

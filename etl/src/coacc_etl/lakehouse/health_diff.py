@@ -8,7 +8,7 @@ import yaml  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from coacc_etl.lakehouse.reality import DatasetHealth
+    from coacc_etl.lakehouse.reality import CuratedTableHealth, DatasetHealth
 
 Severity = Literal["info", "warn", "fail"]
 
@@ -227,6 +227,156 @@ def diff_health(
     return findings
 
 
+def current_curated_health_findings(
+    current: CuratedTableHealth,
+    thresholds: RealityThresholds,
+) -> list[Finding]:
+    findings: list[Finding] = []
+    dataset_id = _curated_id(current.table)
+    if current.row_count == 0:
+        findings.append(
+            Finding(
+                dataset_id=dataset_id,
+                metric="row_count",
+                severity="fail",
+                message="curated table has zero rows",
+                current=0,
+                threshold=">0",
+            )
+        )
+
+    if current.latest_manifest_path is None:
+        findings.append(
+            Finding(
+                dataset_id=dataset_id,
+                metric="manifest",
+                severity="warn",
+                message="curated table has no manifest entry",
+                current=current.manifest_entry_count,
+                threshold=">=1",
+            )
+        )
+    elif current.manifest_row_count_matches is False:
+        findings.append(
+            Finding(
+                dataset_id=dataset_id,
+                metric="manifest.rows",
+                severity="fail",
+                message="latest curated manifest row count does not match parquet rows",
+                current=current.row_count,
+                previous=current.latest_manifest_rows,
+            )
+        )
+
+    if current.table.startswith("signal_feature_"):
+        if current.evidence_ref_coverage is None:
+            findings.append(
+                Finding(
+                    dataset_id=dataset_id,
+                    metric="evidence_refs",
+                    severity="fail",
+                    message="signal feature table is missing evidence_refs",
+                    current=None,
+                    threshold="present",
+                )
+            )
+        elif current.evidence_ref_coverage < 1.0:
+            findings.append(
+                Finding(
+                    dataset_id=dataset_id,
+                    metric="evidence_ref_coverage",
+                    severity="fail",
+                    message="signal feature rows must carry at least one evidence ref",
+                    current=round(current.evidence_ref_coverage, 6),
+                    threshold=1.0,
+                )
+            )
+
+    if (
+        thresholds.max_freshness_seconds is not None
+        and current.freshness_seconds is not None
+        and current.freshness_seconds > thresholds.max_freshness_seconds
+    ):
+        findings.append(
+            Finding(
+                dataset_id=dataset_id,
+                metric="freshness_seconds",
+                severity="warn",
+                message="latest curated parquet file is older than the configured freshness budget",
+                current=round(current.freshness_seconds, 2),
+                threshold=thresholds.max_freshness_seconds,
+            )
+        )
+
+    return findings
+
+
+def diff_curated_health(
+    previous: CuratedTableHealth | None,
+    current: CuratedTableHealth,
+    thresholds: RealityThresholds,
+) -> list[Finding]:
+    findings = current_curated_health_findings(current, thresholds)
+    dataset_id = _curated_id(current.table)
+    if previous is None:
+        findings.append(
+            Finding(
+                dataset_id=dataset_id,
+                metric="baseline",
+                severity="info",
+                message="no previous baseline was available for this curated table",
+            )
+        )
+        return findings
+
+    if previous.row_count > 0:
+        drop_ratio = (previous.row_count - current.row_count) / previous.row_count
+        if drop_ratio > thresholds.row_count_drop_ratio:
+            findings.append(
+                Finding(
+                    dataset_id=dataset_id,
+                    metric="row_count",
+                    severity="fail",
+                    message=f"curated row count dropped by {drop_ratio:.4%}",
+                    current=current.row_count,
+                    previous=previous.row_count,
+                    threshold=thresholds.row_count_drop_ratio,
+                )
+            )
+
+    if current.schema_hash != previous.schema_hash:
+        findings.append(
+            Finding(
+                dataset_id=dataset_id,
+                metric="schema_hash",
+                severity="warn",
+                message="curated schema hash changed",
+                current=current.schema_hash,
+                previous=previous.schema_hash,
+            )
+        )
+
+    if (
+        previous.evidence_ref_coverage is not None
+        and current.evidence_ref_coverage is not None
+        and current.evidence_ref_coverage + thresholds.null_rate_margin
+        < previous.evidence_ref_coverage
+    ):
+        findings.append(
+            Finding(
+                dataset_id=dataset_id,
+                metric="evidence_ref_coverage",
+                severity="fail",
+                message="curated evidence ref coverage regressed",
+                current=round(current.evidence_ref_coverage, 6),
+                previous=round(previous.evidence_ref_coverage, 6),
+                threshold=round(previous.evidence_ref_coverage - thresholds.null_rate_margin, 6),
+            )
+        )
+
+    return findings
+
+
 def findings_have_failures(findings: list[Finding]) -> bool:
     return any(finding.severity == "fail" for finding in findings)
 
@@ -237,8 +387,10 @@ def render_diff_markdown(
     generated_at: datetime | None,
     baseline_date: str | None,
     datasets: list[DatasetHealth],
+    curated_tables: list[CuratedTableHealth] | None = None,
     findings: list[Finding],
 ) -> str:
+    curated_tables = curated_tables or []
     generated_at = generated_at or datetime.now(tz=UTC)
     lines = [
         f"# Lake reality diff: {snapshot_date}",
@@ -246,6 +398,7 @@ def render_diff_markdown(
         f"- Generated at: `{generated_at.isoformat()}`",
         f"- Baseline: `{baseline_date or 'none'}`",
         f"- Datasets: `{len(datasets)}`",
+        f"- Curated tables: `{len(curated_tables)}`",
         f"- Failures: `{sum(1 for finding in findings if finding.severity == 'fail')}`",
         f"- Warnings: `{sum(1 for finding in findings if finding.severity == 'warn')}`",
         "",
@@ -263,6 +416,22 @@ def render_diff_markdown(
             f"{dataset.parquet_file_count} | `{watermark}` | {dup_ratio} | {sentinel} | "
             f"`{dataset.schema_hash[:12]}` |"
         )
+
+    lines.extend(["", "## Curated Table Summary", ""])
+    if not curated_tables:
+        lines.append("No curated tables probed.")
+    else:
+        lines.append(
+            "| table | rows | files | manifest rows | evidence coverage | schema |"
+        )
+        lines.append("| --- | ---: | ---: | ---: | ---: | --- |")
+        for table in sorted(curated_tables, key=lambda item: item.table):
+            manifest_rows = "" if table.latest_manifest_rows is None else table.latest_manifest_rows
+            lines.append(
+                f"| `{table.table}` | {table.row_count} | {table.parquet_file_count} | "
+                f"{manifest_rows} | {_format_ratio(table.evidence_ref_coverage)} | "
+                f"`{table.schema_hash[:12]}` |"
+            )
 
     lines.extend(["", "## Findings", ""])
     if not findings:
@@ -307,6 +476,10 @@ def _append_rise_finding(
                 threshold=threshold,
             )
         )
+
+
+def _curated_id(table: str) -> str:
+    return f"curated:{table}"
 
 
 def _format_ratio(value: float | None) -> str:

@@ -11,7 +11,11 @@ LAKE_REALITY_ARGS = $(if $(DATASET),--dataset $(DATASET),) \
 	$(if $(REALITY_DATE),--date $(REALITY_DATE),) \
 	$(if $(REALITY_OUTPUT_DIR),--output-dir "$(REALITY_OUTPUT_DIR)",) \
 	$(if $(REALITY_THRESHOLDS),--thresholds "$(REALITY_THRESHOLDS)",) \
-	$(if $(CHANGED_YAMLS_ONLY),--changed-yamls-only,)
+	$(if $(CHANGED_YAMLS_ONLY),--changed-yamls-only,) \
+	$(if $(CURATED_TABLE),--curated-table "$(CURATED_TABLE)",) \
+	$(if $(CURATED_TABLES),--curated-tables "$(CURATED_TABLES)",) \
+	$(if $(SKIP_CURATED),--skip-curated,) \
+	$(if $(CURATED_ONLY),--curated-only,)
 
 .PHONY: setup-env dev stop api etl frontend \
 	clean-data \

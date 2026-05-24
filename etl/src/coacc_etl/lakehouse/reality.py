@@ -7,11 +7,12 @@ import logging
 import math
 import sys
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 import duckdb
 from pydantic import BaseModel, ConfigDict, Field
 
+from coacc_etl.lakehouse.paths import curated_path, lake_root, meta_path
 from coacc_etl.lakehouse.reader import register_source, source_files
 from coacc_etl.streaming import _socrata_request
 
@@ -34,6 +35,14 @@ JOIN_KEY_PRIORITY: tuple[JoinKeyClass, ...] = (
 
 class RealityError(RuntimeError):
     """Raised when a dataset cannot be probed from the local lake."""
+
+
+class CuratedManifestInfo(TypedDict):
+    manifest_file_count: int
+    manifest_entry_count: int
+    path: str | None
+    generated_at: datetime | None
+    rows: int | None
 
 
 class ColumnSchema(BaseModel):
@@ -69,6 +78,29 @@ class DatasetHealth(BaseModel):
     schema_columns: list[ColumnSchema]
     freshness_seconds: float | None = None
     live_count: int | None = None
+
+
+class CuratedTableHealth(BaseModel):
+    """Point-in-time local health metrics for one curated parquet table."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    table: str
+    probed_at: datetime
+    row_count: int
+    parquet_file_count: int
+    schema_hash: str
+    schema_columns: list[ColumnSchema]
+    freshness_seconds: float | None = None
+    manifest_file_count: int
+    manifest_entry_count: int
+    latest_manifest_path: str | None = None
+    latest_manifest_generated_at: datetime | None = None
+    latest_manifest_rows: int | None = None
+    manifest_row_count_matches: bool | None = None
+    evidence_ref_rows: int | None = None
+    evidence_ref_count: int | None = None
+    evidence_ref_coverage: float | None = None
 
 
 def socrata_live_count(
@@ -204,6 +236,98 @@ def compute_all_health(
         return results
     finally:
         con.close()
+
+
+def compute_curated_table_health(
+    table: str,
+    *,
+    con: duckdb.DuckDBPyConnection | None = None,
+    now: datetime | None = None,
+) -> CuratedTableHealth:
+    """Compute local health for one curated table without loading rows into Python."""
+    files = _curated_table_files(table)
+    if not files:
+        raise RealityError(f"curated:{table}: no parquet files under local curated path")
+
+    probe_time = now or datetime.now(tz=UTC)
+    owned_connection = con is None
+    connection = con or duckdb.connect(":memory:")
+    view = f"curated_probe_{hashlib.sha1(table.encode('utf-8')).hexdigest()[:12]}"
+    try:
+        connection.execute(
+            f"CREATE OR REPLACE TEMP VIEW {_quote_ident(view)} AS "
+            f"SELECT * FROM read_parquet({_sql_string_list(files)})"
+        )
+        schema_columns = _schema(connection, view)
+        schema_names = {column.name for column in schema_columns}
+        row_count = _scalar_int(connection, f"SELECT count(*) FROM {_quote_ident(view)}")
+        evidence_ref_rows: int | None = None
+        evidence_ref_count: int | None = None
+        evidence_ref_coverage: float | None = None
+        evidence_type = next(
+            (
+                column.duckdb_type
+                for column in schema_columns
+                if column.name == "evidence_refs"
+            ),
+            None,
+        )
+        if "evidence_refs" in schema_names:
+            evidence_ref_rows = _evidence_ref_rows(connection, view, evidence_type)
+            evidence_ref_count = _evidence_ref_count(connection, view, evidence_type)
+            evidence_ref_coverage = _ratio(evidence_ref_rows, row_count)
+
+        manifest = _latest_curated_manifest(table)
+        latest_manifest_rows = manifest["rows"]
+        return CuratedTableHealth(
+            table=table,
+            probed_at=probe_time,
+            row_count=row_count,
+            parquet_file_count=len(files),
+            schema_hash=_schema_hash(schema_columns),
+            schema_columns=schema_columns,
+            freshness_seconds=_freshness_seconds(files, probe_time),
+            manifest_file_count=manifest["manifest_file_count"],
+            manifest_entry_count=manifest["manifest_entry_count"],
+            latest_manifest_path=manifest["path"],
+            latest_manifest_generated_at=manifest["generated_at"],
+            latest_manifest_rows=latest_manifest_rows,
+            manifest_row_count_matches=(
+                None if latest_manifest_rows is None else latest_manifest_rows == row_count
+            ),
+            evidence_ref_rows=evidence_ref_rows,
+            evidence_ref_count=evidence_ref_count,
+            evidence_ref_coverage=evidence_ref_coverage,
+        )
+    finally:
+        if owned_connection:
+            connection.close()
+
+
+def compute_all_curated_health(
+    tables: Iterable[str],
+    *,
+    now: datetime | None = None,
+) -> list[CuratedTableHealth]:
+    """Compute health for curated tables using one DuckDB connection."""
+    probe_time = now or datetime.now(tz=UTC)
+    con = duckdb.connect(":memory:")
+    try:
+        return [compute_curated_table_health(table, con=con, now=probe_time) for table in tables]
+    finally:
+        con.close()
+
+
+def local_curated_tables(root: Path | None = None) -> list[str]:
+    """Return curated table names that have local parquet files."""
+    curated_root = (root or lake_root()) / "curated"
+    if not curated_root.exists():
+        return []
+    tables: list[str] = []
+    for path in sorted(curated_root.glob("table=*")):
+        if path.is_dir() and any(path.rglob("*.parquet")):
+            tables.append(path.name.split("=", 1)[1])
+    return tables
 
 
 def _schema(con: duckdb.DuckDBPyConnection, view: str) -> list[ColumnSchema]:
@@ -369,6 +493,121 @@ def _scalar_int(con: duckdb.DuckDBPyConnection, sql: str) -> int:
     if not row or row[0] is None:
         return 0
     return int(row[0])
+
+
+def _curated_table_files(table: str) -> list[Path]:
+    return sorted(path for path in curated_path(table).rglob("*.parquet") if path.is_file())
+
+
+def _sql_string(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
+def _sql_string_list(files: list[Path]) -> str:
+    return "[" + ", ".join(_sql_string(str(file)) for file in files) + "]"
+
+
+def _evidence_ref_rows(
+    con: duckdb.DuckDBPyConnection,
+    view: str,
+    evidence_type: str | None,
+) -> int:
+    if _is_list_type(evidence_type):
+        return _scalar_int(
+            con,
+            f"SELECT count(*) FROM {_quote_ident(view)} "
+            "WHERE evidence_refs IS NOT NULL AND array_length(evidence_refs) > 0",
+        )
+    return _scalar_int(
+        con,
+        f"SELECT count(*) FROM {_quote_ident(view)} WHERE {_present_expr('evidence_refs')}",
+    )
+
+
+def _evidence_ref_count(
+    con: duckdb.DuckDBPyConnection,
+    view: str,
+    evidence_type: str | None,
+) -> int:
+    if _is_list_type(evidence_type):
+        return _scalar_int(
+            con,
+            f"SELECT coalesce(sum(array_length(evidence_refs)), 0) FROM {_quote_ident(view)} "
+            "WHERE evidence_refs IS NOT NULL",
+        )
+    return _evidence_ref_rows(con, view, evidence_type)
+
+
+def _is_list_type(duckdb_type: str | None) -> bool:
+    if duckdb_type is None:
+        return False
+    normalized = duckdb_type.upper()
+    return "[]" in normalized or normalized.startswith("LIST")
+
+
+def _latest_curated_manifest(table: str) -> CuratedManifestInfo:
+    manifest_dir = meta_path() / "curated"
+    manifest_paths = sorted(manifest_dir.glob("*.json")) if manifest_dir.exists() else []
+    entry_count = 0
+    latest_path: Path | None = None
+    latest_generated_at: datetime | None = None
+    latest_rows: int | None = None
+    for path in manifest_paths:
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            logger.warning("Skipping unreadable curated manifest: %s", path)
+            continue
+        generated_at = _parse_manifest_datetime(raw.get("generated_at"))
+        if generated_at is None:
+            generated_at = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC)
+        tables = raw.get("tables") if isinstance(raw, dict) else None
+        if not isinstance(tables, list):
+            continue
+        for item in tables:
+            if not isinstance(item, dict) or item.get("table") != table:
+                continue
+            entry_count += 1
+            if latest_generated_at is None or generated_at > latest_generated_at:
+                latest_generated_at = generated_at
+                latest_path = path
+                latest_rows = _coerce_int(item.get("rows"))
+    return {
+        "manifest_file_count": len(manifest_paths),
+        "manifest_entry_count": entry_count,
+        "path": str(latest_path) if latest_path is not None else None,
+        "generated_at": latest_generated_at,
+        "rows": latest_rows,
+    }
+
+
+def _parse_manifest_datetime(value: object) -> datetime | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
+
+
+def _coerce_int(value: object) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if not isinstance(value, str):
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        return None
 
 
 def _ratio(numerator: int, denominator: int) -> float:
