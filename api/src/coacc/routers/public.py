@@ -7,12 +7,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from neo4j import AsyncSession  # noqa: TC002
 
 from coacc.config import settings
-from coacc.dependencies import get_session
+from coacc.dependencies import get_optional_session, get_session
 from coacc.models.entity import SourceAttribution
 from coacc.models.graph import GraphEdge, GraphNode, GraphResponse
 from coacc.models.pattern import PatternResponse
 from coacc.services.entity_types import entity_type_for_label
 from coacc.services.intelligence_provider import CommunityIntelligenceProvider
+from coacc.services.lakehouse_entity_service import get_lake_entity
+from coacc.services.lakehouse_pattern_service import lake_patterns_for_entity
 from coacc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
 from coacc.services.public_guard import (
     enforce_person_access_policy,
@@ -103,7 +105,7 @@ async def _resolve_company(
 @router.get("/patterns/company/{company_ref}", response_model=PatternResponse)
 async def public_patterns_for_company(
     company_ref: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
     lang: Annotated[str, Query()] = "en",
 ) -> PatternResponse:
     if not settings.patterns_enabled:
@@ -111,14 +113,22 @@ async def public_patterns_for_company(
             status_code=503,
             detail="Pattern engine temporarily unavailable pending validation.",
         )
-    company_id, _company_identifier = await _resolve_company(session, company_ref)
-    patterns = await _PUBLIC_PROVIDER.run_pattern(
-        session,
-        pattern_id="__all__",
-        entity_id=company_id,
-        lang=lang,
-        include_probable=False,
-    )
+    if session is None:
+        entity = get_lake_entity(company_ref, include_person=False)
+        if entity is None or entity.type != "company":
+            raise HTTPException(status_code=404, detail="Company not found")
+        lake_patterns = lake_patterns_for_entity(entity.id, lang=lang, public_only=True)
+        patterns = lake_patterns or []
+        company_id = entity.id
+    else:
+        company_id, _company_identifier = await _resolve_company(session, company_ref)
+        patterns = await _PUBLIC_PROVIDER.run_pattern(
+            session,
+            pattern_id="__all__",
+            entity_id=company_id,
+            lang=lang,
+            include_probable=False,
+        )
 
     return PatternResponse(entity_id=company_id, patterns=patterns, total=len(patterns))
 

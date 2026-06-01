@@ -30,6 +30,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Added lake-backed entity lookup, entity search, and entity signal drilldown
   APIs from curated dimensions and materialized signal runs for Neo4j-offline
   local runtime.
+- Added lake-backed pattern API fallbacks for materialized signal-backed
+  public patterns when Neo4j is unavailable.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.

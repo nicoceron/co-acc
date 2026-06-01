@@ -213,6 +213,54 @@ def test_materialized_signal_counts_deduplicate_lake_rows(
 
 
 @pytest.mark.anyio
+async def test_patterns_read_materialized_lake_hits_without_neo4j(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    monkeypatch.setattr(settings, "patterns_enabled", True)
+    app.state.neo4j_driver = None
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+
+    response = await client.get("/api/v1/patterns/company:9001234568")
+    specific_response = await client.get(
+        "/api/v1/patterns/company:9001234568/sanctioned_supplier_record"
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["total"] == 1
+    assert payload["patterns"][0]["pattern_id"] == "sanctioned_supplier_record"
+    assert payload["patterns"][0]["data"]["hit_id"] == "hit-entity-1"
+    assert specific_response.status_code == 200
+    assert specific_response.json()["total"] == 1
+
+
+@pytest.mark.anyio
+async def test_public_patterns_read_lake_company_without_neo4j(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    monkeypatch.setattr(settings, "patterns_enabled", True)
+    app.state.neo4j_driver = None
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+
+    response = await client.get("/api/v1/public/patterns/company/9001234568")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["entity_id"] == "company:9001234568"
+    assert payload["total"] == 1
+    assert payload["patterns"][0]["sources"][0]["database"] == "secop_ii_contracts"
+    assert "document_id" not in str(payload).lower()
+
+
+@pytest.mark.anyio
 async def test_lake_search_hides_people_in_public_mode(
     client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,

@@ -5,10 +5,11 @@ from neo4j import AsyncDriver, AsyncSession
 from starlette.requests import Request
 
 from coacc.config import settings
-from coacc.dependencies import get_driver, get_intelligence_provider, get_session
+from coacc.dependencies import get_intelligence_provider, get_optional_session
 from coacc.middleware.rate_limit import limiter
 from coacc.models.pattern import PatternResponse, PatternResult
 from coacc.services.intelligence_provider import IntelligenceProvider
+from coacc.services.lakehouse_pattern_service import lake_patterns_for_entity
 from coacc.services.public_guard import enforce_entity_lookup_enabled
 
 router = APIRouter(prefix="/api/v1/patterns", tags=["patterns"])
@@ -62,7 +63,7 @@ async def run_pattern(
 async def get_patterns_for_entity(
     request: Request,
     entity_id: str,
-    driver: Annotated[AsyncDriver, Depends(get_driver)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
     provider: Annotated[IntelligenceProvider, Depends(get_intelligence_provider)],
     lang: Annotated[str, Query()] = "es",
     include_probable: Annotated[bool, Query()] = False,
@@ -70,13 +71,20 @@ async def get_patterns_for_entity(
     _enforce_patterns_enabled()
     if settings.public_mode:
         enforce_entity_lookup_enabled()
-    results = await run_all_patterns(
-        driver,
-        entity_id,
-        lang,
-        include_probable=include_probable,
-        provider=provider,
-    )
+    driver: AsyncDriver | None = getattr(request.app.state, "neo4j_driver", None)
+    if session is None or driver is None:
+        lake_results = lake_patterns_for_entity(entity_id, lang=lang, public_only=True)
+        if lake_results is None:
+            raise HTTPException(status_code=404, detail="Entity not found")
+        results = lake_results
+    else:
+        results = await run_all_patterns(
+            driver,
+            entity_id,
+            lang,
+            include_probable=include_probable,
+            provider=provider,
+        )
     return PatternResponse(
         entity_id=entity_id,
         patterns=results,
@@ -90,7 +98,7 @@ async def get_specific_pattern(
     request: Request,
     entity_id: str,
     pattern_name: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
     provider: Annotated[IntelligenceProvider, Depends(get_intelligence_provider)],
     lang: Annotated[str, Query()] = "es",
     include_probable: Annotated[bool, Query()] = False,
@@ -107,14 +115,25 @@ async def get_specific_pattern(
             else f"Pattern not found: {pattern_name}. Available: {available}"
         )
         raise HTTPException(status_code=404, detail=detail)
-    results = await run_pattern(
-        session,
-        pattern_name,
-        entity_id,
-        lang,
-        include_probable=include_probable,
-        provider=provider,
-    )
+    if session is None:
+        lake_results = lake_patterns_for_entity(
+            entity_id,
+            lang=lang,
+            pattern_id=pattern_name,
+            public_only=True,
+        )
+        if lake_results is None:
+            raise HTTPException(status_code=404, detail="Entity not found")
+        results = lake_results
+    else:
+        results = await run_pattern(
+            session,
+            pattern_name,
+            entity_id,
+            lang,
+            include_probable=include_probable,
+            provider=provider,
+        )
     return PatternResponse(
         entity_id=entity_id,
         patterns=results,

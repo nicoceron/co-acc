@@ -913,7 +913,7 @@ samples, and evidence items, falling back to curated feature tables only when
 no signal run exists. When Neo4j is unavailable, `/api/v1/cases/` exposes a
 public-safe lake dossier view with one case per materialized signal hit, and
 `/api/v1/cases/{hit_id}` reads the corresponding evidence bundle directly from
-parquet. Graph expansion and broader public pattern APIs still need
+parquet. Graph expansion and full Cypher-only pattern parity still need
 lake-backed implementations or explicit graph-required behavior.
 
 **Entity/search repository slice added 2026-06-01:** `/api/v1/search`,
@@ -922,6 +922,13 @@ and `/api/v1/entity/{entity_id}/signals` now read curated dimensions and
 materialized signal hits through DuckDB when Neo4j is unavailable. The API
 preserves public-mode entity/person guards, deduplicates repeated materialized
 signal rows by `hit_id`, and returns one evidence item per hit/item index.
+
+**Signal-backed pattern slice added 2026-06-01:** `/api/v1/patterns/{entity_id}`,
+`/api/v1/patterns/{entity_id}/{pattern_name}`, and
+`/api/v1/public/patterns/company/{company_ref}` now map the latest materialized
+signal hits into the existing `PatternResponse` shape when Neo4j is unavailable.
+This covers the shipped signal-backed public patterns; legacy Cypher-only
+patterns still require new DuckDB feature tables before they can run offline.
 
 ### 7.1 Goal
 
@@ -1019,8 +1026,9 @@ api/src/coacc/services/lakehouse_entity_service.py
    successful signal runs through DuckDB and returns the same public response
    shape the current Neo4j materializer returns.
 6. **Rewire routes incrementally.** Start with `/api/v1/signals`, case
-   evidence bundle reads, entity lookup, entity search, and entity signal
-   drilldowns. Keep graph-only routes explicit until route parity tests pass.
+   evidence bundle reads, entity lookup, entity search, entity signal
+   drilldowns, and signal-backed public patterns. Keep graph-only routes
+   explicit until route parity tests pass.
 7. **Score/narrative hooks.** `score_service` reads
    `lake/curated/anomaly_scores/<run_id>.parquet` when Phase 13 produces it;
    `case_service` attaches `lake/curated/narratives/<case_id>.md` when Phase
@@ -1044,8 +1052,9 @@ api/src/coacc/services/lakehouse_entity_service.py
       bundles from `lake/curated/` without Neo4j running.
 - [x] At least 3 demo signals are non-empty, including one PACO-backed
       sanctions signal.
-- [x] `/api/v1/signals`, case evidence reads, entity lookup/search, and
-      entity signal reads work from DuckDB-backed repositories.
+- [x] `/api/v1/signals`, case evidence reads, entity lookup/search, entity
+      signal reads, and signal-backed public pattern reads work from
+      DuckDB-backed repositories.
 - [x] Existing response schemas stay compatible or OpenAPI snapshots are
       updated with a documented breaking-change rationale.
 - [x] `make check` green.
@@ -1811,15 +1820,15 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `signal_hits` rows and 91,433 `evidence_bundles` rows without Neo4j;
   contract probes found 0 missing required hit/evidence fields. The
   API now reports the latest completed lake signal run manifest, but
-  API route readers and broader public routes still need lake-backed
+  API route readers and graph-shaped public routes still need lake-backed
   repositories before Phase 11 is fully closed.
 - **2026-06-01** — Phase 11 API readers now prefer materialized
   `signal_hits`/`evidence_bundles` for `/api/v1/signals`; when Neo4j is
   unavailable, `/api/v1/cases/` and `/api/v1/cases/{hit_id}` serve
   public-safe lake dossiers directly from parquet. Existing API response
   schemas were preserved; targeted route tests and `make check` cover
-  both graph-backed and Neo4j-offline paths. Graph expansion, broader public
-  pattern APIs, Phase 13 anomaly scoring, Phase 14 narration, Phase
+  both graph-backed and Neo4j-offline paths. Graph expansion, Cypher-only
+  pattern parity, Phase 13 anomaly scoring, Phase 14 narration, Phase
   15 frontend, and Phase 16 submission remain separate acceptance units.
 - **2026-06-01** — Phase 11 entity/search readers now use curated
   `dim_company`, `dim_buyer`, and `dim_person` tables when Neo4j is
@@ -1829,9 +1838,16 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   and live local smoke against `phase11-local-20260601`. The materialized
   signal reader and ETL materializer now deduplicate by deterministic
   `hit_id` so repeated feature rows do not duplicate API hits or evidence.
-  Remaining runtime gaps are graph expansion, broader public pattern APIs,
+  Remaining runtime gaps are graph expansion, Cypher-only pattern parity,
   Phase 13 anomaly scoring, Phase 14 narration, Phase 15 frontend, and
   Phase 16 submission.
+- **2026-06-01** — Phase 11 signal-backed pattern readers now convert
+  materialized lake signal hits into the existing `PatternResponse` shape
+  when Neo4j is unavailable. This covers `/api/v1/patterns/{entity_id}`,
+  `/api/v1/patterns/{entity_id}/{pattern_name}`, and
+  `/api/v1/public/patterns/company/{company_ref}` for the three shipped
+  signal-backed public patterns. Legacy Cypher-only pattern parity remains
+  out of scope until those patterns get DuckDB feature tables.
 
 (Append new decisions as they're made. One line per decision.)
 

@@ -105,11 +105,11 @@ These two invariants together give us reproducibility: rerun ingest from an empt
 
 ## What's missing (deliberately)
 
-- **Graph expansion and broader public pattern rewires** — the source of
-  truth is now lake/curated parquet; signal lists, case dossiers,
-  entity lookup/search, and entity signal drilldowns can run without Neo4j.
-  Graph exploration and the remaining pattern APIs are still Phase 11/11.5
-  compatibility work.
+- **Graph expansion and full legacy pattern parity** — the source of truth is
+  now lake/curated parquet; signal lists, case dossiers, entity lookup/search,
+  entity signal drilldowns, and shipped signal-backed pattern routes can run
+  without Neo4j. Graph exploration and Cypher-only legacy pattern parity are
+  still Phase 11/11.5 compatibility work.
 - **Optional graph projection** — Neo4j is useful for exploration, but not
   required for corruption-pattern detection correctness.
 - **More custom non-Socrata adapters** — PACO has landed; RUES,

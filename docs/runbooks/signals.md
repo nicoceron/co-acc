@@ -89,6 +89,13 @@ and `/api/v1/entity/by-element-id/{element_id}` read curated
 and returns deduplicated signal hits plus evidence items for that entity key.
 Public-mode person/entity guards still apply before reading lake dimensions.
 
+`/api/v1/patterns/{entity_id}` and
+`/api/v1/public/patterns/company/{company_ref}` also fall back to the latest
+materialized signal run for the shipped signal-backed public patterns:
+sanctioned supplier record, supplier concentration, and recurring low-threshold
+awards. Legacy Cypher-only patterns still require Neo4j until their DuckDB
+feature tables are shipped.
+
 ## Reality Notes
 
 On the local lake generated during the 2026-06-01 run:
