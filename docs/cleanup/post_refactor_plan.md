@@ -2031,9 +2031,10 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   writes a minimal `LakeEntityRef` node for workspace membership state.
 - **2026-06-01** — Frontend refresh actions stay lake-backed when the optional
   graph projection is empty: entity signal refresh returns the current
-  materialized signal payload for curated entities, and case refresh returns
-  the current lake-backed case dossier before falling back to reviewer graph
-  investigations.
+  materialized signal payload for curated entities, case refresh returns the
+  current lake-backed case dossier before falling back to reviewer graph
+  investigations, and investigation case refreshes merge materialized lake hits
+  for attached curated entities.
 
 (Append new decisions as they're made. One line per decision.)
 

@@ -6,7 +6,8 @@ from httpx import AsyncClient
 from coacc.main import app
 from coacc.models.case import CaseListResponse, CaseResponse, CaseSummary
 from coacc.models.entity import EntityResponse, SourceAttribution
-from coacc.models.signal import EntitySignalsResponse
+from coacc.models.investigation import InvestigationResponse
+from coacc.models.signal import EntitySignalsResponse, EvidenceItemResponse, SignalHitResponse
 from coacc.services.signal_registry import clear_signal_registry_cache, load_signal_registry
 
 
@@ -37,6 +38,48 @@ def _user_record() -> MagicMock:
         "created_at": "2026-01-01T00:00:00Z",
         "role": "reviewer",
     })
+
+
+def _lake_signal_hit() -> SignalHitResponse:
+    return SignalHitResponse(
+        hit_id="lake-hit-1",
+        run_id="lake-run-1",
+        signal_id="procurement_sanctioned_supplier_awarded",
+        signal_version=1,
+        title="Sanctioned supplier awarded",
+        description="Lake signal",
+        category="procurement",
+        severity="high",
+        public_safe=True,
+        reviewer_only=False,
+        entity_id="company:8605246546",
+        entity_key="8605246546",
+        entity_label="Company",
+        scope_key="CO1.PCCNTR.8731701",
+        scope_type="contract",
+        dedup_key="lake-hit-dedup",
+        score=7.0,
+        identity_confidence=1.0,
+        identity_match_type="EXACT_COMPANY_NIT",
+        identity_quality="exact",
+        evidence_count=1,
+        evidence_bundle_id="bundle:lake-hit-1",
+        evidence_refs=["https://example.com/evidence"],
+        data={},
+        sources=[SourceAttribution(database="lake_signal_hits")],
+        evidence_items=[
+            EvidenceItemResponse(
+                item_id="lake-hit-1:1",
+                source_id="lake_signal_hits",
+                url="https://example.com/evidence",
+                label="Evidence",
+                observed_at="2026-06-01T00:00:00Z",
+            )
+        ],
+        created_at="2026-06-01T00:00:00Z",
+        first_seen_at="2026-06-01T00:00:00Z",
+        last_seen_at="2026-06-01T00:00:00Z",
+    )
 
 
 @pytest.mark.anyio
@@ -437,4 +480,126 @@ async def test_refresh_case_endpoint_prefers_lake_case_when_graph_is_available(
     data = response.json()
     assert data["id"] == "lake-case-1"
     assert data["last_run_id"] == "lake-run-1"
+    graph_refresh.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_get_case_merges_lake_signals_for_investigation_entities() -> None:
+    from coacc.services import case_service
+
+    investigation = InvestigationResponse(
+        id="case-1",
+        title="Investigation",
+        description="",
+        status="new",
+        created_at="2026-06-01T00:00:00Z",
+        updated_at="2026-06-01T00:00:00Z",
+        entity_ids=["8605246546"],
+    )
+    hit = _lake_signal_hit()
+    lake_response = EntitySignalsResponse(
+        entity_id="8605246546",
+        entity_key="8605246546",
+        total=1,
+        last_run_id="lake-run-1",
+        last_refreshed_at="2026-06-01T00:00:00Z",
+        stale=False,
+        signals=[hit],
+    )
+
+    with (
+        patch(
+            "coacc.services.case_service.investigation_service.get_investigation",
+            new=AsyncMock(return_value=investigation),
+        ),
+        patch(
+            "coacc.services.case_service._case_summary_meta",
+            new=AsyncMock(return_value=(0, 0, "2026-06-01T00:00:00Z", "case-run-1", False)),
+        ),
+        patch("coacc.services.case_service.execute_query", new=AsyncMock(side_effect=[[], []])),
+        patch(
+            "coacc.services.case_service.materialized_entity_signals",
+            return_value=lake_response,
+        ) as lake_signals,
+    ):
+        case = await case_service.get_case(AsyncMock(), "case-1", "test-user-id")
+
+    assert case is not None
+    assert case.signal_count == 1
+    assert case.public_signal_count == 1
+    assert case.signals[0].hit_id == "lake-hit-1"
+    assert case.evidence_bundles[0].bundle_id == "bundle:lake-hit-1"
+    assert case.events[0].signal_hit_id == "lake-hit-1"
+    lake_signals.assert_called_once_with("8605246546", public_only=False)
+
+
+@pytest.mark.anyio
+async def test_refresh_case_uses_lake_signals_without_graph_materialization() -> None:
+    from coacc.services import case_service
+
+    investigation = InvestigationResponse(
+        id="case-1",
+        title="Investigation",
+        description="",
+        status="new",
+        created_at="2026-06-01T00:00:00Z",
+        updated_at="2026-06-01T00:00:00Z",
+        entity_ids=["8605246546"],
+    )
+    hit = _lake_signal_hit()
+    lake_response = EntitySignalsResponse(
+        entity_id="8605246546",
+        entity_key="8605246546",
+        total=1,
+        last_run_id="lake-run-1",
+        last_refreshed_at="2026-06-01T00:00:00Z",
+        stale=False,
+        signals=[hit],
+    )
+    case_response = CaseResponse(
+        id="case-1",
+        title="Investigation",
+        description="",
+        status="new",
+        created_at="2026-06-01T00:00:00Z",
+        updated_at="2026-06-01T00:00:00Z",
+        entity_ids=["8605246546"],
+        signal_count=1,
+        public_signal_count=1,
+        last_refreshed_at="2026-06-01T00:00:00Z",
+        last_run_id="case-run-1",
+        stale=False,
+        signals=[hit],
+        evidence_bundles=[],
+        events=[],
+    )
+
+    with (
+        patch(
+            "coacc.services.case_service.investigation_service.get_investigation",
+            new=AsyncMock(return_value=investigation),
+        ),
+        patch(
+            "coacc.services.case_service.materialized_entity_signals",
+            return_value=lake_response,
+        ),
+        patch(
+            "coacc.services.case_service.refresh_entity_signals",
+            new=AsyncMock(),
+        ) as graph_refresh,
+        patch(
+            "coacc.services.case_service.execute_query_single",
+            new=AsyncMock(return_value=_mock_record({"case_id": "case-1"})),
+        ),
+        patch("coacc.services.case_service.execute_query", new=AsyncMock()),
+        patch("coacc.services.case_service.get_case", new=AsyncMock(return_value=case_response)),
+    ):
+        response = await case_service.refresh_case(
+            AsyncMock(),
+            "case-1",
+            "test-user-id",
+            MagicMock(),
+        )
+
+    assert response == case_response
     graph_refresh.assert_not_called()

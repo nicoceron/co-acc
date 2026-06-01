@@ -13,6 +13,7 @@ from coacc.models.case import (
     CaseSummary,
 )
 from coacc.services import investigation_service
+from coacc.services.lakehouse_signal_service import materialized_entity_signals
 from coacc.services.neo4j_service import execute_query, execute_query_single
 from coacc.services.signal_materializer import (
     _record_to_signal_hit,
@@ -55,6 +56,62 @@ def _case_from_investigation(
 
 def _severity_rank(severity: str) -> int:
     return {"critical": 4, "high": 3, "medium": 2, "low": 1}.get(severity, 0)
+
+
+def _merge_hits(
+    hits_by_id: dict[str, SignalHitResponse],
+    hits: list[SignalHitResponse],
+) -> None:
+    for hit in hits:
+        hits_by_id[hit.hit_id] = hit
+
+
+def _merge_lake_hits_for_entities(
+    hits_by_id: dict[str, SignalHitResponse],
+    entity_ids: list[str],
+) -> None:
+    for entity_id in entity_ids:
+        response = materialized_entity_signals(entity_id, public_only=False)
+        _merge_hits(hits_by_id, response.signals)
+
+
+def _public_signal_count(hits: list[SignalHitResponse]) -> int:
+    return sum(1 for hit in hits if hit.public_safe and not hit.reviewer_only)
+
+
+def _case_evidence_bundles(hits: list[SignalHitResponse]) -> list[CaseEvidenceBundle]:
+    return [
+        CaseEvidenceBundle(
+            bundle_id=hit.evidence_bundle_id or f"bundle:{hit.hit_id}",
+            headline=hit.title,
+            source_list=[source.database for source in hit.sources],
+            evidence_items=hit.evidence_items,
+        )
+        for hit in hits
+    ]
+
+
+def _case_event_from_hit(
+    case_id: str,
+    hit: SignalHitResponse,
+    fallback_date: str | None,
+) -> CaseEventResponse:
+    event_date = (
+        hit.last_seen_at
+        or hit.created_at
+        or fallback_date
+        or datetime.now(UTC).isoformat()
+    )
+    return CaseEventResponse(
+        id=f"{case_id}:{hit.hit_id}",
+        type="signal_hit",
+        label=hit.title,
+        date=event_date,
+        entity_id=hit.entity_id,
+        signal_hit_id=hit.hit_id,
+        evidence_bundle_id=hit.evidence_bundle_id,
+        bundle_document_count=len(hit.evidence_items) or hit.evidence_count,
+    )
 
 
 async def _case_summary_meta(
@@ -141,6 +198,11 @@ async def refresh_case(
     case_run_id = str(uuid.uuid4())
     hits_by_id: dict[str, SignalHitResponse] = {}
     for entity_id in investigation.entity_ids:
+        lake_response = materialized_entity_signals(entity_id, public_only=False)
+        if lake_response.total > 0:
+            _merge_hits(hits_by_id, lake_response.signals)
+            continue
+
         response = await refresh_entity_signals(
             session,
             entity_id,
@@ -216,21 +278,18 @@ async def get_case(
         "case_signal_hits",
         {"case_id": case_id, "user_id": user_id},
     )
-    hits = [_record_to_signal_hit(record) for record in signal_records]
+    hits_by_id = {
+        hit.hit_id: hit for hit in (_record_to_signal_hit(record) for record in signal_records)
+    }
+    _merge_lake_hits_for_entities(hits_by_id, investigation.entity_ids)
+    hits = list(hits_by_id.values())
     hits = sorted(
         hits,
         key=lambda hit: (-_severity_rank(hit.severity), -hit.score, -hit.evidence_count, hit.title),
     )
-
-    bundles = [
-        CaseEvidenceBundle(
-            bundle_id=hit.evidence_bundle_id or f"bundle:{hit.hit_id}",
-            headline=hit.title,
-            source_list=[source.database for source in hit.sources],
-            evidence_items=hit.evidence_items,
-        )
-        for hit in hits
-    ]
+    signal_count = len(hits)
+    public_signal_count = _public_signal_count(hits)
+    bundles = _case_evidence_bundles(hits)
     event_records = await execute_query(
         session,
         "case_events",
@@ -249,6 +308,13 @@ async def get_case(
         )
         for record in event_records
     ]
+    event_hit_ids = {event.signal_hit_id for event in events if event.signal_hit_id}
+    events.extend(
+        _case_event_from_hit(case_id, hit, last_refreshed_at)
+        for hit in hits
+        if hit.hit_id not in event_hit_ids
+    )
+    events.sort(key=lambda event: event.date, reverse=True)
 
     return CaseResponse(
         **_case_from_investigation(

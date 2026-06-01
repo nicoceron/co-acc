@@ -47,3 +47,5 @@ Frontend refresh actions should also tolerate an empty optional graph
 projection: entity signal refresh returns the current materialized lake signal
 payload for curated entities, and case refresh returns the current lake-backed
 case dossier before falling back to reviewer-owned graph investigations.
+Investigation case refreshes merge materialized lake hits for attached curated
+entities so user workspaces do not depend on a projected signal graph.
