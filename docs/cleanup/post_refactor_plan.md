@@ -954,6 +954,11 @@ derive evidence bundles, exposure factors, timeline events, and graph-shaped
 nodes/edges from materialized lake signals plus promoted anomaly scores before
 falling back to Neo4j.
 
+**Baseline slice added 2026-06-01:** `/api/v1/baseline/{entity_id}` now derives
+supplier sector and regional peer comparisons from
+`fct_procurement_contract_awards` before falling back to Neo4j, so the Entity
+Analysis peer-comparison panel has lake-backed data in local runtime.
+
 ### 7.1 Goal
 
 Make the app functional from `lake/curated/` without requiring a graph
@@ -2012,6 +2017,10 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `/api/v1/entity/{entity_id}/timeline`, and `/api/v1/graph/{entity_id}`
   derive from materialized lake signals plus promoted anomaly scores before
   falling back to Neo4j, and `make api-smoke` now verifies those routes.
+- **2026-06-01** — Frontend-facing baseline peer comparison is lake-first:
+  `/api/v1/baseline/{entity_id}` computes supplier sector and regional peer
+  comparisons from `fct_procurement_contract_awards` before falling back to
+  Neo4j, and `make api-smoke` now verifies it.
 
 (Append new decisions as they're made. One line per decision.)
 

@@ -103,6 +103,12 @@ evidence bundles, exposure factors, timeline events, and graph-shaped nodes
 from the same materialized signal hits plus promoted anomaly score parquet
 before falling back to Neo4j.
 
+`/api/v1/baseline/{entity_id}` uses the curated
+`fct_procurement_contract_awards` table to compute sector and regional peer
+comparisons for suppliers before falling back to Neo4j. The regional baseline
+uses award department/city because the lake dimension tables do not carry CIIU
+or graph-only location nodes.
+
 `/api/v1/patterns/{entity_id}` and
 `/api/v1/public/patterns/company/{company_ref}` use the latest materialized
 signal run for the shipped signal-backed public patterns:

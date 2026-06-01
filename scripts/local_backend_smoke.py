@@ -206,6 +206,11 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
             bool(graph.get("nodes")) and bool(graph.get("edges")),
             "graph route returned no lake-backed graph",
         )
+        baseline = _json_request(f"{base_url}/api/v1/baseline/{encoded_entity_id}")
+        _require(
+            int(baseline.get("total") or 0) > 0,
+            "baseline route returned no lake-backed peer comparisons",
+        )
 
         case_detail = _json_request(f"{base_url}/api/v1/cases/{case_id}")
         _require(case_detail.get("id") == case_id, "case detail id mismatch")
