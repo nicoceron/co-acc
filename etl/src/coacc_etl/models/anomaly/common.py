@@ -24,8 +24,8 @@ FEATURE_NAMES = (
     "timing_anomaly_score",
     "modality_value_mismatch",
     "single_bidder",
-    "prior_sanction_supplier",
 )
+LABEL_COLUMN = "prior_sanction_supplier"
 
 _RUN_ID_SAFE = re.compile(r"[^A-Za-z0-9_.=-]+")
 

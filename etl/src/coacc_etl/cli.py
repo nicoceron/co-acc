@@ -439,6 +439,16 @@ def model_train_cmd(
         f"anomaly model {result.run_id}: trained on {result.training_rows:,} rows; "
         f"scored {result.scored_rows:,} contracts"
     )
+    holdout_p100 = (
+        result.holdout_precision_at_100
+        if result.holdout_precision_at_100 is not None
+        else "-"
+    )
+    click.echo(
+        f"  supervised top-up: {result.supervised_positive_labels:,} positives "
+        f"in {result.supervised_training_rows:,} rows; "
+        f"holdout p@100={holdout_p100}"
+    )
     click.echo(f"  model: {result.model_dir}")
     click.echo(f"  scores: {result.score_path}")
     click.echo(f"  metrics: {result.metrics_path}")
@@ -490,10 +500,16 @@ def model_evaluate_cmd(model_name: str, score_run_id: str) -> None:
         result = evaluate_scores(score_run_id)
     except AnomalyModelError as exc:
         raise click.ClickException(str(exc)) from exc
+    holdout_p100 = (
+        result.holdout_precision_at_100
+        if result.holdout_precision_at_100 is not None
+        else "-"
+    )
     click.echo(
         f"anomaly scores {result.score_run_id}: rows={result.scored_rows:,} "
         f"positives={result.positive_labels:,} "
-        f"p@100={result.precision_at_100 if result.precision_at_100 is not None else '-'}"
+        f"p@100={result.precision_at_100 if result.precision_at_100 is not None else '-'} "
+        f"holdout_p@100={holdout_p100}"
     )
 
 

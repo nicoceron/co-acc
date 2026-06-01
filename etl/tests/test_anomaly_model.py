@@ -11,6 +11,7 @@ from click.testing import CliRunner
 
 from coacc_etl.cli import cli
 from coacc_etl.models.anomaly import build_anomaly_features, train_anomaly_model
+from coacc_etl.models.anomaly.common import FEATURE_NAMES
 
 
 def _write_anomaly_inputs(root: Path, *, include_offers: bool = True) -> None:
@@ -259,6 +260,9 @@ def test_train_anomaly_model_writes_model_scores_and_manifest(
     assert result.training_rows == 8
     assert result.scored_rows == 8
     assert (tmp_path / "models" / "anomaly" / "model-test" / "iforest.joblib").exists()
+    assert (
+        tmp_path / "models" / "anomaly" / "model-test" / "supervised_hgb.joblib"
+    ).exists()
     assert (tmp_path / "models" / "anomaly" / "model-test" / "metrics.json").exists()
     assert (tmp_path / "models" / "anomaly" / "current.json").exists()
     assert (
@@ -268,6 +272,39 @@ def test_train_anomaly_model_writes_model_scores_and_manifest(
         / "run_id=model-test"
         / "part-00000.parquet"
     ).exists()
+    metrics = json.loads(
+        (tmp_path / "models" / "anomaly" / "model-test" / "metrics.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert metrics["model_kind"] == "iforest+hgb"
+    assert metrics["supervised_topup"]["enabled"] is True
+    assert metrics["supervised_topup"]["positive_labels"] >= 2
+    assert "prior_sanction_supplier" not in FEATURE_NAMES
+    con = duckdb.connect()
+    try:
+        row = con.execute(
+            """
+            SELECT score, iforest_score, supervised_score, top_features
+            FROM read_parquet(?)
+            ORDER BY score DESC
+            LIMIT 1
+            """,
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "anomaly_scores"
+                    / "run_id=model-test"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchone()
+    finally:
+        con.close()
+    assert row is not None
+    assert isinstance(row[2], float)
+    assert "prior_sanction_supplier" not in row[3]
 
 
 def test_anomaly_model_cli_train(
@@ -294,4 +331,5 @@ def test_anomaly_model_cli_train(
 
     assert result.exit_code == 0, result.output
     assert "anomaly model cli-model" in result.output
+    assert "supervised top-up:" in result.output
     assert (tmp_path / "models" / "anomaly" / "current.json").exists()

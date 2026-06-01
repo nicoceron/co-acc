@@ -35,6 +35,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Added the first Phase 13 anomaly-model batch workflow: DuckDB feature
   materialization, Isolation Forest training, batched score parquet output,
   model promotion metadata, tests, and runbook/model-card docs.
+- Added a supervised Phase 13 anomaly top-up using PACO-backed weak labels,
+  deterministic holdout precision metrics, and blended score output columns.
 - Added SECOP offers-derived `single_bidder` anomaly features with a
   deterministic no-offers fallback.
 - Added API readers for promoted anomaly score parquet so lake-backed cases
@@ -59,6 +61,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   JSON/Markdown diff artifacts, threshold config, runbook, and a pre-commit helper.
 
 ### Changed
+- Excluded `prior_sanction_supplier` from anomaly model input features while
+  retaining it as the score/evaluation label to avoid target leakage.
 - Made Neo4j optional at API startup via `NEO4J_REQUIRED=false`; graph-backed
   routes still require Neo4j, while lake-backed signal routes can run without it.
 - Made materialized signal readers deduplicate repeated `hit_id` and evidence

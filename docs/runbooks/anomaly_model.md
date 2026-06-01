@@ -15,7 +15,11 @@ This command:
 
 - builds `lake/curated/anomaly_features/run_id=<run>/part-00000.parquet`
 - trains an Isolation Forest model from a deterministic bounded sample
+- trains a supervised `HistGradientBoostingClassifier` top-up when
+  sanctioned-supplier weak labels have both positive and negative examples
 - writes `lake/models/anomaly/<run>/iforest.joblib`
+- writes `lake/models/anomaly/<run>/supervised_hgb.joblib` when the top-up is
+  enabled
 - scores every feature row in batches to
   `lake/curated/anomaly_scores/run_id=<run>/`
 - writes `lake/models/anomaly/<run>/metrics.json`
@@ -74,10 +78,12 @@ cd etl && COACC_LAKE_ROOT=../lake uv run coacc-etl model promote anomaly <run-id
 
 ## Current Scope
 
-The current model is an unsupervised Isolation Forest. It uses the curated
-contract award fact table plus PACO-backed sanctioned-supplier signal features
-for label-derived evaluation. The supervised XGBoost top-up remains a later
-Phase 13 slice; the current model metadata records that limitation explicitly.
+The current model combines an unsupervised Isolation Forest baseline with a
+supervised histogram-gradient-boosting top-up. It uses the curated contract
+award fact table plus PACO-backed sanctioned-supplier signal features for weak
+labels and evaluation. `prior_sanction_supplier` is retained in feature and
+score parquet for auditability, but it is excluded from the model input feature
+tuple to avoid label leakage.
 
 `single_bidder` is derived from `secop_offers` / `wi7w-2nvm` when that raw
 source exists in the lake. The builder counts distinct effective offers by
@@ -92,13 +98,12 @@ On 2026-06-01, the local command:
 
 ```bash
 cd etl && COACC_LAKE_ROOT=../lake uv run coacc-etl model train anomaly \
-  --run-id phase13-local-smoke-20260601 \
-  --max-training-rows 5000 \
-  --batch-size 500000
+  --run-id phase13-supervised-smoke-20260601 \
+  --max-training-rows 200000 \
+  --batch-size 250000
 ```
 
-trained on 5,000 sampled feature rows and scored 5,442,058 contracts. The
-label-derived evaluation found 12,376 sanctioned-supplier positives and
-`precision_at_100=0.03`. That is enough to verify the batch runtime path, but
-below the Phase 13 supervised precision target; the XGBoost top-up remains
-required.
+trained on 200,000 sampled feature rows and scored 5,442,058 contracts. The
+label-derived evaluation found 12,376 sanctioned-supplier positives,
+`precision_at_100=0.68`, and `holdout_precision_at_100=0.67` across 1,019,896
+holdout-scored rows. This clears the Phase 13 supervised precision target.

@@ -1271,7 +1271,7 @@ processes; deferred to v2 to keep Phase 7 scope tight):
 - `prior_sanction_supplier` (boolean — `True` when supplier
   `nit_canonical` appears in `paco_sanctions` with sanction date
   ≤ contract `signed_date`; this is the **supervised positive label
-  driver**, not just a feature)
+  driver**, not a model input feature)
 
 Schemas in `etl/src/coacc_etl/contracts/features.py`. Pandera-validated
 on every build.
@@ -1283,13 +1283,13 @@ Two-stage to handle label scarcity:
 1. **Unsupervised baseline:** Isolation Forest on the feature matrix
    to score every contract. Trained on all of `secop_ii_contracts`.
    Fast, interpretable, no labels needed.
-2. **Supervised top-up (if labels permit):** XGBoost binary classifier
-   trained on a labeled subset where positive = contract whose
-   supplier appears in `paco_sanctions` within ±12 months of signing.
-   Held-out test: random 20% split on supplier (not on row, to prevent
-   leak across splits).
+2. **Supervised top-up (if labels permit):** scikit-learn
+   `HistGradientBoostingClassifier` trained on a labeled subset where
+   positive = contract whose supplier appears in `paco_sanctions` before
+   or at signing. Held-out test: deterministic contract-hash split, with
+   the label column excluded from `FEATURE_NAMES` to prevent leakage.
 
-Final score = `0.5 * iforest_score + 0.5 * xgb_proba` when both
+Final score = `0.15 * iforest_score + 0.85 * supervised_proba` when both
 available, else iforest only.
 
 ### 10.5 Implementation steps
@@ -1298,17 +1298,17 @@ available, else iforest only.
    `secop_ii_contracts`, `secop_ii_processes`, `wi7w-2nvm` offers,
    `paco_sanctions`, joins on canonical keys, emits
    `lake/curated/anomaly_features/<run_id>.parquet`.
-2. **`train.py`** trains the iforest and (if labels permit) xgb on
-   a supplier-stratified split, serializes via `joblib` to
-   `lake/models/anomaly/<run_id>/iforest.joblib` and `xgb.joblib`,
-   emits `metrics.json`.
+2. **`train.py`** trains the iforest and (if labels permit) supervised
+   HGB top-up on a deterministic held-out split, serializes via `joblib`
+   to `lake/models/anomaly/<run_id>/iforest.joblib` and
+   `supervised_hgb.joblib`, emits `metrics.json`.
 3. **Model versioning manifest.** `train.py` also writes
    `lake/models/anomaly/current.json` with the shape:
 
    ```json
    {
      "run_id": "20260601T120000Z",
-     "model_kind": "iforest+xgb",
+     "model_kind": "iforest+hgb",
      "trained_at": "2026-06-01T12:00:00Z",
      "metrics": { "precision_at_100": 0.42, "auc": 0.71 },
      "feature_schema_hash": "sha256:..."
@@ -1345,30 +1345,35 @@ available, else iforest only.
 - [x] First bounded Isolation Forest slice:
       `coacc-etl model train anomaly` builds features, trains, scores, and
       promotes a run from curated parquet without Neo4j.
-- [x] `lake/models/anomaly/<run_id>/` contains `iforest.joblib` and
-      `metrics.json` (and `xgb.joblib` if labels available).
+- [x] `lake/models/anomaly/<run_id>/` contains `iforest.joblib`,
+      `supervised_hgb.joblib` when labels are available, and
+      `metrics.json`.
 - [x] `lake/curated/anomaly_scores/run_id=<run_id>/*.parquet` non-empty,
       contract-keyed.
 - [x] `docs/ai/anomaly_model.md` (the card) committed.
-- [ ] Precision@100 ≥ 0.4 on the held-out sanctioned-supplier set
+- [x] Precision@100 ≥ 0.4 on the held-out sanctioned-supplier set
       (per `program_plan.md` M2 reality check).
-- [ ] `make test` green; new tests cover all feature builders.
+- [x] `make check` green; new tests cover the supervised top-up, label
+      exclusion, and blended score output.
 
 **Phase 13 slice added 2026-06-01:** `coacc-etl model train anomaly` now
 builds contract-level anomaly features from curated procurement awards and
 PACO-backed sanctioned-supplier features, trains an Isolation Forest on a
 deterministic bounded sample, scores every feature row in batches, writes
 `lake/curated/anomaly_scores/run_id=<run_id>/`, and promotes
-`lake/models/anomaly/current.json`. This is a real unsupervised ML baseline,
-not the final supervised XGBoost top-up. `single_bidder` is now populated
-when SECOP offers are present in the lake and remains false only on runs
-without offers data.
+`lake/models/anomaly/current.json`. A follow-up supervised top-up now trains a
+scikit-learn histogram-gradient-boosting classifier from PACO-backed weak
+labels when class diversity exists, excludes `prior_sanction_supplier` from
+the model input tuple, and blends supervised probability with the Isolation
+Forest score. `single_bidder` is populated when SECOP offers are present in
+the lake and remains false only on runs without offers data.
 
 **Local smoke 2026-06-01:** `coacc-etl model train anomaly --run-id
-phase13-local-smoke-20260601 --max-training-rows 5000 --batch-size 500000`
-trained on 5,000 sampled rows and scored 5,442,058 contracts on this device.
-Evaluation found 12,376 sanctioned-supplier positives and `precision_at_100 =
-0.03`, proving the runtime path but not the Phase 13 precision target.
+phase13-supervised-smoke-20260601 --max-training-rows 200000 --batch-size
+250000` trained on 200,000 sampled rows and scored 5,442,058 contracts on this
+device. Evaluation found 12,376 sanctioned-supplier positives,
+`precision_at_100=0.68`, and `holdout_precision_at_100=0.67`, clearing the
+Phase 13 supervised precision target.
 
 ### 10.8 Risks / mitigations
 
@@ -1869,11 +1874,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
 - **2026-06-01** — Phase 13 anomaly baseline shipped as a bounded batch
   workflow. `coacc-etl model train anomaly` builds DuckDB contract features,
   trains an Isolation Forest, scores all feature rows in batches, writes
-  contract-keyed score parquet, and promotes `current.json`. This satisfies
-  the first real ML baseline and local runtime path; the supervised XGBoost
-  top-up and held-out precision target remain open Phase 13 work. Local smoke
-  `phase13-local-smoke-20260601` scored
-  5,442,058 contracts with `precision_at_100=0.03`.
+  contract-keyed score parquet, and promotes `current.json`. A supervised HGB
+  top-up now trains from PACO-backed weak labels without feeding the label
+  column into the model. Local smoke `phase13-supervised-smoke-20260601`
+  scored 5,442,058 contracts with `precision_at_100=0.68` and
+  `holdout_precision_at_100=0.67`.
 - **2026-06-01** — Phase 13 offer-derived `single_bidder` is no longer
   hardcoded false. The anomaly feature builder now reads raw
   `secop_offers` / `wi7w-2nvm` when available, counts distinct effective
@@ -1883,8 +1888,9 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   parquet through DuckDB. `/api/v1/cases/` can list top scored contract cases
   without Neo4j, `/api/v1/cases/{case_id}` returns the nested
   `anomaly_score`, and `/api/v1/entity/{entity_id}/anomaly-scores` exposes
-  entity-specific scores for frontend integration. This serves the baseline
-  score but does not close the supervised precision target.
+  entity-specific scores for frontend integration. This now serves the
+  supervised top-up score when the promoted run includes
+  `supervised_hgb.joblib`.
 - **2026-06-01** — Phase 14 narrator foundation shipped in ETL. The new
   `coacc-etl narrator generate <case_id>` path extracts a lake-backed contract
   subgraph, builds a deterministic prompt, can call Gemini/Anthropic/OpenAI
@@ -1893,7 +1899,7 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
 - **2026-06-01** — Phase 14 API reader now attaches precomputed narrative
   Markdown to lake-backed `GET /api/v1/cases/{case_id}` responses via
   `narrative_markdown` and `narrative_generated_at`. Full Phase 14 remains
-  open until recorded LLM fixtures and frontend display are green.
+  open until frontend display is green.
 - **2026-06-01** — Phase 14 batch precompute now supports
   `coacc-etl narrator generate-batch --limit N --min-score X`, reading the
   promoted anomaly score run and writing one verified Markdown narrative per

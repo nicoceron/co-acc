@@ -116,10 +116,10 @@ These two invariants together give us reproducibility: rerun ingest from an empt
 - **More custom non-Socrata adapters** — PACO has landed; RUES,
   Registraduría, official_case_bulletins, etc. remain tracked in
   `_KNOWN_DEFERRED_SOURCES` (`etl/tests/test_signal_source_alignment.py`).
-- **Supervised anomaly top-up and more curated tables** — typed dimensions,
-  signal features, and the first Isolation Forest anomaly score run exist.
-  The API can read promoted score parquet, but Phase 13 still needs the
-  supervised top-up and more demo-specific signal coverage.
+- **More curated tables and demo-specific signal coverage** — typed
+  dimensions, signal features, the Isolation Forest baseline, and the
+  supervised anomaly top-up exist. The API reads promoted score parquet; extra
+  feature tables remain useful for broader pattern parity and demos.
 - **Narrator/frontend completion** — the Phase 14 backend foundation can extract a
   contract case subgraph, build prompts, call an optional provider, verify the
   Markdown, write fallback narratives, and expose precomputed Markdown through
