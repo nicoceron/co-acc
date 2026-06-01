@@ -26,6 +26,30 @@ def test_find_free_port_returns_connectable_port_number() -> None:
     assert 0 < port < 65536
 
 
+def test_api_env_forces_neo4j_offline_by_default(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("NEO4J_URI", "bolt://localhost:7687")
+
+    env = local_backend_smoke._api_env(lake_root=tmp_path)
+
+    assert env["NEO4J_REQUIRED"] == "false"
+    assert env["NEO4J_URI"] == local_backend_smoke.DEFAULT_OFFLINE_NEO4J_URI
+    assert env["COACC_LAKE_ROOT"] == str(tmp_path)
+
+
+def test_api_env_allows_explicit_smoke_neo4j_override(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_SMOKE_NEO4J_URI", "bolt://example.invalid:7687")
+
+    env = local_backend_smoke._api_env(lake_root=tmp_path)
+
+    assert env["NEO4J_URI"] == "bolt://example.invalid:7687"
+
+
 def test_parse_args_accepts_lake_root_and_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         sys,

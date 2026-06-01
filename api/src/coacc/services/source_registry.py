@@ -6,6 +6,8 @@ from typing import Any
 
 import yaml  # type: ignore[import-untyped]
 
+from coacc.services.runtime_paths import dataset_contract_dir, docs_dataset_file
+
 
 @dataclass(frozen=True)
 class SourceRegistryEntry:
@@ -57,9 +59,8 @@ class SourceRegistryEntry:
         }
 
 
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-_SIGNED_CATALOG_PATH = _REPO_ROOT / "docs" / "datasets" / "catalog.signed.csv"
-_DATASET_CONTRACT_DIR = _REPO_ROOT / "etl" / "datasets"
+_SIGNED_CATALOG_PATH = docs_dataset_file("catalog.signed.csv")
+_DATASET_CONTRACT_DIR = dataset_contract_dir()
 _SOCRATA_URL_MARKER = "datos.gov.co/d/"
 _SIGNAL_STATE_BY_RELEVANCE = {
     "already_used": "promoted",

@@ -66,7 +66,10 @@ Phase 11 lake-backed API repositories serve signals/cases/entities/patterns
 without Neo4j and pass `make api-smoke`, Phase 12 legacy CSV retirement is
 pushed, Phase 13 supervised anomaly scoring clears
 `holdout_precision_at_100=0.67`, and Phase 14 can precompute verified
-narratives. Remaining work is not hidden: Phase 8's external three-day
+narratives. Docker compose now builds and runs the backend container path on
+this device, with API/Neo4j health, lake-backed signal and agent routes, the
+ops materializer profile, and the frontend image smoke-tested on the compose
+network. Remaining work is not hidden: Phase 8's external three-day
 cron/runner evidence is still outside this device, Phase 11.5 graph projection
 is optional, Phase 15 frontend pages remain frontend-owned, and Phase 16 still
 has external competition submission/logistics items.
@@ -1963,6 +1966,12 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `lake/` read-only, sets `COACC_LAKE_ROOT=/app/lake`, and keeps the signal
   materializer user-id expansion inside the container so compose config
   validates cleanly.
+- **2026-06-01** — Compose runtime proof exposed and fixed two container-only
+  issues: API file discovery now supports the installed `/app/src` layout, and
+  `signal-materializer --all` exits as a successful empty no-op when the dev
+  graph has no candidate entities. Verified with compose API/Neo4j health,
+  `/api/v1/signals/`, `/api/v1/agent/query`, the ops materializer profile, and
+  the built frontend image on the compose network.
 
 (Append new decisions as they're made. One line per decision.)
 

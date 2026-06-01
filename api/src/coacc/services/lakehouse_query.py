@@ -8,9 +8,10 @@ from pathlib import Path
 
 import duckdb
 
+from coacc.services.runtime_paths import config_file, docs_dataset_file
+
 _SAFE_IDENTIFIER = re.compile(r"[^A-Za-z0-9_]+")
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-_CATALOG_PATH = _REPO_ROOT / "docs" / "datasets" / "catalog.proven.csv"
+_CATALOG_PATH = docs_dataset_file("catalog.proven.csv")
 
 
 def lake_root() -> Path:
@@ -107,4 +108,4 @@ def watermark_exists(source: str) -> bool:
 
 
 def signal_sql_path(signal_id: str) -> Path:
-    return Path(__file__).resolve().parents[4] / "config" / "signals" / "sql" / f"{signal_id}.sql"
+    return config_file("signals", "sql", f"{signal_id}.sql")

@@ -6,6 +6,7 @@ import asyncio
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
@@ -28,28 +29,48 @@ def _read_entity_file(path: str | None) -> list[str]:
     return [row.strip() for row in rows if row.strip() and not row.strip().startswith("#")]
 
 
+def _payload(summaries: list[dict[str, object]], *, all_mode: bool) -> dict[str, object]:
+    payload: dict[str, object] = {"entities": summaries}
+    if all_mode:
+        payload["mode"] = "global"
+        payload["entity_count"] = len(summaries)
+    return payload
+
+
 async def _resolve_watchlist_entities(
-    session,
+    session: Any,
     watchlist: str | None,
     limit: int,
 ) -> list[str]:
     if watchlist == "people":
-        response = await meta_router.prioritized_people_watchlist(session=session, limit=limit)
-        return [item.entity_id for item in response.people]
+        people_response = await meta_router.prioritized_people_watchlist(
+            session=session,
+            limit=limit,
+        )
+        return [item.entity_id for item in people_response.people]
     if watchlist == "companies":
-        response = await meta_router.prioritized_company_watchlist(session=session, limit=limit)
-        return [item.entity_id for item in response.companies]
+        companies_response = await meta_router.prioritized_company_watchlist(
+            session=session,
+            limit=limit,
+        )
+        return [item.entity_id for item in companies_response.companies]
     if watchlist == "buyers":
-        response = await meta_router.prioritized_buyer_watchlist(session=session, limit=limit)
-        return [item.buyer_id for item in response.buyers]
+        buyers_response = await meta_router.prioritized_buyer_watchlist(
+            session=session,
+            limit=limit,
+        )
+        return [item.buyer_id for item in buyers_response.buyers]
     if watchlist == "territories":
-        response = await meta_router.prioritized_territory_watchlist(session=session, limit=limit)
-        return [item.territory_id for item in response.territories]
+        territories_response = await meta_router.prioritized_territory_watchlist(
+            session=session,
+            limit=limit,
+        )
+        return [item.territory_id for item in territories_response.territories]
     return []
 
 
 async def _resolve_entities(
-    session,
+    session: Any,
     investigation_id: str | None,
     user_id: str | None,
     entities: list[str],
@@ -176,6 +197,9 @@ async def _main() -> None:
                 entity_ids.extend(str(record["entity_id"]) for record in candidate_records)
                 entity_ids = list(dict.fromkeys(entity_ids))
             if not entity_ids:
+                if args.all:
+                    print(json.dumps(_payload([], all_mode=True), ensure_ascii=True, indent=2))
+                    return
                 raise SystemExit(
                     "Provide entity ids, --entity-file, --watchlist, --all, or --case-id"
                 )
@@ -199,11 +223,7 @@ async def _main() -> None:
                         "signals": [signal.signal_id for signal in response.signals],
                     }
                 )
-        payload: dict[str, object] = {"entities": summaries}
-        if args.all:
-            payload["mode"] = "global"
-            payload["entity_count"] = len(summaries)
-        print(json.dumps(payload, ensure_ascii=True, indent=2))
+        print(json.dumps(_payload(summaries, all_mode=args.all), ensure_ascii=True, indent=2))
     finally:
         await close_driver()
 

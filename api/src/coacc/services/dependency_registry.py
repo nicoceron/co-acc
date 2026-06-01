@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
 import yaml  # type: ignore[import-untyped]
 
 from coacc.services import lakehouse_query
+from coacc.services.runtime_paths import config_file
 
-_DEPS_PATH = Path(__file__).resolve().parents[4] / "config" / "signal_source_deps.yml"
+_DEPS_PATH = config_file("signal_source_deps.yml")
 _SEVERITY_ORDER = ["low", "medium", "high", "critical"]
 
 

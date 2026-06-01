@@ -30,6 +30,9 @@ Never commit `.env`.
 | Variable | Default | Purpose |
 |---|---:|---|
 | `NEO4J_REQUIRED` | `false` | When `true`, API startup fails if Neo4j is unavailable. When `false`, graph-backed routes return 503 but lake-backed signal routes and `/health` can still run. |
+| `COACC_CONFIG_DIR` | auto-discovered | Optional API override for mounted `config/` files such as `signal_registry.yml` and signal SQL. |
+| `COACC_DATASET_CATALOG_DIR` | auto-discovered | Optional API override for mounted `docs/datasets/` catalog CSVs. |
+| `COACC_DATASET_CONTRACT_DIR` | auto-discovered | Optional API override for mounted `etl/datasets/` YAML contracts. |
 
 Run the local API smoke before demo work or after backend changes:
 

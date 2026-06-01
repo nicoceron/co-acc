@@ -17,6 +17,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SECRET = "local-runtime-smoke-secret-000000000000"
+DEFAULT_OFFLINE_NEO4J_URI = "bolt://127.0.0.1:9"
 
 
 class SmokeError(RuntimeError):
@@ -84,16 +85,21 @@ def _require(condition: bool, message: str) -> None:
         raise SmokeError(message)
 
 
-def _start_api(port: int, *, lake_root: Path) -> subprocess.Popen[str]:
+def _api_env(*, lake_root: Path) -> dict[str, str]:
     env = os.environ.copy()
     env.update(
         {
             "APP_ENV": "test",
             "NEO4J_REQUIRED": "false",
+            "NEO4J_URI": env.get("COACC_SMOKE_NEO4J_URI", DEFAULT_OFFLINE_NEO4J_URI),
             "COACC_LAKE_ROOT": str(lake_root),
             "JWT_SECRET_KEY": env.get("JWT_SECRET_KEY", DEFAULT_SECRET),
         }
     )
+    return env
+
+
+def _start_api(port: int, *, lake_root: Path) -> subprocess.Popen[str]:
     return subprocess.Popen(
         [
             "uv",
@@ -108,7 +114,7 @@ def _start_api(port: int, *, lake_root: Path) -> subprocess.Popen[str]:
             str(port),
         ],
         cwd=REPO_ROOT / "api",
-        env=env,
+        env=_api_env(lake_root=lake_root),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
