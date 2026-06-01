@@ -40,6 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Added the first Phase 14 narrator foundation: lake-backed case subgraph
   extraction, deterministic prompts, optional LLM provider calls, verifier,
   templated fallback, CLI, and docs.
+- Added lake-backed case API fields for precomputed narrator Markdown.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.

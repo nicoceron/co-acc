@@ -16,6 +16,16 @@ contract, or an API anomaly case id. The command writes:
 lake/curated/narratives/<case-id>.md
 ```
 
+The lake-backed case API reads the same file on detail responses:
+
+```bash
+curl http://localhost:8000/api/v1/cases/<case-id>
+```
+
+When present, the response includes `narrative_markdown` and
+`narrative_generated_at`. If a narrative was generated for the underlying
+contract id, anomaly case detail responses can use it as a fallback.
+
 By default the provider is `gemini`. If no provider key is present, the command
 uses the verified templated fallback so local and CI runs remain reproducible.
 
@@ -50,7 +60,6 @@ This slice proves the narrator runtime path and safety checks. Remaining Phase
 14 work:
 
 - recorded LLM fixture responses for 10 subgraphs;
-- API reader for precomputed narratives;
 - frontend narrative display;
 - richer subgraph extraction beyond contract, buyer, supplier, signals, and
   evidence rows.

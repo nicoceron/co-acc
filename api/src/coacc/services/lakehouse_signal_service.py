@@ -22,6 +22,7 @@ from coacc.services.lakehouse_anomaly_service import (
     contract_id_from_anomaly_case_id,
     top_anomaly_scores,
 )
+from coacc.services.lakehouse_narrative_service import read_lake_narrative
 from coacc.services.signal_registry import get_signal_definition, resolve_signal_id
 
 if TYPE_CHECKING:
@@ -638,6 +639,7 @@ def _anomaly_case_summary(score: CaseAnomalyScore) -> CaseSummary:
 
 def _anomaly_case_response(score: CaseAnomalyScore) -> CaseResponse:
     summary = _anomaly_case_summary(score)
+    narrative = read_lake_narrative(summary.id, aliases=[score.contract_id])
     bundle_id = f"{summary.id}:evidence"
     evidence_item = EvidenceItemResponse(
         item_id=f"{summary.id}:contract",
@@ -670,6 +672,8 @@ def _anomaly_case_response(score: CaseAnomalyScore) -> CaseResponse:
         signals=[],
         evidence_bundles=[bundle],
         events=[event],
+        narrative_markdown=narrative.markdown if narrative else None,
+        narrative_generated_at=narrative.generated_at if narrative else None,
     )
 
 
@@ -687,6 +691,10 @@ def get_lake_case(case_id: str) -> CaseResponse | None:
     anomaly_contract_id = _contract_id_from_scope(hit.scope_key)
     anomaly_score = (
         anomaly_score_for_contract(anomaly_contract_id) if anomaly_contract_id else None
+    )
+    narrative = read_lake_narrative(
+        case_id,
+        aliases=[anomaly_contract_id] if anomaly_contract_id else None,
     )
     evidence_items = hit.evidence_items
     source_list = []
@@ -729,4 +737,6 @@ def get_lake_case(case_id: str) -> CaseResponse | None:
         signals=[hit],
         evidence_bundles=[bundle],
         events=[event],
+        narrative_markdown=narrative.markdown if narrative else None,
+        narrative_generated_at=narrative.generated_at if narrative else None,
     )

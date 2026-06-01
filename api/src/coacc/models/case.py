@@ -52,3 +52,5 @@ class CaseResponse(CaseSummary):
     signals: list[SignalHitResponse] = Field(default_factory=list)
     evidence_bundles: list[CaseEvidenceBundle] = Field(default_factory=list)
     events: list[CaseEventResponse] = Field(default_factory=list)
+    narrative_markdown: str | None = None
+    narrative_generated_at: str | None = None

@@ -13,6 +13,8 @@ all factual claims to cite evidence rows from the case subgraph.
 - Input: anomaly score parquet, curated SECOP contract awards, materialized
   signal hits, and evidence bundles.
 - Output: `lake/curated/narratives/<case_id>.md`.
+- API surface: `GET /api/v1/cases/{case_id}` returns `narrative_markdown`
+  and `narrative_generated_at` when a precomputed narrative exists.
 - Providers: Gemini, Anthropic, or OpenAI when a key is configured.
 - Local fallback: deterministic templated narrative when no provider key is
   available and `--require-llm` is not set.
@@ -20,7 +22,7 @@ all factual claims to cite evidence rows from the case subgraph.
 This is a Phase 14 foundation slice. It adds extraction, prompt construction,
 provider call wiring, verifier checks, fallback generation, CLI, and tests. It
 does not yet close the full Phase 14 fixture requirement: recorded LLM
-responses for 10 fixture subgraphs remain open.
+responses for 10 fixture subgraphs and frontend display remain open.
 
 ## Verifier Contract
 

@@ -184,6 +184,13 @@ def _write_anomaly_run(root: Path) -> None:
     )
 
 
+def _write_lake_narrative(root: Path, case_id: str, markdown: str) -> None:
+    safe = "".join(ch if ch.isalnum() or ch in "_.=-" else "_" for ch in case_id).strip("._")
+    out = root / "curated" / "narratives"
+    out.mkdir(parents=True)
+    (out / f"{safe or 'case'}.md").write_text(markdown, encoding="utf-8")
+
+
 @pytest.mark.anyio
 async def test_entity_lookup_reads_curated_dimension_without_neo4j(
     client: AsyncClient,
@@ -258,6 +265,7 @@ async def test_lake_case_routes_expose_anomaly_scores_without_neo4j(
     monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
     app.state.neo4j_driver = None
     _write_anomaly_run(tmp_path)
+    _write_lake_narrative(tmp_path, "C-1", "# Lead\nNarrativa verificada.")
 
     list_response = await client.get("/api/v1/cases/")
 
@@ -273,6 +281,8 @@ async def test_lake_case_routes_expose_anomaly_scores_without_neo4j(
     case = detail_response.json()
     assert case["signal_count"] == 0
     assert case["anomaly_score"]["score"] == 0.92
+    assert case["narrative_markdown"] == "# Lead\nNarrativa verificada."
+    assert case["narrative_generated_at"] is not None
     assert case["events"][0]["type"] == "anomaly_score"
     assert case["evidence_bundles"][0]["evidence_items"][0]["url"] == "https://secop.example/C-1"
 
@@ -287,6 +297,7 @@ async def test_lake_signal_case_detail_attaches_matching_anomaly_score(
     app.state.neo4j_driver = None
     _write_signal_run(tmp_path)
     _write_anomaly_run(tmp_path)
+    _write_lake_narrative(tmp_path, "hit-entity-1", "# Lead\nSignal narrative.")
 
     list_response = await client.get("/api/v1/cases/")
     response = await client.get("/api/v1/cases/hit-entity-1")
@@ -298,6 +309,7 @@ async def test_lake_signal_case_detail_attaches_matching_anomaly_score(
     payload = response.json()
     assert payload["signals"][0]["hit_id"] == "hit-entity-1"
     assert payload["anomaly_score"]["contract_id"] == "C-1"
+    assert payload["narrative_markdown"] == "# Lead\nSignal narrative."
     assert payload["anomaly_score"]["prior_sanction_supplier"] is True
 
 

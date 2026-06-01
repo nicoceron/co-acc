@@ -123,8 +123,9 @@ These two invariants together give us reproducibility: rerun ingest from an empt
   signal coverage.
 - **Narrator completion** — the Phase 14 backend foundation can extract a
   contract case subgraph, build prompts, call an optional provider, verify the
-  Markdown, and write fallback narratives. Recorded LLM fixtures, API serving,
-  and frontend display are still open.
+  Markdown, write fallback narratives, and expose precomputed Markdown through
+  case detail responses. Recorded LLM fixtures and frontend display are still
+  open.
 
 ---
 

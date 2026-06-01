@@ -1883,9 +1883,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `coacc-etl narrator generate <case_id>` path extracts a lake-backed contract
   subgraph, builds a deterministic prompt, can call Gemini/Anthropic/OpenAI
   when configured, verifies section/citation/entity/ethics constraints, and
-  writes a verified template fallback when no key is present. Full Phase 14
-  remains open until recorded LLM fixtures, API serving, and frontend display
-  are green.
+  writes a verified template fallback when no key is present.
+- **2026-06-01** — Phase 14 API reader now attaches precomputed narrative
+  Markdown to lake-backed `GET /api/v1/cases/{case_id}` responses via
+  `narrative_markdown` and `narrative_generated_at`. Full Phase 14 remains
+  open until recorded LLM fixtures and frontend display are green.
 
 (Append new decisions as they're made. One line per decision.)
 

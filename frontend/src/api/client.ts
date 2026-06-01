@@ -644,6 +644,8 @@ export interface CaseResponse extends CaseSummary {
   signals: SignalHit[];
   evidence_bundles: CaseEvidenceBundle[];
   events: CaseEvent[];
+  narrative_markdown?: string | null;
+  narrative_generated_at?: string | null;
 }
 
 export interface EntityAnomalyScoresResponse {
