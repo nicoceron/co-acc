@@ -106,7 +106,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--baseline",
         default=None,
-        help="Baseline date (YYYY-MM-DD) or JSON snapshot path. Defaults to latest older snapshot.",
+        help=(
+            "Baseline date (YYYY-MM-DD) or JSON snapshot path. Defaults to the "
+            "latest existing snapshot on or before the requested snapshot date."
+        ),
     )
     parser.add_argument(
         "--date",
@@ -359,12 +362,12 @@ def _load_baseline(
         if not path.exists():
             raise RealityCliError(f"Baseline snapshot not found: {path}")
     else:
-        older = [
+        candidates = [
             candidate
             for candidate in output_dir.glob("*.json")
-            if candidate.stem < snapshot_date and _looks_like_date(candidate.stem)
+            if candidate.stem <= snapshot_date and _looks_like_date(candidate.stem)
         ]
-        path = max(older, default=None)
+        path = max(candidates, default=None)
 
     if path is None:
         return None, [], []

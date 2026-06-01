@@ -25,6 +25,7 @@ def _load_lake_reality_script(repo: Path) -> Any:
     assert spec is not None
     assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return cast("Any", module)
 
@@ -149,6 +150,47 @@ def test_lake_reality_cli_writes_curated_snapshot_by_default(
     assert "Curated Table Summary" in (output_dir / "2026-05-24.diff.md").read_text(
         encoding="utf-8"
     )
+
+
+def test_load_baseline_uses_existing_same_day_snapshot(tmp_path: Path) -> None:
+    repo = Path(__file__).resolve().parents[3]
+    script = _load_lake_reality_script(repo)
+    output_dir = tmp_path / "reality"
+    output_dir.mkdir()
+    older_snapshot = {
+        "generated_at": "2026-05-23T12:00:00+00:00",
+        "snapshot_date": "2026-05-23",
+        "baseline_date": None,
+        "datasets": [],
+        "curated_tables": [],
+        "findings": [],
+    }
+    same_day_snapshot = {
+        "generated_at": "2026-05-24T12:00:00+00:00",
+        "snapshot_date": "2026-05-24",
+        "baseline_date": "2026-05-23",
+        "datasets": [],
+        "curated_tables": [],
+        "findings": [],
+    }
+    (output_dir / "2026-05-23.json").write_text(
+        json.dumps(older_snapshot),
+        encoding="utf-8",
+    )
+    (output_dir / "2026-05-24.json").write_text(
+        json.dumps(same_day_snapshot),
+        encoding="utf-8",
+    )
+
+    baseline_date, datasets, curated_tables = script._load_baseline(
+        output_dir,
+        "2026-05-24",
+        None,
+    )
+
+    assert baseline_date == "2026-05-24"
+    assert datasets == []
+    assert curated_tables == []
 
 
 def test_changed_catalog_dataset_ids_uses_github_base_ref(

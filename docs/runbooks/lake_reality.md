@@ -89,6 +89,17 @@ Pull requests that touch `etl/datasets/*.yml` run the same workflow with
 must therefore have the lake mounted before PR checks can pass. Changed datasets
 without local parquet are skipped because there is no lake state to compare yet.
 
+## Baseline Selection
+
+By default, `lake-reality` diffs against the latest existing snapshot on or
+before the requested snapshot date. The snapshot is read before the new run
+overwrites the same date's JSON/Markdown files, so repeated checks on the same
+device compare against the last accepted local reality state instead of an
+older stale baseline.
+
+Use `BASELINE=YYYY-MM-DD` or `BASELINE=/path/to/snapshot.json` when you need to
+audit against a specific older snapshot.
+
 ## Exit Codes
 
 - `0`: probe completed with no failure-level findings
