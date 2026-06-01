@@ -1342,15 +1342,32 @@ available, else iforest only.
 
 ### 10.7 DoD
 
-- [ ] `coacc-etl model train anomaly` runs end-to-end in <30 min.
-- [ ] `lake/models/anomaly/<run_id>/` contains `iforest.joblib` and
+- [x] First bounded Isolation Forest slice:
+      `coacc-etl model train anomaly` builds features, trains, scores, and
+      promotes a run from curated parquet without Neo4j.
+- [x] `lake/models/anomaly/<run_id>/` contains `iforest.joblib` and
       `metrics.json` (and `xgb.joblib` if labels available).
-- [ ] `lake/curated/anomaly_scores/<run_id>.parquet` non-empty,
+- [x] `lake/curated/anomaly_scores/run_id=<run_id>/*.parquet` non-empty,
       contract-keyed.
-- [ ] `docs/ai/anomaly_model.md` (the card) committed.
+- [x] `docs/ai/anomaly_model.md` (the card) committed.
 - [ ] Precision@100 ≥ 0.4 on the held-out sanctioned-supplier set
       (per `program_plan.md` M2 reality check).
 - [ ] `make test` green; new tests cover all feature builders.
+
+**Phase 13 slice added 2026-06-01:** `coacc-etl model train anomaly` now
+builds contract-level anomaly features from curated procurement awards and
+PACO-backed sanctioned-supplier features, trains an Isolation Forest on a
+deterministic bounded sample, scores every feature row in batches, writes
+`lake/curated/anomaly_scores/run_id=<run_id>/`, and promotes
+`lake/models/anomaly/current.json`. This is a real unsupervised ML baseline,
+not the final supervised XGBoost top-up; `single_bidder` remains false until
+offers-to-process linkage is curated.
+
+**Local smoke 2026-06-01:** `coacc-etl model train anomaly --run-id
+phase13-local-smoke-20260601 --max-training-rows 5000 --batch-size 500000`
+trained on 5,000 sampled rows and scored 5,442,058 contracts on this device.
+Evaluation found 12,376 sanctioned-supplier positives and `precision_at_100 =
+0.03`, proving the runtime path but not the Phase 13 precision target.
 
 ### 10.8 Risks / mitigations
 
@@ -1592,7 +1609,7 @@ reality.
 | `docs/runbooks/curate.md` | Phase 10 | How to rebuild `lake/curated/` from scratch |
 | `docs/runbooks/signals.md` | Phase 11 | Rebuild, recovery, and signal-run manifest behavior |
 | `docs/runbooks/graph_loader.md` | Phase 11.5 | Reload, recovery, parity check ops |
-| `docs/runbooks/anomaly_model.md` | Phase 13 | Retrain, monitor, recalibrate |
+| `docs/runbooks/anomaly_model.md` | Phase 13 | Retrain, score, promote, evaluate |
 | `docs/runbooks/narrator.md` | Phase 14 | Provider failover, cost cap, cache invalidation |
 | `docs/runbooks/env.md` | Phase 7 (created) | Every env var the system reads |
 
@@ -1848,6 +1865,14 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `/api/v1/public/patterns/company/{company_ref}` for the three shipped
   signal-backed public patterns. Legacy Cypher-only pattern parity remains
   out of scope until those patterns get DuckDB feature tables.
+- **2026-06-01** — Phase 13 anomaly baseline shipped as a bounded batch
+  workflow. `coacc-etl model train anomaly` builds DuckDB contract features,
+  trains an Isolation Forest, scores all feature rows in batches, writes
+  contract-keyed score parquet, and promotes `current.json`. This satisfies
+  the first real ML baseline and local runtime path; the supervised XGBoost
+  top-up, offer-derived `single_bidder`, and held-out precision target remain
+  open Phase 13 work. Local smoke `phase13-local-smoke-20260601` scored
+  5,442,058 contracts with `precision_at_100=0.03`.
 
 (Append new decisions as they're made. One line per decision.)
 

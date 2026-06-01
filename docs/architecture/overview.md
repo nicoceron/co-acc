@@ -115,9 +115,10 @@ These two invariants together give us reproducibility: rerun ingest from an empt
 - **More custom non-Socrata adapters** — PACO has landed; RUES,
   Registraduría, official_case_bulletins, etc. remain tracked in
   `_KNOWN_DEFERRED_SOURCES` (`etl/tests/test_signal_source_alignment.py`).
-- **More curated tables** — typed company/person/buyer dimensions and the
-  first SECOP+PACO and SECOP-only signal features exist; Phase 13 still needs
-  anomaly scoring features and more demo-specific signal coverage.
+- **Supervised anomaly top-up and more curated tables** — typed dimensions,
+  signal features, and the first Isolation Forest anomaly score run exist.
+  Phase 13 still needs the supervised top-up, offer-derived `single_bidder`,
+  and more demo-specific signal coverage.
 
 ---
 

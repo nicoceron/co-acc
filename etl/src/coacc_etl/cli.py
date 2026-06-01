@@ -20,6 +20,14 @@ from coacc_etl.catalog import DatasetSpec, load_catalog
 from coacc_etl.curated import CuratedBuildError, build_curated
 from coacc_etl.ingest import IngestError
 from coacc_etl.ingest import ingest as run_ingest
+from coacc_etl.models.anomaly import (
+    AnomalyModelError,
+    build_anomaly_features,
+    evaluate_scores,
+    predict_anomaly_scores,
+    promote_anomaly_model,
+    train_anomaly_model,
+)
 from coacc_etl.operations.phase7 import Phase7RunError, run_phase7
 from coacc_etl.signals import SignalMaterializationError, materialize_signals
 
@@ -363,6 +371,137 @@ def signals_materialize_cmd(
     click.echo(f"  signal_hits: {result.signal_hits_path}")
     click.echo(f"  evidence_bundles: {result.evidence_bundles_path}")
     click.echo(f"  manifest: {result.manifest_path}")
+
+
+@cli.group(name="model")
+def model_group() -> None:
+    """Train, score, evaluate, and promote lake-backed models."""
+
+
+@model_group.command(name="build-features")
+@click.argument("model_name", type=click.Choice(["anomaly"]))
+@click.option("--run-id", default=None, help="Optional deterministic feature run id.")
+def model_build_features_cmd(model_name: str, run_id: str | None) -> None:
+    """Build model feature parquet from curated lake tables."""
+    del model_name
+    try:
+        result = build_anomaly_features(run_id=run_id)
+    except AnomalyModelError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"anomaly features {result.run_id}: wrote {result.rows:,} rows")
+    click.echo(f"  features: {result.feature_path}")
+    click.echo(f"  manifest: {result.manifest_path}")
+
+
+@model_group.command(name="train")
+@click.argument("model_name", type=click.Choice(["anomaly"]))
+@click.option("--run-id", default=None, help="Optional deterministic model run id.")
+@click.option(
+    "--max-training-rows",
+    type=click.IntRange(min=1),
+    default=200_000,
+    show_default=True,
+    help="Deterministic bounded sample size for model training.",
+)
+@click.option(
+    "--batch-size",
+    type=click.IntRange(min=1),
+    default=100_000,
+    show_default=True,
+    help="Rows per prediction batch when scoring the feature parquet.",
+)
+@click.option("--promote/--no-promote", default=True, help="Update current.json on success.")
+def model_train_cmd(
+    model_name: str,
+    run_id: str | None,
+    max_training_rows: int,
+    batch_size: int,
+    promote: bool,
+) -> None:
+    """Train the requested model and write score parquet."""
+    del model_name
+    try:
+        result = train_anomaly_model(
+            run_id=run_id,
+            max_training_rows=max_training_rows,
+            batch_size=batch_size,
+            promote=promote,
+        )
+    except AnomalyModelError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(
+        f"anomaly model {result.run_id}: trained on {result.training_rows:,} rows; "
+        f"scored {result.scored_rows:,} contracts"
+    )
+    click.echo(f"  model: {result.model_dir}")
+    click.echo(f"  scores: {result.score_path}")
+    click.echo(f"  metrics: {result.metrics_path}")
+    if result.current_manifest_path:
+        click.echo(f"  current: {result.current_manifest_path}")
+
+
+@model_group.command(name="predict")
+@click.argument("model_name", type=click.Choice(["anomaly"]))
+@click.option("--model-run-id", default=None, help="Model run id; defaults to current.json.")
+@click.option("--feature-run-id", default=None, help="Feature run id; defaults to model metadata.")
+@click.option("--run-id", default=None, help="Optional deterministic score run id.")
+@click.option(
+    "--batch-size",
+    type=click.IntRange(min=1),
+    default=100_000,
+    show_default=True,
+    help="Rows per prediction batch.",
+)
+def model_predict_cmd(
+    model_name: str,
+    model_run_id: str | None,
+    feature_run_id: str | None,
+    run_id: str | None,
+    batch_size: int,
+) -> None:
+    """Score anomaly features with a trained model."""
+    del model_name
+    try:
+        result = predict_anomaly_scores(
+            model_run_id=model_run_id,
+            feature_run_id=feature_run_id,
+            run_id=run_id,
+            batch_size=batch_size,
+        )
+    except AnomalyModelError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"anomaly scores {result.run_id}: wrote {result.rows:,} rows")
+    click.echo(f"  scores: {result.score_path}")
+
+
+@model_group.command(name="evaluate")
+@click.argument("model_name", type=click.Choice(["anomaly"]))
+@click.argument("score_run_id")
+def model_evaluate_cmd(model_name: str, score_run_id: str) -> None:
+    """Evaluate score parquet against sanction-derived labels."""
+    del model_name
+    try:
+        result = evaluate_scores(score_run_id)
+    except AnomalyModelError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(
+        f"anomaly scores {result.score_run_id}: rows={result.scored_rows:,} "
+        f"positives={result.positive_labels:,} "
+        f"p@100={result.precision_at_100 if result.precision_at_100 is not None else '-'}"
+    )
+
+
+@model_group.command(name="promote")
+@click.argument("model_name", type=click.Choice(["anomaly"]))
+@click.argument("run_id")
+def model_promote_cmd(model_name: str, run_id: str) -> None:
+    """Promote a trained model run as current."""
+    del model_name
+    try:
+        path = promote_anomaly_model(run_id)
+    except AnomalyModelError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"promoted anomaly model {run_id}: {path}")
 
 
 @cli.command(name="qualify", context_settings={"ignore_unknown_options": True})

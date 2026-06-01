@@ -32,6 +32,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   local runtime.
 - Added lake-backed pattern API fallbacks for materialized signal-backed
   public patterns when Neo4j is unavailable.
+- Added the first Phase 13 anomaly-model batch workflow: DuckDB feature
+  materialization, Isolation Forest training, batched score parquet output,
+  model promotion metadata, tests, and runbook/model-card docs.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.
