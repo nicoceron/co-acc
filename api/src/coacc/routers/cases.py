@@ -42,8 +42,11 @@ async def get_cases(
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> CaseListResponse:
+    lake_cases = list_lake_cases(page, size)
+    if lake_cases.total > 0:
+        return lake_cases
     if session is None:
-        return list_lake_cases(page, size)
+        return lake_cases
     _require_reviewer_when_graph_is_available(session, user)
     assert user is not None
     return await list_cases(session, page, size, user.id)
@@ -67,11 +70,11 @@ async def get_case_detail(
         Depends(get_optional_user_without_database_required),
     ],
 ) -> CaseResponse:
-    if session is None:
-        lake_case = get_lake_case(case_id)
-        if lake_case is None:
-            raise HTTPException(status_code=404, detail="Case not found")
+    lake_case = get_lake_case(case_id)
+    if lake_case is not None:
         return lake_case
+    if session is None:
+        raise HTTPException(status_code=404, detail="Case not found")
     _require_reviewer_when_graph_is_available(session, user)
     assert user is not None
     case = await get_case(session, case_id, user.id)

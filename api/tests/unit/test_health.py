@@ -23,6 +23,29 @@ async def test_health_returns_ok(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
+async def test_health_uses_lake_run_when_connected_graph_has_no_signal_run(
+    client: AsyncClient,
+) -> None:
+    with (
+        patch(
+            "coacc.main.get_latest_materializer_run",
+            new_callable=AsyncMock,
+            return_value=("curated:20260601T044945Z", "2026-06-01T04:49:45Z"),
+        ),
+        patch("coacc.main.execute_query_single", new_callable=AsyncMock, return_value=None),
+    ):
+        response = await client.get("/health")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["neo4j"] == "connected"
+    assert payload["last_signal_run_id"] == "curated:20260601T044945Z"
+    assert payload["last_signal_run_at"] == "2026-06-01T04:49:45Z"
+    assert payload["last_signal_run_status"] == "curated"
+    assert payload["last_signal_hit_count"] is None
+
+
+@pytest.mark.anyio
 async def test_meta_health_has_security_headers(client: AsyncClient) -> None:
     with patch(
         "coacc.routers.meta.execute_query_single",

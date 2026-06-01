@@ -114,15 +114,15 @@ app.include_router(agent.router)
 async def health(
     session: Annotated[AsyncSession | None, Depends(get_optional_session)],
 ) -> dict[str, str | int | None]:
+    latest_run_id, latest_run_at = await get_latest_materializer_run(session)
+    latest_run_status: str | None = (
+        "curated"
+        if latest_run_id and latest_run_id.startswith("curated:")
+        else "completed"
+        if latest_run_id
+        else None
+    )
     if session is None:
-        latest_run_id, latest_run_at = await get_latest_materializer_run(None)
-        latest_run_status = (
-            "curated"
-            if latest_run_id and latest_run_id.startswith("curated:")
-            else "completed"
-            if latest_run_id
-            else None
-        )
         return {
             "status": "ok",
             "neo4j": "unavailable",
@@ -132,27 +132,28 @@ async def health(
             "last_signal_hit_count": None,
         }
     latest_run = await execute_query_single(session, "signal_latest_completed_run")
+    latest_signal_hit_count = None
+    if (
+        latest_run
+        and latest_run_id
+        and latest_run["run_id"] is not None
+        and str(latest_run["run_id"]) == latest_run_id
+    ):
+        latest_run_status = (
+            str(latest_run["status"])
+            if "status" in latest_run and latest_run["status"] is not None
+            else latest_run_status
+        )
+        latest_signal_hit_count = (
+            latest_run["hit_count"]
+            if "hit_count" in latest_run and latest_run["hit_count"] is not None
+            else None
+        )
     return {
         "status": "ok",
         "neo4j": "connected",
-        "last_signal_run_id": (
-            str(latest_run["run_id"]) if latest_run and latest_run["run_id"] is not None else None
-        ),
-        "last_signal_run_at": (
-            str(latest_run["finished_at"])
-            if latest_run and latest_run["finished_at"] is not None
-            else None
-        ),
-        "last_signal_run_status": (
-            str(latest_run["status"])
-            if latest_run and "status" in latest_run and latest_run["status"] is not None
-            else None
-        ),
-        "last_signal_hit_count": (
-            latest_run["hit_count"]
-            if latest_run
-            and "hit_count" in latest_run
-            and latest_run["hit_count"] is not None
-            else None
-        ),
+        "last_signal_run_id": latest_run_id,
+        "last_signal_run_at": latest_run_at,
+        "last_signal_run_status": latest_run_status,
+        "last_signal_hit_count": latest_signal_hit_count,
     }

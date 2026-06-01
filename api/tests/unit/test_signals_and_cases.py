@@ -4,6 +4,7 @@ import pytest
 from httpx import AsyncClient
 
 from coacc.main import app
+from coacc.models.case import CaseListResponse, CaseResponse, CaseSummary
 from coacc.services.signal_registry import clear_signal_registry_cache, load_signal_registry
 
 
@@ -162,6 +163,74 @@ async def test_list_cases_uses_existing_investigations(
     data = response.json()
     assert data["cases"][0]["id"] == "case-1"
     assert data["cases"][0]["stale"] is True
+
+
+@pytest.mark.anyio
+async def test_list_cases_prefers_lake_cases_when_graph_is_available(
+    client: AsyncClient,
+) -> None:
+    lake_response = CaseListResponse(
+        cases=[
+            CaseSummary(
+                id="lake-case-1",
+                title="Lake case",
+                description="Public lake case",
+                status="new",
+                created_at="2026-06-01T00:00:00Z",
+                updated_at="2026-06-01T00:00:00Z",
+                entity_ids=["8601"],
+                signal_count=1,
+                public_signal_count=1,
+                last_refreshed_at="2026-06-01T00:00:00Z",
+                last_run_id="lake-run-1",
+                stale=False,
+            )
+        ],
+        total=1,
+    )
+
+    with (
+        patch("coacc.routers.cases.list_lake_cases", return_value=lake_response),
+        patch("coacc.routers.cases.list_cases", new=AsyncMock()) as graph_list,
+    ):
+        response = await client.get("/api/v1/cases/")
+
+    assert response.status_code == 200
+    assert response.json()["cases"][0]["id"] == "lake-case-1"
+    graph_list.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_case_detail_prefers_lake_case_when_graph_is_available(
+    client: AsyncClient,
+) -> None:
+    lake_case = CaseResponse(
+        id="lake-case-1",
+        title="Lake case",
+        description="Public lake case",
+        status="new",
+        created_at="2026-06-01T00:00:00Z",
+        updated_at="2026-06-01T00:00:00Z",
+        entity_ids=["8601"],
+        signal_count=1,
+        public_signal_count=1,
+        last_refreshed_at="2026-06-01T00:00:00Z",
+        last_run_id="lake-run-1",
+        stale=False,
+        signals=[],
+        evidence_bundles=[],
+        events=[],
+    )
+
+    with (
+        patch("coacc.routers.cases.get_lake_case", return_value=lake_case),
+        patch("coacc.routers.cases.get_case", new=AsyncMock()) as graph_get,
+    ):
+        response = await client.get("/api/v1/cases/lake-case-1")
+
+    assert response.status_code == 200
+    assert response.json()["id"] == "lake-case-1"
+    graph_get.assert_not_called()
 
 
 def test_signal_registry_v2_definitions_are_loaded() -> None:

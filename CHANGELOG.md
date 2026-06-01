@@ -80,6 +80,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Made API runtime file discovery work in both checkout and container install
   layouts, so signal registries, SQL, catalog files, and YAML contracts resolve
   under `/app` in Docker.
+- Made case read routes lake-first so default compose serves promoted case
+  dossiers even when Neo4j is connected but has no derived projection yet.
+- Made `/health` report the latest lake signal run when the connected graph has
+  no materialized run metadata.
 - Made the compose signal materializer exit successfully as an empty global
   no-op when the dev Neo4j graph has no candidate entities yet.
 - Wired the compliance pack, public privacy, open-core boundary, and repository

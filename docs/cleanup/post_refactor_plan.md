@@ -1972,6 +1972,10 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   graph has no candidate entities. Verified with compose API/Neo4j health,
   `/api/v1/signals/`, `/api/v1/agent/query`, the ops materializer profile, and
   the built frontend image on the compose network.
+- **2026-06-01** — Lake-first API behavior now holds even when Neo4j is
+  connected. Default compose serves public lake case lists/details and reports
+  the latest lake signal run in `/health` while the graph remains an optional
+  reviewer investigation overlay.
 
 (Append new decisions as they're made. One line per decision.)
 
