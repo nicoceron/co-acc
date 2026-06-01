@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import duckdb
 
+from coacc_etl.lakehouse import reader
 from coacc_etl.lakehouse.paths import lake_root
 from coacc_etl.models.anomaly.common import (
     AnomalyModelError,
@@ -37,6 +38,79 @@ def _table_glob(table: str) -> str:
     if not root.exists() or not any(root.glob("*.parquet")):
         raise AnomalyModelError(f"missing curated table parquet: {root}")
     return str(root / "*.parquet")
+
+
+def _sql_list(values: list[str]) -> str:
+    return "[" + ", ".join(sql_string(value) for value in values) + "]"
+
+
+def _offer_key_sql(prefix: str = "") -> str:
+    return f"""
+        coalesce(
+            nullif(trim({prefix}identificador_de_la_oferta), ''),
+            nullif(trim({prefix}referencia_de_la_oferta), ''),
+            nullif(
+                regexp_replace(
+                    coalesce(cast({prefix}nit_del_proveedor AS VARCHAR), ''),
+                    '[^0-9]',
+                    '',
+                    'g'
+                ),
+                ''
+            ),
+            nullif(trim({prefix}nombre_proveedor), '')
+        )
+    """
+
+
+def _create_offer_counts_view(
+    con: duckdb.DuckDBPyConnection,
+    *,
+    contracts_glob: str,
+) -> bool:
+    files = [str(path) for path in reader.source_files("secop_offers")]
+    if not files:
+        con.execute("""
+            CREATE OR REPLACE TEMP VIEW anomaly_offer_counts AS
+            SELECT
+                NULL::VARCHAR AS process_id,
+                0::INTEGER AS effective_offer_count
+            WHERE false
+        """)
+        return False
+
+    con.execute(
+        f"""
+        CREATE OR REPLACE TEMP VIEW anomaly_award_processes AS
+        SELECT DISTINCT nullif(trim(process_id), '') AS process_id
+        FROM read_parquet({sql_string(contracts_glob)})
+        WHERE nullif(trim(process_id), '') IS NOT NULL
+        """
+    )
+    con.execute(
+        f"""
+        CREATE OR REPLACE TEMP VIEW anomaly_offer_counts AS
+        SELECT
+            process_id,
+            count(DISTINCT offer_key)::INTEGER AS effective_offer_count
+        FROM (
+            SELECT
+                nullif(trim(o.id_del_proceso_de_compra), '') AS process_id,
+                {_offer_key_sql("o.")} AS offer_key
+            FROM read_parquet(
+                {_sql_list(files)},
+                union_by_name = true,
+                hive_partitioning = true
+            ) AS o
+            INNER JOIN anomaly_award_processes AS p
+                ON p.process_id = nullif(trim(o.id_del_proceso_de_compra), '')
+            WHERE nullif(trim(o.id_del_proceso_de_compra), '') IS NOT NULL
+                AND {_offer_key_sql("o.")} IS NOT NULL
+        )
+        GROUP BY process_id
+        """
+    )
+    return True
 
 
 def _replace_partition_from_sql(
@@ -169,7 +243,7 @@ def _feature_sql(
             contract_type,
             contract_value,
             signing_date,
-            process_id,
+            profiled.process_id,
             process_url,
             source_id,
             log_value,
@@ -191,7 +265,10 @@ def _feature_sql(
                 log_value < coalesce(modality_log_p05, log_value)
                 OR log_value > coalesce(modality_log_p95, log_value)
             ) AS modality_value_mismatch,
-            false AS single_bidder,
+            (
+                offer_counts.process_id IS NOT NULL
+                AND offer_counts.effective_offer_count <= 1
+            ) AS single_bidder,
             EXISTS (
                 SELECT 1
                 FROM sanction_keys
@@ -207,6 +284,8 @@ def _feature_sql(
                 ELSE 'standard'
             END AS score_confidence
         FROM profiled
+        LEFT JOIN anomaly_offer_counts AS offer_counts
+            ON offer_counts.process_id = profiled.process_id
     """
 
 
@@ -217,6 +296,7 @@ def build_anomaly_features(run_id: str | None = None) -> AnomalyFeatureBuildResu
     sanctions_glob = _table_glob("signal_feature_procurement_sanctioned_supplier_awarded")
     con = duckdb.connect(database=":memory:")
     try:
+        offers_available = _create_offer_counts_view(con, contracts_glob=contracts_glob)
         feature_path, rows = _replace_partition_from_sql(
             con,
             name="anomaly_features",
@@ -245,7 +325,12 @@ def build_anomaly_features(run_id: str | None = None) -> AnomalyFeatureBuildResu
             "sources": [
                 "fct_procurement_contract_awards",
                 "signal_feature_procurement_sanctioned_supplier_awarded",
+                *(["secop_offers"] if offers_available else []),
             ],
+            "offer_features": {
+                "available": offers_available,
+                "source": "secop_offers",
+            },
         },
     )
     return AnomalyFeatureBuildResult(

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import json
 from datetime import date
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import duckdb
 import pyarrow as pa
@@ -11,11 +12,8 @@ from click.testing import CliRunner
 from coacc_etl.cli import cli
 from coacc_etl.models.anomaly import build_anomaly_features, train_anomaly_model
 
-if TYPE_CHECKING:
-    from pathlib import Path
 
-
-def _write_anomaly_inputs(root: Path) -> None:
+def _write_anomaly_inputs(root: Path, *, include_offers: bool = True) -> None:
     awards_out = root / "curated" / "table=fct_procurement_contract_awards"
     sanctions_out = (
         root
@@ -104,6 +102,68 @@ def _write_anomaly_inputs(root: Path) -> None:
         ]),
         sanctions_out / "part-00000.parquet",
     )
+    if include_offers:
+        offers_out = root / "raw" / "source=wi7w-2nvm" / "year=2026" / "month=01"
+        offers_out.mkdir(parents=True)
+        pq.write_table(
+            pa.Table.from_pylist([
+                {
+                    "fecha_de_registro": "2026-01-01T00:00:00.000",
+                    "referencia_de_la_oferta": "O-C-0",
+                    "identificador_de_la_oferta": "O-C-0",
+                    "valor_de_la_oferta": "1000000",
+                    "entidad_compradora": "Entidad Compradora",
+                    "nit_entidad_compradora": "800123456",
+                    "moneda": "COP",
+                    "descripcion_del_procedimiento": "Proceso C-0",
+                    "referencia_del_proceso": "P-0",
+                    "id_del_proceso_de_compra": "P-0",
+                    "modalidad": "Contratacion directa",
+                    "invitacion_directa": "No",
+                    "nombre_proveedor": "Proveedor 0",
+                    "nit_del_proveedor": "900123456",
+                    "c_digo_entidad": "buyer-0",
+                    "c_digo_proveedor": "supplier-0",
+                },
+                {
+                    "fecha_de_registro": "2026-01-02T00:00:00.000",
+                    "referencia_de_la_oferta": "O-C-1-A",
+                    "identificador_de_la_oferta": "O-C-1-A",
+                    "valor_de_la_oferta": "2000000",
+                    "entidad_compradora": "Entidad Compradora",
+                    "nit_entidad_compradora": "800123456",
+                    "moneda": "COP",
+                    "descripcion_del_procedimiento": "Proceso C-1",
+                    "referencia_del_proceso": "P-1",
+                    "id_del_proceso_de_compra": "P-1",
+                    "modalidad": "Contratacion directa",
+                    "invitacion_directa": "No",
+                    "nombre_proveedor": "Proveedor 1",
+                    "nit_del_proveedor": "900000001",
+                    "c_digo_entidad": "buyer-1",
+                    "c_digo_proveedor": "supplier-1",
+                },
+                {
+                    "fecha_de_registro": "2026-01-02T00:00:00.000",
+                    "referencia_de_la_oferta": "O-C-1-B",
+                    "identificador_de_la_oferta": "O-C-1-B",
+                    "valor_de_la_oferta": "2100000",
+                    "entidad_compradora": "Entidad Compradora",
+                    "nit_entidad_compradora": "800123456",
+                    "moneda": "COP",
+                    "descripcion_del_procedimiento": "Proceso C-1",
+                    "referencia_del_proceso": "P-1",
+                    "id_del_proceso_de_compra": "P-1",
+                    "modalidad": "Contratacion directa",
+                    "invitacion_directa": "No",
+                    "nombre_proveedor": "Proveedor Alterno",
+                    "nit_del_proveedor": "900000099",
+                    "c_digo_entidad": "buyer-1",
+                    "c_digo_proveedor": "supplier-99",
+                },
+            ]),
+            offers_out / "part-00000.parquet",
+        )
 
 
 def test_build_anomaly_features_writes_contract_features(
@@ -120,15 +180,67 @@ def test_build_anomaly_features_writes_contract_features(
     try:
         row = con.execute(
             """
-            SELECT prior_sanction_supplier, n_prior_contracts_12mo_supplier
+            SELECT prior_sanction_supplier, n_prior_contracts_12mo_supplier, single_bidder
             FROM read_parquet(?)
             WHERE contract_id = 'C-3'
             """,
             [str(tmp_path / "curated" / "anomaly_features" / "run_id=feature-test" / "*.parquet")],
         ).fetchone()
+        offer_rows = con.execute(
+            """
+            SELECT contract_id, single_bidder
+            FROM read_parquet(?)
+            WHERE contract_id IN ('C-0', 'C-1')
+            ORDER BY contract_id
+            """,
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "anomaly_features"
+                    / "run_id=feature-test"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
     finally:
         con.close()
-    assert row == (True, 1)
+    assert row == (True, 1, False)
+    assert offer_rows == [("C-0", True), ("C-1", False)]
+
+
+def test_build_anomaly_features_without_offers_keeps_single_bidder_false(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_anomaly_inputs(tmp_path, include_offers=False)
+
+    result = build_anomaly_features(run_id="feature-no-offers")
+
+    con = duckdb.connect()
+    try:
+        row = con.execute(
+            """
+            SELECT bool_or(single_bidder)
+            FROM read_parquet(?)
+            """,
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "anomaly_features"
+                    / "run_id=feature-no-offers"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchone()
+    finally:
+        con.close()
+
+    manifest = json.loads(Path(result.manifest_path).read_text(encoding="utf-8"))
+    assert row == (False,)
+    assert manifest["offer_features"] == {"available": False, "source": "secop_offers"}
 
 
 def test_train_anomaly_model_writes_model_scores_and_manifest(

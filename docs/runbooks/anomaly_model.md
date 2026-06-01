@@ -79,9 +79,12 @@ contract award fact table plus PACO-backed sanctioned-supplier signal features
 for label-derived evaluation. The supervised XGBoost top-up remains a later
 Phase 13 slice; the current model metadata records that limitation explicitly.
 
-`single_bidder` is emitted as `false` until offers-to-process linkage is
-curated. Score consumers should treat `score_confidence=low` as a cold-start
-flag for suppliers with fewer than five prior contracts.
+`single_bidder` is derived from `secop_offers` / `wi7w-2nvm` when that raw
+source exists in the lake. The builder counts distinct effective offers by
+`id_del_proceso_de_compra` and flags processes with one offer. Runs without
+offers data keep the flag false. Score consumers should treat
+`score_confidence=low` as a cold-start flag for suppliers with fewer than five
+prior contracts.
 
 ## Local Smoke
 

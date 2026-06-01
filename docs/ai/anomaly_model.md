@@ -29,7 +29,8 @@ target.
 
 ## Features
 
-The feature builder uses only curated lake tables:
+The feature builder uses curated lake tables and, when present, the raw
+`secop_offers` source for offer-count features:
 
 - log contract value
 - buyer-relative value z-score
@@ -40,13 +41,14 @@ The feature builder uses only curated lake tables:
 - share of prior buyer spend
 - buyer signing-day timing anomaly score
 - modality value mismatch flag
-- single-bidder placeholder, currently `false`
+- single-bidder flag derived from SECOP offer counts by process
 - prior sanctioned-supplier overlap flag
 
 ## Limitations
 
-- `single_bidder` remains unavailable until offers-to-process linkage is
-  curated.
+- `single_bidder` is populated only when SECOP offers are present in the lake;
+  runs without that source keep the flag false rather than fabricating offer
+  evidence.
 - Cold-start suppliers have lower confidence because there is little prior
   behavior to compare against.
 - Scores are prioritization signals. They must be presented with evidence and

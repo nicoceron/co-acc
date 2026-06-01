@@ -152,7 +152,7 @@ def train_anomaly_model(
         "metrics": {},
         "limitations": [
             "Supervised XGBoost top-up is not promoted in this slice.",
-            "single_bidder remains false until offers-to-process linkage is curated.",
+            "single_bidder is populated only when SECOP offers are present in the lake.",
         ],
     }
     write_json(metrics_path, base_metrics)

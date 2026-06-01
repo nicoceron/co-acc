@@ -1360,8 +1360,9 @@ PACO-backed sanctioned-supplier features, trains an Isolation Forest on a
 deterministic bounded sample, scores every feature row in batches, writes
 `lake/curated/anomaly_scores/run_id=<run_id>/`, and promotes
 `lake/models/anomaly/current.json`. This is a real unsupervised ML baseline,
-not the final supervised XGBoost top-up; `single_bidder` remains false until
-offers-to-process linkage is curated.
+not the final supervised XGBoost top-up. `single_bidder` is now populated
+when SECOP offers are present in the lake and remains false only on runs
+without offers data.
 
 **Local smoke 2026-06-01:** `coacc-etl model train anomaly --run-id
 phase13-local-smoke-20260601 --max-training-rows 5000 --batch-size 500000`
@@ -1870,9 +1871,14 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   trains an Isolation Forest, scores all feature rows in batches, writes
   contract-keyed score parquet, and promotes `current.json`. This satisfies
   the first real ML baseline and local runtime path; the supervised XGBoost
-  top-up, offer-derived `single_bidder`, and held-out precision target remain
-  open Phase 13 work. Local smoke `phase13-local-smoke-20260601` scored
+  top-up and held-out precision target remain open Phase 13 work. Local smoke
+  `phase13-local-smoke-20260601` scored
   5,442,058 contracts with `precision_at_100=0.03`.
+- **2026-06-01** — Phase 13 offer-derived `single_bidder` is no longer
+  hardcoded false. The anomaly feature builder now reads raw
+  `secop_offers` / `wi7w-2nvm` when available, counts distinct effective
+  offers by `id_del_proceso_de_compra`, and flags one-offer processes while
+  keeping a deterministic false fallback when offers data is absent.
 - **2026-06-01** — Phase 13 API exposure now reads promoted anomaly score
   parquet through DuckDB. `/api/v1/cases/` can list top scored contract cases
   without Neo4j, `/api/v1/cases/{case_id}` returns the nested
