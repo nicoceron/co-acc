@@ -161,6 +161,42 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     assert manifest["evidence_count"] == 6
 
 
+def test_materialize_signals_deduplicates_repeated_feature_rows(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    feature_row = {
+        "signal_id": "procurement_sanctioned_supplier_awarded",
+        "entity_id": "doc:900123456",
+        "entity_key": "900123456",
+        "entity_label": "Company",
+        "scope_key": "C-1:paco-1",
+        "scope_type": "sanction_record",
+        "risk_signal": 1.0,
+        "identity_confidence": 1.0,
+        "identity_match_type": "EXACT_COMPANY_NIT",
+        "identity_quality": "exact",
+        "evidence_refs": [
+            "https://secop.example/C-1",
+            "https://paco.example/paco-1",
+        ],
+    }
+    _write_feature_rows(
+        tmp_path,
+        "procurement_sanctioned_supplier_awarded",
+        [feature_row, dict(feature_row)],
+    )
+
+    result = materialize_signals(
+        ["procurement_sanctioned_supplier_awarded"],
+        run_id="dedup-run",
+    )
+
+    assert result.hit_count == 1
+    assert result.evidence_count == 2
+
+
 def test_materialize_signal_accepts_registry_alias(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

@@ -191,6 +191,22 @@ def _hit_select(
         hashed AS (
             SELECT *, substr(sha256(dedup_key), 1, 32) AS hit_id
             FROM normalized
+        ),
+        deduped AS (
+            SELECT *
+            FROM (
+                SELECT
+                    *,
+                    row_number() OVER (
+                        PARTITION BY hit_id
+                        ORDER BY
+                            score DESC NULLS LAST,
+                            identity_confidence DESC NULLS LAST,
+                            scope_key
+                    ) AS hit_rank
+                FROM hashed
+            )
+            WHERE hit_rank = 1
         )
         SELECT
             run_id,
@@ -219,7 +235,7 @@ def _hit_select(
             last_seen_at,
             source_feature_table,
             source_feature_path
-        FROM hashed
+        FROM deduped
     """
 
 

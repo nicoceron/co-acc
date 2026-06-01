@@ -105,18 +105,19 @@ These two invariants together give us reproducibility: rerun ingest from an empt
 
 ## What's missing (deliberately)
 
-- **A broader DuckDB-backed signal API** — the source of truth is now
-  lake/curated parquet; the first three curated feature tables can already
-  populate `/api/v1/signals` counts and samples without Neo4j. Wider API
-  rewires are planned in Phase 11.
+- **Graph expansion and broader public pattern rewires** — the source of
+  truth is now lake/curated parquet; signal lists, case dossiers,
+  entity lookup/search, and entity signal drilldowns can run without Neo4j.
+  Graph exploration and the remaining pattern APIs are still Phase 11/11.5
+  compatibility work.
 - **Optional graph projection** — Neo4j is useful for exploration, but not
   required for corruption-pattern detection correctness.
 - **More custom non-Socrata adapters** — PACO has landed; RUES,
   Registraduría, official_case_bulletins, etc. remain tracked in
   `_KNOWN_DEFERRED_SOURCES` (`etl/tests/test_signal_source_alignment.py`).
-- **More curated tables** — the first SECOP+PACO and SECOP-only curation runs
-  exist; Phase 10 still needs typed company/person/buyer dimensions and more
-  signal features.
+- **More curated tables** — typed company/person/buyer dimensions and the
+  first SECOP+PACO and SECOP-only signal features exist; Phase 13 still needs
+  anomaly scoring features and more demo-specific signal coverage.
 
 ---
 

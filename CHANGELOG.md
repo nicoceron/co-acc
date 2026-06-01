@@ -27,6 +27,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Added API readers for materialized lake signal runs, including offline
   `/api/v1/signals` samples and public-safe case evidence dossiers when Neo4j
   is unavailable.
+- Added lake-backed entity lookup, entity search, and entity signal drilldown
+  APIs from curated dimensions and materialized signal runs for Neo4j-offline
+  local runtime.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.
@@ -38,6 +41,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 ### Changed
 - Made Neo4j optional at API startup via `NEO4J_REQUIRED=false`; graph-backed
   routes still require Neo4j, while lake-backed signal routes can run without it.
+- Made materialized signal readers deduplicate repeated `hit_id` and evidence
+  rows defensively, and made the ETL materializer emit one row per deterministic
+  signal hit.
 - Updated `make api` to start through `python -m uvicorn` with the repo-level
   `COACC_LAKE_ROOT`, so local API runs see the populated parquet lake by default.
 - Added the legal index required by the compliance gate and aligned public

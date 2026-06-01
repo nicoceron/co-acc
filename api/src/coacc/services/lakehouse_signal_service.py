@@ -14,7 +14,7 @@ from coacc.models.case import (
     CaseSummary,
 )
 from coacc.models.entity import SourceAttribution
-from coacc.models.signal import EvidenceItemResponse, SignalHitResponse
+from coacc.models.signal import EntitySignalsResponse, EvidenceItemResponse, SignalHitResponse
 from coacc.services import lakehouse_query
 from coacc.services.signal_registry import get_signal_definition, resolve_signal_id
 
@@ -103,6 +103,26 @@ def _run_has_parquet(run: LakeSignalRun) -> bool:
     )
 
 
+def _deduped_hits_sql(run: LakeSignalRun) -> str:
+    return f"""
+        SELECT *
+        FROM (
+            SELECT
+                *,
+                row_number() OVER (
+                    PARTITION BY hit_id
+                    ORDER BY
+                        last_seen_at DESC NULLS LAST,
+                        created_at DESC NULLS LAST,
+                        signal_id,
+                        scope_key
+                ) AS __hit_rank
+            FROM read_parquet({_sql_string(run.signal_hits_path)})
+        )
+        WHERE __hit_rank = 1
+    """
+
+
 def materialized_signal_counts() -> dict[str, tuple[int, str | None]]:
     run = latest_signal_run()
     if run is None or not _run_has_parquet(run):
@@ -111,8 +131,9 @@ def materialized_signal_counts() -> dict[str, tuple[int, str | None]]:
     try:
         rows = con.execute(
             f"""
+            WITH hits AS ({_deduped_hits_sql(run)})
             SELECT signal_id, count(*) AS hit_count, max(last_seen_at) AS last_seen_at
-            FROM read_parquet({_sql_string(run.signal_hits_path)})
+            FROM hits
             GROUP BY signal_id
             """
         ).fetchall()
@@ -161,16 +182,34 @@ def _evidence_items_for_hits(
 ) -> dict[str, list[EvidenceItemResponse]]:
     if not hit_ids:
         return {}
+    unique_hit_ids = list(dict.fromkeys(hit_ids))
     con = lakehouse_query.connect(read_only=True)
     try:
         cursor = con.execute(
             f"""
+            WITH evidence AS (
+                SELECT *
+                FROM (
+                    SELECT
+                        *,
+                        row_number() OVER (
+                            PARTITION BY hit_id, item_index
+                            ORDER BY
+                                observed_at DESC NULLS LAST,
+                                source_id,
+                                url,
+                                label
+                        ) AS __evidence_rank
+                    FROM read_parquet({_sql_string(run.evidence_bundles_path)})
+                    WHERE hit_id IN (SELECT unnest(?))
+                )
+                WHERE __evidence_rank = 1
+            )
             SELECT *
-            FROM read_parquet({_sql_string(run.evidence_bundles_path)})
-            WHERE hit_id IN (SELECT unnest(?))
+            FROM evidence
             ORDER BY hit_id, item_index
             """,
-            [hit_ids],
+            [unique_hit_ids],
         )
         columns = [item[0] for item in cursor.description or []]
         rows = [dict(zip(columns, row, strict=False)) for row in cursor.fetchall()]
@@ -292,8 +331,9 @@ def _hit_rows(
     try:
         cursor = con.execute(
             f"""
+            WITH hits AS ({_deduped_hits_sql(run)})
             SELECT *
-            FROM read_parquet({_sql_string(run.signal_hits_path)})
+            FROM hits
             {where_sql}
             ORDER BY
                 CASE severity
@@ -338,6 +378,78 @@ def materialized_hit(hit_id: str, *, public_only: bool = False) -> SignalHitResp
     return _hit_from_row(rows[0], evidence_by_hit.get(str(rows[0]["hit_id"]), []))
 
 
+def materialized_entity_signals(
+    entity_id: str,
+    *,
+    public_only: bool = False,
+    limit: int = 100,
+) -> EntitySignalsResponse:
+    run = latest_signal_run()
+    clean = "".join(ch for ch in entity_id if ch.isdigit())
+    numeric_candidates = [candidate for candidate in [clean, clean[:9]] if candidate]
+    key_candidates = list(dict.fromkeys([entity_id, *numeric_candidates]))
+    uid_candidates = list(dict.fromkeys([
+        entity_id,
+        *(
+            f"{prefix}:{candidate}"
+            for candidate in numeric_candidates
+            for prefix in ("doc", "company", "buyer")
+        ),
+    ]))
+    if run is None or not _run_has_parquet(run):
+        return EntitySignalsResponse(
+            entity_id=entity_id,
+            entity_key=clean or entity_id,
+            total=0,
+            last_run_id=None,
+            last_refreshed_at=None,
+            stale=True,
+            signals=[],
+        )
+    predicates = ["(entity_uid IN (SELECT unnest(?)) OR entity_key IN (SELECT unnest(?)))"]
+    params: list[object] = [uid_candidates, key_candidates]
+    if public_only:
+        predicates.append("public_safe = true AND reviewer_only = false")
+    con = lakehouse_query.connect(read_only=True)
+    try:
+        cursor = con.execute(
+            f"""
+            WITH hits AS ({_deduped_hits_sql(run)})
+            SELECT *
+            FROM hits
+            WHERE {" AND ".join(predicates)}
+            ORDER BY
+                CASE severity
+                    WHEN 'critical' THEN 4
+                    WHEN 'high' THEN 3
+                    WHEN 'medium' THEN 2
+                    WHEN 'low' THEN 1
+                    ELSE 0
+                END DESC,
+                score DESC NULLS LAST,
+                last_seen_at DESC NULLS LAST,
+                hit_id
+            LIMIT {int(limit)}
+            """,
+            params,
+        )
+        columns = [item[0] for item in cursor.description or []]
+        rows = [dict(zip(columns, row, strict=False)) for row in cursor.fetchall()]
+    finally:
+        con.close()
+    evidence_by_hit = _evidence_items_for_hits(run, [str(row["hit_id"]) for row in rows])
+    hits = [_hit_from_row(row, evidence_by_hit.get(str(row["hit_id"]), [])) for row in rows]
+    return EntitySignalsResponse(
+        entity_id=entity_id,
+        entity_key=clean or entity_id,
+        total=len(hits),
+        last_run_id=run.run_id,
+        last_refreshed_at=run.finished_at,
+        stale=False,
+        signals=hits,
+    )
+
+
 def list_lake_cases(page: int = 1, size: int = 20) -> CaseListResponse:
     run = latest_signal_run()
     if run is None or not _run_has_parquet(run):
@@ -347,8 +459,9 @@ def list_lake_cases(page: int = 1, size: int = 20) -> CaseListResponse:
     try:
         total_row = con.execute(
             f"""
+            WITH hits AS ({_deduped_hits_sql(run)})
             SELECT count(*)
-            FROM read_parquet({_sql_string(run.signal_hits_path)})
+            FROM hits
             WHERE public_safe = true AND reviewer_only = false
             """
         ).fetchone()

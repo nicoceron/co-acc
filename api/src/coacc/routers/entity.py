@@ -9,7 +9,8 @@ from coacc.dependencies import (
     CurrentUser,
     can_access_reviewer_content,
     get_intelligence_provider,
-    get_optional_user,
+    get_optional_session,
+    get_optional_user_without_database_required,
     get_session,
 )
 from coacc.models.entity import (
@@ -29,6 +30,8 @@ from coacc.models.signal import EntitySignalsResponse
 from coacc.models.user import UserResponse
 from coacc.services.entity_types import entity_type_for_label
 from coacc.services.intelligence_provider import IntelligenceProvider
+from coacc.services.lakehouse_entity_service import get_lake_entity
+from coacc.services.lakehouse_signal_service import materialized_entity_signals
 from coacc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
 from coacc.services.public_guard import (
     enforce_entity_lookup_enabled,
@@ -122,13 +125,20 @@ async def _lookup_entity_record(
 @router.get("/{identifier}", response_model=EntityResponse)
 async def get_entity(
     identifier: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
 ) -> EntityResponse:
     enforce_entity_lookup_policy(identifier)
     clean_identifier = _clean_identifier(identifier)
 
     if not IDENTIFIER_PATTERN.match(clean_identifier):
         raise HTTPException(status_code=400, detail="Invalid identifier format")
+
+    if session is None:
+        entity = get_lake_entity(clean_identifier, include_person=not should_hide_person_entities())
+        if entity is None:
+            raise HTTPException(status_code=404, detail="Entity not found")
+        enforce_person_access_policy([entity.entity_label] if entity.entity_label else [])
+        return entity
 
     record = await execute_query_single(
         session,
@@ -147,9 +157,16 @@ async def get_entity(
 @router.get("/by-element-id/{element_id}", response_model=EntityResponse)
 async def get_entity_by_element_id(
     element_id: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
 ) -> EntityResponse:
     enforce_entity_lookup_enabled()
+    if session is None:
+        entity = get_lake_entity(element_id, include_person=not should_hide_person_entities())
+        if entity is None:
+            raise HTTPException(status_code=404, detail="Entity not found")
+        enforce_person_access_policy([entity.entity_label] if entity.entity_label else [])
+        return entity
+
     record = await execute_query_single(
         session, "entity_by_element_id", {"element_id": element_id}
     )
@@ -217,10 +234,22 @@ async def get_entity_timeline(
 @router.get("/{entity_id}/signals", response_model=EntitySignalsResponse)
 async def get_entity_signals(
     entity_id: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    user: Annotated[UserResponse | None, Depends(get_optional_user)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
+    user: Annotated[
+        UserResponse | None,
+        Depends(get_optional_user_without_database_required),
+    ],
 ) -> EntitySignalsResponse:
     enforce_entity_lookup_enabled()
+    if session is None:
+        response = materialized_entity_signals(
+            entity_id,
+            public_only=not can_access_reviewer_content(user),
+        )
+        if response.total == 0 and get_lake_entity(entity_id) is None:
+            raise HTTPException(status_code=404, detail="Entity not found")
+        return response
+
     record = await _lookup_entity_record(session, entity_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Entity not found")

@@ -5,11 +5,12 @@ from fastapi import APIRouter, Depends, Query
 from neo4j import AsyncSession
 from starlette.requests import Request
 
-from coacc.dependencies import get_session
+from coacc.dependencies import get_optional_session
 from coacc.middleware.rate_limit import limiter
 from coacc.models.entity import SourceAttribution
 from coacc.models.search import SearchResponse, SearchResult
 from coacc.services.entity_types import entity_type_for_label
+from coacc.services.lakehouse_entity_service import search_lake_entities
 from coacc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
 from coacc.services.public_guard import (
     has_person_labels,
@@ -52,12 +53,15 @@ def _extract_name(node: Any, labels: list[str]) -> str:
 @limiter.limit("30/minute")
 async def search_entities(
     request: Request,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
     q: Annotated[str, Query(min_length=2, max_length=200)],
     entity_type: Annotated[str | None, Query(alias="type")] = None,
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> SearchResponse:
+    if session is None:
+        return search_lake_entities(q, entity_type=entity_type, page=page, size=size)
+
     skip = (page - 1) * size
     type_filter = entity_type.lower() if entity_type else None
     hide_person_entities = should_hide_person_entities()

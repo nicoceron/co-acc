@@ -1,6 +1,7 @@
 import logging
 from collections.abc import AsyncGenerator
-from typing import Annotated
+from types import TracebackType
+from typing import Annotated, Protocol, cast
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
@@ -15,6 +16,17 @@ _driver: AsyncDriver | None = None
 logger = logging.getLogger(__name__)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
+
+
+class _AsyncSessionContext(Protocol):
+    async def __aenter__(self) -> AsyncSession: ...
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> bool | None: ...
 
 
 async def init_driver() -> AsyncDriver:
@@ -64,12 +76,24 @@ async def get_optional_session(
     if driver is None:
         yield None
         return
+    session_context = cast(
+        "_AsyncSessionContext",
+        driver.session(database=settings.neo4j_database),
+    )
     try:
-        async with driver.session(database=settings.neo4j_database) as session:
-            yield session
+        session = await session_context.__aenter__()
     except Exception:
         logger.exception("Optional Neo4j session unavailable; continuing without graph data")
         yield None
+        return
+    try:
+        yield session
+    except BaseException as exc:
+        suppress = await session_context.__aexit__(type(exc), exc, exc.__traceback__)
+        if not suppress:
+            raise
+    else:
+        await session_context.__aexit__(None, None, None)
 
 
 def get_intelligence_provider() -> IntelligenceProvider:

@@ -48,6 +48,9 @@ identity quality, timestamps, evidence bundle id, and evidence refs.
 
 `evidence_bundles` expands each evidence ref into an auditable row with source
 id, record/url, source parquet path, row selector, label, and identity metadata.
+The materializer writes one row per deterministic `hit_id`; API readers also
+deduplicate by `hit_id` and evidence `item_index` so repeated source feature
+rows do not duplicate user-facing hits.
 
 ## Recovery
 
@@ -79,12 +82,21 @@ the corresponding signal hit and evidence bundle directly from parquet.
 Graph-backed case creation and refresh remain available only when Neo4j is
 connected.
 
+When Neo4j is unavailable, `/api/v1/search`, `/api/v1/entity/{identifier}`,
+and `/api/v1/entity/by-element-id/{element_id}` read curated
+`dim_company`, `dim_buyer`, and `dim_person` parquet through DuckDB.
+`/api/v1/entity/{entity_id}/signals` reads the latest materialized signal run
+and returns deduplicated signal hits plus evidence items for that entity key.
+Public-mode person/entity guards still apply before reading lake dimensions.
+
 ## Reality Notes
 
 On the local lake generated during the 2026-06-01 run:
 
-- `procurement_sanctioned_supplier_awarded`: 20,184 hits
+- Raw materialized parquet: 30,397 `signal_hits` rows and 91,433
+  `evidence_bundles` rows
+- API-deduplicated `procurement_sanctioned_supplier_awarded`: 16,894 hits
 - `procurement_supplier_concentration_across_entities`: 497 hits
 - `procurement_repeat_awards_same_supplier`: 9,716 hits
-- Total `signal_hits`: 30,397 rows
-- Total `evidence_bundles`: 91,433 rows
+- Total API-deduplicated hits: 27,107
+- Total API-deduplicated evidence items: 84,853
