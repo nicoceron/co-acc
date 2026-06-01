@@ -72,11 +72,13 @@ async def get_patterns_for_entity(
     if settings.public_mode:
         enforce_entity_lookup_enabled()
     driver: AsyncDriver | None = getattr(request.app.state, "neo4j_driver", None)
-    if session is None or driver is None:
-        lake_results = lake_patterns_for_entity(entity_id, lang=lang, public_only=True)
+    lake_results = lake_patterns_for_entity(entity_id, lang=lang, public_only=True)
+    if lake_results is not None and (lake_results or session is None or driver is None):
+        results = lake_results
+    elif session is None or driver is None:
         if lake_results is None:
             raise HTTPException(status_code=404, detail="Entity not found")
-        results = lake_results
+        results = []
     else:
         results = await run_all_patterns(
             driver,
@@ -115,16 +117,18 @@ async def get_specific_pattern(
             else f"Pattern not found: {pattern_name}. Available: {available}"
         )
         raise HTTPException(status_code=404, detail=detail)
-    if session is None:
-        lake_results = lake_patterns_for_entity(
-            entity_id,
-            lang=lang,
-            pattern_id=pattern_name,
-            public_only=True,
-        )
+    lake_results = lake_patterns_for_entity(
+        entity_id,
+        lang=lang,
+        pattern_id=pattern_name,
+        public_only=True,
+    )
+    if lake_results is not None and (lake_results or session is None):
+        results = lake_results
+    elif session is None:
         if lake_results is None:
             raise HTTPException(status_code=404, detail="Entity not found")
-        results = lake_results
+        results = []
     else:
         results = await run_pattern(
             session,

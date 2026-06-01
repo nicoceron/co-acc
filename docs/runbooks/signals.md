@@ -83,18 +83,21 @@ Graph-backed case creation and refresh remain available only when Neo4j is
 connected.
 
 Use `make api-smoke` to start the API in Neo4j-off mode and verify the
-lake-backed signal, case, and citizen-agent endpoints against the local lake.
+lake-backed signal, search, entity, pattern, case, and citizen-agent endpoints
+against the local lake.
 
-When Neo4j is unavailable, `/api/v1/search`, `/api/v1/entity/{identifier}`,
-and `/api/v1/entity/by-element-id/{element_id}` read curated
-`dim_company`, `dim_buyer`, and `dim_person` parquet through DuckDB.
+`/api/v1/search`, `/api/v1/entity/{identifier}`, and
+`/api/v1/entity/by-element-id/{element_id}` prefer curated `dim_company`,
+`dim_buyer`, and `dim_person` parquet through DuckDB before falling back to
+Neo4j.
 `/api/v1/entity/{entity_id}/signals` reads the latest materialized signal run
-and returns deduplicated signal hits plus evidence items for that entity key.
+and returns deduplicated signal hits plus evidence items for that entity key
+before falling back to graph-stored signals.
 Public-mode person/entity guards still apply before reading lake dimensions.
 
 `/api/v1/patterns/{entity_id}` and
-`/api/v1/public/patterns/company/{company_ref}` also fall back to the latest
-materialized signal run for the shipped signal-backed public patterns:
+`/api/v1/public/patterns/company/{company_ref}` use the latest materialized
+signal run for the shipped signal-backed public patterns:
 sanctioned supplier record, supplier concentration, and recurring low-threshold
 awards. Legacy Cypher-only patterns still require Neo4j until their DuckDB
 feature tables are shipped.

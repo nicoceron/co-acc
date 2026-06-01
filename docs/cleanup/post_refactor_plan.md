@@ -1994,6 +1994,10 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `/api/v1/entity/by-element-id/{element_id}` read curated dimensions before
   falling back to Neo4j, so an empty connected graph no longer hides populated
   lake entities.
+- **2026-06-01** — Frontend-facing entity signal and pattern routes are also
+  lake-first: `/api/v1/entity/{entity_id}/signals` and
+  `/api/v1/patterns/{entity_id}` use materialized lake hits before falling
+  back to Neo4j, and `make api-smoke` now verifies both routes.
 
 (Append new decisions as they're made. One line per decision.)
 

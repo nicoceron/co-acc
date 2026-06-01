@@ -54,6 +54,7 @@ make api-smoke
 The smoke starts Uvicorn with `NEO4J_REQUIRED=false`, points it at the repo
 lake, and verifies `/health`, `/api/v1/meta/health`, `/api/v1/meta/stats`,
 `/api/v1/signals/`, `/api/v1/search`, `/api/v1/entity/{entity_id}`,
+`/api/v1/entity/{entity_id}/signals`, `/api/v1/patterns/{entity_id}`,
 `/api/v1/cases/`, `/api/v1/cases/{case_id}`, and `/api/v1/agent/query`.
 
 The remaining API, frontend, and Neo4j variables are listed in `.env.example`.

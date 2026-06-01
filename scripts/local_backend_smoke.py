@@ -172,6 +172,18 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
             f"{base_url}/api/v1/search?q={encoded_entity_id}&page=1&size=1"
         )
         _require(int(search.get("total") or 0) > 0, "search returned no lake entity matches")
+        entity_signals = _json_request(
+            f"{base_url}/api/v1/entity/{encoded_entity_id}/signals"
+        )
+        _require(
+            int(entity_signals.get("total") or 0) > 0,
+            "entity signal route returned no lake signals",
+        )
+        patterns = _json_request(f"{base_url}/api/v1/patterns/{encoded_entity_id}")
+        _require(
+            int(patterns.get("total") or 0) > 0,
+            "pattern route returned no lake-backed patterns",
+        )
 
         case_detail = _json_request(f"{base_url}/api/v1/cases/{case_id}")
         _require(case_detail.get("id") == case_id, "case detail id mismatch")

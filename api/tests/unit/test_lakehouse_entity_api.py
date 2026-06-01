@@ -308,6 +308,24 @@ async def test_entity_signals_reads_materialized_hits_without_neo4j(
 
 
 @pytest.mark.anyio
+async def test_entity_signals_prefers_materialized_hits_when_neo4j_is_connected(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+
+    response = await client.get("/api/v1/entity/900123456/signals")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["total"] == 1
+    assert payload["signals"][0]["hit_id"] == "hit-entity-1"
+
+
+@pytest.mark.anyio
 async def test_lake_case_routes_expose_anomaly_scores_without_neo4j(
     client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,
@@ -417,6 +435,30 @@ async def test_patterns_read_materialized_lake_hits_without_neo4j(
     assert payload["total"] == 1
     assert payload["patterns"][0]["pattern_id"] == "sanctioned_supplier_record"
     assert payload["patterns"][0]["data"]["hit_id"] == "hit-entity-1"
+    assert specific_response.status_code == 200
+    assert specific_response.json()["total"] == 1
+
+
+@pytest.mark.anyio
+async def test_patterns_prefer_materialized_lake_hits_when_neo4j_is_connected(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    monkeypatch.setattr(settings, "patterns_enabled", True)
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+
+    response = await client.get("/api/v1/patterns/company:9001234568")
+    specific_response = await client.get(
+        "/api/v1/patterns/company:9001234568/sanctioned_supplier_record"
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["total"] == 1
+    assert payload["patterns"][0]["pattern_id"] == "sanctioned_supplier_record"
     assert specific_response.status_code == 200
     assert specific_response.json()["total"] == 1
 
