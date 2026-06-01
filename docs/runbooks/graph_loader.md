@@ -39,3 +39,7 @@ used for demos.
 
 Until those commands exist, treat Neo4j as optional UI infrastructure only. Do
 not compute signals in Neo4j and do not use graph counts as audit evidence.
+Authenticated investigation workspaces still use Neo4j for user-owned state.
+When a user attaches an entity that is present in curated dimensions but absent
+from the optional graph projection, the API writes a minimal `LakeEntityRef`
+workspace node and keeps the entity evidence/analysis reads lake-backed.

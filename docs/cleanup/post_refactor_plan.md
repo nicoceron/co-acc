@@ -2025,6 +2025,10 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `/api/v1/public/meta`, `/api/v1/public/patterns/company/{company_ref}`, and
   `/api/v1/public/graph/company/{company_ref}` run in Neo4j-off mode, with
   `make api-smoke` covering the public meta, pattern, and graph paths.
+- **2026-06-01** — Authenticated investigation workspaces can attach lake
+  entities even when the optional graph projection is empty. If the legacy
+  graph lookup misses, the API resolves the entity from curated dimensions and
+  writes a minimal `LakeEntityRef` node for workspace membership state.
 
 (Append new decisions as they're made. One line per decision.)
 

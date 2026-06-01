@@ -4,7 +4,9 @@ from datetime import UTC, datetime, timedelta
 from neo4j import AsyncSession, Record
 
 from coacc.config import settings
+from coacc.models.entity import EntityResponse
 from coacc.models.investigation import Annotation, InvestigationResponse, Tag
+from coacc.services.lakehouse_entity_service import get_lake_entity
 from coacc.services.neo4j_service import execute_query, execute_query_single
 
 
@@ -50,6 +52,31 @@ def _record_to_tag(record: Record) -> Tag:
         name=record["name"],
         color=record["color"],
     )
+
+
+def _lake_entity_params(
+    investigation_id: str,
+    user_id: str,
+    entity: EntityResponse,
+) -> dict[str, object]:
+    props = entity.properties
+    document_id = props.get("document_id") or props.get("nit") or props.get("cedula")
+    name = props.get("name") or props.get("razon_social") or props.get("nome") or entity.id
+    source_list = [source.database for source in entity.sources]
+    return {
+        "investigation_id": investigation_id,
+        "user_id": user_id,
+        "entity_uid": entity.id,
+        "entity_type": entity.type,
+        "entity_label": entity.entity_label or entity.type.title(),
+        "document_id": str(document_id) if document_id else None,
+        "nit": str(props.get("nit")) if props.get("nit") is not None else None,
+        "cedula": str(props.get("cedula")) if props.get("cedula") is not None else None,
+        "name": str(name),
+        "source_list": source_list,
+        "identity_quality": entity.identity_quality,
+        "exposure_tier": entity.exposure_tier,
+    }
 
 
 async def create_investigation(
@@ -150,6 +177,17 @@ async def add_entity_to_investigation(
         session,
         "investigation_add_entity",
         {"investigation_id": investigation_id, "entity_id": entity_id, "user_id": user_id},
+    )
+    if record is not None:
+        return True
+
+    lake_entity = get_lake_entity(entity_id, include_person=True)
+    if lake_entity is None:
+        return False
+    record = await execute_query_single(
+        session,
+        "investigation_add_lake_entity",
+        _lake_entity_params(investigation_id, user_id, lake_entity),
     )
     return record is not None
 

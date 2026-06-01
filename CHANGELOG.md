@@ -109,6 +109,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   and `/api/v1/public/graph/company/{company_ref}` run from lake/catalog data
   without requiring Neo4j, with public company graph falling back to Neo4j only
   when no lake graph exists.
+- Made authenticated investigations attach curated lake entities by creating a
+  minimal Neo4j `LakeEntityRef` workspace node when the optional graph
+  projection has no matching entity yet.
 - Made `/api/v1/baseline/{entity_id}` derive sector and regional peer
   comparisons from curated procurement awards before falling back to Neo4j.
 - Made `lake-reality` reuse the latest same-day snapshot as the default

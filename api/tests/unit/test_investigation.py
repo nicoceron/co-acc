@@ -3,6 +3,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import AsyncClient
 
+from coacc.models.entity import EntityResponse, SourceAttribution
+from coacc.services import investigation_service
 from coacc.services.neo4j_service import CypherLoader
 
 FAKE_PDF = b"%PDF-1.4 fake pdf content for testing"
@@ -14,6 +16,7 @@ INVESTIGATION_CYPHER_FILES = [
     "investigation_update",
     "investigation_delete",
     "investigation_add_entity",
+    "investigation_add_lake_entity",
     "investigation_remove_entity",
     "investigation_share",
     "investigation_by_token",
@@ -623,6 +626,80 @@ async def test_remove_entity_no_auth(client: AsyncClient) -> None:
         "/api/v1/investigations/inv-uuid/entities/entity-1"
     )
     assert response.status_code == 401
+
+
+@pytest.mark.anyio
+async def test_add_entity_to_investigation_falls_back_to_lake_entity() -> None:
+    session = AsyncMock()
+    lake_entity = EntityResponse(
+        id="company:9001234568",
+        type="company",
+        entity_label="Company",
+        identity_quality="exact",
+        properties={
+            "document_id": "9001234568",
+            "nit": "9001234568",
+            "name": "Proveedor SAS",
+            "razon_social": "Proveedor SAS",
+        },
+        sources=[SourceAttribution(database="dim_company")],
+    )
+
+    with (
+        patch(
+            "coacc.services.investigation_service.execute_query_single",
+            new_callable=AsyncMock,
+            side_effect=[
+                None,
+                _mock_record({
+                    "investigation_id": "inv-uuid",
+                    "entity_id": "9001234568",
+                }),
+            ],
+        ) as query,
+        patch(
+            "coacc.services.investigation_service.get_lake_entity",
+            return_value=lake_entity,
+        ),
+    ):
+        result = await investigation_service.add_entity_to_investigation(
+            session,
+            "inv-uuid",
+            "900123456",
+            "test-user-id",
+        )
+
+    assert result is True
+    assert query.await_args_list[0].args[1] == "investigation_add_entity"
+    assert query.await_args_list[1].args[1] == "investigation_add_lake_entity"
+    assert query.await_args_list[1].args[2]["entity_uid"] == "company:9001234568"
+    assert query.await_args_list[1].args[2]["document_id"] == "9001234568"
+
+
+@pytest.mark.anyio
+async def test_add_entity_to_investigation_returns_false_when_graph_and_lake_miss() -> None:
+    session = AsyncMock()
+
+    with (
+        patch(
+            "coacc.services.investigation_service.execute_query_single",
+            new_callable=AsyncMock,
+            return_value=None,
+        ) as query,
+        patch(
+            "coacc.services.investigation_service.get_lake_entity",
+            return_value=None,
+        ),
+    ):
+        result = await investigation_service.add_entity_to_investigation(
+            session,
+            "inv-uuid",
+            "missing",
+            "test-user-id",
+        )
+
+    assert result is False
+    query.assert_awaited_once()
 
 
 # --- Cypher integrity tests for investigation queries ---
