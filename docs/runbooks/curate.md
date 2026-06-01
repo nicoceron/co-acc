@@ -81,8 +81,9 @@ Neo4j has no matching materialized hits or is unavailable:
 - `GET /api/v1/signals/procurement_repeat_awards_same_supplier`
 
 Set `NEO4J_REQUIRED=false` to allow API startup without a graph. In that mode,
-graph-backed routes still return 503, but lake-backed signal routes and
-`/health` remain available.
+lake-backed health, meta, search, entity, signal, pattern, context, baseline,
+and public company graph routes remain available. Legacy Cypher-only routes
+still require a connected graph.
 
 ## Memory Posture
 

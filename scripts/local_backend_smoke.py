@@ -142,6 +142,11 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
             int(meta_stats.get("data_sources") or 0) > 0,
             "meta stats returned no data source count",
         )
+        public_meta = _json_request(f"{base_url}/api/v1/public/meta")
+        _require(
+            public_meta.get("mode") == "public_safe",
+            "public meta did not return the public-safe envelope",
+        )
 
         signals = _json_request(f"{base_url}/api/v1/signals/")
         signal_items = signals.get("signals")
@@ -184,6 +189,13 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
             int(patterns.get("total") or 0) > 0,
             "pattern route returned no lake-backed patterns",
         )
+        public_patterns = _json_request(
+            f"{base_url}/api/v1/public/patterns/company/{encoded_entity_id}"
+        )
+        _require(
+            int(public_patterns.get("total") or 0) > 0,
+            "public pattern route returned no lake-backed patterns",
+        )
         evidence_trail = _json_request(
             f"{base_url}/api/v1/entity/{encoded_entity_id}/evidence-trail"
         )
@@ -205,6 +217,13 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
         _require(
             bool(graph.get("nodes")) and bool(graph.get("edges")),
             "graph route returned no lake-backed graph",
+        )
+        public_graph = _json_request(
+            f"{base_url}/api/v1/public/graph/company/{encoded_entity_id}?depth=1"
+        )
+        _require(
+            bool(public_graph.get("nodes")) and bool(public_graph.get("edges")),
+            "public graph route returned no lake-backed graph",
         )
         baseline = _json_request(f"{base_url}/api/v1/baseline/{encoded_entity_id}")
         _require(

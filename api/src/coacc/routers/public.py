@@ -7,12 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from neo4j import AsyncSession  # noqa: TC002
 
 from coacc.config import settings
-from coacc.dependencies import get_optional_session, get_session
+from coacc.dependencies import get_optional_session
 from coacc.models.entity import SourceAttribution
 from coacc.models.graph import GraphEdge, GraphNode, GraphResponse
 from coacc.models.pattern import PatternResponse
 from coacc.services.entity_types import entity_type_for_label
 from coacc.services.intelligence_provider import CommunityIntelligenceProvider
+from coacc.services.lakehouse_entity_context_service import lake_graph
 from coacc.services.lakehouse_entity_service import get_lake_entity
 from coacc.services.lakehouse_pattern_service import lake_patterns_for_entity
 from coacc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
@@ -46,23 +47,79 @@ def _build_sources(value: Any) -> list[SourceAttribution]:
     return []
 
 
+def _record_metric(record: Any, key: str, *fallback_keys: str) -> Any:
+    if record is None:
+        return 0
+    for candidate in (key, *fallback_keys):
+        value = record.get(candidate)
+        if value is not None:
+            return value
+    return 0
+
+
+def _public_lake_graph_response(response: GraphResponse) -> GraphResponse:
+    nodes: list[GraphNode] = []
+    node_ids: set[str] = set()
+    for node in response.nodes:
+        if node.type.lower() in {"person", "partner"}:
+            continue
+        if node.exposure_tier != "public_safe":
+            continue
+        clean_props = {
+            key: value
+            for key, value in node.properties.items()
+            if key not in _PERSON_DOC_KEYS
+        }
+        nodes.append(
+            GraphNode(
+                id=node.id,
+                label=node.label,
+                type=node.type,
+                document_id=node.document_id,
+                properties=_slim_props(clean_props),
+                sources=node.sources,
+                is_pep=False,
+                exposure_tier="public_safe",
+            )
+        )
+        node_ids.add(node.id)
+
+    edges = [
+        GraphEdge(
+            id=edge.id,
+            source=edge.source,
+            target=edge.target,
+            type=edge.type,
+            properties=_slim_props(edge.properties),
+            confidence=edge.confidence,
+            sources=edge.sources,
+            exposure_tier="public_safe",
+        )
+        for edge in response.edges
+        if edge.source in node_ids
+        and edge.target in node_ids
+        and edge.exposure_tier == "public_safe"
+    ]
+    return GraphResponse(nodes=nodes, edges=edges, center_id=response.center_id)
+
+
 @router.get("/meta")
 async def public_meta(
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
 ) -> dict[str, Any]:
-    record = await execute_query_single(session, "meta_stats", {})
+    record = await execute_query_single(session, "meta_stats", {}) if session is not None else None
     summary = source_registry_summary(load_source_registry())
     return {
         "product": "CO-ACC",
         "mode": "public_safe",
-        "total_nodes": record["total_nodes"] if record else 0,
-        "total_relationships": record["total_relationships"] if record else 0,
-        "company_count": record["company_count"] if record else 0,
-        "contract_count": record["contract_count"] if record else 0,
-        "sanction_count": record["sanction_count"] if record else 0,
-        "finance_count": record["finance_count"] if record else 0,
-        "bid_count": record["bid_count"] if record else 0,
-        "inquiry_count": record["cpi_count"] if record else 0,
+        "total_nodes": _record_metric(record, "total_nodes"),
+        "total_relationships": _record_metric(record, "total_relationships"),
+        "company_count": _record_metric(record, "company_count"),
+        "contract_count": _record_metric(record, "contract_count"),
+        "sanction_count": _record_metric(record, "sanction_count"),
+        "finance_count": _record_metric(record, "finance_count"),
+        "bid_count": _record_metric(record, "bid_count"),
+        "inquiry_count": _record_metric(record, "cpi_count", "inquiry_count"),
         "source_health": {
             "data_sources": summary["universe_v1_sources"],
             "implemented_sources": summary["implemented_sources"],
@@ -113,32 +170,49 @@ async def public_patterns_for_company(
             status_code=503,
             detail="Pattern engine temporarily unavailable pending validation.",
         )
-    if session is None:
-        entity = get_lake_entity(company_ref, include_person=False)
-        if entity is None or entity.type != "company":
-            raise HTTPException(status_code=404, detail="Company not found")
+    entity = get_lake_entity(company_ref, include_person=False)
+    if entity is not None and entity.type == "company":
         lake_patterns = lake_patterns_for_entity(entity.id, lang=lang, public_only=True)
-        patterns = lake_patterns or []
-        company_id = entity.id
-    else:
-        company_id, _company_identifier = await _resolve_company(session, company_ref)
-        patterns = await _PUBLIC_PROVIDER.run_pattern(
-            session,
-            pattern_id="__all__",
-            entity_id=company_id,
-            lang=lang,
-            include_probable=False,
-        )
+        if lake_patterns:
+            return PatternResponse(
+                entity_id=entity.id,
+                patterns=lake_patterns,
+                total=len(lake_patterns),
+            )
+        if session is None:
+            return PatternResponse(entity_id=entity.id, patterns=[], total=0)
+    elif session is None:
+        raise HTTPException(status_code=404, detail="Company not found")
 
+    assert session is not None
+    company_id, _company_identifier = await _resolve_company(session, company_ref)
+    patterns = await _PUBLIC_PROVIDER.run_pattern(
+        session,
+        pattern_id="__all__",
+        entity_id=company_id,
+        lang=lang,
+        include_probable=False,
+    )
     return PatternResponse(entity_id=company_id, patterns=patterns, total=len(patterns))
 
 
 @router.get("/graph/company/{company_ref}", response_model=GraphResponse)
 async def public_graph_for_company(
     company_ref: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
     depth: Annotated[int, Query(ge=1, le=3)] = 2,
 ) -> GraphResponse:
+    entity = get_lake_entity(company_ref, include_person=False)
+    if entity is not None and entity.type == "company":
+        lake_response = lake_graph(entity.id, depth=depth)
+        if lake_response is not None:
+            return _public_lake_graph_response(lake_response)
+        if session is None:
+            raise HTTPException(status_code=404, detail="Company graph not found")
+    elif session is None:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    assert session is not None
     company_id, company_identifier = await _resolve_company(session, company_ref)
     degree_record = await execute_query_single(
         session,

@@ -2021,6 +2021,10 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `/api/v1/baseline/{entity_id}` computes supplier sector and regional peer
   comparisons from `fct_procurement_contract_awards` before falling back to
   Neo4j, and `make api-smoke` now verifies it.
+- **2026-06-01** — Public company routes are also lake-first:
+  `/api/v1/public/meta`, `/api/v1/public/patterns/company/{company_ref}`, and
+  `/api/v1/public/graph/company/{company_ref}` run in Neo4j-off mode, with
+  `make api-smoke` covering the public meta, pattern, and graph paths.
 
 (Append new decisions as they're made. One line per decision.)
 

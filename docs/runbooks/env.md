@@ -29,7 +29,7 @@ Never commit `.env`.
 
 | Variable | Default | Purpose |
 |---|---:|---|
-| `NEO4J_REQUIRED` | `false` | When `true`, API startup fails if Neo4j is unavailable. When `false`, graph-backed routes return 503 but lake-backed signal routes and `/health` can still run. |
+| `NEO4J_REQUIRED` | `false` | When `true`, API startup fails if Neo4j is unavailable. When `false`, lake-backed health, meta, signal, search, entity, context, baseline, and public graph routes can still run; legacy Cypher-only routes remain graph-dependent. |
 | `API_PORT` | `8000` | Host port for the API service in dev compose and the local Vite proxy target. |
 | `FRONTEND_PORT` | `3000` | Host port for the frontend service in dev compose. Use `3100` when another local dev server already owns `3000`. |
 | `NEO4J_HTTP_PORT` / `NEO4J_BOLT_PORT` | `7474` / `7687` | Host ports for the dev Neo4j browser and Bolt listener. |
@@ -53,11 +53,14 @@ make api-smoke
 
 The smoke starts Uvicorn with `NEO4J_REQUIRED=false`, points it at the repo
 lake, and verifies `/health`, `/api/v1/meta/health`, `/api/v1/meta/stats`,
-`/api/v1/signals/`, `/api/v1/search`, `/api/v1/entity/{entity_id}`,
-`/api/v1/entity/{entity_id}/signals`, `/api/v1/patterns/{entity_id}`,
+`/api/v1/public/meta`, `/api/v1/signals/`, `/api/v1/search`,
+`/api/v1/entity/{entity_id}`, `/api/v1/entity/{entity_id}/signals`,
+`/api/v1/patterns/{entity_id}`,
+`/api/v1/public/patterns/company/{entity_id}`,
 `/api/v1/entity/{entity_id}/evidence-trail`,
 `/api/v1/entity/{entity_id}/exposure`,
 `/api/v1/entity/{entity_id}/timeline`, `/api/v1/graph/{entity_id}`,
+`/api/v1/public/graph/company/{entity_id}`,
 `/api/v1/baseline/{entity_id}`, `/api/v1/cases/`,
 `/api/v1/cases/{case_id}`, and `/api/v1/agent/query`.
 

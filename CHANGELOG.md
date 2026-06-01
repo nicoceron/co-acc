@@ -105,6 +105,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   `/api/v1/entity/{entity_id}/timeline`, and `/api/v1/graph/{entity_id}`
   derive frontend context from materialized lake signals/anomaly scores before
   falling back to Neo4j.
+- Made `/api/v1/public/meta`, `/api/v1/public/patterns/company/{company_ref}`,
+  and `/api/v1/public/graph/company/{company_ref}` run from lake/catalog data
+  without requiring Neo4j, with public company graph falling back to Neo4j only
+  when no lake graph exists.
 - Made `/api/v1/baseline/{entity_id}` derive sector and regional peer
   comparisons from curated procurement awards before falling back to Neo4j.
 - Made `lake-reality` reuse the latest same-day snapshot as the default
@@ -112,8 +116,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   schemas.
 - Wired the compliance pack, public privacy, open-core boundary, and repository
   publish audit checks as tracked pre-push hooks in `.pre-commit-config.yaml`.
-- Made Neo4j optional at API startup via `NEO4J_REQUIRED=false`; graph-backed
-  routes still require Neo4j, while lake-backed signal routes can run without it.
+- Made Neo4j optional at API startup via `NEO4J_REQUIRED=false`; lake-backed
+  health, meta, signal, search, entity, pattern, context, baseline, and public
+  graph routes can run without it while legacy Cypher-only routes remain
+  graph-dependent.
 - Made materialized signal readers deduplicate repeated `hit_id` and evidence
   rows defensively, and made the ETL materializer emit one row per deterministic
   signal hit.

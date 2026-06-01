@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -564,6 +565,68 @@ async def test_public_patterns_read_lake_company_without_neo4j(
     assert payload["total"] == 1
     assert payload["patterns"][0]["sources"][0]["database"] == "secop_ii_contracts"
     assert "document_id" not in str(payload).lower()
+
+
+@pytest.mark.anyio
+async def test_public_patterns_prefer_lake_company_when_neo4j_is_connected(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    monkeypatch.setattr(settings, "patterns_enabled", True)
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+
+    with patch("coacc.routers.public.execute_query_single") as neo_lookup:
+        response = await client.get("/api/v1/public/patterns/company/9001234568")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["entity_id"] == "company:9001234568"
+    assert payload["total"] == 1
+    neo_lookup.assert_not_called()
+
+
+@pytest.mark.anyio
+async def test_public_graph_reads_lake_company_without_neo4j(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    app.state.neo4j_driver = None
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+    _write_anomaly_run(tmp_path)
+
+    response = await client.get("/api/v1/public/graph/company/9001234568?depth=2")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["center_id"] == "company:9001234568"
+    assert any(node["type"] == "signal" for node in payload["nodes"])
+    assert any(edge["type"] == "HAS_SIGNAL" for edge in payload["edges"])
+    assert not any(node["type"] == "person" for node in payload["nodes"])
+    assert "cedula" not in str(payload).lower()
+
+
+@pytest.mark.anyio
+async def test_public_graph_prefers_lake_company_when_neo4j_is_connected(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+
+    with patch("coacc.routers.public.execute_query_single") as neo_lookup:
+        response = await client.get("/api/v1/public/graph/company/9001234568?depth=2")
+
+    assert response.status_code == 200
+    assert response.json()["center_id"] == "company:9001234568"
+    neo_lookup.assert_not_called()
 
 
 @pytest.mark.anyio

@@ -83,8 +83,8 @@ Graph-backed case creation and refresh remain available only when Neo4j is
 connected.
 
 Use `make api-smoke` to start the API in Neo4j-off mode and verify the
-lake-backed signal, search, entity, pattern, case, and citizen-agent endpoints
-against the local lake.
+lake-backed signal, search, entity, pattern, public graph, case, and
+citizen-agent endpoints against the local lake.
 
 `/api/v1/search`, `/api/v1/entity/{identifier}`, and
 `/api/v1/entity/by-element-id/{element_id}` prefer curated `dim_company`,

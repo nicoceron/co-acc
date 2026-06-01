@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from coacc.config import settings
+from coacc.main import app
 from coacc.models.entity import SourceAttribution
 from coacc.models.pattern import PatternResult
 
@@ -132,6 +133,44 @@ async def test_public_meta_endpoint(client: AsyncClient) -> None:
     payload = response.json()
     assert payload["product"] == "CO-ACC"
     assert payload["mode"] == "public_safe"
+
+
+@pytest.mark.anyio
+async def test_public_meta_endpoint_accepts_inquiry_count_alias(
+    client: AsyncClient,
+) -> None:
+    with patch(
+        "coacc.routers.public.execute_query_single",
+        new_callable=AsyncMock,
+        return_value={
+            "total_nodes": 10,
+            "total_relationships": 20,
+            "company_count": 3,
+            "contract_count": 4,
+            "sanction_count": 5,
+            "finance_count": 6,
+            "bid_count": 7,
+            "inquiry_count": 8,
+        },
+    ):
+        response = await client.get("/api/v1/public/meta")
+
+    assert response.status_code == 200
+    assert response.json()["inquiry_count"] == 8
+
+
+@pytest.mark.anyio
+async def test_public_meta_endpoint_without_neo4j(client: AsyncClient) -> None:
+    app.state.neo4j_driver = None
+
+    response = await client.get("/api/v1/public/meta")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["product"] == "CO-ACC"
+    assert payload["mode"] == "public_safe"
+    assert payload["total_nodes"] == 0
+    assert payload["source_health"]["data_sources"] > 0
 
 
 @pytest.mark.anyio
