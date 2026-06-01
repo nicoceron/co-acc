@@ -34,14 +34,17 @@ services:
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: ${NEO4J_PASSWORD}
       COACC_SOURCE_REGISTRY_PATH: /app/docs/datasets/catalog.signed.csv
+      COACC_LAKE_ROOT: /app/lake
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-generate-with-openssl-rand-hex-32}
       INVITE_CODE: ${INVITE_CODE:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       APP_ENV: ${APP_ENV:-dev}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3100}
     volumes:
+      - ./config:/app/config:ro
       - ./docs/datasets:/app/docs/datasets:ro
       - ./etl/datasets:/app/etl/datasets:ro
+      - ./lake:/app/lake:ro
       - ./api/src/coacc/data/watchlists:/app/src/coacc/data/watchlists
     depends_on:
       neo4j:
@@ -91,7 +94,7 @@ services:
       APP_ENV: ${APP_ENV:-dev}
       SIGNAL_MATERIALIZER_USER_ID: ${SIGNAL_MATERIALIZER_USER_ID:-system}
     command: >-
-      sh -lc 'uv run python scripts/materialize_signals.py --all --user-id "${SIGNAL_MATERIALIZER_USER_ID}"'
+      sh -lc 'uv run python scripts/materialize_signals.py --all --user-id "$${SIGNAL_MATERIALIZER_USER_ID}"'
     volumes:
       - ./api/scripts:/app/scripts:ro
       - ./config:/app/config:ro

@@ -1958,6 +1958,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   verifies `/health`, `/api/v1/signals/`, `/api/v1/cases/`, case detail, and
   `/api/v1/agent/query` against the repo lake. Current local run returned 33
   signals, case `5eb6652cdd59301239005807e9d42c6b`, and 2 agent citations.
+- **2026-06-01** — Dev compose now mirrors that lake-backed API runtime: the
+  API container mounts `config/`, `docs/datasets/`, `etl/datasets/`, and
+  `lake/` read-only, sets `COACC_LAKE_ROOT=/app/lake`, and keeps the signal
+  materializer user-id expansion inside the container so compose config
+  validates cleanly.
 
 (Append new decisions as they're made. One line per decision.)
 

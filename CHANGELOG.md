@@ -74,6 +74,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Retired the legacy source registry CSV from live code, compose mounts, and
   alignment tests in favor of `catalog.signed.csv` source refs and YAML
   adapter contracts.
+- Mounted the API compose runtime's config and local lake inputs read-only and
+  set `COACC_LAKE_ROOT=/app/lake` so containers match the lake-backed local
+  smoke path.
 - Wired the compliance pack, public privacy, open-core boundary, and repository
   publish audit checks as tracked pre-push hooks in `.pre-commit-config.yaml`.
 - Made Neo4j optional at API startup via `NEO4J_REQUIRED=false`; graph-backed
