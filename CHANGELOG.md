@@ -37,6 +37,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   model promotion metadata, tests, and runbook/model-card docs.
 - Added API readers for promoted anomaly score parquet so lake-backed cases
   and entity anomaly-score drilldowns work without Neo4j.
+- Added the first Phase 14 narrator foundation: lake-backed case subgraph
+  extraction, deterministic prompts, optional LLM provider calls, verifier,
+  templated fallback, CLI, and docs.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.

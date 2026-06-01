@@ -1879,6 +1879,13 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `anomaly_score`, and `/api/v1/entity/{entity_id}/anomaly-scores` exposes
   entity-specific scores for frontend integration. This serves the baseline
   score but does not close the supervised precision target.
+- **2026-06-01** — Phase 14 narrator foundation shipped in ETL. The new
+  `coacc-etl narrator generate <case_id>` path extracts a lake-backed contract
+  subgraph, builds a deterministic prompt, can call Gemini/Anthropic/OpenAI
+  when configured, verifies section/citation/entity/ethics constraints, and
+  writes a verified template fallback when no key is present. Full Phase 14
+  remains open until recorded LLM fixtures, API serving, and frontend display
+  are green.
 
 (Append new decisions as they're made. One line per decision.)
 

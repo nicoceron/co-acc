@@ -13,6 +13,7 @@ YAML-declared lake ingesters:
 
 import logging
 import sys
+from pathlib import Path
 
 import click
 
@@ -28,6 +29,7 @@ from coacc_etl.models.anomaly import (
     promote_anomaly_model,
     train_anomaly_model,
 )
+from coacc_etl.models.narrator import NarratorError, generate_narrative
 from coacc_etl.operations.phase7 import Phase7RunError, run_phase7
 from coacc_etl.signals import SignalMaterializationError, materialize_signals
 
@@ -502,6 +504,56 @@ def model_promote_cmd(model_name: str, run_id: str) -> None:
     except AnomalyModelError as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(f"promoted anomaly model {run_id}: {path}")
+
+
+@cli.group(name="narrator")
+def narrator_group() -> None:
+    """Generate and verify citation-bound case narratives."""
+
+
+@narrator_group.command(name="generate")
+@click.argument("case_id")
+@click.option(
+    "--provider",
+    type=click.Choice(["gemini", "anthropic", "openai", "template"]),
+    default="gemini",
+    show_default=True,
+    help="Narrator provider. Falls back to template unless --require-llm is set.",
+)
+@click.option("--model", default=None, help="Optional provider model override.")
+@click.option("--api-key", default=None, help="Optional provider API key.")
+@click.option("--require-llm/--allow-template", default=False, help="Fail instead of templating.")
+@click.option(
+    "--output",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Output markdown path.",
+)
+def narrator_generate_cmd(
+    case_id: str,
+    provider: str,
+    model: str | None,
+    api_key: str | None,
+    require_llm: bool,
+    output: Path | None,
+) -> None:
+    """Generate a verified narrative for a lake-backed case id."""
+    try:
+        result = generate_narrative(
+            case_id,
+            provider=provider,
+            model=model,
+            api_key=api_key,
+            require_llm=require_llm,
+            output=output,
+        )
+    except NarratorError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(
+        f"narrative {result.case_id}: provider={result.provider} "
+        f"words={result.word_count} valid={result.valid}"
+    )
+    click.echo(f"  narrative: {result.narrative_path}")
 
 
 @cli.command(name="qualify", context_settings={"ignore_unknown_options": True})

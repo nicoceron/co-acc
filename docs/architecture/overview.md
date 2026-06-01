@@ -82,12 +82,12 @@ One-page trace of how data moves through co/acc, from raw audit JSON to API resp
                        ┌────────────────────┼────────────────────┐
                        ▼                    ▼                    ▼
         ┌─────────────────────┐  ┌─────────────────────┐  ┌─────────────────────┐
-        │  lakehouse.reality  │  │  api/               │  │  signal engine      │
+        │  lakehouse.reality  │  │  api/               │  │  signal/narrator    │
         │  freshness,         │  │  FastAPI service    │  │  (api workspace)    │
         │  coverage, manifest │  │  reads parquet via  │  │  reads parquet via  │
         │  + evidence checks  │  │  DuckDB first;      │  │  DuckDB, emits      │
-        │  scripts/lake_      │  │  Neo4j optional     │  │  signal rows per    │
-        │  reality.py         │  │  projection only    │  │  signal_registry    │
+        │  scripts/lake_      │  │  Neo4j optional     │  │  signal rows and    │
+        │  reality.py         │  │  projection only    │  │  narratives         │
         └─────────────────────┘  └─────────────────────┘  └─────────────────────┘
 ```
 
@@ -121,6 +121,10 @@ These two invariants together give us reproducibility: rerun ingest from an empt
   The API can read promoted score parquet, but Phase 13 still needs the
   supervised top-up, offer-derived `single_bidder`, and more demo-specific
   signal coverage.
+- **Narrator completion** — the Phase 14 backend foundation can extract a
+  contract case subgraph, build prompts, call an optional provider, verify the
+  Markdown, and write fallback narratives. Recorded LLM fixtures, API serving,
+  and frontend display are still open.
 
 ---
 
