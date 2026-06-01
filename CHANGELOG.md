@@ -54,6 +54,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   expanded verifier guard tests.
 - Added Phase 16 public-readiness checks: tracked/unignored publish audit,
   CRISP-ML evidence mapping, and focused Markdown link validation.
+- Added `make curated-contracts` and `scripts/check_curated_contracts.py` to
+  validate shipped curated parquet schema/non-null contracts against the local
+  lake.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.
@@ -68,6 +71,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Retired the legacy source registry CSV from live code, compose mounts, and
   alignment tests in favor of `catalog.signed.csv` source refs and YAML
   adapter contracts.
+- Wired the compliance pack, public privacy, open-core boundary, and repository
+  publish audit checks as tracked pre-push hooks in `.pre-commit-config.yaml`.
 - Made Neo4j optional at API startup via `NEO4J_REQUIRED=false`; graph-backed
   routes still require Neo4j, while lake-backed signal routes can run without it.
 - Made materialized signal readers deduplicate repeated `hit_id` and evidence

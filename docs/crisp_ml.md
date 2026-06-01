@@ -73,6 +73,7 @@ Operational checks are captured in the [post-refactor plan](cleanup/post_refacto
 
 - `make check` for lint, typing, API tests, ETL tests, and frontend tests.
 - `make lake-reality` for local lake health and curated-table drift.
+- `make curated-contracts` for shipped curated parquet schema/non-null contracts.
 - `scripts/check_compliance_pack.py` for public legal/ethics baseline.
 - `scripts/check_public_privacy.py` for public-surface privacy rules.
 - `scripts/check_open_core_boundary.py` for open-core boundary regressions.

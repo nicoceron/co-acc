@@ -25,6 +25,13 @@ make curate TABLE=dim_buyer
 make curate TABLE=dim_person
 ```
 
+Validate the shipped curated table contracts against the local parquet:
+
+```bash
+make curated-contracts
+make curated-contracts TABLE=dim_company
+```
+
 `LAKE_ROOT` defaults to `./lake`. Override it when running against another
 lake:
 

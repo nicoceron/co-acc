@@ -21,7 +21,7 @@ LAKE_REALITY_ARGS = $(if $(DATASET),--dataset $(DATASET),) \
 	clean-data \
 	lint type-check format \
 	test test-api test-etl test-frontend check \
-	lake-init lake-reality lake-compact \
+	lake-init lake-reality lake-compact curated-contracts \
 	qualify ingest ingest-all ingest-phase7-smoke ingest-phase7-full curate \
 	materialize-deps materialize-all
 
@@ -97,6 +97,9 @@ lake-compact:
 
 curate: lake-init
 	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run coacc-etl curate $(if $(TABLE),--table $(TABLE),)
+
+curated-contracts:
+	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python ../scripts/check_curated_contracts.py $(if $(TABLE),--table $(TABLE),)
 
 # Qualify (re-)builds the signed catalog. Pass extra flags via QUALIFY_ARGS.
 qualify:

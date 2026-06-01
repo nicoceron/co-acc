@@ -58,6 +58,18 @@ The phases below fill the lake, monitor it, build curated DuckDB signal
 tables, rewire the API to those tables, optionally project a small graph for
 exploration, ship the AI components the competition rubric demands, and submit.
 
+**Current state audit — 2026-06-01:** the local backend/data stack is now green
+on this device through Phase 14 backend work. Evidence from the current branch:
+Phase 7 raw lake has the eight active datasets, Phase 9.0 PACO is ingested,
+Phase 10 curated tables rebuild in 2:34 and pass `make curated-contracts`,
+Phase 11 lake-backed API repositories serve signals/cases/entities/patterns
+without Neo4j, Phase 12 legacy CSV retirement is pushed, Phase 13 supervised
+anomaly scoring clears `holdout_precision_at_100=0.67`, and Phase 14 can
+precompute verified narratives. Remaining work is not hidden: Phase 8's external
+three-day cron/runner evidence is still outside this device, Phase 11.5 graph
+projection is optional, Phase 15 frontend pages remain frontend-owned, and Phase
+16 still has external competition submission/logistics items.
+
 ---
 
 ## 1. Phases at a glance
@@ -864,8 +876,8 @@ class SignalFeatureRow(BaseModel):
 - [x] `lake/curated/table=dim_company/`, `table=dim_buyer/`,
       `table=dim_person/` populated.
 - [x] At least 3 signal feature parquets non-empty.
-- [ ] All curated outputs validate against contracts.
-- [ ] `coacc-etl curate --all` runs end-to-end in <10 minutes on the
+- [x] All curated outputs validate against contracts.
+- [x] `coacc-etl curate --all` runs end-to-end in <10 minutes on the
       Phase 7 lake.
 - [x] `make lake-reality` covers curated/ without errors for the shipped
       curated tables.
@@ -1602,10 +1614,11 @@ reality.
 
 - [ ] Inscripción confirmed, archived.
 - [x] Repo public-readiness audit clean for tracked and unignored files via
-      `scripts/repo_publish_audit.py`.
+      `scripts/repo_publish_audit.py`; configured as a tracked pre-push hook in
+      `.pre-commit-config.yaml`.
 - [ ] `usos` URL live and pointing to the repo.
 - [x] `docs/crisp_ml.md` link-check clean via `scripts/check_doc_links.py`.
-- [ ] Architecture diagram current.
+- [x] Architecture diagram current.
 - [ ] Dress rehearsal recorded; rubric ≥85.
 - [ ] Travel booked, in-person attendee confirmed.
 - [ ] Backup video on USB.
@@ -1930,6 +1943,15 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   The API source registry, qualification hints, signal-source alignment tests,
   and compose mounts now use the signed catalog and YAML contracts. The legacy
   CSV and its `.gitignore` exception were deleted.
+- **2026-06-01** — Phase 10 local proof tightened. `make curate` rebuilt all
+  eight shipped curated tables on this device in 2:34.43, then
+  `make curated-contracts` validated their schema/non-null runtime contracts.
+  The new `scripts/check_curated_contracts.py` gate is covered by ETL tests and
+  documented in `docs/runbooks/curate.md`.
+- **2026-06-01** — Phase 16 public-readiness gates are now tracked pre-push
+  hooks in `.pre-commit-config.yaml`: compliance pack, public privacy,
+  open-core boundary, and repository publish audit. `uvx pre-commit run
+  --hook-stage pre-push --all-files` passed locally.
 
 (Append new decisions as they're made. One line per decision.)
 

@@ -82,13 +82,29 @@ One-page trace of how data moves through co/acc, from raw audit JSON to API resp
                        ┌────────────────────┼────────────────────┐
                        ▼                    ▼                    ▼
         ┌─────────────────────┐  ┌─────────────────────┐  ┌─────────────────────┐
-        │  lakehouse.reality  │  │  api/               │  │  signal/narrator    │
-        │  freshness,         │  │  FastAPI service    │  │  (api workspace)    │
-        │  coverage, manifest │  │  reads parquet via  │  │  reads parquet via  │
-        │  + evidence checks  │  │  DuckDB first;      │  │  DuckDB, emits      │
-        │  scripts/lake_      │  │  Neo4j optional     │  │  signal rows and    │
-        │  reality.py         │  │  projection only    │  │  narratives         │
+        │  lakehouse.reality  │  │  signal engine      │  │  anomaly + narrator │
+        │  freshness,         │  │  materialized       │  │  model train/score, │
+        │  coverage, manifest │  │  signal_hits and    │  │  verified narrative │
+        │  + evidence checks  │  │  evidence_bundles   │  │  Markdown           │
+        │  scripts/lake_      │  │  from curated       │  │  from parquet       │
+        │  reality.py         │  │  parquet            │  │                     │
         └─────────────────────┘  └─────────────────────┘  └─────────────────────┘
+                                            │
+                                            ▼
+        ┌──────────────────────────────────────────────────────────────────────┐
+        │  api/ FastAPI service                                                │
+        │   - lake-backed signals, cases, search, entity detail, patterns      │
+        │   - promoted anomaly score parquet and precomputed narratives        │
+        │   - citizen-agent endpoint reads promoted case data and citations    │
+        │   - Neo4j remains optional for exploration/projection                │
+        └──────────────────────────────────────────────────────────────────────┘
+                                            │
+                                            ▼
+        ┌──────────────────────────────────────────────────────────────────────┐
+        │  frontend/                                                           │
+        │   Existing UI and contract tests are green. Phase 15 still owns      │
+        │   the new case browser, narrative reader, and citizen-agent pages.   │
+        └──────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -120,11 +136,11 @@ These two invariants together give us reproducibility: rerun ingest from an empt
   dimensions, signal features, the Isolation Forest baseline, and the
   supervised anomaly top-up exist. The API reads promoted score parquet; extra
   feature tables remain useful for broader pattern parity and demos.
-- **Narrator/frontend completion** — the Phase 14 backend foundation can extract a
-  contract case subgraph, build prompts, call an optional provider, verify the
-  Markdown, write fallback narratives, and expose precomputed Markdown through
-  case detail responses. Recorded LLM fixtures are covered; frontend display is
-  still open.
+- **Frontend completion** — the backend can extract contract case subgraphs,
+  score contracts, precompute verified narratives, expose those narratives
+  through case detail responses, and answer citizen-agent queries from promoted
+  case data. Phase 15 still owns the actual `/casos`, case detail, and
+  `/agente` frontend surfaces.
 
 ---
 
