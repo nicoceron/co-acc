@@ -326,6 +326,87 @@ async def test_entity_signals_prefers_materialized_hits_when_neo4j_is_connected(
 
 
 @pytest.mark.anyio
+async def test_entity_evidence_trail_reads_materialized_lake_hits_when_neo4j_is_connected(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+
+    response = await client.get("/api/v1/entity/900123456/evidence-trail")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["total_bundles"] == 1
+    assert payload["total_documents"] == 1
+    assert payload["bundles"][0]["documents"][0]["url"] == "https://secop.example/C-1"
+
+
+@pytest.mark.anyio
+async def test_entity_exposure_reads_lake_context_when_neo4j_is_connected(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+    _write_anomaly_run(tmp_path)
+
+    response = await client.get("/api/v1/entity/900123456/exposure")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["exposure_index"] > 0
+    assert payload["factors"][0]["name"] == "Materialized signal hits"
+    assert payload["sources"]
+
+
+@pytest.mark.anyio
+async def test_entity_timeline_reads_lake_context_when_neo4j_is_connected(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+    _write_anomaly_run(tmp_path)
+
+    response = await client.get("/api/v1/entity/900123456/timeline")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["total"] >= 2
+    assert {event["entity_type"] for event in payload["events"]} >= {
+        "Signal",
+        "AnomalyScore",
+    }
+
+
+@pytest.mark.anyio
+async def test_graph_reads_lake_context_when_neo4j_is_connected(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+    _write_anomaly_run(tmp_path)
+
+    response = await client.get("/api/v1/graph/900123456?depth=2")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["center_id"] == "company:9001234568"
+    assert any(node["type"] == "signal" for node in payload["nodes"])
+    assert any(edge["type"] == "HAS_SIGNAL" for edge in payload["edges"])
+
+
+@pytest.mark.anyio
 async def test_lake_case_routes_expose_anomaly_scores_without_neo4j(
     client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,

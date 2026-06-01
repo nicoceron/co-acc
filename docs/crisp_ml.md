@@ -74,7 +74,8 @@ Operational checks are captured in the [post-refactor plan](cleanup/post_refacto
 - `make check` for lint, typing, API tests, ETL tests, and frontend tests.
 - `make backend-ready` for the local non-frontend runtime gate.
 - `make api-smoke` for local Uvicorn startup, frontend meta/search/entity/
-  signal/pattern routes, and lake-backed API route smoke.
+  signal/pattern/evidence/exposure/timeline/graph routes, and lake-backed API
+  route smoke.
 - `make lake-reality` for local lake health and curated-table drift.
 - `make curated-contracts` for shipped curated parquet schema/non-null contracts.
 - `scripts/check_compliance_pack.py` for public legal/ethics baseline.

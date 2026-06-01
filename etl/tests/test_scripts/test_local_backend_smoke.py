@@ -78,3 +78,7 @@ def test_smoke_script_covers_frontend_lookup_routes() -> None:
     assert "/api/v1/search" in source
     assert "/api/v1/patterns/" in source
     assert "/signals" in source
+    assert "/evidence-trail" in source
+    assert "/exposure" in source
+    assert "/timeline" in source
+    assert "/api/v1/graph/" in source

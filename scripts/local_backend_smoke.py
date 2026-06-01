@@ -184,6 +184,28 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
             int(patterns.get("total") or 0) > 0,
             "pattern route returned no lake-backed patterns",
         )
+        evidence_trail = _json_request(
+            f"{base_url}/api/v1/entity/{encoded_entity_id}/evidence-trail"
+        )
+        _require(
+            int(evidence_trail.get("total_bundles") or 0) > 0,
+            "evidence trail route returned no lake-backed bundles",
+        )
+        exposure = _json_request(f"{base_url}/api/v1/entity/{encoded_entity_id}/exposure")
+        _require(
+            float(exposure.get("exposure_index") or 0.0) > 0.0,
+            "exposure route returned no lake-backed exposure",
+        )
+        timeline = _json_request(f"{base_url}/api/v1/entity/{encoded_entity_id}/timeline")
+        _require(
+            int(timeline.get("total") or 0) > 0,
+            "timeline route returned no lake-backed events",
+        )
+        graph = _json_request(f"{base_url}/api/v1/graph/{encoded_entity_id}?depth=1")
+        _require(
+            bool(graph.get("nodes")) and bool(graph.get("edges")),
+            "graph route returned no lake-backed graph",
+        )
 
         case_detail = _json_request(f"{base_url}/api/v1/cases/{case_id}")
         _require(case_detail.get("id") == case_id, "case detail id mismatch")

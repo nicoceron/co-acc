@@ -32,6 +32,11 @@ from coacc.models.user import UserResponse
 from coacc.services.entity_types import entity_type_for_label
 from coacc.services.intelligence_provider import IntelligenceProvider
 from coacc.services.lakehouse_anomaly_service import entity_anomaly_scores
+from coacc.services.lakehouse_entity_context_service import (
+    lake_evidence_trail,
+    lake_exposure,
+    lake_timeline,
+)
 from coacc.services.lakehouse_entity_service import get_lake_entity
 from coacc.services.lakehouse_signal_service import materialized_entity_signals
 from coacc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
@@ -184,21 +189,31 @@ async def get_entity_by_element_id(
 @router.get("/{entity_id}/exposure", response_model=ExposureResponse)
 async def get_entity_exposure(
     entity_id: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
     provider: Annotated[IntelligenceProvider, Depends(get_intelligence_provider)],
 ) -> ExposureResponse:
     enforce_entity_lookup_enabled()
+    lake_response = lake_exposure(entity_id)
+    if lake_response is not None:
+        return lake_response
+    if session is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
     return await provider.get_entity_exposure(session, entity_id)
 
 
 @router.get("/{entity_id}/timeline", response_model=TimelineResponse)
 async def get_entity_timeline(
     entity_id: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
     cursor: Annotated[str | None, Query()] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
 ) -> TimelineResponse:
     enforce_entity_lookup_enabled()
+    lake_response = lake_timeline(entity_id, cursor=cursor, limit=limit)
+    if lake_response is not None:
+        return lake_response
+    if session is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
     records = await execute_query(
         session,
         "entity_timeline",
@@ -323,10 +338,15 @@ async def refresh_signals_for_entity(
 @router.get("/{entity_id}/evidence-trail", response_model=EntityEvidenceTrailResponse)
 async def get_entity_evidence_trail(
     entity_id: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
     limit: Annotated[int, Query(ge=1, le=24)] = 12,
 ) -> EntityEvidenceTrailResponse:
     enforce_entity_lookup_enabled()
+    lake_response = lake_evidence_trail(entity_id, limit=limit)
+    if lake_response is not None:
+        return lake_response
+    if session is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
     record = await _lookup_entity_record(session, entity_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Entity not found")

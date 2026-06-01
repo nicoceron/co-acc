@@ -5,10 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from neo4j import AsyncSession
 
 from coacc.constants import PEP_ROLES
-from coacc.dependencies import get_session
+from coacc.dependencies import get_optional_session
 from coacc.models.entity import SourceAttribution
 from coacc.models.graph import GraphEdge, GraphNode, GraphResponse
 from coacc.services.entity_types import entity_type_for_label
+from coacc.services.lakehouse_entity_context_service import lake_graph
 from coacc.services.neo4j_service import execute_query, sanitize_props
 from coacc.services.public_guard import (
     enforce_entity_lookup_enabled,
@@ -251,11 +252,16 @@ def _build_label_filter(type_list: list[str] | None) -> str:
 @router.get("/{entity_id}", response_model=GraphResponse)
 async def get_graph(
     entity_id: str,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
     depth: Annotated[int, Query(ge=1, le=4)] = 2,
     entity_types: Annotated[str | None, Query()] = None,
 ) -> GraphResponse:
     enforce_entity_lookup_enabled()
+    lake_response = lake_graph(entity_id, depth=depth)
+    if lake_response is not None:
+        return lake_response
+    if session is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
     type_list = [t.strip().lower() for t in entity_types.split(",")] if entity_types else None
 
     # Degree guard: cap depth to 1 for supernodes to prevent explosion

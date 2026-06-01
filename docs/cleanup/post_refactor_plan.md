@@ -946,6 +946,14 @@ signal hits into the existing `PatternResponse` shape when Neo4j is unavailable.
 This covers the shipped signal-backed public patterns; legacy Cypher-only
 patterns still require new DuckDB feature tables before they can run offline.
 
+**Frontend context slice added 2026-06-01:**
+`/api/v1/entity/{entity_id}/evidence-trail`,
+`/api/v1/entity/{entity_id}/exposure`,
+`/api/v1/entity/{entity_id}/timeline`, and `/api/v1/graph/{entity_id}` now
+derive evidence bundles, exposure factors, timeline events, and graph-shaped
+nodes/edges from materialized lake signals plus promoted anomaly scores before
+falling back to Neo4j.
+
 ### 7.1 Goal
 
 Make the app functional from `lake/curated/` without requiring a graph
@@ -1998,6 +2006,12 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   lake-first: `/api/v1/entity/{entity_id}/signals` and
   `/api/v1/patterns/{entity_id}` use materialized lake hits before falling
   back to Neo4j, and `make api-smoke` now verifies both routes.
+- **2026-06-01** — Frontend-facing evidence, exposure, timeline, and graph
+  context is lake-first: `/api/v1/entity/{entity_id}/evidence-trail`,
+  `/api/v1/entity/{entity_id}/exposure`,
+  `/api/v1/entity/{entity_id}/timeline`, and `/api/v1/graph/{entity_id}`
+  derive from materialized lake signals plus promoted anomaly scores before
+  falling back to Neo4j, and `make api-smoke` now verifies those routes.
 
 (Append new decisions as they're made. One line per decision.)
 

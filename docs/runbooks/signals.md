@@ -95,6 +95,14 @@ and returns deduplicated signal hits plus evidence items for that entity key
 before falling back to graph-stored signals.
 Public-mode person/entity guards still apply before reading lake dimensions.
 
+The frontend context routes are also lake-first.
+`/api/v1/entity/{entity_id}/evidence-trail`,
+`/api/v1/entity/{entity_id}/exposure`,
+`/api/v1/entity/{entity_id}/timeline`, and `/api/v1/graph/{entity_id}` derive
+evidence bundles, exposure factors, timeline events, and graph-shaped nodes
+from the same materialized signal hits plus promoted anomaly score parquet
+before falling back to Neo4j.
+
 `/api/v1/patterns/{entity_id}` and
 `/api/v1/public/patterns/company/{company_ref}` use the latest materialized
 signal run for the shipped signal-backed public patterns:
