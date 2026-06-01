@@ -29,7 +29,11 @@ from coacc_etl.models.anomaly import (
     promote_anomaly_model,
     train_anomaly_model,
 )
-from coacc_etl.models.narrator import NarratorError, generate_narrative
+from coacc_etl.models.narrator import (
+    NarratorError,
+    generate_narrative,
+    generate_narratives_batch,
+)
 from coacc_etl.operations.phase7 import Phase7RunError, run_phase7
 from coacc_etl.signals import SignalMaterializationError, materialize_signals
 
@@ -554,6 +558,62 @@ def narrator_generate_cmd(
         f"words={result.word_count} valid={result.valid}"
     )
     click.echo(f"  narrative: {result.narrative_path}")
+
+
+@narrator_group.command(name="generate-batch")
+@click.option(
+    "--limit",
+    type=click.IntRange(min=1),
+    default=25,
+    show_default=True,
+    help="Number of top scored contracts to consider.",
+)
+@click.option(
+    "--min-score",
+    type=click.FloatRange(min=0.0, max=1.0),
+    default=0.0,
+    show_default=True,
+    help="Minimum anomaly score to include.",
+)
+@click.option(
+    "--provider",
+    type=click.Choice(["gemini", "anthropic", "openai", "template"]),
+    default="gemini",
+    show_default=True,
+    help="Narrator provider. Falls back to template unless --require-llm is set.",
+)
+@click.option("--model", default=None, help="Optional provider model override.")
+@click.option("--api-key", default=None, help="Optional provider API key.")
+@click.option("--require-llm/--allow-template", default=False, help="Fail instead of templating.")
+@click.option("--skip-existing/--overwrite", default=True, help="Skip existing narrative files.")
+def narrator_generate_batch_cmd(
+    limit: int,
+    min_score: float,
+    provider: str,
+    model: str | None,
+    api_key: str | None,
+    require_llm: bool,
+    skip_existing: bool,
+) -> None:
+    """Generate verified narratives for top anomaly-score cases."""
+    try:
+        result = generate_narratives_batch(
+            limit=limit,
+            min_score=min_score,
+            provider=provider,
+            model=model,
+            api_key=api_key,
+            require_llm=require_llm,
+            skip_existing=skip_existing,
+        )
+    except NarratorError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(
+        f"narrative batch: requested={result.requested} "
+        f"generated={result.generated} skipped={result.skipped}"
+    )
+    for item in result.results:
+        click.echo(f"  {item.case_id}: {item.narrative_path}")
 
 
 @cli.command(name="qualify", context_settings={"ignore_unknown_options": True})

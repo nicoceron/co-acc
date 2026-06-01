@@ -47,6 +47,21 @@ Environment variables:
 Use `--model` to override the provider default and `--output` to write to a
 specific Markdown path.
 
+## Batch Precompute
+
+Generate narratives for the highest-scoring promoted anomaly cases:
+
+```bash
+cd etl && COACC_LAKE_ROOT=../lake uv run coacc-etl narrator generate-batch \
+  --limit 25 \
+  --min-score 0.7
+```
+
+The batch command reads `lake/models/anomaly/current.json`, orders the active
+`lake/curated/anomaly_scores/run_id=<run>/` partition by score, and writes one
+Markdown file per selected contract id. It skips existing files by default; use
+`--overwrite` to regenerate.
+
 ## Verification
 
 Every generated or templated narrative goes through

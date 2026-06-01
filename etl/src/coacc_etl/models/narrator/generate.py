@@ -5,6 +5,8 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+import duckdb
+
 from coacc_etl.lakehouse.paths import lake_root
 from coacc_etl.models.narrator.prompt import build_prompt
 from coacc_etl.models.narrator.subgraph import CaseSubgraph, NarratorError, extract
@@ -30,6 +32,18 @@ class NarrativeGenerationResult:
     valid: bool
     word_count: int
     errors: list[str]
+
+
+@dataclass(frozen=True)
+class NarrativeBatchResult:
+    requested: int
+    generated: int
+    skipped: int
+    results: list[NarrativeGenerationResult]
+
+
+def _sql_string(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
 
 
 def _citation_text(subgraph: CaseSubgraph, index: int = 0) -> str:
@@ -208,4 +222,101 @@ def generate_narrative(
         valid=verification.valid,
         word_count=verification.word_count,
         errors=verification.errors,
+    )
+
+
+def _current_score_run_id() -> str | None:
+    manifest = lake_root() / "models" / "anomaly" / "current.json"
+    if manifest.exists():
+        import json
+
+        try:
+            payload = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+        run_id = str(payload.get("score_run_id") or payload.get("run_id") or "").strip()
+        score_dir = lake_root() / "curated" / "anomaly_scores" / f"run_id={run_id}"
+        if run_id and score_dir.exists() and any(score_dir.glob("*.parquet")):
+            return run_id
+
+    root = lake_root() / "curated" / "anomaly_scores"
+    if not root.exists():
+        return None
+    partitions = [
+        path
+        for path in root.glob("run_id=*")
+        if path.is_dir() and any(path.glob("*.parquet"))
+    ]
+    if not partitions:
+        return None
+    return max(partitions, key=lambda path: path.stat().st_mtime).name.removeprefix("run_id=")
+
+
+def top_scored_case_ids(*, limit: int, min_score: float = 0.0) -> list[str]:
+    if limit <= 0:
+        raise NarratorError("limit must be positive")
+    run_id = _current_score_run_id()
+    if run_id is None:
+        raise NarratorError("missing promoted anomaly score run")
+    score_path = lake_root() / "curated" / "anomaly_scores" / f"run_id={run_id}" / "*.parquet"
+    con = duckdb.connect(database=":memory:")
+    try:
+        rows = con.execute(
+            f"""
+            SELECT contract_id
+            FROM (
+                SELECT
+                    contract_id,
+                    score,
+                    row_number() OVER (
+                        PARTITION BY contract_id
+                        ORDER BY scored_at DESC NULLS LAST, score DESC NULLS LAST
+                    ) AS score_rank
+                FROM read_parquet({_sql_string(str(score_path))})
+                WHERE contract_id IS NOT NULL
+                    AND score >= ?
+            )
+            WHERE score_rank = 1
+            ORDER BY score DESC NULLS LAST, contract_id
+            LIMIT {int(limit)}
+            """,
+            [float(min_score)],
+        ).fetchall()
+    finally:
+        con.close()
+    return [str(row[0]) for row in rows]
+
+
+def generate_narratives_batch(
+    *,
+    limit: int,
+    min_score: float = 0.0,
+    provider: str = "gemini",
+    model: str | None = None,
+    api_key: str | None = None,
+    require_llm: bool = False,
+    skip_existing: bool = True,
+) -> NarrativeBatchResult:
+    case_ids = top_scored_case_ids(limit=limit, min_score=min_score)
+    results: list[NarrativeGenerationResult] = []
+    skipped = 0
+    for case_id in case_ids:
+        path = _narrative_path(case_id)
+        if skip_existing and path.exists():
+            skipped += 1
+            continue
+        results.append(
+            generate_narrative(
+                case_id,
+                provider=provider,
+                model=model,
+                api_key=api_key,
+                require_llm=require_llm,
+            )
+        )
+    return NarrativeBatchResult(
+        requested=len(case_ids),
+        generated=len(results),
+        skipped=skipped,
+        results=results,
     )

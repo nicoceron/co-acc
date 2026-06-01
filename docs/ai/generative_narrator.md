@@ -18,6 +18,8 @@ all factual claims to cite evidence rows from the case subgraph.
 - Providers: Gemini, Anthropic, or OpenAI when a key is configured.
 - Local fallback: deterministic templated narrative when no provider key is
   available and `--require-llm` is not set.
+- Batch path: `coacc-etl narrator generate-batch --limit N --min-score X`
+  precomputes top promoted anomaly cases and skips existing Markdown by default.
 
 This is a Phase 14 foundation slice. It adds extraction, prompt construction,
 provider call wiring, verifier checks, fallback generation, CLI, and tests. It

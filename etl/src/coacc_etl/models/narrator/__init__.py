@@ -1,8 +1,11 @@
 from coacc_etl.models.narrator.generate import (
+    NarrativeBatchResult,
     NarrativeGenerationResult,
     build_templated_narrative,
     call_llm,
     generate_narrative,
+    generate_narratives_batch,
+    top_scored_case_ids,
 )
 from coacc_etl.models.narrator.prompt import build_prompt
 from coacc_etl.models.narrator.subgraph import (
@@ -20,6 +23,7 @@ __all__ = [
     "AnomalyContext",
     "CaseSubgraph",
     "EvidenceCitation",
+    "NarrativeBatchResult",
     "NarrativeGenerationResult",
     "NarrativeVerificationResult",
     "NarratorError",
@@ -31,4 +35,6 @@ __all__ = [
     "check",
     "extract",
     "generate_narrative",
+    "generate_narratives_batch",
+    "top_scored_case_ids",
 ]

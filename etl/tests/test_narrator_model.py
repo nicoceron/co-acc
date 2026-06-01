@@ -16,6 +16,7 @@ from coacc_etl.models.narrator import (
     build_prompt,
     build_templated_narrative,
     check,
+    top_scored_case_ids,
 )
 
 if TYPE_CHECKING:
@@ -78,6 +79,19 @@ def _write_narrator_inputs(root: Path) -> None:
                 "top_features": ["log_value_z_buyer", "timing_anomaly_score"],
                 "prior_sanction_supplier": True,
                 "process_url": "https://secop.example/C-1",
+            },
+            {
+                "run_id": "score-run",
+                "model_run_id": "model-run",
+                "feature_run_id": "feature-run",
+                "scored_at": "2026-06-01T02:00:00+00:00",
+                "contract_id": "C-2",
+                "entity_uid": "company:800000000",
+                "score": 0.42,
+                "score_confidence": "standard",
+                "top_features": ["buyer_supplier_concentration"],
+                "prior_sanction_supplier": False,
+                "process_url": "https://secop.example/C-2",
             }
         ]),
         scores_out / "part-00000.parquet",
@@ -105,6 +119,16 @@ def _write_narrator_inputs(root: Path) -> None:
                 "procurement_modality": "Contratacion directa",
                 "contract_value": 1_250_000_000.0,
                 "signing_date": "2026-06-01",
+            },
+            {
+                "contract_id": "C-2",
+                "contract_reference": "REF-2",
+                "process_url": "https://secop.example/C-2",
+                "buyer_name": "Entidad Dos",
+                "supplier_name": "Proveedor Dos SAS",
+                "procurement_modality": "Licitacion publica",
+                "contract_value": 220_000_000.0,
+                "signing_date": "2026-06-02",
             }
         ]),
         contracts_out / "part-00000.parquet",
@@ -179,3 +203,39 @@ def test_narrator_cli_generate_uses_template_fallback(
     assert result.exit_code == 0, result.output
     assert "provider=template" in result.output
     assert (tmp_path / "curated" / "narratives" / "C-1.md").exists()
+
+
+def test_top_scored_case_ids_respects_limit_and_min_score(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_narrator_inputs(tmp_path)
+
+    assert top_scored_case_ids(limit=5, min_score=0.5) == ["C-1"]
+
+
+def test_narrator_cli_generate_batch_writes_top_cases(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_narrator_inputs(tmp_path)
+
+    result = CliRunner().invoke(
+        cli,
+        ["narrator", "generate-batch", "--provider", "template", "--limit", "2"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "requested=2 generated=2 skipped=0" in result.output
+    assert (tmp_path / "curated" / "narratives" / "C-1.md").exists()
+    assert (tmp_path / "curated" / "narratives" / "C-2.md").exists()
+
+    second = CliRunner().invoke(
+        cli,
+        ["narrator", "generate-batch", "--provider", "template", "--limit", "2"],
+    )
+
+    assert second.exit_code == 0, second.output
+    assert "requested=2 generated=0 skipped=2" in second.output

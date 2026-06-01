@@ -1888,6 +1888,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   Markdown to lake-backed `GET /api/v1/cases/{case_id}` responses via
   `narrative_markdown` and `narrative_generated_at`. Full Phase 14 remains
   open until recorded LLM fixtures and frontend display are green.
+- **2026-06-01** — Phase 14 batch precompute now supports
+  `coacc-etl narrator generate-batch --limit N --min-score X`, reading the
+  promoted anomaly score run and writing one verified Markdown narrative per
+  selected contract. Existing files are skipped by default for repeatable
+  local/demo runs.
 
 (Append new decisions as they're made. One line per decision.)
 
