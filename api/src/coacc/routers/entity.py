@@ -135,12 +135,12 @@ async def get_entity(
     if not IDENTIFIER_PATTERN.match(clean_identifier):
         raise HTTPException(status_code=400, detail="Invalid identifier format")
 
-    if session is None:
-        entity = get_lake_entity(clean_identifier, include_person=not should_hide_person_entities())
-        if entity is None:
-            raise HTTPException(status_code=404, detail="Entity not found")
+    entity = get_lake_entity(clean_identifier, include_person=not should_hide_person_entities())
+    if entity is not None:
         enforce_person_access_policy([entity.entity_label] if entity.entity_label else [])
         return entity
+    if session is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
 
     record = await execute_query_single(
         session,
@@ -162,12 +162,12 @@ async def get_entity_by_element_id(
     session: Annotated[AsyncSession | None, Depends(get_optional_session)],
 ) -> EntityResponse:
     enforce_entity_lookup_enabled()
-    if session is None:
-        entity = get_lake_entity(element_id, include_person=not should_hide_person_entities())
-        if entity is None:
-            raise HTTPException(status_code=404, detail="Entity not found")
+    entity = get_lake_entity(element_id, include_person=not should_hide_person_entities())
+    if entity is not None:
         enforce_person_access_policy([entity.entity_label] if entity.entity_label else [])
         return entity
+    if session is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
 
     record = await execute_query_single(
         session, "entity_by_element_id", {"element_id": element_id}

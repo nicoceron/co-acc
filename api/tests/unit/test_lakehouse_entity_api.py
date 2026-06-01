@@ -212,6 +212,23 @@ async def test_entity_lookup_reads_curated_dimension_without_neo4j(
 
 
 @pytest.mark.anyio
+async def test_entity_lookup_prefers_curated_dimension_when_neo4j_is_connected(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_dim_tables(tmp_path)
+
+    response = await client.get("/api/v1/entity/9001234568")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["id"] == "company:9001234568"
+    assert payload["properties"]["razon_social"] == "Proveedor Sancionado SAS"
+
+
+@pytest.mark.anyio
 async def test_search_reads_curated_dimensions_without_neo4j(
     client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,
@@ -228,6 +245,40 @@ async def test_search_reads_curated_dimensions_without_neo4j(
     assert payload["total"] == 1
     assert payload["results"][0]["id"] == "company:9001234568"
     assert payload["results"][0]["name"] == "Proveedor Sancionado SAS"
+
+
+@pytest.mark.anyio
+async def test_search_prefers_curated_dimensions_when_neo4j_is_connected(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_dim_tables(tmp_path)
+
+    response = await client.get("/api/v1/search?q=Proveedor&type=company")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["total"] == 1
+    assert payload["results"][0]["id"] == "company:9001234568"
+
+
+@pytest.mark.anyio
+async def test_search_matches_nit_root_against_curated_dimensions(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_dim_tables(tmp_path)
+
+    response = await client.get("/api/v1/search?q=900123456&type=company")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["total"] == 1
+    assert payload["results"][0]["document"] == "9001234568"
 
 
 @pytest.mark.anyio

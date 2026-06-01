@@ -69,3 +69,10 @@ def test_smoke_script_covers_frontend_meta_routes() -> None:
 
     assert "/api/v1/meta/health" in source
     assert "/api/v1/meta/stats" in source
+
+
+def test_smoke_script_covers_frontend_lookup_routes() -> None:
+    source = SCRIPT_PATH.read_text(encoding="utf-8")
+
+    assert "/api/v1/entity/" in source
+    assert "/api/v1/search" in source

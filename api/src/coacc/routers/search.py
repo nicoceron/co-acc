@@ -59,8 +59,9 @@ async def search_entities(
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> SearchResponse:
-    if session is None:
-        return search_lake_entities(q, entity_type=entity_type, page=page, size=size)
+    lake_response = search_lake_entities(q, entity_type=entity_type, page=page, size=size)
+    if lake_response.total > 0 or session is None:
+        return lake_response
 
     skip = (page - 1) * size
     type_filter = entity_type.lower() if entity_type else None

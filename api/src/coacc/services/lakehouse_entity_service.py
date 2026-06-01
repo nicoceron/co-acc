@@ -191,8 +191,18 @@ def search_lake_entities(
         return SearchResponse(results=[], total=0, page=page, size=size)
     clean = _clean_identifier(query_text)
     like = _like_pattern(query_text)
-    predicates = ["(lower(coalesce(name, '')) LIKE ? ESCAPE '\\' OR document_id = ?)"]
-    params: list[object] = [like, clean]
+    predicates = [
+        """(
+            lower(coalesce(name, '')) LIKE ? ESCAPE '\\'
+            OR document_id = ?
+            OR (nit IS NOT NULL AND left(nit, 9) = ?)
+            OR entity_id = 'doc:' || ?
+            OR entity_id = 'company:' || ?
+            OR entity_id = 'buyer:' || ?
+            OR entity_id = 'person:' || ?
+        )"""
+    ]
+    params: list[object] = [like, clean, clean, clean, clean, clean, clean]
     type_filter = (entity_type or "").strip().lower()
     if type_filter:
         if type_filter == "company":

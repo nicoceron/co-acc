@@ -11,6 +11,7 @@ import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -154,6 +155,23 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
         assert isinstance(case_items, list)
         case_id = str(case_items[0].get("id") or "")
         _require(bool(case_id), "case response did not include an id")
+        case_entity_ids = case_items[0].get("entity_ids")
+        _require(
+            isinstance(case_entity_ids, list) and bool(case_entity_ids),
+            "case response did not include entity ids",
+        )
+        entity_id = str(case_entity_ids[0])
+        encoded_entity_id = urllib.parse.quote(entity_id, safe="")
+
+        entity = _json_request(f"{base_url}/api/v1/entity/{encoded_entity_id}")
+        _require(
+            bool(entity.get("id") or entity.get("properties")),
+            "entity lookup returned no entity",
+        )
+        search = _json_request(
+            f"{base_url}/api/v1/search?q={encoded_entity_id}&page=1&size=1"
+        )
+        _require(int(search.get("total") or 0) > 0, "search returned no lake entity matches")
 
         case_detail = _json_request(f"{base_url}/api/v1/cases/{case_id}")
         _require(case_detail.get("id") == case_id, "case detail id mismatch")
@@ -177,6 +195,7 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
             "signal_count": len(signal_items),
             "last_signal_run_id": signals.get("last_run_id"),
             "case_id": case_id,
+            "entity_id": entity_id,
             "agent_citation_count": len(citations),
             "data_sources": meta_stats.get("data_sources"),
         }
@@ -217,6 +236,7 @@ def main() -> int:
         "PASS lake-backed API smoke: "
         f"{result['signal_count']} signal(s), "
         f"case={result['case_id']}, "
+        f"entity={result['entity_id']}, "
         f"citations={result['agent_citation_count']}, "
         f"sources={result['data_sources']}, "
         f"run={result['last_signal_run_id']}"

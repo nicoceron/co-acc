@@ -1989,6 +1989,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `/api/v1/meta/health`, `/api/v1/meta/stats`, and `/api/v1/meta/sources`
   use lake/catalog fallbacks when the graph is unavailable, and `make
   api-smoke` now verifies the first two routes in Neo4j-off mode.
+- **2026-06-01** — Frontend-facing search and entity lookup are lake-first:
+  `/api/v1/search`, `/api/v1/entity/{identifier}`, and
+  `/api/v1/entity/by-element-id/{element_id}` read curated dimensions before
+  falling back to Neo4j, so an empty connected graph no longer hides populated
+  lake entities.
 
 (Append new decisions as they're made. One line per decision.)
 
