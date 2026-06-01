@@ -6,7 +6,7 @@ WHERE elementId(c) = $company_id
    OR c.nit = $company_identifier_formatted
 CALL {
   WITH c
-  MATCH (officer:Person)-[:OFFICER_OF]->(c)
+  MATCH (officer)-[:OFFICER_OF]->(c)
   MATCH (officer)-[:OFFICER_OF]->(peer:Company)
   WHERE peer <> c
   CALL {

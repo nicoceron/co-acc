@@ -4,7 +4,7 @@ WHERE elementId(c) = $company_id
    OR c.document_id = $company_identifier_formatted
    OR c.nit = $company_identifier
    OR c.nit = $company_identifier_formatted
-MATCH (p:Person)-[:OFFICER_OF]->(c)
+MATCH (p)-[:OFFICER_OF]->(c)
 MATCH (p)-[salary:RECIBIO_SALARIO]->(o:PublicOffice)
 WHERE coalesce(salary.sensitive_position, false)
    OR coalesce(o.sensitive_position, false)

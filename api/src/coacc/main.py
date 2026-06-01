@@ -58,10 +58,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         raise RuntimeError(msg)
     try:
         driver = await init_driver()
-    except Exception:
+    except Exception as exc:
         if settings.neo4j_required:
             raise
-        _logger.exception("Neo4j unavailable; starting with graph-backed routes disabled")
+        _logger.warning(
+            "Neo4j unavailable; starting with graph-backed routes disabled: %s",
+            exc,
+        )
         app.state.neo4j_driver = None
     else:
         app.state.neo4j_driver = driver

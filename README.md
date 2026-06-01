@@ -184,7 +184,7 @@ Pre-Wave-4, this project ran ~60 hand-written `Pipeline` subclasses that read CS
 
 ---
 
-## Legal & ethics
+## Legal & Ethics
 
 - **[ETHICS.md](ETHICS.md)** — guidelines for data-driven investigations
 - **[LGPD.md](LGPD.md)** — Ley 1581 / LGPD compliance

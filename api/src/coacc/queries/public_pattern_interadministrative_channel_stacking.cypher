@@ -48,7 +48,7 @@ CALL {
 }
 CALL {
   WITH c
-  OPTIONAL MATCH (p:Person)-[:OFFICER_OF]->(c)
+  OPTIONAL MATCH (p)-[:OFFICER_OF]->(c)
   WHERE EXISTS { MATCH (p)-[:RECIBIO_SALARIO]->(:PublicOffice) }
   RETURN count(DISTINCT p) AS official_officer_count
 }

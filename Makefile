@@ -39,7 +39,7 @@ stop:
 	docker compose down
 
 api:
-	cd api && uv run uvicorn coacc.main:app --reload --host 0.0.0.0 --port 8000
+	cd api && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python -m uvicorn coacc.main:app --reload --host 0.0.0.0 --port 8000
 
 etl:
 	cd etl && uv run coacc-etl --help

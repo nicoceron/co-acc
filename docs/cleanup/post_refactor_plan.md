@@ -1759,6 +1759,17 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   as `only_future_watermarks` instead of failing as a column-name typo;
   this handles `5u9e-g5w9` and `rpmr-utcd` rows whose source dates are
   beyond the one-day future grace window.
+- **2026-06-01** — Local runtime audit: Phase 7 raw lake, Phase 9.0
+  PACO, Phase 10's first curated slice, and the Phase 11 lake-backed
+  signal API slice are green on this device. Evidence: `make check`
+  passed, `make curate` rebuilt five curated tables, `make lake-reality`
+  probed nine raw datasets and five curated tables with 0 failures and
+  0 warnings, and `make api` served `/health`, `/api/v1/signals/`, and
+  signal detail routes from the repo-level `lake/` with Neo4j offline.
+  This does not close the full plan: typed `dim_company`/`dim_buyer`/
+  `dim_person`, `coacc-etl signals materialize`, Phase 13 anomaly
+  modeling, Phase 14 narration, Phase 15 frontend, and Phase 16
+  competition submission remain separate acceptance units.
 
 (Append new decisions as they're made. One line per decision.)
 

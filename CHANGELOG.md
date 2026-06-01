@@ -30,6 +30,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 ### Changed
 - Made Neo4j optional at API startup via `NEO4J_REQUIRED=false`; graph-backed
   routes still require Neo4j, while lake-backed signal routes can run without it.
+- Updated `make api` to start through `python -m uvicorn` with the repo-level
+  `COACC_LAKE_ROOT`, so local API runs see the populated parquet lake by default.
+- Added the legal index required by the compliance gate and aligned public
+  pattern queries with the public privacy checker.
 - Resolved semantic signal source ids such as `secop_ii_contracts` to raw lake
   dataset ids such as `jbjy-vk9h` through the signed catalog when registering
   DuckDB source views.
