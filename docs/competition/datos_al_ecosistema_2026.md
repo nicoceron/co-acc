@@ -190,7 +190,7 @@ Before inscripción:
 Before Fase 2 close:
 - [ ] `herramientas.datos.gov.co/usos` entry created, linking to the repo
 - [ ] `docs/ai/` has the two model docs + model cards
-- [ ] `docs/crisp_ml.md` traces phases 1-6 with links
+- [x] `docs/crisp_ml.md` traces phases 1-6 with links
 
 ## 12. Decision log
 

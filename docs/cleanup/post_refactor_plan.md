@@ -1595,9 +1595,10 @@ reality.
 ### 13.2 DoD
 
 - [ ] Inscripción confirmed, archived.
-- [ ] Repo public-readiness audit clean.
+- [x] Repo public-readiness audit clean for tracked and unignored files via
+      `scripts/repo_publish_audit.py`.
 - [ ] `usos` URL live and pointing to the repo.
-- [ ] `docs/crisp_ml.md` link-check clean.
+- [x] `docs/crisp_ml.md` link-check clean via `scripts/check_doc_links.py`.
 - [ ] Architecture diagram current.
 - [ ] Dress rehearsal recorded; rubric ≥85.
 - [ ] Travel booked, in-person attendee confirmed.
@@ -1914,6 +1915,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   citizen-agent endpoint at `/api/v1/agent/query`, with `/agent/query` kept as
   a legacy alias. The endpoint answers from promoted anomaly/case data and
   returns citations plus a small case subgraph without a live LLM dependency.
+- **2026-06-01** — Phase 16 public-readiness checks now include
+  `scripts/repo_publish_audit.py` for tracked/unignored publish blockers and
+  `scripts/check_doc_links.py` for `docs/crisp_ml.md`. The CRISP-ML evidence
+  map links the repo's data, model, evaluation, deployment, and monitoring
+  artifacts; external submission items remain user-owned.
 
 (Append new decisions as they're made. One line per decision.)
 

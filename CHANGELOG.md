@@ -52,6 +52,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   promoted anomaly cases.
 - Added recorded no-network narrator fixture coverage for 10 subgraphs and
   expanded verifier guard tests.
+- Added Phase 16 public-readiness checks: tracked/unignored publish audit,
+  CRISP-ML evidence mapping, and focused Markdown link validation.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.
