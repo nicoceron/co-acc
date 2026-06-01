@@ -82,6 +82,9 @@ the corresponding signal hit and evidence bundle directly from parquet.
 Graph-backed case creation and refresh remain available only when Neo4j is
 connected.
 
+Use `make api-smoke` to start the API in Neo4j-off mode and verify the
+lake-backed signal, case, and citizen-agent endpoints against the local lake.
+
 When Neo4j is unavailable, `/api/v1/search`, `/api/v1/entity/{identifier}`,
 and `/api/v1/entity/by-element-id/{element_id}` read curated
 `dim_company`, `dim_buyer`, and `dim_person` parquet through DuckDB.

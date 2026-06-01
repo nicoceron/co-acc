@@ -63,12 +63,13 @@ on this device through Phase 14 backend work. Evidence from the current branch:
 Phase 7 raw lake has the eight active datasets, Phase 9.0 PACO is ingested,
 Phase 10 curated tables rebuild in 2:34 and pass `make curated-contracts`,
 Phase 11 lake-backed API repositories serve signals/cases/entities/patterns
-without Neo4j, Phase 12 legacy CSV retirement is pushed, Phase 13 supervised
-anomaly scoring clears `holdout_precision_at_100=0.67`, and Phase 14 can
-precompute verified narratives. Remaining work is not hidden: Phase 8's external
-three-day cron/runner evidence is still outside this device, Phase 11.5 graph
-projection is optional, Phase 15 frontend pages remain frontend-owned, and Phase
-16 still has external competition submission/logistics items.
+without Neo4j and pass `make api-smoke`, Phase 12 legacy CSV retirement is
+pushed, Phase 13 supervised anomaly scoring clears
+`holdout_precision_at_100=0.67`, and Phase 14 can precompute verified
+narratives. Remaining work is not hidden: Phase 8's external three-day
+cron/runner evidence is still outside this device, Phase 11.5 graph projection
+is optional, Phase 15 frontend pages remain frontend-owned, and Phase 16 still
+has external competition submission/logistics items.
 
 ---
 
@@ -1952,6 +1953,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   hooks in `.pre-commit-config.yaml`: compliance pack, public privacy,
   open-core boundary, and repository publish audit. `uvx pre-commit run
   --hook-stage pre-push --all-files` passed locally.
+- **2026-06-01** — Local lake-backed API runtime proof is now repeatable via
+  `make api-smoke`. The smoke starts Uvicorn with `NEO4J_REQUIRED=false` and
+  verifies `/health`, `/api/v1/signals/`, `/api/v1/cases/`, case detail, and
+  `/api/v1/agent/query` against the repo lake. Current local run returned 33
+  signals, case `5eb6652cdd59301239005807e9d42c6b`, and 2 agent citations.
 
 (Append new decisions as they're made. One line per decision.)
 

@@ -57,6 +57,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Added `make curated-contracts` and `scripts/check_curated_contracts.py` to
   validate shipped curated parquet schema/non-null contracts against the local
   lake.
+- Added `make api-smoke` and `scripts/local_backend_smoke.py` to start the API
+  with Neo4j disabled and verify lake-backed health, signals, cases, and
+  citizen-agent routes against the local lake.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.
