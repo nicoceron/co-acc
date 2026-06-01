@@ -92,6 +92,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   no-op when the dev Neo4j graph has no candidate entities yet.
 - Made dev compose host ports configurable and defaulted the frontend API
   client to same-origin `/api` proxying when `VITE_API_URL` is unset.
+- Made `/api/v1/meta/health`, `/api/v1/meta/stats`, and `/api/v1/meta/sources`
+  work without Neo4j so frontend status/stats views keep rendering in
+  lake-backed local runtime.
 - Wired the compliance pack, public privacy, open-core boundary, and repository
   publish audit checks as tracked pre-push hooks in `.pre-commit-config.yaml`.
 - Made Neo4j optional at API startup via `NEO4J_REQUIRED=false`; graph-backed

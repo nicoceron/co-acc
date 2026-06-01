@@ -62,3 +62,10 @@ def test_parse_args_accepts_lake_root_and_timeout(monkeypatch: pytest.MonkeyPatc
     assert REPO_ROOT == local_backend_smoke.REPO_ROOT
     assert args.lake_root == Path("/tmp/coacc-lake")
     assert args.timeout == 7.0
+
+
+def test_smoke_script_covers_frontend_meta_routes() -> None:
+    source = SCRIPT_PATH.read_text(encoding="utf-8")
+
+    assert "/api/v1/meta/health" in source
+    assert "/api/v1/meta/stats" in source

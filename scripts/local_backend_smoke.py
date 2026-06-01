@@ -131,6 +131,17 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
         _require(health.get("status") == "ok", "health status was not ok")
         _require(health.get("neo4j") == "unavailable", "smoke expected Neo4j-off mode")
 
+        meta_health = _json_request(f"{base_url}/api/v1/meta/health")
+        _require(
+            meta_health.get("neo4j") == "unavailable",
+            "meta health did not report Neo4j-off mode",
+        )
+        meta_stats = _json_request(f"{base_url}/api/v1/meta/stats")
+        _require(
+            int(meta_stats.get("data_sources") or 0) > 0,
+            "meta stats returned no data source count",
+        )
+
         signals = _json_request(f"{base_url}/api/v1/signals/")
         signal_items = signals.get("signals")
         _require(isinstance(signal_items, list) and len(signal_items) > 0, "no signals returned")
@@ -167,6 +178,7 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
             "last_signal_run_id": signals.get("last_run_id"),
             "case_id": case_id,
             "agent_citation_count": len(citations),
+            "data_sources": meta_stats.get("data_sources"),
         }
     finally:
         process.terminate()
@@ -206,6 +218,7 @@ def main() -> int:
         f"{result['signal_count']} signal(s), "
         f"case={result['case_id']}, "
         f"citations={result['agent_citation_count']}, "
+        f"sources={result['data_sources']}, "
         f"run={result['last_signal_run_id']}"
     )
     return 0

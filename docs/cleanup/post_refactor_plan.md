@@ -1985,6 +1985,10 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   lake reality, and the Neo4j-off API smoke. Phase 11.5 graph projection stays
   optional; `docs/runbooks/graph_loader.md` documents Neo4j as a derived cache,
   not a source of truth.
+- **2026-06-01** — Frontend-facing meta routes no longer force Neo4j online:
+  `/api/v1/meta/health`, `/api/v1/meta/stats`, and `/api/v1/meta/sources`
+  use lake/catalog fallbacks when the graph is unavailable, and `make
+  api-smoke` now verifies the first two routes in Neo4j-off mode.
 
 (Append new decisions as they're made. One line per decision.)
 

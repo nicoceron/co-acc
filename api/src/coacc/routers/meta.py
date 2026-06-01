@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends
 from neo4j import AsyncSession
 
 from coacc.config import settings
-from coacc.dependencies import get_session
+from coacc.dependencies import get_optional_session, get_session
 from coacc.models.dashboard import (
     PrioritizedBuyerResponse,
     PrioritizedBuyersResponse,
@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 _stats_cache: dict[str, Any] | None = None
 _stats_cache_time: float = 0.0
+_stats_cache_scope: str | None = None
 _watchlist_cache: dict[int, tuple[float, PrioritizedPeopleResponse]] = {}
 _company_watchlist_cache: dict[int, tuple[float, PrioritizedCompaniesResponse]] = {}
 _buyer_watchlist_cache: dict[int, tuple[float, PrioritizedBuyersResponse]] = {}
@@ -2149,12 +2150,19 @@ def _build_territory_alerts(record: dict[str, Any]) -> list[RiskAlertResponse]:
 
 
 async def _load_registry_with_runtime_status(
-    session: AsyncSession,
+    session: AsyncSession | None,
 ) -> list[Any]:
     entries = load_source_registry()
-    status_records = await execute_query(session, "meta_source_load_status", {})
+    if session is None:
+        return entries
+    try:
+        status_records = await execute_query(session, "meta_source_load_status", {})
+    except Exception:
+        logger.exception("Graph source status query failed; using lake/catalog source registry")
+        return entries
     status_by_source = {
-        (record.get("source_id") or ""): (record.get("status") or "") for record in status_records
+        (record.get("source_id") or ""): (record.get("status") or "")
+        for record in status_records
     }
 
     updated_entries = []
@@ -2175,8 +2183,10 @@ async def _load_registry_with_runtime_status(
 
 @router.get("/health")
 async def neo4j_health(
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
 ) -> dict[str, str]:
+    if session is None:
+        return {"neo4j": "unavailable"}
     record = await execute_query_single(session, "health_check", {})
     if record and record["ok"] == 1:
         return {"neo4j": "connected"}
@@ -2185,14 +2195,23 @@ async def neo4j_health(
 
 @router.get("/stats")
 async def database_stats(
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
 ) -> dict[str, Any]:
-    global _stats_cache, _stats_cache_time  # noqa: PLW0603
+    global _stats_cache, _stats_cache_scope, _stats_cache_time  # noqa: PLW0603
 
-    if _stats_cache is not None and (time.monotonic() - _stats_cache_time) < 300:
+    cache_scope = "graph" if session is not None else "lake"
+    if (
+        _stats_cache is not None
+        and _stats_cache_scope == cache_scope
+        and (time.monotonic() - _stats_cache_time) < 300
+    ):
         return _stats_cache
 
-    record = await execute_query_single(session, "meta_stats", {})
+    record = (
+        await execute_query_single(session, "meta_stats", {})
+        if session is not None
+        else None
+    )
     source_entries = await _load_registry_with_runtime_status(session)
     source_summary = source_registry_summary(source_entries)
 
@@ -2227,13 +2246,14 @@ async def database_stats(
     }
 
     _stats_cache = result
+    _stats_cache_scope = cache_scope
     _stats_cache_time = time.monotonic()
     return result
 
 
 @router.get("/sources")
 async def list_sources(
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
 ) -> dict[str, list[dict[str, Any]]]:
     source_entries = await _load_registry_with_runtime_status(session)
     sources = [entry.to_public_dict() for entry in source_entries if entry.in_universe_v1]

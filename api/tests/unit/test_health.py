@@ -62,6 +62,18 @@ async def test_meta_health_has_security_headers(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
+async def test_meta_health_reports_unavailable_without_graph(client: AsyncClient) -> None:
+    from coacc.main import app
+
+    app.state.neo4j_driver = None
+
+    response = await client.get("/api/v1/meta/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"neo4j": "unavailable"}
+
+
+@pytest.mark.anyio
 async def test_meta_sources(client: AsyncClient) -> None:
     response = await client.get("/api/v1/meta/sources")
     assert response.status_code == 200
@@ -85,6 +97,21 @@ async def test_meta_sources(client: AsyncClient) -> None:
     assert "last_seen_url" in first
     assert "public_access_mode" in first
     assert "quality_status" in first
+
+
+@pytest.mark.anyio
+async def test_meta_sources_uses_catalog_when_graph_unavailable(client: AsyncClient) -> None:
+    from coacc.main import app
+
+    app.state.neo4j_driver = None
+
+    response = await client.get("/api/v1/meta/sources")
+
+    assert response.status_code == 200
+    data = response.json()
+    summary = source_registry_summary(load_source_registry())
+    assert len(data["sources"]) == summary["universe_v1_sources"]
+    assert all("load_state" in source for source in data["sources"])
 
 
 @pytest.mark.anyio
@@ -147,6 +174,32 @@ async def test_meta_stats(client: AsyncClient) -> None:
     assert data["enrichment_only_sources"] == summary["enrichment_only_sources"]
     assert data["quarantined_sources"] == summary["quarantined_sources"]
     assert data["discovered_uningested_sources"] == summary["discovered_uningested_sources"]
+
+
+@pytest.mark.anyio
+async def test_meta_stats_uses_catalog_when_graph_unavailable(client: AsyncClient) -> None:
+    import coacc.routers.meta as meta_module
+    from coacc.main import app
+
+    meta_module._stats_cache = None
+    meta_module._stats_cache_scope = None
+    meta_module._stats_cache_time = 0.0
+    app.state.neo4j_driver = None
+
+    response = await client.get("/api/v1/meta/stats")
+
+    assert response.status_code == 200
+    data = response.json()
+    summary = source_registry_summary(load_source_registry())
+    assert data["total_nodes"] == 0
+    assert data["total_relationships"] == 0
+    assert data["person_count"] == 0
+    assert data["company_count"] == 0
+    assert data["contract_count"] == 0
+    assert data["data_sources"] == summary["universe_v1_sources"]
+    assert data["implemented_sources"] == summary["implemented_sources"]
+    assert data["loaded_sources"] == summary["loaded_sources"]
+    assert data["healthy_sources"] == summary["healthy_sources"]
 
 
 @pytest.mark.anyio
