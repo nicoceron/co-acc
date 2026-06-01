@@ -91,6 +91,9 @@ async def refresh_case_detail(
     provider: Annotated[IntelligenceProvider, Depends(get_intelligence_provider)],
     lang: Annotated[str, Query()] = "es",
 ) -> CaseResponse:
+    lake_case = get_lake_case(case_id)
+    if lake_case is not None:
+        return lake_case
     case = await refresh_case(session, case_id, user.id, provider, lang=lang)
     if case is None:
         raise HTTPException(status_code=404, detail="Case not found")

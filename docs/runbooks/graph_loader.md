@@ -43,3 +43,7 @@ Authenticated investigation workspaces still use Neo4j for user-owned state.
 When a user attaches an entity that is present in curated dimensions but absent
 from the optional graph projection, the API writes a minimal `LakeEntityRef`
 workspace node and keeps the entity evidence/analysis reads lake-backed.
+Frontend refresh actions should also tolerate an empty optional graph
+projection: entity signal refresh returns the current materialized lake signal
+payload for curated entities, and case refresh returns the current lake-backed
+case dossier before falling back to reviewer-owned graph investigations.

@@ -2029,6 +2029,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   entities even when the optional graph projection is empty. If the legacy
   graph lookup misses, the API resolves the entity from curated dimensions and
   writes a minimal `LakeEntityRef` node for workspace membership state.
+- **2026-06-01** — Frontend refresh actions stay lake-backed when the optional
+  graph projection is empty: entity signal refresh returns the current
+  materialized signal payload for curated entities, and case refresh returns
+  the current lake-backed case dossier before falling back to reviewer graph
+  investigations.
 
 (Append new decisions as they're made. One line per decision.)
 

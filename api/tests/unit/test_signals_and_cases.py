@@ -5,6 +5,8 @@ from httpx import AsyncClient
 
 from coacc.main import app
 from coacc.models.case import CaseListResponse, CaseResponse, CaseSummary
+from coacc.models.entity import EntityResponse, SourceAttribution
+from coacc.models.signal import EntitySignalsResponse
 from coacc.services.signal_registry import clear_signal_registry_cache, load_signal_registry
 
 
@@ -295,6 +297,58 @@ async def test_refresh_entity_signals_endpoint_returns_persisted_payload(
 
 
 @pytest.mark.anyio
+async def test_refresh_entity_signals_endpoint_returns_lake_payload_when_graph_missing(
+    client: AsyncClient,
+    auth_headers: dict[str, str],
+) -> None:
+    from coacc.main import app
+
+    driver = app.state.neo4j_driver
+    mock_session = AsyncMock()
+    mock_session.run = AsyncMock(return_value=_fake_result([_user_record()]))
+    driver.session.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+
+    lake_entity = EntityResponse(
+        id="company:8605246546",
+        type="company",
+        entity_label="Company",
+        identity_quality="exact",
+        properties={"name": "Lake company", "nit": "8605246546"},
+        sources=[SourceAttribution(database="lake_curated")],
+    )
+    lake_payload = EntitySignalsResponse(
+        entity_id="company:8605246546",
+        entity_key="8605246546",
+        total=0,
+        last_run_id="lake-run-1",
+        last_refreshed_at="2026-06-01T00:00:00Z",
+        stale=False,
+        signals=[],
+    )
+
+    with (
+        patch("coacc.routers.entity._lookup_entity_record", new=AsyncMock(return_value=None)),
+        patch("coacc.routers.entity.get_lake_entity", return_value=lake_entity),
+        patch(
+            "coacc.routers.entity.materialized_entity_signals",
+            return_value=lake_payload,
+        ) as lake_signals,
+        patch("coacc.routers.entity.refresh_entity_signals", new=AsyncMock()) as graph_refresh,
+    ):
+        response = await client.post(
+            "/api/v1/entity/860524654/signals/refresh?lang=es",
+            headers=auth_headers,
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["entity_id"] == "company:8605246546"
+    assert data["last_run_id"] == "lake-run-1"
+    lake_signals.assert_called_once_with("company:8605246546", public_only=False)
+    graph_refresh.assert_not_called()
+
+
+@pytest.mark.anyio
 async def test_refresh_case_endpoint_returns_case_payload(
     client: AsyncClient,
     auth_headers: dict[str, str],
@@ -324,7 +378,10 @@ async def test_refresh_case_endpoint_returns_case_payload(
         "events": [],
     }
 
-    with patch("coacc.routers.cases.refresh_case", new=AsyncMock(return_value=payload)):
+    with (
+        patch("coacc.routers.cases.get_lake_case", return_value=None),
+        patch("coacc.routers.cases.refresh_case", new=AsyncMock(return_value=payload)),
+    ):
         response = await client.post(
             "/api/v1/cases/case-1/refresh?lang=es",
             headers=auth_headers,
@@ -335,3 +392,49 @@ async def test_refresh_case_endpoint_returns_case_payload(
     assert data["id"] == "case-1"
     assert data["last_run_id"] == "run-case-1"
     assert data["signal_count"] == 2
+
+
+@pytest.mark.anyio
+async def test_refresh_case_endpoint_prefers_lake_case_when_graph_is_available(
+    client: AsyncClient,
+    auth_headers: dict[str, str],
+) -> None:
+    from coacc.main import app
+
+    driver = app.state.neo4j_driver
+    mock_session = AsyncMock()
+    mock_session.run = AsyncMock(return_value=_fake_result([_user_record()]))
+    driver.session.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+
+    lake_case = CaseResponse(
+        id="lake-case-1",
+        title="Lake case",
+        description="Public lake case",
+        status="new",
+        created_at="2026-06-01T00:00:00Z",
+        updated_at="2026-06-01T00:00:00Z",
+        entity_ids=["8601"],
+        signal_count=1,
+        public_signal_count=1,
+        last_refreshed_at="2026-06-01T00:00:00Z",
+        last_run_id="lake-run-1",
+        stale=False,
+        signals=[],
+        evidence_bundles=[],
+        events=[],
+    )
+
+    with (
+        patch("coacc.routers.cases.get_lake_case", return_value=lake_case),
+        patch("coacc.routers.cases.refresh_case", new=AsyncMock()) as graph_refresh,
+    ):
+        response = await client.post(
+            "/api/v1/cases/lake-case-1/refresh?lang=es",
+            headers=auth_headers,
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == "lake-case-1"
+    assert data["last_run_id"] == "lake-run-1"
+    graph_refresh.assert_not_called()

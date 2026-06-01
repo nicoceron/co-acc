@@ -323,7 +323,15 @@ async def refresh_signals_for_entity(
     enforce_entity_lookup_enabled()
     record = await _lookup_entity_record(session, entity_id)
     if record is None:
-        raise HTTPException(status_code=404, detail="Entity not found")
+        lake_entity = get_lake_entity(entity_id, include_person=not should_hide_person_entities())
+        if lake_entity is None:
+            raise HTTPException(status_code=404, detail="Entity not found")
+        labels = [lake_entity.entity_label] if lake_entity.entity_label else []
+        enforce_person_access_policy(labels)
+        return materialized_entity_signals(
+            lake_entity.id,
+            public_only=not can_access_reviewer_content(user),
+        )
     enforce_person_access_policy(record["entity_labels"])
     return await refresh_entity_signals(
         session,
