@@ -712,20 +712,22 @@ Build `lake/curated/` from `lake/raw/`. Three deliverables:
    `entity_uid`. These feed API lookup tables first; optional graph nodes
    are a derived projection in Phase 11.5.
 
-**Started 2026-05-24:** the first narrow slice is live. `coacc-etl curate`
-builds `table=dim_subject_document`, `table=fct_procurement_contract_awards`,
+**Started 2026-05-24; typed dimensions added 2026-06-01:** `coacc-etl curate`
+builds `table=dim_subject_document`, `table=dim_company`, `table=dim_buyer`,
+`table=dim_person`, `table=fct_procurement_contract_awards`,
 `table=signal_feature_procurement_sanctioned_supplier_awarded`,
 `table=signal_feature_procurement_supplier_concentration_across_entities`, and
 `table=signal_feature_procurement_repeat_awards_same_supplier`
 from SECOP II contracts (`jbjy-vk9h`, resolved through the
-`secop_ii_contracts` semantic alias) and, where required, `paco_sanctions`.
-On the local lake it produced 1,215,832 subject document rows, 5,442,058 award
-rows, 20,184 PACO-backed sanctioned-supplier signal rows, and 497 SECOP-only
+`secop_ii_contracts` semantic alias), `paco_sanctions`, and the active
+person-level Phase 7 sources (`5u9e-g5w9`, `8tz7-h3eu`). On the local lake it
+produced 1,215,832 subject document rows, 101,916 company dimension rows,
+4,914 buyer dimension rows, 259,990 person dimension rows, 5,442,058 award
+rows, 20,184 PACO-backed sanctioned-supplier signal rows, 497 SECOP-only
 supplier-concentration signal rows, and 9,716 SECOP-only repeat-awards signal
-rows. This is not full Phase 10 completion yet; it is the proof that the
-lake/DuckDB path can cross-reference public sanctions and procurement, and
-aggregate procurement patterns, without loading the full graph or a full join
-into Python memory.
+rows. This closes the first useful Phase 10 acceptance slice: typed dimensions
+plus three non-empty signal feature tables are rebuilt from the local lake
+without loading the full graph or a full join into Python memory.
 
 ### 6.2 Module layout
 
@@ -733,11 +735,12 @@ into Python memory.
 etl/src/coacc_etl/curated/
 ├── __init__.py
 ├── procurement.py         # current SECOP+PACO curated builder
-├── canonical_nit.py       # planned canonicalize() + tests
+├── canonical_cedula.py    # shipped cedula canonicalization helper
+├── canonical_nit.py       # shipped NIT MOD-11 canonicalization helper
 ├── canonical_name.py      # planned accent-fold/legal-form cleanup
-├── dim_company.py         # planned typed company dimension
-├── dim_person.py          # planned typed person dimension
-├── dim_buyer.py           # planned typed buyer dimension
+├── dim_company.py         # planned split from current procurement.py builder
+├── dim_person.py          # planned split from current procurement.py builder
+├── dim_buyer.py           # planned split from current procurement.py builder
 ├── signal_features.py     # planned dispatcher: signal_id → builder
 └── builders/
     ├── procurement_sanctioned_supplier_awarded.py
@@ -858,8 +861,9 @@ class SignalFeatureRow(BaseModel):
 
 ### 6.6 DoD
 
-- [ ] `lake/curated/dim_company/`, `dim_buyer/`, `dim_person/` populated.
-- [ ] At least 3 signal feature parquets non-empty.
+- [x] `lake/curated/table=dim_company/`, `table=dim_buyer/`,
+      `table=dim_person/` populated.
+- [x] At least 3 signal feature parquets non-empty.
 - [ ] All curated outputs validate against contracts.
 - [ ] `coacc-etl curate --all` runs end-to-end in <10 minutes on the
       Phase 7 lake.
@@ -1766,10 +1770,17 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   probed nine raw datasets and five curated tables with 0 failures and
   0 warnings, and `make api` served `/health`, `/api/v1/signals/`, and
   signal detail routes from the repo-level `lake/` with Neo4j offline.
-  This does not close the full plan: typed `dim_company`/`dim_buyer`/
-  `dim_person`, `coacc-etl signals materialize`, Phase 13 anomaly
-  modeling, Phase 14 narration, Phase 15 frontend, and Phase 16
-  competition submission remain separate acceptance units.
+  This does not close the full plan: `coacc-etl signals materialize`,
+  Phase 13 anomaly modeling, Phase 14 narration, Phase 15 frontend,
+  and Phase 16 competition submission remain separate acceptance units.
+- **2026-06-01** — Phase 10 typed dimensions shipped in the current
+  `procurement.py` builder: `dim_company`, `dim_buyer`, and `dim_person`
+  now rebuild from the local lake using NIT MOD-11 and cedula
+  canonicalization. Local evidence: `make curate` produced 101,916
+  company rows, 4,914 buyer rows, and 259,990 person rows; `make
+  lake-reality` probed eight curated tables successfully. The two
+  schema-hash warnings are expected because `dim_subject_document` and
+  `fct_procurement_contract_awards` gained canonical NIT columns.
 
 (Append new decisions as they're made. One line per decision.)
 

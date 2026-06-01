@@ -288,10 +288,18 @@ def ingest_phase7_cmd(
     multiple=True,
     help="Curated table to rebuild; repeat for multiple tables. Defaults to all.",
 )
-def curate_cmd(tables: tuple[str, ...]) -> None:
+@click.option(
+    "--all",
+    "build_all",
+    is_flag=True,
+    help="Explicitly rebuild every shipped curated table (default when --table is omitted).",
+)
+def curate_cmd(tables: tuple[str, ...], build_all: bool) -> None:
     """Build DuckDB-curated parquet tables from the raw lake."""
+    if build_all and tables:
+        raise click.ClickException("use either --all or --table, not both")
     try:
-        results = build_curated(tables or None)
+        results = build_curated(None if build_all or not tables else tables)
     except CuratedBuildError as exc:
         raise click.ClickException(str(exc)) from exc
     for result in results:

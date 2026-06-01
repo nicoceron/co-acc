@@ -19,6 +19,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   table for supplier exposure across many public buyers.
 - Added the SECOP-only `procurement_repeat_awards_same_supplier` curated
   signal feature table for high-repeat buyer/supplier award exposure.
+- Added typed curated `dim_company`, `dim_buyer`, and `dim_person` tables with
+  Colombian NIT and cedula canonicalization.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.

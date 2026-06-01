@@ -33,7 +33,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 "contract_reference": "REF-1",
                 "procurement_process": "P-1",
                 "process_url": "{'url': 'https://secop.example/C-1'}",
-                "supplier_document": "900123456-7",
+                "supplier_document": "900123456-8",
                 "supplier_doc_type": "NIT",
                 "awarded_supplier": "Proveedor Sancionado SAS",
                 "entity_nit": "800111222",
@@ -76,7 +76,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     "contract_reference": f"REF-X-{index}",
                     "procurement_process": f"PX-{index}",
                     "process_url": f"https://secop.example/CX-{index}",
-                    "supplier_document": "900765432-1",
+                    "supplier_document": "900765432-6",
                     "supplier_doc_type": "NIT",
                     "awarded_supplier": "Proveedor Concentrado SAS",
                     "entity_nit": f"800{index:06d}",
@@ -100,7 +100,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     "contract_reference": f"REF-R-{index}",
                     "procurement_process": f"PR-{index}",
                     "process_url": f"https://secop.example/CR-{index}",
-                    "supplier_document": "901000111-5",
+                    "supplier_document": "901000111-8",
                     "supplier_doc_type": "NIT",
                     "awarded_supplier": "Proveedor Recurrente SAS",
                     "entity_nit": "800999888",
@@ -142,11 +142,44 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             }
         ],
     )
+    _write_rows(
+        tmp_path,
+        "5u9e-g5w9",
+        [
+            {
+                "document_type": "CC",
+                "funcionario_id": "123.456.789",
+                "full_name": "Servidora Publica",
+                "institution_id": "INST-1",
+                "institution_name": "Entidad Uno",
+                "start_date": "2025-01-15",
+            }
+        ],
+    )
+    _write_rows(
+        tmp_path,
+        "8tz7-h3eu",
+        [
+            {
+                "document_type": "CC",
+                "document_id": "123456789",
+                "declarant_first_name": "Servidora",
+                "declarant_second_name": "",
+                "declarant_first_lastname": "Publica",
+                "declarant_second_lastname": "",
+                "entity_name": "Entidad Uno",
+                "publication_date": "2026-01-10",
+            }
+        ],
+    )
 
     results = build_curated()
 
     assert {result.table for result in results} == {
         "dim_subject_document",
+        "dim_company",
+        "dim_buyer",
+        "dim_person",
         "fct_procurement_contract_awards",
         "signal_feature_procurement_sanctioned_supplier_awarded",
         "signal_feature_procurement_supplier_concentration_across_entities",
@@ -154,6 +187,9 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     }
     rows_by_table = {result.table: result.rows for result in results}
     assert rows_by_table["fct_procurement_contract_awards"] == 62
+    assert rows_by_table["dim_company"] == 3
+    assert rows_by_table["dim_buyer"] == 52
+    assert rows_by_table["dim_person"] == 1
     assert rows_by_table["signal_feature_procurement_sanctioned_supplier_awarded"] == 1
     assert rows_by_table["signal_feature_procurement_supplier_concentration_across_entities"] == 1
     assert rows_by_table["signal_feature_procurement_repeat_awards_same_supplier"] == 1
@@ -199,6 +235,28 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 )
             ],
         ).fetchall()
+        company_rows = con.execute(
+            "SELECT nit_canonical, sources FROM read_parquet(?) ORDER BY nit_canonical",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=dim_company"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
+        person_rows = con.execute(
+            "SELECT cedula_canonical, nit_canonical, sources FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=dim_person"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
     finally:
         con.close()
     assert signal_rows == [
@@ -224,6 +282,12 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             "https://secop.example/CR-0",
         )
     ]
+    assert company_rows == [
+        ("9001234568", ["paco_sanctions", "secop_ii_contracts"]),
+        ("9007654326", ["secop_ii_contracts"]),
+        ("9010001118", ["secop_ii_contracts"]),
+    ]
+    assert person_rows == [("123456789", None, ["5u9e-g5w9", "8tz7-h3eu"])]
 
 
 def test_build_curated_errors_when_required_sources_are_missing(
@@ -234,3 +298,44 @@ def test_build_curated_errors_when_required_sources_are_missing(
 
     with pytest.raises(CuratedBuildError, match="missing required lake source"):
         build_curated()
+
+
+def test_build_dim_person_without_procurement_sources(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    _write_rows(
+        tmp_path,
+        "5u9e-g5w9",
+        [
+            {
+                "document_type": "CC",
+                "funcionario_id": "987654321",
+                "full_name": "Funcionario Uno",
+                "institution_id": "INST-2",
+                "institution_name": "Entidad Dos",
+                "start_date": "2025-02-01",
+            }
+        ],
+    )
+    _write_rows(
+        tmp_path,
+        "8tz7-h3eu",
+        [
+            {
+                "document_type": "CC",
+                "document_id": "987654321",
+                "declarant_first_name": "Funcionario",
+                "declarant_second_name": "",
+                "declarant_first_lastname": "Uno",
+                "declarant_second_lastname": "",
+                "entity_name": "Entidad Dos",
+                "publication_date": "2026-02-01",
+            }
+        ],
+    )
+
+    results = build_curated(["dim_person"])
+
+    assert [(result.table, result.rows) for result in results] == [("dim_person", 1)]

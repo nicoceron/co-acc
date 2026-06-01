@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING
 
 import duckdb
 
+from coacc_etl.curated.canonical_cedula import canonicalize_cedula
+from coacc_etl.curated.canonical_nit import canonicalize_nit
 from coacc_etl.lakehouse import reader
 from coacc_etl.lakehouse.paths import curated_path, meta_path
 
@@ -18,6 +20,9 @@ if TYPE_CHECKING:
 
 _DEFAULT_TABLES = (
     "dim_subject_document",
+    "dim_company",
+    "dim_buyer",
+    "dim_person",
     "fct_procurement_contract_awards",
     "signal_feature_procurement_sanctioned_supplier_awarded",
     "signal_feature_procurement_supplier_concentration_across_entities",
@@ -25,6 +30,9 @@ _DEFAULT_TABLES = (
 )
 _TABLE_SOURCES = {
     "dim_subject_document": ("secop_ii_contracts", "paco_sanctions"),
+    "dim_company": ("secop_ii_contracts", "paco_sanctions"),
+    "dim_buyer": ("secop_ii_contracts",),
+    "dim_person": ("5u9e-g5w9", "8tz7-h3eu"),
     "fct_procurement_contract_awards": ("secop_ii_contracts",),
     "signal_feature_procurement_sanctioned_supplier_awarded": (
         "secop_ii_contracts",
@@ -50,6 +58,14 @@ class CuratedTableResult:
 
 def _sql_string(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
+
+
+def _canonicalize_nit_for_duckdb(value: object, doc_type: object) -> str:
+    return canonicalize_nit(value, document_type=doc_type) or ""
+
+
+def _canonicalize_cedula_for_duckdb(value: object, doc_type: object) -> str:
+    return canonicalize_cedula(value, document_type=doc_type) or ""
 
 
 def _required_sources(tables: Sequence[str]) -> tuple[str, ...]:
@@ -78,6 +94,28 @@ def _install_macros(con: duckdb.DuckDBPyConnection) -> None:
     con.execute("""
         CREATE OR REPLACE MACRO coacc_doc_digits(value) AS (
             NULLIF(regexp_replace(coalesce(cast(value AS VARCHAR), ''), '[^0-9]', '', 'g'), '')
+        )
+    """)
+    con.create_function(
+        "coacc_nit_canonical_raw",
+        _canonicalize_nit_for_duckdb,
+        [duckdb.sqltypes.VARCHAR, duckdb.sqltypes.VARCHAR],
+        duckdb.sqltypes.VARCHAR,
+    )
+    con.create_function(
+        "coacc_cedula_key_raw",
+        _canonicalize_cedula_for_duckdb,
+        [duckdb.sqltypes.VARCHAR, duckdb.sqltypes.VARCHAR],
+        duckdb.sqltypes.VARCHAR,
+    )
+    con.execute("""
+        CREATE OR REPLACE MACRO coacc_nit_canonical(value, doc_type) AS (
+            NULLIF(coacc_nit_canonical_raw(value, doc_type), '')
+        )
+    """)
+    con.execute("""
+        CREATE OR REPLACE MACRO coacc_cedula_key(value, doc_type) AS (
+            NULLIF(coacc_cedula_key_raw(value, doc_type), '')
         )
     """)
     con.execute("""
@@ -118,7 +156,96 @@ def _install_macros(con: duckdb.DuckDBPyConnection) -> None:
     """)
 
 
+def _create_person_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    include_sigep_sensitive = "5u9e-g5w9" in set(required_sources)
+    include_asset_disclosures = "8tz7-h3eu" in set(required_sources)
+    person_source_sql: list[str] = []
+    if include_sigep_sensitive:
+        person_source_sql.append("""
+            SELECT
+                coacc_cedula_key(funcionario_id, document_type) AS cedula_canonical,
+                coacc_doc_digits(funcionario_id) AS raw_document,
+                document_type,
+                nullif(trim(full_name), '') AS display_name,
+                nullif(trim(institution_id), '') AS institution_id,
+                nullif(trim(institution_name), '') AS institution_name,
+                try_cast(start_date AS DATE) AS observed_date,
+                '5u9e-g5w9' AS source_id
+            FROM src_5u9e_g5w9
+            WHERE coacc_cedula_key(funcionario_id, document_type) IS NOT NULL
+        """)
+    if include_asset_disclosures:
+        person_source_sql.append("""
+            SELECT
+                coacc_cedula_key(document_id, document_type) AS cedula_canonical,
+                coacc_doc_digits(document_id) AS raw_document,
+                document_type,
+                nullif(trim(concat_ws(
+                    ' ',
+                    declarant_first_name,
+                    declarant_second_name,
+                    declarant_first_lastname,
+                    declarant_second_lastname
+                )), '') AS display_name,
+                NULL AS institution_id,
+                nullif(trim(entity_name), '') AS institution_name,
+                try_cast(publication_date AS DATE) AS observed_date,
+                '8tz7-h3eu' AS source_id
+            FROM src_8tz7_h3eu
+            WHERE coacc_cedula_key(document_id, document_type) IS NOT NULL
+        """)
+    if person_source_sql:
+        con.execute(
+            "CREATE OR REPLACE TEMP VIEW curated_person_sources AS "
+            + " UNION ALL ".join(person_source_sql)
+        )
+    else:
+        con.execute("""
+            CREATE OR REPLACE TEMP VIEW curated_person_sources AS
+            SELECT
+                NULL::VARCHAR AS cedula_canonical,
+                NULL::VARCHAR AS raw_document,
+                NULL::VARCHAR AS document_type,
+                NULL::VARCHAR AS display_name,
+                NULL::VARCHAR AS institution_id,
+                NULL::VARCHAR AS institution_name,
+                NULL::DATE AS observed_date,
+                NULL::VARCHAR AS source_id
+            WHERE false
+        """)
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_dim_person AS
+        SELECT
+            'person:' || cedula_canonical AS entity_uid,
+            cedula_canonical,
+            NULL::VARCHAR AS nit_canonical,
+            list(DISTINCT raw_document ORDER BY raw_document)
+                FILTER (WHERE raw_document IS NOT NULL) AS document_variants,
+            min(display_name) FILTER (WHERE display_name IS NOT NULL) AS name_canonical,
+            list(DISTINCT display_name ORDER BY display_name)
+                FILTER (WHERE display_name IS NOT NULL) AS name_variants,
+            list(DISTINCT document_type ORDER BY document_type)
+                FILTER (WHERE document_type IS NOT NULL) AS document_types,
+            min(observed_date) AS first_seen,
+            max(observed_date) AS last_seen,
+            list(DISTINCT institution_name ORDER BY institution_name)
+                FILTER (WHERE institution_name IS NOT NULL) AS institution_names,
+            list(DISTINCT source_id ORDER BY source_id) AS sources,
+            count(*) AS source_row_count
+        FROM curated_person_sources
+        WHERE cedula_canonical IS NOT NULL
+        GROUP BY cedula_canonical
+    """)
+
+
 def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str]) -> None:
+    if not ({"secop_ii_contracts", "paco_sanctions"} & set(required_sources)):
+        _create_person_views(con, required_sources)
+        return
+
     con.execute("""
         CREATE OR REPLACE TEMP VIEW curated_contract_awards AS
         SELECT
@@ -129,11 +256,14 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
             coacc_reference_url(process_url) AS process_url,
             coacc_doc_digits(supplier_document) AS supplier_document_digits,
             coacc_nit_base(supplier_document, supplier_doc_type) AS supplier_nit_base,
+            coacc_nit_canonical(supplier_document, supplier_doc_type) AS supplier_nit_canonical,
             coacc_document_key(supplier_document, supplier_doc_type) AS supplier_document_key,
             'doc:' || coacc_document_key(supplier_document, supplier_doc_type)
                 AS supplier_entity_id,
             nullif(trim(awarded_supplier), '') AS supplier_name,
             nullif(trim(supplier_doc_type), '') AS supplier_doc_type,
+            coacc_doc_digits(entity_nit) AS buyer_document_digits,
+            coacc_nit_canonical(entity_nit, 'NIT') AS buyer_nit_canonical,
             nullif(trim(entity_nit), '') AS buyer_document_id,
             nullif(trim(entity_name), '') AS buyer_name,
             nullif(trim(department), '') AS department,
@@ -169,6 +299,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
                 nullif(trim(paco_feed), '') AS paco_feed,
                 nullif(trim(source_url), '') AS source_url,
                 coacc_doc_digits(subject_document_id) AS subject_document_digits,
+                coacc_nit_canonical(subject_document_id, subject_type) AS subject_nit_canonical,
                 coacc_document_key(subject_document_id, subject_type) AS subject_document_key,
                 'doc:' || coacc_document_key(subject_document_id, subject_type)
                     AS subject_entity_id,
@@ -239,6 +370,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
                 NULL::VARCHAR AS paco_feed,
                 NULL::VARCHAR AS source_url,
                 NULL::VARCHAR AS subject_document_digits,
+                NULL::VARCHAR AS subject_nit_canonical,
                 NULL::VARCHAR AS subject_document_key,
                 NULL::VARCHAR AS subject_entity_id,
                 NULL::VARCHAR AS subject_name,
@@ -275,6 +407,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
                 supplier_document_key AS document_key,
                 supplier_document_digits AS document_digits,
                 supplier_nit_base AS nit_base,
+                supplier_nit_canonical AS nit_canonical,
                 supplier_doc_type AS document_type,
                 supplier_name AS display_name,
                 'secop_ii_contracts' AS source_id
@@ -284,6 +417,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
                 subject_document_key AS document_key,
                 subject_document_digits AS document_digits,
                 NULL AS nit_base,
+                subject_nit_canonical AS nit_canonical,
                 subject_type AS document_type,
                 subject_name AS display_name,
                 'paco_sanctions' AS source_id
@@ -294,6 +428,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
             document_key,
             max(document_digits) AS sample_document_digits,
             max(nit_base) AS nit_base,
+            max(nit_canonical) AS nit_canonical,
             max(display_name) AS display_name,
             max(document_type) AS document_type,
             string_agg(DISTINCT source_id, ',') AS source_ids,
@@ -302,6 +437,75 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         WHERE document_key IS NOT NULL
         GROUP BY document_key
     """)
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_dim_company AS
+        WITH company_sources AS (
+            SELECT
+                supplier_nit_canonical AS nit_canonical,
+                supplier_document_digits AS raw_nit,
+                supplier_name AS display_name,
+                signing_date AS observed_date,
+                'secop_ii_contracts' AS source_id
+            FROM curated_contract_awards
+            WHERE supplier_nit_canonical IS NOT NULL
+            UNION ALL
+            SELECT
+                subject_nit_canonical AS nit_canonical,
+                subject_document_digits AS raw_nit,
+                subject_name AS display_name,
+                sanction_date AS observed_date,
+                'paco_sanctions' AS source_id
+            FROM curated_paco_subjects
+            WHERE subject_nit_canonical IS NOT NULL
+        )
+        SELECT
+            'company:' || nit_canonical AS entity_uid,
+            nit_canonical,
+            list(DISTINCT raw_nit ORDER BY raw_nit)
+                FILTER (WHERE raw_nit IS NOT NULL) AS nit_variants,
+            min(display_name) FILTER (WHERE display_name IS NOT NULL) AS name_canonical,
+            list(DISTINCT display_name ORDER BY display_name)
+                FILTER (WHERE display_name IS NOT NULL) AS name_variants,
+            min(observed_date) AS first_seen,
+            max(observed_date) AS last_seen,
+            list(DISTINCT source_id ORDER BY source_id) AS sources,
+            count(*) AS source_row_count
+        FROM company_sources
+        WHERE nit_canonical IS NOT NULL
+        GROUP BY nit_canonical
+    """)
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_dim_buyer AS
+        WITH buyer_sources AS (
+            SELECT
+                buyer_nit_canonical AS nit_canonical,
+                buyer_document_digits AS raw_nit,
+                buyer_name AS display_name,
+                signing_date AS observed_date,
+                contract_id,
+                contract_value,
+                'secop_ii_contracts' AS source_id
+            FROM curated_contract_awards
+            WHERE buyer_nit_canonical IS NOT NULL
+        )
+        SELECT
+            'buyer:' || nit_canonical AS entity_uid,
+            nit_canonical,
+            list(DISTINCT raw_nit ORDER BY raw_nit)
+                FILTER (WHERE raw_nit IS NOT NULL) AS nit_variants,
+            min(display_name) FILTER (WHERE display_name IS NOT NULL) AS name_canonical,
+            list(DISTINCT display_name ORDER BY display_name)
+                FILTER (WHERE display_name IS NOT NULL) AS name_variants,
+            min(observed_date) AS first_seen,
+            max(observed_date) AS last_seen,
+            count(DISTINCT contract_id) AS contract_count,
+            coalesce(sum(coalesce(contract_value, 0.0)), 0.0) AS total_contract_value,
+            list(DISTINCT source_id ORDER BY source_id) AS sources
+        FROM buyer_sources
+        WHERE nit_canonical IS NOT NULL
+        GROUP BY nit_canonical
+    """)
+    _create_person_views(con, required_sources)
     con.execute("""
         CREATE OR REPLACE TEMP VIEW curated_sanctioned_awards AS
         SELECT
@@ -576,6 +780,12 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
 def _table_sql(table: str) -> str:
     if table == "dim_subject_document":
         return "SELECT * FROM curated_subject_documents"
+    if table == "dim_company":
+        return "SELECT * FROM curated_dim_company"
+    if table == "dim_buyer":
+        return "SELECT * FROM curated_dim_buyer"
+    if table == "dim_person":
+        return "SELECT * FROM curated_dim_person"
     if table == "fct_procurement_contract_awards":
         return "SELECT * FROM curated_contract_awards"
     if table == "signal_feature_procurement_sanctioned_supplier_awarded":
