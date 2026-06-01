@@ -1,58 +1,39 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { describe, expect, it, vi } from "vitest";
-
-import "./i18n";
-
-// Mock auth store — unauthenticated by default
-vi.mock("./stores/auth", () => ({
-  useAuthStore: Object.assign(
-    (selector?: (state: Record<string, unknown>) => unknown) => {
-      const state = {
-        token: null,
-        user: null,
-        restored: true,
-        restore: () => Promise.resolve(),
-      };
-      return selector ? selector(state) : state;
-    },
-    {
-      getState: () => ({ token: null, restored: true }),
-    },
-  ),
-}));
-
-// Keep App route test deterministic without Landing async effects.
-vi.mock("./pages/Landing", () => ({
-  Landing: () => <div>CO-ACC</div>,
-}));
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
 
 describe("App", () => {
-  it("renders the landing page with title", async () => {
-    await act(async () => {
-      render(
-        <MemoryRouter>
-          <App />
-        </MemoryRouter>,
-      );
-    });
+  beforeEach(() => {
+    vi.stubGlobal("fetch", undefined);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("renders the atlas landing page", async () => {
+    render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    );
+
     await waitFor(() => {
-      expect(screen.getAllByText("CO-ACC").length).toBeGreaterThan(0);
+      expect(screen.getByRole("heading", { name: /datos publicos de colombia/i })).toBeInTheDocument();
     });
   });
 
-  it("renders login page at /login", async () => {
-    await act(async () => {
-      render(
-        <MemoryRouter initialEntries={["/login"]}>
-          <App />
-        </MemoryRouter>,
-      );
-    });
+  it("renders the workspace search route", async () => {
+    render(
+      <MemoryRouter initialEntries={["/app/search"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
     await waitFor(() => {
-      expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: /buscar en el grafo/i })).toBeInTheDocument();
     });
   });
 });
