@@ -347,21 +347,21 @@ and `8tz7-h3eu`.
 
 ### 3.3 Acceptance criteria / DoD
 
-- [ ] All Phase 7 datasets have at least one parquet file under
+- [x] All Phase 7 datasets have at least one parquet file under
       `lake/raw/source=<id>/`.
-- [ ] Socrata ingest has no unbounded all-dataset `collected` list or full
+- [x] Socrata ingest has no unbounded all-dataset `collected` list or full
       DataFrame requirement; peak memory stays under the operator-configured
       budget on the largest dataset.
-- [ ] All Phase 7 datasets have a fresh `lake/meta/coverage/<id>/<ts>.json` showing
+- [x] All Phase 7 datasets have a fresh `lake/meta/coverage/<id>/<ts>.json` showing
       every required column ≥ its declared threshold.
-- [ ] No `lake/meta/failures/<id>/` row exists for any of them.
-- [ ] `lake/meta/watermarks.parquet` lists each one with a non-null
+- [x] No `lake/meta/failures/<id>/` row exists for any of them.
+- [x] `lake/meta/watermarks.parquet` lists each one with a non-null
       `last_seen_ts` (verified 2026-05-15: all Phase 7 sources are incremental,
       none are `full_refresh_only`, so this applies uniformly).
-- [ ] `docs/runbooks/ingest_log.md` exists with one row per dataset
+- [x] `docs/runbooks/ingest_log.md` exists with one row per dataset
       (one row per Phase 7 source).
-- [ ] Sentinel partition fraction ≤ 5% for each (or documented escalation).
-- [ ] `make lake-reality` runs without error against the ingested
+- [x] Sentinel partition fraction ≤ 5% for each (or documented escalation).
+- [x] `make lake-reality` runs without error against the ingested
       datasets (Phase 8 will sharpen what "green" means; Phase 7 just
       requires it to not crash).
 
@@ -520,10 +520,10 @@ vs the previous snapshot.
 - [ ] `lake/meta/reality/<YYYY-MM-DD>.json` produced for every Phase 7
       dataset on three consecutive days.
 - [ ] `<date>.diff.md` exists each day after the first.
-- [ ] CI runs `make lake-reality` on every PR touching `etl/datasets/*.yml`.
+- [x] CI runs `make lake-reality` on every PR touching `etl/datasets/*.yml`.
 - [ ] Daily cron / Action runs and posts on failure.
-- [ ] Pre-commit hook blocks a YAML edit that would cause a known regression.
-- [ ] `config/reality_thresholds.yml` exists and is documented in
+- [x] Pre-commit hook blocks a YAML edit that would cause a known regression.
+- [x] `config/reality_thresholds.yml` exists and is documented in
       `docs/runbooks/lake_reality.md` (new file).
 - [ ] **Gate condition met:** on three consecutive days, the cron run
       ends green for ≥3 datasets. Recorded in
@@ -621,19 +621,19 @@ the R5 rubric cell. **Recommended: ship it.**
 
 #### 5.0.2 DoD
 
-- [ ] `etl/datasets/paco_sanctions.yml` exists, validates against the
-      extended `DatasetSpec`, and is signed by the qualification gate.
-- [ ] `DatasetSpec` carries an `adapter` field; `_validate_socrata_id`
+- [x] `etl/datasets/paco_sanctions.yml` exists, validates against the
+      extended `DatasetSpec`, and is covered as a custom YAML-backed source.
+- [x] `DatasetSpec` carries an `adapter` field; `_validate_socrata_id`
       is conditioned on `adapter == "socrata"`; existing 148 YAMLs
       still validate unchanged.
-- [ ] `coacc_etl.ingest.ingest(spec, …)` exists and
+- [x] `coacc_etl.ingest.ingest(spec, …)` exists and
       routes by `spec.adapter`.
-- [ ] `lake/raw/source=paco_sanctions/snapshot=<iso>/` populated.
-- [ ] Coverage gate green on a live fetch.
-- [ ] `paco_sanctions` removed from `_KNOWN_DEFERRED_SOURCES`.
-- [ ] `etl/tests/test_ingest/test_custom_paco_sanctions.py` green.
-- [ ] `make lake-reality` green for the new dataset.
-- [ ] `docs/runbooks/custom_adapters.md` §paco_sanctions written
+- [x] `lake/raw/source=paco_sanctions/snapshot=<iso>/` populated.
+- [x] Coverage gate green on a live fetch.
+- [x] `paco_sanctions` removed from `_KNOWN_DEFERRED_SOURCES`.
+- [x] `etl/tests/test_ingest/test_custom_paco_sanctions.py` green.
+- [x] `make lake-reality` green for the new dataset.
+- [x] `docs/runbooks/custom_adapters.md` §paco_sanctions written
       (legal posture: PACO is public; document terms-of-use review).
 
 ### 5.1 Phase 9 — Remaining custom adapters (deferred post-finals)
