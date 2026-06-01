@@ -1,0 +1,4448 @@
+openapi: 3.1.0
+info:
+  title: CO-ACC API
+  description: Colombian public data graph analysis tool
+  version: 0.1.0
+paths:
+  /api/v1/meta/health:
+    get:
+      tags:
+      - meta
+      summary: Neo4J Health
+      operationId: neo4j_health_api_v1_meta_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Neo4J Health Api V1 Meta Health Get
+  /api/v1/meta/stats:
+    get:
+      tags:
+      - meta
+      summary: Database Stats
+      operationId: database_stats_api_v1_meta_stats_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Database Stats Api V1 Meta Stats Get
+  /api/v1/meta/sources:
+    get:
+      tags:
+      - meta
+      summary: List Sources
+      operationId: list_sources_api_v1_meta_sources_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  items:
+                    additionalProperties: true
+                    type: object
+                  type: array
+                type: object
+                title: Response List Sources Api V1 Meta Sources Get
+  /api/v1/meta/validation/known-cases:
+    get:
+      tags:
+      - meta
+      summary: Validate Known Cases
+      operationId: validate_known_cases_api_v1_meta_validation_known_cases_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationCasesResponse'
+  /api/v1/meta/watchlist/people:
+    get:
+      tags:
+      - meta
+      summary: Prioritized People Watchlist
+      operationId: prioritized_people_watchlist_api_v1_meta_watchlist_people_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 12
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrioritizedPeopleResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/meta/watchlist/companies:
+    get:
+      tags:
+      - meta
+      summary: Prioritized Company Watchlist
+      operationId: prioritized_company_watchlist_api_v1_meta_watchlist_companies_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 12
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrioritizedCompaniesResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/meta/watchlist/buyers:
+    get:
+      tags:
+      - meta
+      summary: Prioritized Buyer Watchlist
+      operationId: prioritized_buyer_watchlist_api_v1_meta_watchlist_buyers_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 12
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrioritizedBuyersResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/meta/watchlist/territories:
+    get:
+      tags:
+      - meta
+      summary: Prioritized Territory Watchlist
+      operationId: prioritized_territory_watchlist_api_v1_meta_watchlist_territories_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 12
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrioritizedTerritoriesResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/public/meta:
+    get:
+      tags:
+      - public
+      summary: Public Meta
+      operationId: public_meta_api_v1_public_meta_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Public Meta Api V1 Public Meta Get
+  /api/v1/public/patterns/company/{company_ref}:
+    get:
+      tags:
+      - public
+      summary: Public Patterns For Company
+      operationId: public_patterns_for_company_api_v1_public_patterns_company__company_ref__get
+      parameters:
+      - name: company_ref
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Company Ref
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+          default: en
+          title: Lang
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/public/graph/company/{company_ref}:
+    get:
+      tags:
+      - public
+      summary: Public Graph For Company
+      operationId: public_graph_for_company_api_v1_public_graph_company__company_ref__get
+      parameters:
+      - name: company_ref
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Company Ref
+      - name: depth
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 3
+          minimum: 1
+          default: 2
+          title: Depth
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/auth/register:
+    post:
+      tags:
+      - auth
+      summary: Register
+      operationId: register_api_v1_auth_register_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/auth/login:
+    post:
+      tags:
+      - auth
+      summary: Login
+      operationId: login_api_v1_auth_login_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_login_api_v1_auth_login_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/auth/me:
+    get:
+      tags:
+      - auth
+      summary: Me
+      operationId: me_api_v1_auth_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+      security:
+      - OAuth2PasswordBearer: []
+  /api/v1/auth/logout:
+    post:
+      tags:
+      - auth
+      summary: Logout
+      operationId: logout_api_v1_auth_logout_post
+      responses:
+        '204':
+          description: Successful Response
+  /api/v1/entity/{identifier}:
+    get:
+      tags:
+      - entity
+      summary: Get Entity
+      operationId: get_entity_api_v1_entity__identifier__get
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Identifier
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/entity/by-element-id/{element_id}:
+    get:
+      tags:
+      - entity
+      summary: Get Entity By Element Id
+      operationId: get_entity_by_element_id_api_v1_entity_by_element_id__element_id__get
+      parameters:
+      - name: element_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Element Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/entity/{entity_id}/exposure:
+    get:
+      tags:
+      - entity
+      summary: Get Entity Exposure
+      operationId: get_entity_exposure_api_v1_entity__entity_id__exposure_get
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExposureResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/entity/{entity_id}/timeline:
+    get:
+      tags:
+      - entity
+      summary: Get Entity Timeline
+      operationId: get_entity_timeline_api_v1_entity__entity_id__timeline_get
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cursor
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 50
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/entity/{entity_id}/signals:
+    get:
+      tags:
+      - entity
+      summary: Get Entity Signals
+      operationId: get_entity_signals_api_v1_entity__entity_id__signals_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntitySignalsResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/entity/{entity_id}/anomaly-scores:
+    get:
+      tags:
+      - entity
+      summary: Get Entity Anomaly Scores
+      operationId: get_entity_anomaly_scores_api_v1_entity__entity_id__anomaly_scores_get
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 25
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityAnomalyScoresResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/entity/{entity_id}/signals/refresh:
+    post:
+      tags:
+      - entity
+      summary: Refresh Signals For Entity
+      operationId: refresh_signals_for_entity_api_v1_entity__entity_id__signals_refresh_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+          default: es
+          title: Lang
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntitySignalsResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/entity/{entity_id}/evidence-trail:
+    get:
+      tags:
+      - entity
+      summary: Get Entity Evidence Trail
+      operationId: get_entity_evidence_trail_api_v1_entity__entity_id__evidence_trail_get
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 24
+          minimum: 1
+          default: 12
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityEvidenceTrailResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/entity/{entity_id}/connections:
+    get:
+      tags:
+      - entity
+      summary: Get Connections
+      operationId: get_connections_api_v1_entity__entity_id__connections_get
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      - name: depth
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 4
+          minimum: 1
+          default: 2
+          title: Depth
+      - name: types
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Types
+      - name: include_probable
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Probable
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityWithConnections'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/search:
+    get:
+      tags:
+      - search
+      summary: Search Entities
+      operationId: search_entities_api_v1_search_get
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 200
+          title: Q
+      - name: type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Type
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Size
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/graph/{entity_id}:
+    get:
+      tags:
+      - graph
+      summary: Get Graph
+      operationId: get_graph_api_v1_graph__entity_id__get
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      - name: depth
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 4
+          minimum: 1
+          default: 2
+          title: Depth
+      - name: entity_types
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Entity Types
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/patterns/{entity_id}:
+    get:
+      tags:
+      - patterns
+      summary: Get Patterns For Entity
+      operationId: get_patterns_for_entity_api_v1_patterns__entity_id__get
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+          default: es
+          title: Lang
+      - name: include_probable
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Probable
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/patterns/{entity_id}/{pattern_name}:
+    get:
+      tags:
+      - patterns
+      summary: Get Specific Pattern
+      operationId: get_specific_pattern_api_v1_patterns__entity_id___pattern_name__get
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      - name: pattern_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Pattern Name
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+          default: es
+          title: Lang
+      - name: include_probable
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Probable
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/patterns/:
+    get:
+      tags:
+      - patterns
+      summary: List Patterns
+      operationId: list_patterns_api_v1_patterns__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  items:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  type: array
+                type: object
+                title: Response List Patterns Api V1 Patterns  Get
+  /api/v1/signals/:
+    get:
+      tags:
+      - signals
+      summary: List Signals
+      operationId: list_signals_api_v1_signals__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalListResponse'
+      security:
+      - OAuth2PasswordBearer: []
+  /api/v1/signals/{signal_id}:
+    get:
+      tags:
+      - signals
+      summary: Get Signal
+      operationId: get_signal_api_v1_signals__signal_id__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: signal_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Signal Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 25
+          minimum: 1
+          default: 10
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalDetailResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/baseline/{entity_id}:
+    get:
+      tags:
+      - baseline
+      summary: Get Baseline For Entity
+      operationId: get_baseline_for_entity_api_v1_baseline__entity_id__get
+      parameters:
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      - name: dimension
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Dimension
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaselineResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/investigations/:
+    post:
+      tags:
+      - investigations
+      summary: Create Investigation
+      operationId: create_investigation_api_v1_investigations__post
+      security:
+      - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvestigationCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestigationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - investigations
+      summary: List Investigations
+      operationId: list_investigations_api_v1_investigations__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Size
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestigationListResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/investigations/{investigation_id}:
+    get:
+      tags:
+      - investigations
+      summary: Get Investigation
+      operationId: get_investigation_api_v1_investigations__investigation_id__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestigationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+      - investigations
+      summary: Update Investigation
+      operationId: update_investigation_api_v1_investigations__investigation_id__patch
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvestigationUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestigationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - investigations
+      summary: Delete Investigation
+      operationId: delete_investigation_api_v1_investigations__investigation_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/investigations/{investigation_id}/entities/{entity_id}:
+    post:
+      tags:
+      - investigations
+      summary: Add Entity
+      operationId: add_entity_api_v1_investigations__investigation_id__entities__entity_id__post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Add Entity Api V1 Investigations  Investigation Id  Entities  Entity
+                  Id  Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - investigations
+      summary: Remove Entity
+      operationId: remove_entity_api_v1_investigations__investigation_id__entities__entity_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Entity Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/investigations/{investigation_id}/annotations:
+    post:
+      tags:
+      - investigations
+      summary: Create Annotation
+      operationId: create_annotation_api_v1_investigations__investigation_id__annotations_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnnotationCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Annotation'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - investigations
+      summary: List Annotations
+      operationId: list_annotations_api_v1_investigations__investigation_id__annotations_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Annotation'
+                title: Response List Annotations Api V1 Investigations  Investigation
+                  Id  Annotations Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/investigations/{investigation_id}/tags:
+    post:
+      tags:
+      - investigations
+      summary: Create Tag
+      operationId: create_tag_api_v1_investigations__investigation_id__tags_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - investigations
+      summary: List Tags
+      operationId: list_tags_api_v1_investigations__investigation_id__tags_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+                title: Response List Tags Api V1 Investigations  Investigation Id  Tags
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/investigations/{investigation_id}/annotations/{annotation_id}:
+    delete:
+      tags:
+      - investigations
+      summary: Delete Annotation
+      operationId: delete_annotation_api_v1_investigations__investigation_id__annotations__annotation_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      - name: annotation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Annotation Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/investigations/{investigation_id}/tags/{tag_id}:
+    delete:
+      tags:
+      - investigations
+      summary: Delete Tag
+      operationId: delete_tag_api_v1_investigations__investigation_id__tags__tag_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      - name: tag_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Tag Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/investigations/{investigation_id}/share:
+    post:
+      tags:
+      - investigations
+      summary: Generate Share Link
+      operationId: generate_share_link_api_v1_investigations__investigation_id__share_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                title: Response Generate Share Link Api V1 Investigations  Investigation
+                  Id  Share Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - investigations
+      summary: Revoke Share Link
+      operationId: revoke_share_link_api_v1_investigations__investigation_id__share_delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/investigations/{investigation_id}/export:
+    get:
+      tags:
+      - investigations
+      summary: Export Investigation
+      operationId: export_investigation_api_v1_investigations__investigation_id__export_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/investigations/{investigation_id}/export/pdf:
+    get:
+      tags:
+      - investigations
+      summary: Export Investigation Pdf
+      operationId: export_investigation_pdf_api_v1_investigations__investigation_id__export_pdf_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: investigation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Investigation Id
+      - name: lang
+        in: query
+        required: false
+        schema:
+          enum:
+          - es
+          - en
+          type: string
+          default: es
+          title: Lang
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/shared/{token}:
+    get:
+      tags:
+      - shared
+      summary: Get Shared Investigation
+      operationId: get_shared_investigation_api_v1_shared__token__get
+      parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Token
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestigationResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/cases/:
+    get:
+      tags:
+      - cases
+      summary: Get Cases
+      operationId: get_cases_api_v1_cases__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Size
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseListResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - cases
+      summary: Post Case
+      operationId: post_case_api_v1_cases__post
+      security:
+      - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseSummary'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/cases/{case_id}:
+    get:
+      tags:
+      - cases
+      summary: Get Case Detail
+      operationId: get_case_detail_api_v1_cases__case_id__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/cases/{case_id}/refresh:
+    post:
+      tags:
+      - cases
+      summary: Refresh Case Detail
+      operationId: refresh_case_detail_api_v1_cases__case_id__refresh_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      - name: lang
+        in: query
+        required: false
+        schema:
+          type: string
+          default: es
+          title: Lang
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/agent/query:
+    post:
+      tags:
+      - agent
+      summary: Post Agent Query
+      operationId: post_agent_query_api_v1_agent_query_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentQueryRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentQueryResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /health:
+    get:
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  anyOf:
+                  - type: string
+                  - type: integer
+                  - type: 'null'
+                type: object
+                title: Response Health Health Get
+components:
+  schemas:
+    AgentCitation:
+      properties:
+        dataset_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Dataset Id
+        source_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source Id
+        row_key:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Row Key
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+        label:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Label
+        case_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Case Id
+        evidence_item_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Evidence Item Id
+      type: object
+      title: AgentCitation
+    AgentQueryRequest:
+      properties:
+        question:
+          type: string
+          maxLength: 1000
+          minLength: 1
+          title: Question
+        case_id:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          title: Case Id
+      type: object
+      required:
+      - question
+      title: AgentQueryRequest
+    AgentQueryResponse:
+      properties:
+        answer:
+          type: string
+          title: Answer
+        citations:
+          items:
+            $ref: '#/components/schemas/AgentCitation'
+          type: array
+          title: Citations
+        subgraphs:
+          items:
+            $ref: '#/components/schemas/AgentSubgraph'
+          type: array
+          title: Subgraphs
+        related_case_ids:
+          items:
+            type: string
+          type: array
+          title: Related Case Ids
+      type: object
+      required:
+      - answer
+      title: AgentQueryResponse
+    AgentSubgraph:
+      properties:
+        case_id:
+          type: string
+          title: Case Id
+        title:
+          type: string
+          title: Title
+        nodes:
+          items:
+            $ref: '#/components/schemas/AgentSubgraphNode'
+          type: array
+          title: Nodes
+        edges:
+          items:
+            $ref: '#/components/schemas/AgentSubgraphEdge'
+          type: array
+          title: Edges
+      type: object
+      required:
+      - case_id
+      - title
+      title: AgentSubgraph
+    AgentSubgraphEdge:
+      properties:
+        source:
+          type: string
+          title: Source
+        target:
+          type: string
+          title: Target
+        label:
+          type: string
+          title: Label
+      type: object
+      required:
+      - source
+      - target
+      - label
+      title: AgentSubgraphEdge
+    AgentSubgraphNode:
+      properties:
+        id:
+          type: string
+          title: Id
+        label:
+          type: string
+          title: Label
+        type:
+          type: string
+          title: Type
+      type: object
+      required:
+      - id
+      - label
+      - type
+      title: AgentSubgraphNode
+    Annotation:
+      properties:
+        id:
+          type: string
+          title: Id
+        entity_id:
+          type: string
+          title: Entity Id
+        investigation_id:
+          type: string
+          title: Investigation Id
+        text:
+          type: string
+          title: Text
+        created_at:
+          type: string
+          title: Created At
+      type: object
+      required:
+      - id
+      - entity_id
+      - investigation_id
+      - text
+      - created_at
+      title: Annotation
+    AnnotationCreate:
+      properties:
+        entity_id:
+          type: string
+          title: Entity Id
+        text:
+          type: string
+          maxLength: 5000
+          title: Text
+      type: object
+      required:
+      - entity_id
+      - text
+      title: AnnotationCreate
+    BaselineMetrics:
+      properties:
+        company_name:
+          type: string
+          title: Company Name
+        company_document_id:
+          type: string
+          title: Company Document Id
+        company_id:
+          type: string
+          title: Company Id
+        contract_count:
+          type: integer
+          title: Contract Count
+        total_value:
+          type: number
+          title: Total Value
+        peer_count:
+          type: integer
+          title: Peer Count
+        peer_avg_contracts:
+          type: number
+          title: Peer Avg Contracts
+        peer_avg_value:
+          type: number
+          title: Peer Avg Value
+        contract_ratio:
+          type: number
+          title: Contract Ratio
+        value_ratio:
+          type: number
+          title: Value Ratio
+        comparison_dimension:
+          type: string
+          title: Comparison Dimension
+        comparison_key:
+          type: string
+          title: Comparison Key
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          type: array
+          title: Sources
+      type: object
+      required:
+      - company_name
+      - company_document_id
+      - company_id
+      - contract_count
+      - total_value
+      - peer_count
+      - peer_avg_contracts
+      - peer_avg_value
+      - contract_ratio
+      - value_ratio
+      - comparison_dimension
+      - comparison_key
+      - sources
+      title: BaselineMetrics
+    BaselineResponse:
+      properties:
+        entity_id:
+          type: string
+          title: Entity Id
+        comparisons:
+          items:
+            $ref: '#/components/schemas/BaselineMetrics'
+          type: array
+          title: Comparisons
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - entity_id
+      - comparisons
+      - total
+      title: BaselineResponse
+    Body_login_api_v1_auth_login_post:
+      properties:
+        grant_type:
+          anyOf:
+          - type: string
+            pattern: ^password$
+          - type: 'null'
+          title: Grant Type
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          format: password
+          title: Password
+        scope:
+          type: string
+          title: Scope
+          default: ''
+        client_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Id
+        client_secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          format: password
+          title: Client Secret
+      type: object
+      required:
+      - username
+      - password
+      title: Body_login_api_v1_auth_login_post
+    CaseAnomalyScore:
+      properties:
+        contract_id:
+          type: string
+          title: Contract Id
+        entity_uid:
+          type: string
+          title: Entity Uid
+        score:
+          type: number
+          title: Score
+        score_confidence:
+          type: string
+          title: Score Confidence
+          default: unknown
+        top_features:
+          items:
+            type: string
+          type: array
+          title: Top Features
+        prior_sanction_supplier:
+          type: boolean
+          title: Prior Sanction Supplier
+          default: false
+        process_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Process Url
+        score_run_id:
+          type: string
+          title: Score Run Id
+        model_run_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model Run Id
+        feature_run_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Feature Run Id
+        scored_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Scored At
+      type: object
+      required:
+      - contract_id
+      - entity_uid
+      - score
+      - score_run_id
+      title: CaseAnomalyScore
+    CaseCreate:
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          title: Title
+        description:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Description
+      type: object
+      required:
+      - title
+      title: CaseCreate
+    CaseEventResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        type:
+          type: string
+          title: Type
+        label:
+          type: string
+          title: Label
+        date:
+          type: string
+          title: Date
+        entity_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Entity Id
+        signal_hit_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Signal Hit Id
+        evidence_bundle_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Evidence Bundle Id
+        bundle_document_count:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Bundle Document Count
+      type: object
+      required:
+      - id
+      - type
+      - label
+      - date
+      title: CaseEventResponse
+    CaseEvidenceBundle:
+      properties:
+        bundle_id:
+          type: string
+          title: Bundle Id
+        headline:
+          type: string
+          title: Headline
+        source_list:
+          items:
+            type: string
+          type: array
+          title: Source List
+        evidence_items:
+          items:
+            $ref: '#/components/schemas/EvidenceItemResponse'
+          type: array
+          title: Evidence Items
+      type: object
+      required:
+      - bundle_id
+      - headline
+      title: CaseEvidenceBundle
+    CaseListResponse:
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/CaseSummary'
+          type: array
+          title: Cases
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - cases
+      - total
+      title: CaseListResponse
+    CaseResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        title:
+          type: string
+          title: Title
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        status:
+          type: string
+          title: Status
+          default: new
+        created_at:
+          type: string
+          title: Created At
+        updated_at:
+          type: string
+          title: Updated At
+        entity_ids:
+          items:
+            type: string
+          type: array
+          title: Entity Ids
+        signal_count:
+          type: integer
+          title: Signal Count
+          default: 0
+        public_signal_count:
+          type: integer
+          title: Public Signal Count
+          default: 0
+        last_refreshed_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Refreshed At
+        last_run_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Run Id
+        stale:
+          type: boolean
+          title: Stale
+          default: true
+        anomaly_score:
+          anyOf:
+          - $ref: '#/components/schemas/CaseAnomalyScore'
+          - type: 'null'
+        signals:
+          items:
+            $ref: '#/components/schemas/SignalHitResponse'
+          type: array
+          title: Signals
+        evidence_bundles:
+          items:
+            $ref: '#/components/schemas/CaseEvidenceBundle'
+          type: array
+          title: Evidence Bundles
+        events:
+          items:
+            $ref: '#/components/schemas/CaseEventResponse'
+          type: array
+          title: Events
+        narrative_markdown:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Narrative Markdown
+        narrative_generated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Narrative Generated At
+      type: object
+      required:
+      - id
+      - title
+      - created_at
+      - updated_at
+      title: CaseResponse
+    CaseSummary:
+      properties:
+        id:
+          type: string
+          title: Id
+        title:
+          type: string
+          title: Title
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        status:
+          type: string
+          title: Status
+          default: new
+        created_at:
+          type: string
+          title: Created At
+        updated_at:
+          type: string
+          title: Updated At
+        entity_ids:
+          items:
+            type: string
+          type: array
+          title: Entity Ids
+        signal_count:
+          type: integer
+          title: Signal Count
+          default: 0
+        public_signal_count:
+          type: integer
+          title: Public Signal Count
+          default: 0
+        last_refreshed_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Refreshed At
+        last_run_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Run Id
+        stale:
+          type: boolean
+          title: Stale
+          default: true
+        anomaly_score:
+          anyOf:
+          - $ref: '#/components/schemas/CaseAnomalyScore'
+          - type: 'null'
+      type: object
+      required:
+      - id
+      - title
+      - created_at
+      - updated_at
+      title: CaseSummary
+    ConnectionResponse:
+      properties:
+        source_id:
+          type: string
+          title: Source Id
+        target_id:
+          type: string
+          title: Target Id
+        relationship_type:
+          type: string
+          title: Relationship Type
+        properties:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: 'null'
+          type: object
+          title: Properties
+        confidence:
+          type: number
+          title: Confidence
+          default: 1.0
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          type: array
+          title: Sources
+        exposure_tier:
+          type: string
+          title: Exposure Tier
+          default: public_safe
+      type: object
+      required:
+      - source_id
+      - target_id
+      - relationship_type
+      - properties
+      - sources
+      title: ConnectionResponse
+    EntityAnomalyScoresResponse:
+      properties:
+        entity_id:
+          type: string
+          title: Entity Id
+        total:
+          type: integer
+          title: Total
+        scores:
+          items:
+            $ref: '#/components/schemas/CaseAnomalyScore'
+          type: array
+          title: Scores
+      type: object
+      required:
+      - entity_id
+      - total
+      title: EntityAnomalyScoresResponse
+    EntityEvidenceTrailResponse:
+      properties:
+        entity_id:
+          type: string
+          title: Entity Id
+        bundles:
+          items:
+            $ref: '#/components/schemas/EvidenceTrailBundle'
+          type: array
+          title: Bundles
+        total_bundles:
+          type: integer
+          title: Total Bundles
+        total_documents:
+          type: integer
+          title: Total Documents
+      type: object
+      required:
+      - entity_id
+      - bundles
+      - total_bundles
+      - total_documents
+      title: EntityEvidenceTrailResponse
+    EntityResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        type:
+          type: string
+          title: Type
+        entity_label:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Entity Label
+        identity_quality:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Identity Quality
+        properties:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: 'null'
+          type: object
+          title: Properties
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          type: array
+          title: Sources
+        is_pep:
+          type: boolean
+          title: Is Pep
+          default: false
+        exposure_tier:
+          type: string
+          title: Exposure Tier
+          default: public_safe
+      type: object
+      required:
+      - id
+      - type
+      - properties
+      - sources
+      title: EntityResponse
+    EntitySignalsResponse:
+      properties:
+        entity_id:
+          type: string
+          title: Entity Id
+        entity_key:
+          type: string
+          title: Entity Key
+        total:
+          type: integer
+          title: Total
+        last_run_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Run Id
+        last_refreshed_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Refreshed At
+        stale:
+          type: boolean
+          title: Stale
+          default: true
+        signals:
+          items:
+            $ref: '#/components/schemas/SignalHitResponse'
+          type: array
+          title: Signals
+      type: object
+      required:
+      - entity_id
+      - entity_key
+      - total
+      title: EntitySignalsResponse
+    EntityWithConnections:
+      properties:
+        entity:
+          $ref: '#/components/schemas/EntityResponse'
+        connections:
+          items:
+            $ref: '#/components/schemas/ConnectionResponse'
+          type: array
+          title: Connections
+        connected_entities:
+          items:
+            $ref: '#/components/schemas/EntityResponse'
+          type: array
+          title: Connected Entities
+      type: object
+      required:
+      - entity
+      - connections
+      - connected_entities
+      title: EntityWithConnections
+    EvidenceItemResponse:
+      properties:
+        item_id:
+          type: string
+          title: Item Id
+        source_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source Id
+        record_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Record Id
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+        label:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Label
+        item_type:
+          type: string
+          title: Item Type
+          default: reference
+        node_ref:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Node Ref
+        observed_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Observed At
+        public_safe:
+          type: boolean
+          title: Public Safe
+          default: true
+        identity_match_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Identity Match Type
+        identity_quality:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Identity Quality
+      type: object
+      required:
+      - item_id
+      title: EvidenceItemResponse
+    EvidenceTrailBundle:
+      properties:
+        id:
+          type: string
+          title: Id
+        bundle_type:
+          type: string
+          title: Bundle Type
+        title:
+          type: string
+          title: Title
+        reference:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reference
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        relation_summary:
+          type: string
+          title: Relation Summary
+        via_entity_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Via Entity Name
+        via_entity_ref:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Via Entity Ref
+        document_count:
+          type: integer
+          title: Document Count
+        document_kinds:
+          items:
+            type: string
+          type: array
+          title: Document Kinds
+        documents:
+          items:
+            $ref: '#/components/schemas/EvidenceTrailDocument'
+          type: array
+          title: Documents
+        parties:
+          items:
+            $ref: '#/components/schemas/EvidenceTrailParty'
+          type: array
+          title: Parties
+        source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source
+      type: object
+      required:
+      - id
+      - bundle_type
+      - title
+      - relation_summary
+      - document_count
+      - document_kinds
+      - documents
+      - parties
+      title: EvidenceTrailBundle
+    EvidenceTrailDocument:
+      properties:
+        id:
+          type: string
+          title: Id
+        title:
+          type: string
+          title: Title
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+        kind:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Kind
+        extension:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Extension
+        uploaded_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uploaded At
+        source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source
+      type: object
+      required:
+      - id
+      - title
+      title: EvidenceTrailDocument
+    EvidenceTrailParty:
+      properties:
+        role:
+          type: string
+          title: Role
+        name:
+          type: string
+          title: Name
+        document_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Document Id
+        entity_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Entity Id
+      type: object
+      required:
+      - role
+      - name
+      title: EvidenceTrailParty
+    ExposureFactor:
+      properties:
+        name:
+          type: string
+          title: Name
+        value:
+          type: number
+          title: Value
+        percentile:
+          type: number
+          title: Percentile
+        weight:
+          type: number
+          title: Weight
+        sources:
+          items:
+            type: string
+          type: array
+          title: Sources
+      type: object
+      required:
+      - name
+      - value
+      - percentile
+      - weight
+      - sources
+      title: ExposureFactor
+    ExposureResponse:
+      properties:
+        entity_id:
+          type: string
+          title: Entity Id
+        exposure_index:
+          type: number
+          title: Exposure Index
+        factors:
+          items:
+            $ref: '#/components/schemas/ExposureFactor'
+          type: array
+          title: Factors
+        peer_group:
+          type: string
+          title: Peer Group
+        peer_count:
+          type: integer
+          title: Peer Count
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          type: array
+          title: Sources
+        intelligence_tier:
+          type: string
+          title: Intelligence Tier
+          default: community
+      type: object
+      required:
+      - entity_id
+      - exposure_index
+      - factors
+      - peer_group
+      - peer_count
+      - sources
+      title: ExposureResponse
+    GraphEdge:
+      properties:
+        id:
+          type: string
+          title: Id
+        source:
+          type: string
+          title: Source
+        target:
+          type: string
+          title: Target
+        type:
+          type: string
+          title: Type
+        properties:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: 'null'
+          type: object
+          title: Properties
+        confidence:
+          type: number
+          title: Confidence
+          default: 1.0
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          type: array
+          title: Sources
+        exposure_tier:
+          type: string
+          title: Exposure Tier
+          default: public_safe
+      type: object
+      required:
+      - id
+      - source
+      - target
+      - type
+      - properties
+      - sources
+      title: GraphEdge
+    GraphNode:
+      properties:
+        id:
+          type: string
+          title: Id
+        label:
+          type: string
+          title: Label
+        type:
+          type: string
+          title: Type
+        document_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Document Id
+        properties:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: 'null'
+          type: object
+          title: Properties
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          type: array
+          title: Sources
+        is_pep:
+          type: boolean
+          title: Is Pep
+          default: false
+        exposure_tier:
+          type: string
+          title: Exposure Tier
+          default: public_safe
+      type: object
+      required:
+      - id
+      - label
+      - type
+      - properties
+      - sources
+      title: GraphNode
+    GraphResponse:
+      properties:
+        nodes:
+          items:
+            $ref: '#/components/schemas/GraphNode'
+          type: array
+          title: Nodes
+        edges:
+          items:
+            $ref: '#/components/schemas/GraphEdge'
+          type: array
+          title: Edges
+        center_id:
+          type: string
+          title: Center Id
+      type: object
+      required:
+      - nodes
+      - edges
+      - center_id
+      title: GraphResponse
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    InvestigationCreate:
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          title: Title
+        description:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Description
+      type: object
+      required:
+      - title
+      title: InvestigationCreate
+    InvestigationListResponse:
+      properties:
+        investigations:
+          items:
+            $ref: '#/components/schemas/InvestigationResponse'
+          type: array
+          title: Investigations
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - investigations
+      - total
+      title: InvestigationListResponse
+    InvestigationResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        title:
+          type: string
+          title: Title
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        status:
+          type: string
+          title: Status
+          default: new
+        created_at:
+          type: string
+          title: Created At
+        updated_at:
+          type: string
+          title: Updated At
+        entity_ids:
+          items:
+            type: string
+          type: array
+          title: Entity Ids
+          default: []
+        share_token:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Share Token
+        share_expires_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Share Expires At
+      type: object
+      required:
+      - id
+      - title
+      - created_at
+      - updated_at
+      title: InvestigationResponse
+    InvestigationUpdate:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+          title: Title
+        description:
+          anyOf:
+          - type: string
+            maxLength: 2000
+          - type: 'null'
+          title: Description
+      type: object
+      title: InvestigationUpdate
+    PatternResponse:
+      properties:
+        entity_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Entity Id
+        patterns:
+          items:
+            $ref: '#/components/schemas/PatternResult'
+          type: array
+          title: Patterns
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - entity_id
+      - patterns
+      - total
+      title: PatternResponse
+    PatternResult:
+      properties:
+        pattern_id:
+          type: string
+          title: Pattern Id
+        pattern_name:
+          type: string
+          title: Pattern Name
+        description:
+          type: string
+          title: Description
+        data:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - items:
+                type: string
+              type: array
+            - type: 'null'
+          type: object
+          title: Data
+        entity_ids:
+          items:
+            type: string
+          type: array
+          title: Entity Ids
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          type: array
+          title: Sources
+        exposure_tier:
+          type: string
+          title: Exposure Tier
+          default: public_safe
+        intelligence_tier:
+          type: string
+          title: Intelligence Tier
+          default: community
+      type: object
+      required:
+      - pattern_id
+      - pattern_name
+      - description
+      - data
+      - entity_ids
+      - sources
+      title: PatternResult
+    PrioritizedBuyerResponse:
+      properties:
+        buyer_id:
+          type: string
+          title: Buyer Id
+        buyer_name:
+          type: string
+          title: Buyer Name
+        buyer_document_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Buyer Document Id
+        suspicion_score:
+          type: integer
+          title: Suspicion Score
+        signal_types:
+          type: integer
+          title: Signal Types
+        contract_count:
+          type: integer
+          title: Contract Count
+        contract_value:
+          type: number
+          title: Contract Value
+        supplier_count:
+          type: integer
+          title: Supplier Count
+        top_supplier_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Top Supplier Name
+        top_supplier_document_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Top Supplier Document Id
+        top_supplier_share:
+          type: number
+          title: Top Supplier Share
+        low_competition_contract_count:
+          type: integer
+          title: Low Competition Contract Count
+        direct_invitation_contract_count:
+          type: integer
+          title: Direct Invitation Contract Count
+        sanctioned_supplier_contract_count:
+          type: integer
+          title: Sanctioned Supplier Contract Count
+        sanctioned_supplier_value:
+          type: number
+          title: Sanctioned Supplier Value
+        official_overlap_contract_count:
+          type: integer
+          title: Official Overlap Contract Count
+        official_overlap_supplier_count:
+          type: integer
+          title: Official Overlap Supplier Count
+        capacity_mismatch_supplier_count:
+          type: integer
+          title: Capacity Mismatch Supplier Count
+        discrepancy_contract_count:
+          type: integer
+          title: Discrepancy Contract Count
+        discrepancy_value:
+          type: number
+          title: Discrepancy Value
+        alerts:
+          items:
+            $ref: '#/components/schemas/RiskAlertResponse'
+          type: array
+          title: Alerts
+      type: object
+      required:
+      - buyer_id
+      - buyer_name
+      - suspicion_score
+      - signal_types
+      - contract_count
+      - contract_value
+      - supplier_count
+      - top_supplier_share
+      - low_competition_contract_count
+      - direct_invitation_contract_count
+      - sanctioned_supplier_contract_count
+      - sanctioned_supplier_value
+      - official_overlap_contract_count
+      - official_overlap_supplier_count
+      - capacity_mismatch_supplier_count
+      - discrepancy_contract_count
+      - discrepancy_value
+      - alerts
+      title: PrioritizedBuyerResponse
+    PrioritizedBuyersResponse:
+      properties:
+        buyers:
+          items:
+            $ref: '#/components/schemas/PrioritizedBuyerResponse'
+          type: array
+          title: Buyers
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - buyers
+      - total
+      title: PrioritizedBuyersResponse
+    PrioritizedCompaniesResponse:
+      properties:
+        companies:
+          items:
+            $ref: '#/components/schemas/PrioritizedCompanyResponse'
+          type: array
+          title: Companies
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - companies
+      - total
+      title: PrioritizedCompaniesResponse
+    PrioritizedCompanyResponse:
+      properties:
+        entity_id:
+          type: string
+          title: Entity Id
+        name:
+          type: string
+          title: Name
+        document_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Document Id
+        suspicion_score:
+          type: integer
+          title: Suspicion Score
+        signal_types:
+          type: integer
+          title: Signal Types
+        contract_count:
+          type: integer
+          title: Contract Count
+        contract_value:
+          type: number
+          title: Contract Value
+        buyer_count:
+          type: integer
+          title: Buyer Count
+        sanction_count:
+          type: integer
+          title: Sanction Count
+        official_officer_count:
+          type: integer
+          title: Official Officer Count
+        official_role_count:
+          type: integer
+          title: Official Role Count
+        low_competition_bid_count:
+          type: integer
+          title: Low Competition Bid Count
+        low_competition_bid_value:
+          type: number
+          title: Low Competition Bid Value
+        direct_invitation_bid_count:
+          type: integer
+          title: Direct Invitation Bid Count
+        funding_overlap_event_count:
+          type: integer
+          title: Funding Overlap Event Count
+        funding_overlap_total:
+          type: number
+          title: Funding Overlap Total
+        capacity_mismatch_contract_count:
+          type: integer
+          title: Capacity Mismatch Contract Count
+        capacity_mismatch_contract_value:
+          type: number
+          title: Capacity Mismatch Contract Value
+        capacity_mismatch_revenue_ratio:
+          type: number
+          title: Capacity Mismatch Revenue Ratio
+        capacity_mismatch_asset_ratio:
+          type: number
+          title: Capacity Mismatch Asset Ratio
+        execution_gap_contract_count:
+          type: integer
+          title: Execution Gap Contract Count
+        execution_gap_invoice_total:
+          type: number
+          title: Execution Gap Invoice Total
+        commitment_gap_contract_count:
+          type: integer
+          title: Commitment Gap Contract Count
+        commitment_gap_total:
+          type: number
+          title: Commitment Gap Total
+        suspension_contract_count:
+          type: integer
+          title: Suspension Contract Count
+        suspension_event_count:
+          type: integer
+          title: Suspension Event Count
+        sanctioned_still_receiving_contract_count:
+          type: integer
+          title: Sanctioned Still Receiving Contract Count
+        sanctioned_still_receiving_total:
+          type: number
+          title: Sanctioned Still Receiving Total
+        split_contract_group_count:
+          type: integer
+          title: Split Contract Group Count
+        split_contract_total:
+          type: number
+          title: Split Contract Total
+        archive_contract_count:
+          type: integer
+          title: Archive Contract Count
+        archive_document_total:
+          type: integer
+          title: Archive Document Total
+        archive_supervision_contract_count:
+          type: integer
+          title: Archive Supervision Contract Count
+        archive_supervision_document_total:
+          type: integer
+          title: Archive Supervision Document Total
+        archive_payment_contract_count:
+          type: integer
+          title: Archive Payment Contract Count
+        archive_payment_document_total:
+          type: integer
+          title: Archive Payment Document Total
+        archive_assignment_contract_count:
+          type: integer
+          title: Archive Assignment Contract Count
+        archive_assignment_document_total:
+          type: integer
+          title: Archive Assignment Document Total
+        official_names:
+          items:
+            type: string
+          type: array
+          title: Official Names
+        alerts:
+          items:
+            $ref: '#/components/schemas/RiskAlertResponse'
+          type: array
+          title: Alerts
+      type: object
+      required:
+      - entity_id
+      - name
+      - suspicion_score
+      - signal_types
+      - contract_count
+      - contract_value
+      - buyer_count
+      - sanction_count
+      - official_officer_count
+      - official_role_count
+      - low_competition_bid_count
+      - low_competition_bid_value
+      - direct_invitation_bid_count
+      - funding_overlap_event_count
+      - funding_overlap_total
+      - capacity_mismatch_contract_count
+      - capacity_mismatch_contract_value
+      - capacity_mismatch_revenue_ratio
+      - capacity_mismatch_asset_ratio
+      - execution_gap_contract_count
+      - execution_gap_invoice_total
+      - commitment_gap_contract_count
+      - commitment_gap_total
+      - suspension_contract_count
+      - suspension_event_count
+      - sanctioned_still_receiving_contract_count
+      - sanctioned_still_receiving_total
+      - split_contract_group_count
+      - split_contract_total
+      - archive_contract_count
+      - archive_document_total
+      - archive_supervision_contract_count
+      - archive_supervision_document_total
+      - archive_payment_contract_count
+      - archive_payment_document_total
+      - archive_assignment_contract_count
+      - archive_assignment_document_total
+      - official_names
+      - alerts
+      title: PrioritizedCompanyResponse
+    PrioritizedPeopleResponse:
+      properties:
+        people:
+          items:
+            $ref: '#/components/schemas/PrioritizedPersonResponse'
+          type: array
+          title: People
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - people
+      - total
+      title: PrioritizedPeopleResponse
+    PrioritizedPersonResponse:
+      properties:
+        entity_id:
+          type: string
+          title: Entity Id
+        name:
+          type: string
+          title: Name
+        document_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Document Id
+        case_person_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Case Person Id
+        suspicion_score:
+          type: integer
+          title: Suspicion Score
+        signal_types:
+          type: integer
+          title: Signal Types
+        office_count:
+          type: integer
+          title: Office Count
+        donation_count:
+          type: integer
+          title: Donation Count
+        donation_value:
+          type: number
+          title: Donation Value
+        candidacy_count:
+          type: integer
+          title: Candidacy Count
+        asset_count:
+          type: integer
+          title: Asset Count
+        asset_value:
+          type: number
+          title: Asset Value
+        finance_count:
+          type: integer
+          title: Finance Count
+        finance_value:
+          type: number
+          title: Finance Value
+        supplier_contract_count:
+          type: integer
+          title: Supplier Contract Count
+        supplier_contract_value:
+          type: number
+          title: Supplier Contract Value
+        person_sanction_count:
+          type: integer
+          title: Person Sanction Count
+        disciplinary_sanction_count:
+          type: integer
+          title: Disciplinary Sanction Count
+        fiscal_responsibility_count:
+          type: integer
+          title: Fiscal Responsibility Count
+        conflict_disclosure_count:
+          type: integer
+          title: Conflict Disclosure Count
+        disclosure_reference_count:
+          type: integer
+          title: Disclosure Reference Count
+        corporate_activity_disclosure_count:
+          type: integer
+          title: Corporate Activity Disclosure Count
+        donor_vendor_loop_count:
+          type: integer
+          title: Donor Vendor Loop Count
+        payment_supervision_count:
+          type: integer
+          title: Payment Supervision Count
+        payment_supervision_company_count:
+          type: integer
+          title: Payment Supervision Company Count
+        payment_supervision_risk_contract_count:
+          type: integer
+          title: Payment Supervision Risk Contract Count
+        payment_supervision_discrepancy_contract_count:
+          type: integer
+          title: Payment Supervision Discrepancy Contract Count
+        payment_supervision_suspension_contract_count:
+          type: integer
+          title: Payment Supervision Suspension Contract Count
+        payment_supervision_pending_contract_count:
+          type: integer
+          title: Payment Supervision Pending Contract Count
+        payment_supervision_contract_value:
+          type: number
+          title: Payment Supervision Contract Value
+        payment_supervision_archive_contract_count:
+          type: integer
+          title: Payment Supervision Archive Contract Count
+        archive_document_total:
+          type: integer
+          title: Archive Document Total
+        archive_supervision_document_total:
+          type: integer
+          title: Archive Supervision Document Total
+        archive_payment_document_total:
+          type: integer
+          title: Archive Payment Document Total
+        archive_assignment_document_total:
+          type: integer
+          title: Archive Assignment Document Total
+        official_case_bulletin_count:
+          type: integer
+          title: Official Case Bulletin Count
+        official_case_bulletin_titles:
+          items:
+            type: string
+          type: array
+          title: Official Case Bulletin Titles
+        offices:
+          items:
+            type: string
+          type: array
+          title: Offices
+        alerts:
+          items:
+            $ref: '#/components/schemas/RiskAlertResponse'
+          type: array
+          title: Alerts
+      type: object
+      required:
+      - entity_id
+      - name
+      - suspicion_score
+      - signal_types
+      - office_count
+      - donation_count
+      - donation_value
+      - candidacy_count
+      - asset_count
+      - asset_value
+      - finance_count
+      - finance_value
+      - supplier_contract_count
+      - supplier_contract_value
+      - person_sanction_count
+      - disciplinary_sanction_count
+      - fiscal_responsibility_count
+      - conflict_disclosure_count
+      - disclosure_reference_count
+      - corporate_activity_disclosure_count
+      - donor_vendor_loop_count
+      - payment_supervision_count
+      - payment_supervision_company_count
+      - payment_supervision_risk_contract_count
+      - payment_supervision_discrepancy_contract_count
+      - payment_supervision_suspension_contract_count
+      - payment_supervision_pending_contract_count
+      - payment_supervision_contract_value
+      - payment_supervision_archive_contract_count
+      - archive_document_total
+      - archive_supervision_document_total
+      - archive_payment_document_total
+      - archive_assignment_document_total
+      - official_case_bulletin_count
+      - official_case_bulletin_titles
+      - offices
+      - alerts
+      title: PrioritizedPersonResponse
+    PrioritizedTerritoriesResponse:
+      properties:
+        territories:
+          items:
+            $ref: '#/components/schemas/PrioritizedTerritoryResponse'
+          type: array
+          title: Territories
+        total:
+          type: integer
+          title: Total
+      type: object
+      required:
+      - territories
+      - total
+      title: PrioritizedTerritoriesResponse
+    PrioritizedTerritoryResponse:
+      properties:
+        territory_id:
+          type: string
+          title: Territory Id
+        territory_name:
+          type: string
+          title: Territory Name
+        department:
+          type: string
+          title: Department
+        municipality:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Municipality
+        suspicion_score:
+          type: integer
+          title: Suspicion Score
+        signal_types:
+          type: integer
+          title: Signal Types
+        contract_count:
+          type: integer
+          title: Contract Count
+        contract_value:
+          type: number
+          title: Contract Value
+        buyer_count:
+          type: integer
+          title: Buyer Count
+        supplier_count:
+          type: integer
+          title: Supplier Count
+        top_supplier_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Top Supplier Name
+        top_supplier_share:
+          type: number
+          title: Top Supplier Share
+        low_competition_contract_count:
+          type: integer
+          title: Low Competition Contract Count
+        direct_invitation_contract_count:
+          type: integer
+          title: Direct Invitation Contract Count
+        sanctioned_supplier_contract_count:
+          type: integer
+          title: Sanctioned Supplier Contract Count
+        sanctioned_supplier_value:
+          type: number
+          title: Sanctioned Supplier Value
+        official_overlap_contract_count:
+          type: integer
+          title: Official Overlap Contract Count
+        capacity_mismatch_supplier_count:
+          type: integer
+          title: Capacity Mismatch Supplier Count
+        discrepancy_contract_count:
+          type: integer
+          title: Discrepancy Contract Count
+        discrepancy_value:
+          type: number
+          title: Discrepancy Value
+        alerts:
+          items:
+            $ref: '#/components/schemas/RiskAlertResponse'
+          type: array
+          title: Alerts
+      type: object
+      required:
+      - territory_id
+      - territory_name
+      - department
+      - suspicion_score
+      - signal_types
+      - contract_count
+      - contract_value
+      - buyer_count
+      - supplier_count
+      - top_supplier_share
+      - low_competition_contract_count
+      - direct_invitation_contract_count
+      - sanctioned_supplier_contract_count
+      - sanctioned_supplier_value
+      - official_overlap_contract_count
+      - capacity_mismatch_supplier_count
+      - discrepancy_contract_count
+      - discrepancy_value
+      - alerts
+      title: PrioritizedTerritoryResponse
+    RiskAlertResponse:
+      properties:
+        alert_type:
+          type: string
+          title: Alert Type
+        finding_class:
+          type: string
+          title: Finding Class
+        severity_score:
+          type: integer
+          title: Severity Score
+        confidence_tier:
+          type: string
+          title: Confidence Tier
+        reason_text:
+          type: string
+          title: Reason Text
+        evidence_refs:
+          items:
+            type: string
+          type: array
+          title: Evidence Refs
+        source_list:
+          items:
+            type: string
+          type: array
+          title: Source List
+        human_review_needed:
+          type: boolean
+          title: Human Review Needed
+          default: true
+        what_is_unproven:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: What Is Unproven
+        next_step:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Step
+      type: object
+      required:
+      - alert_type
+      - finding_class
+      - severity_score
+      - confidence_tier
+      - reason_text
+      - evidence_refs
+      - source_list
+      title: RiskAlertResponse
+    SearchResponse:
+      properties:
+        results:
+          items:
+            $ref: '#/components/schemas/SearchResult'
+          type: array
+          title: Results
+        total:
+          type: integer
+          title: Total
+        page:
+          type: integer
+          title: Page
+        size:
+          type: integer
+          title: Size
+      type: object
+      required:
+      - results
+      - total
+      - page
+      - size
+      title: SearchResponse
+    SearchResult:
+      properties:
+        id:
+          type: string
+          title: Id
+        type:
+          type: string
+          title: Type
+        name:
+          type: string
+          title: Name
+        score:
+          type: number
+          title: Score
+        document:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Document
+        properties:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: 'null'
+          type: object
+          title: Properties
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          type: array
+          title: Sources
+        exposure_tier:
+          type: string
+          title: Exposure Tier
+          default: public_safe
+      type: object
+      required:
+      - id
+      - type
+      - name
+      - score
+      - properties
+      - sources
+      title: SearchResult
+    SignalDefinition:
+      properties:
+        id:
+          type: string
+          title: Id
+        version:
+          type: integer
+          title: Version
+          default: 1
+        title:
+          type: string
+          title: Title
+        description:
+          type: string
+          title: Description
+        category:
+          type: string
+          title: Category
+        severity:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - critical
+          title: Severity
+        entity_types:
+          items:
+            type: string
+          type: array
+          title: Entity Types
+        public_safe:
+          type: boolean
+          title: Public Safe
+          default: false
+        reviewer_only:
+          type: boolean
+          title: Reviewer Only
+          default: false
+        engine:
+          anyOf:
+          - type: string
+            enum:
+            - pattern
+            - cypher
+            - duckdb
+          - type: 'null'
+          title: Engine
+        sources:
+          items:
+            type: string
+          type: array
+          title: Sources
+        public_presentation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Public Presentation
+        review_only_expansion:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Review Only Expansion
+        requires_identity:
+          items:
+            type: string
+          type: array
+          title: Requires Identity
+        sources_required:
+          items:
+            type: string
+          type: array
+          title: Sources Required
+        scope_type:
+          type: string
+          title: Scope Type
+          default: entity
+        dedup_fields:
+          items:
+            type: string
+          type: array
+          title: Dedup Fields
+        runner:
+          $ref: '#/components/schemas/SignalRunner'
+        public_policy:
+          $ref: '#/components/schemas/SignalPublicPolicy'
+        evidence_mapping:
+          $ref: '#/components/schemas/SignalEvidenceMapping'
+        pattern_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pattern Id
+        dedup_key_template:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Dedup Key Template
+      type: object
+      required:
+      - id
+      - title
+      - description
+      - category
+      - severity
+      - runner
+      title: SignalDefinition
+    SignalDetailResponse:
+      properties:
+        definition:
+          $ref: '#/components/schemas/SignalDefinition'
+        sample_hits:
+          items:
+            $ref: '#/components/schemas/SignalHitResponse'
+          type: array
+          title: Sample Hits
+      type: object
+      required:
+      - definition
+      title: SignalDetailResponse
+    SignalEvidenceMapping:
+      properties:
+        item_type:
+          type: string
+          title: Item Type
+          default: reference
+        label_field:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Label Field
+        node_ref_field:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Node Ref Field
+        summary_field:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Summary Field
+      type: object
+      title: SignalEvidenceMapping
+    SignalHitResponse:
+      properties:
+        hit_id:
+          type: string
+          title: Hit Id
+        run_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Run Id
+        signal_id:
+          type: string
+          title: Signal Id
+        signal_version:
+          type: integer
+          title: Signal Version
+        title:
+          type: string
+          title: Title
+        description:
+          type: string
+          title: Description
+        category:
+          type: string
+          title: Category
+        severity:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - critical
+          title: Severity
+        public_safe:
+          type: boolean
+          title: Public Safe
+        reviewer_only:
+          type: boolean
+          title: Reviewer Only
+        entity_id:
+          type: string
+          title: Entity Id
+        entity_key:
+          type: string
+          title: Entity Key
+        entity_label:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Entity Label
+        scope_key:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Scope Key
+        scope_type:
+          type: string
+          title: Scope Type
+          default: entity
+        dedup_key:
+          type: string
+          title: Dedup Key
+        score:
+          type: number
+          title: Score
+        identity_confidence:
+          type: number
+          title: Identity Confidence
+        identity_match_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Identity Match Type
+        identity_quality:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Identity Quality
+        evidence_count:
+          type: integer
+          title: Evidence Count
+        evidence_bundle_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Evidence Bundle Id
+        evidence_refs:
+          items:
+            type: string
+          type: array
+          title: Evidence Refs
+        data:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - items:
+                type: string
+              type: array
+            - type: 'null'
+          type: object
+          title: Data
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          type: array
+          title: Sources
+        evidence_items:
+          items:
+            $ref: '#/components/schemas/EvidenceItemResponse'
+          type: array
+          title: Evidence Items
+        created_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Created At
+        first_seen_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: First Seen At
+        last_seen_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Seen At
+      type: object
+      required:
+      - hit_id
+      - signal_id
+      - signal_version
+      - title
+      - description
+      - category
+      - severity
+      - public_safe
+      - reviewer_only
+      - entity_id
+      - entity_key
+      - dedup_key
+      - score
+      - identity_confidence
+      - evidence_count
+      title: SignalHitResponse
+    SignalListItem:
+      properties:
+        id:
+          type: string
+          title: Id
+        version:
+          type: integer
+          title: Version
+          default: 1
+        title:
+          type: string
+          title: Title
+        description:
+          type: string
+          title: Description
+        category:
+          type: string
+          title: Category
+        severity:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - critical
+          title: Severity
+        entity_types:
+          items:
+            type: string
+          type: array
+          title: Entity Types
+        public_safe:
+          type: boolean
+          title: Public Safe
+          default: false
+        reviewer_only:
+          type: boolean
+          title: Reviewer Only
+          default: false
+        engine:
+          anyOf:
+          - type: string
+            enum:
+            - pattern
+            - cypher
+            - duckdb
+          - type: 'null'
+          title: Engine
+        sources:
+          items:
+            type: string
+          type: array
+          title: Sources
+        public_presentation:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Public Presentation
+        review_only_expansion:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Review Only Expansion
+        requires_identity:
+          items:
+            type: string
+          type: array
+          title: Requires Identity
+        sources_required:
+          items:
+            type: string
+          type: array
+          title: Sources Required
+        scope_type:
+          type: string
+          title: Scope Type
+          default: entity
+        dedup_fields:
+          items:
+            type: string
+          type: array
+          title: Dedup Fields
+        runner:
+          $ref: '#/components/schemas/SignalRunner'
+        public_policy:
+          $ref: '#/components/schemas/SignalPublicPolicy'
+        evidence_mapping:
+          $ref: '#/components/schemas/SignalEvidenceMapping'
+        pattern_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Pattern Id
+        dedup_key_template:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Dedup Key Template
+        hit_count:
+          type: integer
+          title: Hit Count
+          default: 0
+        last_seen_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Seen At
+      type: object
+      required:
+      - id
+      - title
+      - description
+      - category
+      - severity
+      - runner
+      title: SignalListItem
+    SignalListResponse:
+      properties:
+        registry_version:
+          type: integer
+          title: Registry Version
+        last_run_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Run Id
+        last_refreshed_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Refreshed At
+        signals:
+          items:
+            $ref: '#/components/schemas/SignalListItem'
+          type: array
+          title: Signals
+      type: object
+      required:
+      - registry_version
+      - signals
+      title: SignalListResponse
+    SignalPublicPolicy:
+      properties:
+        allow_public:
+          type: boolean
+          title: Allow Public
+          default: false
+        require_public_evidence:
+          type: boolean
+          title: Require Public Evidence
+          default: true
+        require_exact_identity:
+          type: boolean
+          title: Require Exact Identity
+          default: true
+        allowed_identity_match_types:
+          items:
+            type: string
+          type: array
+          title: Allowed Identity Match Types
+        allow_person_entities:
+          type: boolean
+          title: Allow Person Entities
+          default: false
+      type: object
+      title: SignalPublicPolicy
+    SignalRunner:
+      properties:
+        kind:
+          type: string
+          enum:
+          - pattern
+          - cypher
+          - duckdb
+          title: Kind
+        ref:
+          type: string
+          title: Ref
+      type: object
+      required:
+      - kind
+      - ref
+      title: SignalRunner
+    SourceAttribution:
+      properties:
+        database:
+          type: string
+          title: Database
+        record_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Record Id
+        extracted_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Extracted At
+      type: object
+      required:
+      - database
+      title: SourceAttribution
+    Tag:
+      properties:
+        id:
+          type: string
+          title: Id
+        investigation_id:
+          type: string
+          title: Investigation Id
+        name:
+          type: string
+          title: Name
+        color:
+          type: string
+          title: Color
+      type: object
+      required:
+      - id
+      - investigation_id
+      - name
+      - color
+      title: Tag
+    TagCreate:
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          title: Name
+        color:
+          type: string
+          maxLength: 7
+          title: Color
+          default: '#E07A2F'
+      type: object
+      required:
+      - name
+      title: TagCreate
+    TimelineEvent:
+      properties:
+        id:
+          type: string
+          title: Id
+        date:
+          type: string
+          title: Date
+        label:
+          type: string
+          title: Label
+        entity_type:
+          type: string
+          title: Entity Type
+        properties:
+          additionalProperties: true
+          type: object
+          title: Properties
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          type: array
+          title: Sources
+      type: object
+      required:
+      - id
+      - date
+      - label
+      - entity_type
+      - properties
+      - sources
+      title: TimelineEvent
+    TimelineResponse:
+      properties:
+        entity_id:
+          type: string
+          title: Entity Id
+        events:
+          items:
+            $ref: '#/components/schemas/TimelineEvent'
+          type: array
+          title: Events
+        total:
+          type: integer
+          title: Total
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+      type: object
+      required:
+      - entity_id
+      - events
+      - total
+      - next_cursor
+      title: TimelineResponse
+    TokenResponse:
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+        token_type:
+          type: string
+          title: Token Type
+          default: bearer
+      type: object
+      required:
+      - access_token
+      title: TokenResponse
+    UserCreate:
+      properties:
+        email:
+          type: string
+          maxLength: 254
+          title: Email
+        password:
+          type: string
+          maxLength: 128
+          minLength: 8
+          title: Password
+        invite_code:
+          type: string
+          title: Invite Code
+          default: ''
+      type: object
+      required:
+      - email
+      - password
+      title: UserCreate
+    UserResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        email:
+          type: string
+          title: Email
+        created_at:
+          type: string
+          title: Created At
+        role:
+          type: string
+          enum:
+          - viewer
+          - reviewer
+          - admin
+          title: Role
+          default: reviewer
+      type: object
+      required:
+      - id
+      - email
+      - created_at
+      title: UserResponse
+    ValidationCaseResult:
+      properties:
+        case_id:
+          type: string
+          title: Case Id
+        title:
+          type: string
+          title: Title
+        category:
+          type: string
+          title: Category
+        entity_type:
+          type: string
+          title: Entity Type
+        entity_ref:
+          type: string
+          title: Entity Ref
+        entity_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Entity Id
+        entity_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Entity Name
+        status:
+          type: string
+          title: Status
+        matched:
+          type: boolean
+          title: Matched
+        expected_signals:
+          items:
+            type: string
+          type: array
+          title: Expected Signals
+        observed_signals:
+          items:
+            type: string
+          type: array
+          title: Observed Signals
+        matched_signals:
+          items:
+            type: string
+          type: array
+          title: Matched Signals
+        summary:
+          type: string
+          title: Summary
+        metrics:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - items:
+                type: string
+              type: array
+            - type: 'null'
+          type: object
+          title: Metrics
+        public_sources:
+          items:
+            type: string
+          type: array
+          title: Public Sources
+      type: object
+      required:
+      - case_id
+      - title
+      - category
+      - entity_type
+      - entity_ref
+      - status
+      - matched
+      - expected_signals
+      - observed_signals
+      - matched_signals
+      - summary
+      - metrics
+      - public_sources
+      title: ValidationCaseResult
+    ValidationCasesResponse:
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/ValidationCaseResult'
+          type: array
+          title: Cases
+        total:
+          type: integer
+          title: Total
+        matched:
+          type: integer
+          title: Matched
+      type: object
+      required:
+      - cases
+      - total
+      - matched
+      title: ValidationCasesResponse
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: /api/v1/auth/login

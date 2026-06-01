@@ -1497,14 +1497,14 @@ citizen-facing chat agent backed by `POST /agent/query` (per
 ### 12.2 Implementation steps
 
 1. **API contract refresh.** Generate `docs/contracts/api.openapi.yaml`
-   from FastAPI's `/openapi.json`. Run `npm run api:contract-test`
-   (Schemathesis) — must pass.
+   from FastAPI's `/openapi.json`. Run `npm run api:contract-test` —
+   must pass.
 2. **Routes added in `api/src/coacc/routers/`:**
    - `GET /cases?limit&offset&min_score` → paginated list (joins
      anomaly_scores + narratives).
    - `GET /cases/{case_id}` → detail (subgraph + narrative + evidence).
-   - `POST /agent/query` → `{question}` → `{answer, citations[],
-     subgraphs[]}`.
+   - `POST /agent/query` and `POST /api/v1/agent/query` → `{question}` →
+     `{answer, citations[], subgraphs[]}`.
 3. **Frontend pages:**
    - `/casos` — list view with score, badge, last-update.
    - `/casos/<id>` — detail with subgraph viz (reuse existing graph
@@ -1904,6 +1904,10 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   through `generate_narrative` without live LLM calls, and test the verifier
   against missing sections, entity hallucination, fake datasets, unresolved
   citations, word-count violations, and forbidden culpability language.
+- **2026-06-01** — Phase 15 backend contract now includes the lake-backed
+  citizen-agent endpoint at `/api/v1/agent/query`, with `/agent/query` kept as
+  a legacy alias. The endpoint answers from promoted anomaly/case data and
+  returns citations plus a small case subgraph without a live LLM dependency.
 
 (Append new decisions as they're made. One line per decision.)
 

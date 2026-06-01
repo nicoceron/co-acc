@@ -39,6 +39,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
   deterministic no-offers fallback.
 - Added API readers for promoted anomaly score parquet so lake-backed cases
   and entity anomaly-score drilldowns work without Neo4j.
+- Added a lake-backed citizen agent endpoint at `/api/v1/agent/query`, plus
+  the legacy `/agent/query` alias, returning deterministic answers,
+  citations, and subgraphs from promoted cases.
 - Added the first Phase 14 narrator foundation: lake-backed case subgraph
   extraction, deterministic prompts, optional LLM provider calls, verifier,
   templated fallback, CLI, and docs.

@@ -654,6 +654,47 @@ export interface EntityAnomalyScoresResponse {
   scores: CaseAnomalyScore[];
 }
 
+export interface AgentQueryRequest {
+  question: string;
+  case_id?: string | null;
+}
+
+export interface AgentCitation {
+  dataset_id?: string | null;
+  source_id?: string | null;
+  row_key?: string | null;
+  url?: string | null;
+  label?: string | null;
+  case_id?: string | null;
+  evidence_item_id?: string | null;
+}
+
+export interface AgentSubgraphNode {
+  id: string;
+  label: string;
+  type: string;
+}
+
+export interface AgentSubgraphEdge {
+  source: string;
+  target: string;
+  label: string;
+}
+
+export interface AgentSubgraph {
+  case_id: string;
+  title: string;
+  nodes: AgentSubgraphNode[];
+  edges: AgentSubgraphEdge[];
+}
+
+export interface AgentQueryResponse {
+  answer: string;
+  citations: AgentCitation[];
+  subgraphs: AgentSubgraph[];
+  related_case_ids: string[];
+}
+
 export interface InvestigationListResponse {
   investigations: Investigation[];
   total: number;
@@ -703,6 +744,13 @@ export function getEntityAnomalyScores(
   return apiFetch<EntityAnomalyScoresResponse>(
     `/api/v1/entity/${encodeURIComponent(entityId)}/anomaly-scores?${params}`,
   );
+}
+
+export function queryAgent(request: AgentQueryRequest): Promise<AgentQueryResponse> {
+  return apiFetch<AgentQueryResponse>("/api/v1/agent/query", {
+    method: "POST",
+    body: JSON.stringify(request),
+  });
 }
 
 export function refreshCase(id: string, lang = "es"): Promise<CaseResponse> {

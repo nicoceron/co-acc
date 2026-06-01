@@ -119,13 +119,12 @@ These two invariants together give us reproducibility: rerun ingest from an empt
 - **Supervised anomaly top-up and more curated tables** — typed dimensions,
   signal features, and the first Isolation Forest anomaly score run exist.
   The API can read promoted score parquet, but Phase 13 still needs the
-  supervised top-up, offer-derived `single_bidder`, and more demo-specific
-  signal coverage.
-- **Narrator completion** — the Phase 14 backend foundation can extract a
+  supervised top-up and more demo-specific signal coverage.
+- **Narrator/frontend completion** — the Phase 14 backend foundation can extract a
   contract case subgraph, build prompts, call an optional provider, verify the
   Markdown, write fallback narratives, and expose precomputed Markdown through
-  case detail responses. Recorded LLM fixtures and frontend display are still
-  open.
+  case detail responses. Recorded LLM fixtures are covered; frontend display is
+  still open.
 
 ---
 

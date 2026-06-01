@@ -15,6 +15,7 @@ from coacc.dependencies import close_driver, get_optional_session, init_driver
 from coacc.middleware.rate_limit import limiter
 from coacc.middleware.security_headers import SecurityHeadersMiddleware
 from coacc.routers import (
+    agent,
     auth,
     baseline,
     cases,
@@ -106,6 +107,7 @@ app.include_router(baseline.router)
 app.include_router(investigation.router)
 app.include_router(investigation.shared_router)
 app.include_router(cases.router)
+app.include_router(agent.router)
 
 
 @app.get("/health")
