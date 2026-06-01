@@ -1123,11 +1123,12 @@ are sufficient for the demo.
 
 ### 8.4 DoD
 
-- [ ] Graph projection can be skipped without breaking signal APIs.
+- [x] Graph projection can be skipped without breaking signal APIs. Verified
+      by `make api-smoke` and the wider `make backend-ready` gate.
 - [ ] `coacc-etl graph load --scope finals` runs within the local memory
       budget.
 - [ ] `coacc-etl graph verify` reports ≤0.1% drift from parquet.
-- [ ] `docs/runbooks/graph_loader.md` clearly states this is a derived cache,
+- [x] `docs/runbooks/graph_loader.md` clearly states this is a derived cache,
       not a source of truth.
 
 ---
@@ -1979,6 +1980,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
 - **2026-06-01** — Dev compose is now friendlier to this device's existing
   processes: API, frontend, and Neo4j host ports are env-configurable, and the
   frontend defaults to same-origin `/api` proxying unless `VITE_API_URL` is set.
+- **2026-06-01** — Local backend/runtime readiness is now a single gate:
+  `make backend-ready` validates compose config, curated parquet contracts,
+  lake reality, and the Neo4j-off API smoke. Phase 11.5 graph projection stays
+  optional; `docs/runbooks/graph_loader.md` documents Neo4j as a derived cache,
+  not a source of truth.
 
 (Append new decisions as they're made. One line per decision.)
 

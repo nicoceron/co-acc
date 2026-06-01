@@ -21,7 +21,7 @@ LAKE_REALITY_ARGS = $(if $(DATASET),--dataset $(DATASET),) \
 	clean-data \
 	lint type-check format \
 	test test-api test-etl test-frontend check \
-	lake-init lake-reality lake-compact curated-contracts api-smoke \
+	lake-init lake-reality lake-compact curated-contracts api-smoke backend-ready \
 	qualify ingest ingest-all ingest-phase7-smoke ingest-phase7-full curate \
 	materialize-deps materialize-all
 
@@ -103,6 +103,13 @@ curated-contracts:
 
 api-smoke:
 	python3 scripts/local_backend_smoke.py --lake-root "$(LAKE_ROOT)"
+
+backend-ready: lake-init
+	docker compose config >/dev/null
+	docker compose --profile etl --profile ops config >/dev/null
+	$(MAKE) curated-contracts
+	$(MAKE) lake-reality
+	$(MAKE) api-smoke
 
 # Qualify (re-)builds the signed catalog. Pass extra flags via QUALIFY_ARGS.
 qualify:

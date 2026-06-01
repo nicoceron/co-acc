@@ -100,9 +100,14 @@ make ingest DATASET=<id> [FULL_REFRESH=1]
 make ingest-all [FULL_REFRESH=1] [CONTINUE_ON_ERROR=1]
 make qualify QUALIFY_ARGS="..."
 make lake-init lake-reality lake-compact
+make backend-ready
 make test  test-etl  test-api  test-frontend
 make lint  type-check  format
 ```
+
+`make backend-ready` is the local non-frontend readiness gate. It validates
+compose configuration, curated parquet contracts, lake reality, and the
+lake-backed API smoke path with Neo4j disabled.
 
 ---
 

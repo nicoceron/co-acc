@@ -60,6 +60,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Added `make api-smoke` and `scripts/local_backend_smoke.py` to start the API
   with Neo4j disabled and verify lake-backed health, signals, cases, and
   citizen-agent routes against the local lake.
+- Added `make backend-ready` as the local non-frontend readiness gate for
+  compose config, curated contracts, lake reality, and API smoke checks.
+- Added the graph loader runbook documenting Neo4j as an optional derived cache
+  while graph load/verify commands remain unshipped.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.

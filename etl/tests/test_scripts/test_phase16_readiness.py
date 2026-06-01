@@ -91,3 +91,15 @@ def test_dev_compose_host_ports_are_env_configurable() -> None:
         "${NEO4J_HTTP_PORT:-7474}:7474",
         "${NEO4J_BOLT_PORT:-7687}:7687",
     ]
+
+
+def test_makefile_has_local_backend_readiness_gate() -> None:
+    repo = Path(__file__).resolve().parents[3]
+    makefile = (repo / "Makefile").read_text(encoding="utf-8")
+
+    assert "backend-ready: lake-init" in makefile
+    assert "docker compose config >/dev/null" in makefile
+    assert "docker compose --profile etl --profile ops config >/dev/null" in makefile
+    assert "$(MAKE) curated-contracts" in makefile
+    assert "$(MAKE) lake-reality" in makefile
+    assert "$(MAKE) api-smoke" in makefile

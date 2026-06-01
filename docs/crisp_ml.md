@@ -72,6 +72,7 @@ Operational checks are captured in the [post-refactor plan](cleanup/post_refacto
 [lake reality runbook](runbooks/lake_reality.md), and the repository scripts:
 
 - `make check` for lint, typing, API tests, ETL tests, and frontend tests.
+- `make backend-ready` for the local non-frontend runtime gate.
 - `make api-smoke` for local Uvicorn startup and lake-backed API route smoke.
 - `make lake-reality` for local lake health and curated-table drift.
 - `make curated-contracts` for shipped curated parquet schema/non-null contracts.

@@ -38,7 +38,14 @@ Never commit `.env`.
 | `COACC_DATASET_CATALOG_DIR` | auto-discovered | Optional API override for mounted `docs/datasets/` catalog CSVs. |
 | `COACC_DATASET_CONTRACT_DIR` | auto-discovered | Optional API override for mounted `etl/datasets/` YAML contracts. |
 
-Run the local API smoke before demo work or after backend changes:
+Run the local backend readiness gate before demo work or after backend/runtime
+changes:
+
+```bash
+make backend-ready
+```
+
+For a narrower API-only smoke:
 
 ```bash
 make api-smoke
