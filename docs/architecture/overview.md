@@ -107,9 +107,10 @@ These two invariants together give us reproducibility: rerun ingest from an empt
 
 - **Graph expansion and full legacy pattern parity** — the source of truth is
   now lake/curated parquet; signal lists, case dossiers, entity lookup/search,
-  entity signal drilldowns, and shipped signal-backed pattern routes can run
-  without Neo4j. Graph exploration and Cypher-only legacy pattern parity are
-  still Phase 11/11.5 compatibility work.
+  entity signal drilldowns, anomaly score drilldowns, and shipped
+  signal-backed pattern routes can run without Neo4j. Graph exploration and
+  Cypher-only legacy pattern parity are still Phase 11/11.5 compatibility
+  work.
 - **Optional graph projection** — Neo4j is useful for exploration, but not
   required for corruption-pattern detection correctness.
 - **More custom non-Socrata adapters** — PACO has landed; RUES,
@@ -117,8 +118,9 @@ These two invariants together give us reproducibility: rerun ingest from an empt
   `_KNOWN_DEFERRED_SOURCES` (`etl/tests/test_signal_source_alignment.py`).
 - **Supervised anomaly top-up and more curated tables** — typed dimensions,
   signal features, and the first Isolation Forest anomaly score run exist.
-  Phase 13 still needs the supervised top-up, offer-derived `single_bidder`,
-  and more demo-specific signal coverage.
+  The API can read promoted score parquet, but Phase 13 still needs the
+  supervised top-up, offer-derived `single_bidder`, and more demo-specific
+  signal coverage.
 
 ---
 

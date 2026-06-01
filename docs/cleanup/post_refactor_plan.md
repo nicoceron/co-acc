@@ -1873,6 +1873,12 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   top-up, offer-derived `single_bidder`, and held-out precision target remain
   open Phase 13 work. Local smoke `phase13-local-smoke-20260601` scored
   5,442,058 contracts with `precision_at_100=0.03`.
+- **2026-06-01** — Phase 13 API exposure now reads promoted anomaly score
+  parquet through DuckDB. `/api/v1/cases/` can list top scored contract cases
+  without Neo4j, `/api/v1/cases/{case_id}` returns the nested
+  `anomaly_score`, and `/api/v1/entity/{entity_id}/anomaly-scores` exposes
+  entity-specific scores for frontend integration. This serves the baseline
+  score but does not close the supervised precision target.
 
 (Append new decisions as they're made. One line per decision.)
 

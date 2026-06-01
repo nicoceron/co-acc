@@ -16,10 +16,18 @@ from coacc.models.case import (
 from coacc.models.entity import SourceAttribution
 from coacc.models.signal import EntitySignalsResponse, EvidenceItemResponse, SignalHitResponse
 from coacc.services import lakehouse_query
+from coacc.services.lakehouse_anomaly_service import (
+    anomaly_case_id,
+    anomaly_score_for_contract,
+    contract_id_from_anomaly_case_id,
+    top_anomaly_scores,
+)
 from coacc.services.signal_registry import get_signal_definition, resolve_signal_id
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from coacc.models.anomaly import CaseAnomalyScore
 
 logger = logging.getLogger(__name__)
 
@@ -451,10 +459,34 @@ def materialized_entity_signals(
 
 
 def list_lake_cases(page: int = 1, size: int = 20) -> CaseListResponse:
+    offset = (page - 1) * size
+    anomaly_scores, anomaly_total = top_anomaly_scores(limit=size, offset=offset)
+    if anomaly_total > 0:
+        run = latest_signal_run()
+        signal_rows_by_contract: dict[str, dict[str, Any]] = {}
+        if run is not None and _run_has_parquet(run):
+            signal_rows_by_contract = _public_signal_rows_for_contracts(
+                run,
+                [score.contract_id for score in anomaly_scores],
+            )
+        cases = [
+            _case_summary_from_row(
+                signal_rows_by_contract[score.contract_id],
+                run,
+                anomaly_score=score,
+            )
+            if run is not None and score.contract_id in signal_rows_by_contract
+            else _anomaly_case_summary(score)
+            for score in anomaly_scores
+        ]
+        return CaseListResponse(
+            cases=cases,
+            total=anomaly_total,
+        )
+
     run = latest_signal_run()
     if run is None or not _run_has_parquet(run):
         return CaseListResponse(cases=[], total=0)
-    offset = (page - 1) * size
     con = lakehouse_query.connect(read_only=True)
     try:
         total_row = con.execute(
@@ -472,10 +504,98 @@ def list_lake_cases(page: int = 1, size: int = 20) -> CaseListResponse:
     return CaseListResponse(cases=cases, total=int(total_row[0]) if total_row else 0)
 
 
-def _case_summary_from_row(row: dict[str, Any], run: LakeSignalRun) -> CaseSummary:
+def _public_signal_rows_for_contracts(
+    run: LakeSignalRun,
+    contract_ids: list[str],
+) -> dict[str, dict[str, Any]]:
+    unique_contract_ids = list(
+        dict.fromkeys(contract_id for contract_id in contract_ids if contract_id)
+    )
+    if not unique_contract_ids:
+        return {}
+    con = lakehouse_query.connect(read_only=True)
+    try:
+        cursor = con.execute(
+            f"""
+            WITH hits AS ({_deduped_hits_sql(run)}),
+            matched AS (
+                SELECT
+                    *,
+                    CASE
+                        WHEN scope_key IN (SELECT unnest(?)) THEN scope_key
+                        ELSE split_part(coalesce(scope_key, ''), ':', 1)
+                    END AS __contract_id
+                FROM hits
+                WHERE public_safe = true
+                    AND reviewer_only = false
+                    AND (
+                        scope_key IN (SELECT unnest(?))
+                        OR split_part(coalesce(scope_key, ''), ':', 1)
+                            IN (SELECT unnest(?))
+                    )
+            ),
+            ranked AS (
+                SELECT
+                    *,
+                    row_number() OVER (
+                        PARTITION BY __contract_id
+                        ORDER BY
+                            CASE severity
+                                WHEN 'critical' THEN 4
+                                WHEN 'high' THEN 3
+                                WHEN 'medium' THEN 2
+                                WHEN 'low' THEN 1
+                                ELSE 0
+                            END DESC,
+                            score DESC NULLS LAST,
+                            last_seen_at DESC NULLS LAST,
+                            hit_id
+                    ) AS __contract_rank
+                FROM matched
+            )
+            SELECT *
+            FROM ranked
+            WHERE __contract_rank = 1
+            """,
+            [unique_contract_ids, unique_contract_ids, unique_contract_ids],
+        )
+        columns = [item[0] for item in cursor.description or []]
+        rows = [dict(zip(columns, row, strict=False)) for row in cursor.fetchall()]
+    finally:
+        con.close()
+    return {str(row["__contract_id"]): row for row in rows}
+
+
+def _contract_id_from_scope(scope_key: str | None) -> str | None:
+    if scope_key is None:
+        return None
+    text = scope_key.strip()
+    if not text:
+        return None
+    if ":" in text:
+        text = text.split(":", 1)[0].strip()
+    return text or None
+
+
+def _contract_id_from_signal_row(row: dict[str, Any]) -> str | None:
+    raw_contract_id = row.get("contract_id")
+    if raw_contract_id is not None and str(raw_contract_id).strip():
+        return str(raw_contract_id).strip()
+    return _contract_id_from_scope(str(row["scope_key"]) if row.get("scope_key") else None)
+
+
+def _case_summary_from_row(
+    row: dict[str, Any],
+    run: LakeSignalRun,
+    *,
+    anomaly_score: CaseAnomalyScore | None = None,
+) -> CaseSummary:
     created_at = str(row.get("first_seen_at") or run.finished_at)
     updated_at = str(row.get("last_seen_at") or run.finished_at)
     entity_key = str(row.get("entity_key") or row.get("entity_uid") or "")
+    contract_id = _contract_id_from_signal_row(row)
+    if anomaly_score is None:
+        anomaly_score = anomaly_score_for_contract(contract_id) if contract_id else None
     return CaseSummary(
         id=str(row["hit_id"]),
         title=str(row.get("title") or row.get("signal_id") or "Lake signal case"),
@@ -489,13 +609,85 @@ def _case_summary_from_row(row: dict[str, Any], run: LakeSignalRun) -> CaseSumma
         last_refreshed_at=updated_at,
         last_run_id=str(row.get("run_id") or run.run_id),
         stale=False,
+        anomaly_score=anomaly_score,
+    )
+
+
+def _anomaly_case_summary(score: CaseAnomalyScore) -> CaseSummary:
+    scored_at = score.scored_at or datetime.now(UTC).isoformat()
+    features = ", ".join(score.top_features) if score.top_features else "no dominant features"
+    return CaseSummary(
+        id=anomaly_case_id(score.contract_id),
+        title=f"Anomalous contract {score.contract_id}",
+        description=(
+            f"Model score {score.score:.3f} with {score.score_confidence} confidence; "
+            f"drivers: {features}."
+        ),
+        status="new",
+        created_at=scored_at,
+        updated_at=scored_at,
+        entity_ids=[score.entity_uid] if score.entity_uid else [],
+        signal_count=0,
+        public_signal_count=0,
+        last_refreshed_at=scored_at,
+        last_run_id=score.score_run_id,
+        stale=False,
+        anomaly_score=score,
+    )
+
+
+def _anomaly_case_response(score: CaseAnomalyScore) -> CaseResponse:
+    summary = _anomaly_case_summary(score)
+    bundle_id = f"{summary.id}:evidence"
+    evidence_item = EvidenceItemResponse(
+        item_id=f"{summary.id}:contract",
+        source_id="secop_ii_contracts",
+        record_id=score.contract_id,
+        url=score.process_url,
+        label=score.process_url or score.contract_id,
+        item_type="contract",
+        observed_at=score.scored_at,
+        public_safe=True,
+    )
+    bundle = CaseEvidenceBundle(
+        bundle_id=bundle_id,
+        headline=summary.title,
+        source_list=["secop_ii_contracts"],
+        evidence_items=[evidence_item],
+    )
+    event = CaseEventResponse(
+        id=f"{summary.id}:anomaly_score",
+        type="anomaly_score",
+        label=f"Anomaly score {score.score:.3f}",
+        date=score.scored_at or summary.updated_at,
+        entity_id=score.entity_uid,
+        signal_hit_id=None,
+        evidence_bundle_id=bundle_id,
+        bundle_document_count=1,
+    )
+    return CaseResponse(
+        **summary.model_dump(),
+        signals=[],
+        evidence_bundles=[bundle],
+        events=[event],
     )
 
 
 def get_lake_case(case_id: str) -> CaseResponse | None:
+    anomaly_contract_id = contract_id_from_anomaly_case_id(case_id)
+    if anomaly_contract_id is not None:
+        anomaly_score = anomaly_score_for_contract(anomaly_contract_id)
+        if anomaly_score is None:
+            return None
+        return _anomaly_case_response(anomaly_score)
+
     hit = materialized_hit(case_id, public_only=True)
     if hit is None:
         return None
+    anomaly_contract_id = _contract_id_from_scope(hit.scope_key)
+    anomaly_score = (
+        anomaly_score_for_contract(anomaly_contract_id) if anomaly_contract_id else None
+    )
     evidence_items = hit.evidence_items
     source_list = []
     for item in evidence_items:
@@ -533,6 +725,7 @@ def get_lake_case(case_id: str) -> CaseResponse | None:
         last_refreshed_at=event_date,
         last_run_id=hit.run_id,
         stale=False,
+        anomaly_score=anomaly_score,
         signals=[hit],
         evidence_bundles=[bundle],
         events=[event],

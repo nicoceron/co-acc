@@ -21,6 +21,22 @@ This command:
 - writes `lake/models/anomaly/<run>/metrics.json`
 - promotes the model by updating `lake/models/anomaly/current.json`
 
+## API Consumption
+
+When `lake/models/anomaly/current.json` points at a score run with parquet
+under `lake/curated/anomaly_scores/run_id=<run>/`, the API can serve those
+scores without Neo4j:
+
+```bash
+curl http://localhost:8000/api/v1/cases/
+curl http://localhost:8000/api/v1/entity/company:9001234568/anomaly-scores?limit=25
+```
+
+`/api/v1/cases/` returns top contract anomalies as case summaries with an
+`anomaly_score` object. `/api/v1/cases/{case_id}` returns the same score plus a
+SECOP evidence reference. Lake-backed signal cases also attach a matching
+`anomaly_score` when the signal scope can be resolved to a scored contract id.
+
 Use deterministic run ids for repeatable operator runs:
 
 ```bash

@@ -13,6 +13,7 @@ from coacc.dependencies import (
     get_optional_user_without_database_required,
     get_session,
 )
+from coacc.models.anomaly import EntityAnomalyScoresResponse
 from coacc.models.entity import (
     ConnectionResponse,
     EntityEvidenceTrailResponse,
@@ -30,6 +31,7 @@ from coacc.models.signal import EntitySignalsResponse
 from coacc.models.user import UserResponse
 from coacc.services.entity_types import entity_type_for_label
 from coacc.services.intelligence_provider import IntelligenceProvider
+from coacc.services.lakehouse_anomaly_service import entity_anomaly_scores
 from coacc.services.lakehouse_entity_service import get_lake_entity
 from coacc.services.lakehouse_signal_service import materialized_entity_signals
 from coacc.services.neo4j_service import execute_query, execute_query_single, sanitize_props
@@ -263,6 +265,31 @@ async def get_entity_signals(
             "total": len([signal for signal in response.signals if not signal.reviewer_only]),
         }
     )
+
+
+@router.get("/{entity_id}/anomaly-scores", response_model=EntityAnomalyScoresResponse)
+async def get_entity_anomaly_scores(
+    entity_id: str,
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 25,
+) -> EntityAnomalyScoresResponse:
+    enforce_entity_lookup_enabled()
+    scores, total = entity_anomaly_scores(entity_id, limit=limit)
+    lake_entity = get_lake_entity(entity_id, include_person=not should_hide_person_entities())
+    if scores or lake_entity is not None:
+        if lake_entity is not None:
+            labels = [lake_entity.entity_label] if lake_entity.entity_label else []
+            enforce_person_access_policy(labels)
+        return EntityAnomalyScoresResponse(entity_id=entity_id, total=total, scores=scores)
+
+    if session is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
+
+    record = await _lookup_entity_record(session, entity_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Entity not found")
+    enforce_person_access_policy(record["entity_labels"])
+    return EntityAnomalyScoresResponse(entity_id=entity_id, total=total, scores=scores)
 
 
 @router.post("/{entity_id}/signals/refresh", response_model=EntitySignalsResponse)

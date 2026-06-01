@@ -605,6 +605,20 @@ export interface CaseEvidenceBundle {
   evidence_items: SignalEvidenceItem[];
 }
 
+export interface CaseAnomalyScore {
+  contract_id: string;
+  entity_uid: string;
+  score: number;
+  score_confidence: string;
+  top_features: string[];
+  prior_sanction_supplier: boolean;
+  process_url?: string | null;
+  score_run_id: string;
+  model_run_id?: string | null;
+  feature_run_id?: string | null;
+  scored_at?: string | null;
+}
+
 export interface CaseSummary {
   id: string;
   title: string;
@@ -618,6 +632,7 @@ export interface CaseSummary {
   last_refreshed_at?: string | null;
   last_run_id?: string | null;
   stale: boolean;
+  anomaly_score?: CaseAnomalyScore | null;
 }
 
 export interface CaseListResponse {
@@ -629,6 +644,12 @@ export interface CaseResponse extends CaseSummary {
   signals: SignalHit[];
   evidence_bundles: CaseEvidenceBundle[];
   events: CaseEvent[];
+}
+
+export interface EntityAnomalyScoresResponse {
+  entity_id: string;
+  total: number;
+  scores: CaseAnomalyScore[];
 }
 
 export interface InvestigationListResponse {
@@ -670,6 +691,16 @@ export function listCases(page = 1, size = 20): Promise<CaseListResponse> {
 
 export function getCase(id: string): Promise<CaseResponse> {
   return apiFetch<CaseResponse>(`/api/v1/cases/${encodeURIComponent(id)}`);
+}
+
+export function getEntityAnomalyScores(
+  entityId: string,
+  limit = 25,
+): Promise<EntityAnomalyScoresResponse> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  return apiFetch<EntityAnomalyScoresResponse>(
+    `/api/v1/entity/${encodeURIComponent(entityId)}/anomaly-scores?${params}`,
+  );
 }
 
 export function refreshCase(id: string, lang = "es"): Promise<CaseResponse> {

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+from coacc.models.anomaly import CaseAnomalyScore
 from coacc.models.signal import EvidenceItemResponse, SignalHitResponse
 
 
@@ -21,6 +22,7 @@ class CaseSummary(BaseModel):
     last_refreshed_at: str | None = None
     last_run_id: str | None = None
     stale: bool = True
+    anomaly_score: CaseAnomalyScore | None = None
 
 
 class CaseListResponse(BaseModel):

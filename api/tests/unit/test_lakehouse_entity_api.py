@@ -135,6 +135,55 @@ def _write_signal_run(root: Path) -> None:
     )
 
 
+def _write_anomaly_run(root: Path) -> None:
+    run_id = "anomaly-run"
+    scores_out = root / "curated" / "anomaly_scores" / f"run_id={run_id}"
+    scores_out.mkdir(parents=True)
+    pq.write_table(
+        pa.Table.from_pylist([
+            {
+                "run_id": run_id,
+                "model_run_id": "model-run",
+                "feature_run_id": "feature-run",
+                "scored_at": "2026-06-01T02:00:00+00:00",
+                "contract_id": "C-1",
+                "entity_uid": "company:9001234568",
+                "score": 0.92,
+                "score_confidence": "low",
+                "top_features": ["log_value_z_buyer", "timing_anomaly_score"],
+                "prior_sanction_supplier": True,
+                "process_url": "https://secop.example/C-1",
+            },
+            {
+                "run_id": run_id,
+                "model_run_id": "model-run",
+                "feature_run_id": "feature-run",
+                "scored_at": "2026-06-01T02:00:00+00:00",
+                "contract_id": "C-2",
+                "entity_uid": "company:800000000",
+                "score": 0.44,
+                "score_confidence": "standard",
+                "top_features": ["buyer_supplier_concentration"],
+                "prior_sanction_supplier": False,
+                "process_url": "https://secop.example/C-2",
+            },
+        ]),
+        scores_out / "part-00000.parquet",
+    )
+    current_out = root / "models" / "anomaly"
+    current_out.mkdir(parents=True)
+    (current_out / "current.json").write_text(
+        json.dumps({
+            "run_id": "model-run",
+            "score_run_id": run_id,
+            "feature_run_id": "feature-run",
+            "trained_at": "2026-06-01T01:55:00+00:00",
+            "metrics": {"precision_at_100": 0.03},
+        }),
+        encoding="utf-8",
+    )
+
+
 @pytest.mark.anyio
 async def test_entity_lookup_reads_curated_dimension_without_neo4j(
     client: AsyncClient,
@@ -198,6 +247,77 @@ async def test_entity_signals_reads_materialized_hits_without_neo4j(
     linked_response = await client.get("/api/v1/entity/company:9001234568/signals")
     assert linked_response.status_code == 200
     assert linked_response.json()["total"] == 1
+
+
+@pytest.mark.anyio
+async def test_lake_case_routes_expose_anomaly_scores_without_neo4j(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    app.state.neo4j_driver = None
+    _write_anomaly_run(tmp_path)
+
+    list_response = await client.get("/api/v1/cases/")
+
+    assert list_response.status_code == 200
+    payload = list_response.json()
+    assert payload["total"] == 2
+    assert payload["cases"][0]["anomaly_score"]["contract_id"] == "C-1"
+    assert payload["cases"][0]["anomaly_score"]["score_confidence"] == "low"
+
+    detail_response = await client.get(f"/api/v1/cases/{payload['cases'][0]['id']}")
+
+    assert detail_response.status_code == 200
+    case = detail_response.json()
+    assert case["signal_count"] == 0
+    assert case["anomaly_score"]["score"] == 0.92
+    assert case["events"][0]["type"] == "anomaly_score"
+    assert case["evidence_bundles"][0]["evidence_items"][0]["url"] == "https://secop.example/C-1"
+
+
+@pytest.mark.anyio
+async def test_lake_signal_case_detail_attaches_matching_anomaly_score(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    app.state.neo4j_driver = None
+    _write_signal_run(tmp_path)
+    _write_anomaly_run(tmp_path)
+
+    list_response = await client.get("/api/v1/cases/")
+    response = await client.get("/api/v1/cases/hit-entity-1")
+
+    assert list_response.status_code == 200
+    assert list_response.json()["cases"][0]["id"] == "hit-entity-1"
+    assert list_response.json()["cases"][0]["signal_count"] == 1
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["signals"][0]["hit_id"] == "hit-entity-1"
+    assert payload["anomaly_score"]["contract_id"] == "C-1"
+    assert payload["anomaly_score"]["prior_sanction_supplier"] is True
+
+
+@pytest.mark.anyio
+async def test_entity_anomaly_scores_read_lake_without_neo4j(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    app.state.neo4j_driver = None
+    _write_anomaly_run(tmp_path)
+
+    response = await client.get("/api/v1/entity/company:9001234568/anomaly-scores")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["entity_id"] == "company:9001234568"
+    assert payload["total"] == 1
+    assert payload["scores"][0]["contract_id"] == "C-1"
 
 
 def test_materialized_signal_counts_deduplicate_lake_rows(

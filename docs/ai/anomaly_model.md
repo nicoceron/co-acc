@@ -14,6 +14,8 @@ assertion of illegality or misconduct.
 - Training source: `lake/curated/anomaly_features/run_id=<run>/`
 - Output: `lake/curated/anomaly_scores/run_id=<run>/`
 - Promotion pointer: `lake/models/anomaly/current.json`
+- API surface: `/api/v1/cases/`, `/api/v1/cases/{case_id}`, and
+  `/api/v1/entity/{entity_id}/anomaly-scores`
 
 The current slice is unsupervised. PACO-backed sanctioned-supplier overlaps
 are used for evaluation and prioritization checks, not as supervised training
@@ -59,3 +61,7 @@ contain:
 - `lake/models/anomaly/<run>/metrics.json`
 - `lake/models/anomaly/current.json`
 - `lake/curated/anomaly_scores/run_id=<run>/*.parquet`
+
+The API response embeds scores as `anomaly_score` with `contract_id`,
+`entity_uid`, `score`, `score_confidence`, `top_features`, `process_url`,
+`score_run_id`, `model_run_id`, `feature_run_id`, and `scored_at`.
