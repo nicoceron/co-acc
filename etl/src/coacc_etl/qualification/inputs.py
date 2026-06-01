@@ -4,7 +4,7 @@ Sources of dataset entries that get fed into the Socrata probe:
 
 - ``load_appendix`` — archived ``dataset_relevance_appendix.csv``
 - ``load_audit_json`` — ``colombia_open_data_audit.json``
-- ``load_source_registry`` — legacy ``source_registry_co_v1.csv``
+- ``load_source_registry`` — signed catalog source-ref bridge
 - ``load_signal_source_ids`` — pulls source ids out of
   ``signal_source_deps.yml`` to mark coverage
 - ``load_pipeline_env_sources`` — env-backed Socrata IDs that lived
@@ -187,13 +187,35 @@ def load_audit_json(path: Path) -> list[dict[str, str]]:
 
 def load_source_registry(path: Path) -> list[dict[str, str]]:
     if not path.exists():
-        LOG.warning("source registry CSV not found: %s", path)
+        LOG.warning("source-ref catalog CSV not found: %s", path)
         return []
 
     rows: list[dict[str, str]] = []
     with path.open("r", encoding="utf-8", newline="") as fh:
         reader = csv.DictReader(fh)
         for r in reader:
+            if r.get("dataset_id"):
+                source_refs = _split_refs(r.get("source_refs", ""))
+                if not source_refs:
+                    continue
+                dataset_id = (r.get("dataset_id") or "").strip().lower()
+                for source_id in sorted(source_refs):
+                    rows.append(
+                        {
+                            "dataset_id": dataset_id,
+                            "name": (r.get("name") or "").strip(),
+                            "sector_or_category": (r.get("sector") or "").strip(),
+                            "scope": "signed_catalog",
+                            "recommendation": (r.get("recommendation") or "keep").strip(),
+                            "relevance": (r.get("relevance") or "catalog").strip(),
+                            "audit_status": (r.get("audit_status") or "valid").strip(),
+                            "source_refs": source_id,
+                            "origin_refs": "signed_catalog",
+                            "url": (r.get("url") or f"https://{DEFAULT_DOMAIN}/d/{dataset_id}").strip(),
+                        }
+                    )
+                continue
+
             source_id = (r.get("source_id") or "").strip()
             candidate_ids = _extract_socrata_ids(
                 r.get("primary_url"),

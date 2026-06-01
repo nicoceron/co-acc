@@ -65,6 +65,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 ### Changed
 - Excluded `prior_sanction_supplier` from anomaly model input features while
   retaining it as the score/evaluation label to avoid target leakage.
+- Retired the legacy source registry CSV from live code, compose mounts, and
+  alignment tests in favor of `catalog.signed.csv` source refs and YAML
+  adapter contracts.
 - Made Neo4j optional at API startup via `NEO4J_REQUIRED=false`; graph-backed
   routes still require Neo4j, while lake-backed signal routes can run without it.
 - Made materialized signal readers deduplicate repeated `hit_id` and evidence

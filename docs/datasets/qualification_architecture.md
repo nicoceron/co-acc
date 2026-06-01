@@ -39,7 +39,7 @@ The `--all-known` pass combines:
 
 - `docs/datasets/colombia_open_data_audit.json` — audit of 550 portal IDs (285 valid).
 - `docs/datasets/archive/dataset_relevance_appendix.csv` — retired relevance appendix. Still consumed as a hint source; will be dropped once `catalog.signed.csv` fully supplants it.
-- `docs/source_registry_co_v1.csv` — current operational registry. **Scheduled for retirement in Wave 6** (still load-bearing for `api/src/coacc/services/source_registry.py` and `docker-compose.yml` mounts).
+- `docs/datasets/catalog.signed.csv` — signed source-ref hints for already qualified datasets.
 - `config/signal_source_deps.yml` — signal dependency declarations.
 - env-backed Socrata dataset IDs declared by ETL pipeline classes.
 

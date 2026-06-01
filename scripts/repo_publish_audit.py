@@ -90,6 +90,8 @@ def audit_paths(repo_root: Path, rel_paths: list[Path]) -> list[AuditFinding]:
             continue
 
         path = repo_root / rel_path
+        if not path.exists():
+            continue
         try:
             size = path.stat().st_size
         except OSError as exc:

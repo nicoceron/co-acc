@@ -11,7 +11,7 @@ One-page trace of how data moves through co/acc, from raw audit JSON to API resp
                       │  Sources of dataset truth                              │
                       │   - docs/datasets/colombia_open_data_audit.json        │
                       │   - docs/datasets/archive/dataset_relevance_appendix   │
-                      │   - docs/source_registry_co_v1.csv (legacy, retiring)  │
+                      │   - docs/datasets/catalog.signed.csv source_refs       │
                       │   - config/signal_source_deps.yml                      │
                       └────────────────────────────────────────────────────────┘
                                             │

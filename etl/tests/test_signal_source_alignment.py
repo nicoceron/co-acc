@@ -3,9 +3,9 @@
 Every source name a signal depends on must either:
 
 1. Map to an ``ingest-ready`` YAML in ``etl/datasets/`` (incremental or
-   snapshot). The bridge from the legacy ``pipeline_id`` string to a
-   Socrata 4x4 dataset id goes through ``docs/source_registry_co_v1.csv``
-   ``primary_url``.
+   snapshot). The bridge from a signal source name to a dataset id goes
+   through ``docs/datasets/catalog.signed.csv`` ``source_refs`` or a
+   custom-adapter YAML id.
 
 2. Or be in :data:`_KNOWN_DEFERRED_SOURCES` — sources we have explicitly
    parked (no ingest path today; the dependent signals must declare
@@ -17,18 +17,17 @@ Every source name a signal depends on must either:
    signal author's intent is to add them later. They must not appear
    in any signal's ``required`` set.
 
-Wave 6 retires ``source_registry_co_v1.csv`` and migrates the
-``pipeline_id`` → ``dataset_id`` map directly into the YAML catalog;
-this test stays correct across that migration because the resolution
-goes through ``primary_url`` which lives on the YAML itself.
+This keeps signal dependencies aligned with the lake catalog after the
+legacy CSV registry is retired.
 """
 
 from __future__ import annotations
 
 import csv
 from pathlib import Path
+from typing import Any
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from coacc_etl.catalog import load_catalog
 
@@ -80,23 +79,24 @@ _ASPIRATIONAL_SOURCES = {
 
 
 def _load_pipeline_id_to_dataset_id() -> dict[str, str | None]:
-    """pipeline_id (legacy) → Socrata dataset_id (or None for non-Socrata)."""
+    """signal source id → dataset_id (or None for known non-lake sources)."""
     catalog = load_catalog()
-    url_to_dataset = {spec.url: spec.id for spec in catalog.values()}
-
-    registry = REPO_ROOT / "docs" / "source_registry_co_v1.csv"
     out: dict[str, str | None] = {}
-    with registry.open(encoding="utf-8", newline="") as fh:
+    signed_catalog = REPO_ROOT / "docs" / "datasets" / "catalog.signed.csv"
+    with signed_catalog.open(encoding="utf-8", newline="") as fh:
         for row in csv.DictReader(fh):
-            pid = (row.get("pipeline_id") or "").strip()
-            if not pid:
-                continue
-            url = (row.get("primary_url") or "").strip()
-            out[pid] = url_to_dataset.get(url)
+            dataset_id = (row.get("dataset_id") or "").strip()
+            for source_ref in (row.get("source_refs") or "").split("|"):
+                source_ref = source_ref.strip()
+                if source_ref:
+                    out[source_ref] = dataset_id
+    for dataset_id, spec in catalog.items():
+        if spec.adapter != "socrata":
+            out[dataset_id] = dataset_id
     return out
 
 
-def _load_signal_deps() -> dict[str, dict]:
+def _load_signal_deps() -> dict[str, dict[str, Any]]:
     payload = yaml.safe_load(
         (REPO_ROOT / "config" / "signal_source_deps.yml").read_text(encoding="utf-8")
     )
@@ -117,7 +117,7 @@ def test_every_signal_source_resolves_to_yaml_or_known_backlog() -> None:
     pid_to_ds = _load_pipeline_id_to_dataset_id()
 
     deps = _load_signal_deps()
-    referenced = set()
+    referenced: set[str] = set()
     for payload in deps.values():
         for key in ("sources", "required", "optional"):
             referenced.update(payload.get(key) or [])

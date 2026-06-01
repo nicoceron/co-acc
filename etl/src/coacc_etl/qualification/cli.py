@@ -57,8 +57,8 @@ def main() -> int:
     )
     parser.add_argument(
         "--source-registry",
-        default=str(REPO_ROOT / "docs/source_registry_co_v1.csv"),
-        help="Path to the current source registry CSV",
+        default=str(REPO_ROOT / "docs/datasets/catalog.signed.csv"),
+        help="Path to the signed catalog CSV used for source-ref hints",
     )
     parser.add_argument(
         "--signal-deps",
@@ -120,7 +120,7 @@ def main() -> int:
     parser.add_argument(
         "--no-source-registry",
         action="store_true",
-        help="With --all-known, skip docs/source_registry_co_v1.csv",
+        help="With --all-known, skip signed-catalog source-ref hints",
     )
     parser.add_argument(
         "--no-pipeline-env",

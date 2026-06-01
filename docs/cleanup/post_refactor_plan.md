@@ -1200,16 +1200,22 @@ deleted in this phase.
 
 ### 9.4 DoD
 
-- [ ] `grep -rn source_registry_co_v1` returns 0 hits in
+- [x] `grep -rn source_registry_co_v1` returns 0 hits in
       current-state files (historical records under `docs/cleanup/`
       and `docs/datasets/archive/` may keep their references).
-- [ ] All API and ETL tests green against the catalog.
-- [ ] `docker-compose.yml` mounts and env vars point at
-      `catalog.signed.csv`; `docker compose up` boots cleanly.
-- [ ] `.gitignore` no longer contains the
+- [x] All API and ETL tests green against the catalog.
+- [x] `docker-compose.yml` mounts and env vars point at
+      `catalog.signed.csv` plus YAML contracts; compose config validates.
+- [x] `.gitignore` no longer contains the
       `!docs/source_registry_co_v1.csv` exception.
-- [ ] `docs/source_registry_co_v1.csv` deleted.
-- [ ] Architecture overview updated.
+- [x] `docs/source_registry_co_v1.csv` deleted.
+- [x] Architecture overview updated.
+
+**Phase 12 slice added 2026-06-01:** the live API source registry now derives
+source rows from `docs/datasets/catalog.signed.csv` `source_refs` plus custom
+YAML adapter contracts, `docker-compose.yml` mounts `docs/datasets/` and
+`etl/datasets/`, and the legacy CSV file is deleted. Historical cleanup/archive docs retain old
+references as migration history.
 
 ---
 
@@ -1920,6 +1926,10 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   `scripts/check_doc_links.py` for `docs/crisp_ml.md`. The CRISP-ML evidence
   map links the repo's data, model, evaluation, deployment, and monitoring
   artifacts; external submission items remain user-owned.
+- **2026-06-01** — Phase 12 legacy source registry retirement is complete.
+  The API source registry, qualification hints, signal-source alignment tests,
+  and compose mounts now use the signed catalog and YAML contracts. The legacy
+  CSV and its `.gitignore` exception were deleted.
 
 (Append new decisions as they're made. One line per decision.)
 
