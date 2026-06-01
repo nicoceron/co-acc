@@ -563,6 +563,35 @@ def _latest_curated_run() -> tuple[str | None, str | None]:
     return f"curated:{latest.stem}", datetime.fromtimestamp(latest.stat().st_mtime, UTC).isoformat()
 
 
+def _latest_signal_run() -> tuple[str | None, str | None]:
+    manifest_dir = lakehouse_query.lake_root() / "meta" / "signal_runs"
+    if not manifest_dir.exists():
+        return None, None
+    manifests = sorted(path for path in manifest_dir.glob("*.json") if path.is_file())
+    for path in reversed(manifests):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            logger.warning("Skipping unreadable signal run manifest: %s", path)
+            continue
+        if payload.get("status") != "completed":
+            continue
+        run_id = str(payload.get("run_id") or path.stem)
+        refreshed_at = payload.get("finished_at") or payload.get("generated_at")
+        if refreshed_at is None:
+            refreshed_at = datetime.fromtimestamp(path.stat().st_mtime, UTC).isoformat()
+        return run_id, str(refreshed_at)
+    return None, None
+
+
+def _latest_lake_run() -> tuple[str | None, str | None]:
+    curated_run = _latest_curated_run()
+    signal_run = _latest_signal_run()
+    if signal_run[1] and (curated_run[1] is None or signal_run[1] > curated_run[1]):
+        return signal_run
+    return curated_run
+
+
 def _curated_signal_count(signal_id: str) -> tuple[int, str | None]:
     glob = _curated_signal_glob(signal_id)
     if glob is None:
@@ -1090,21 +1119,21 @@ async def get_latest_materializer_run(
     session: AsyncSession | None,
 ) -> tuple[str | None, str | None]:
     if session is None:
-        return _latest_curated_run()
+        return _latest_lake_run()
     try:
         record = await execute_query_single(session, "signal_latest_completed_run")
     except Exception:
-        logger.exception("Failed to load Neo4j latest signal run; using curated run only")
-        return _latest_curated_run()
+        logger.exception("Failed to load Neo4j latest signal run; using lake run only")
+        return _latest_lake_run()
     if record is None:
-        return _latest_curated_run()
+        return _latest_lake_run()
     graph_run = (
         str(record["run_id"]) if record["run_id"] is not None else None,
         str(record["finished_at"]) if record["finished_at"] is not None else None,
     )
-    curated_run = _latest_curated_run()
-    if curated_run[1] and (graph_run[1] is None or curated_run[1] > graph_run[1]):
-        return curated_run
+    lake_run = _latest_lake_run()
+    if lake_run[1] and (graph_run[1] is None or lake_run[1] > graph_run[1]):
+        return lake_run
     return graph_run
 
 

@@ -896,9 +896,16 @@ unavailable. Current lake-backed signal IDs are
 `procurement_sanctioned_supplier_awarded` and
 `procurement_supplier_concentration_across_entities`, and
 `procurement_repeat_awards_same_supplier`. This is a thin API projection slice,
-not full Phase 11 completion: entity detail, search, cases, graph expansion,
-and broader public pattern APIs still need lake-backed implementations or
-explicit graph-required behavior.
+not full Phase 11 completion.
+
+**Materializer slice added 2026-06-01:** `coacc-etl signals materialize --all`
+now writes run-scoped `signal_hits` and `evidence_bundles` parquet from those
+three curated signal feature tables without Neo4j. On the local lake it wrote
+30,397 signal hits and 91,433 evidence rows: 20,184 PACO-backed sanctioned
+supplier hits, 497 supplier-concentration hits, and 9,716 repeat-awards hits.
+The API reports the newest completed lake signal run manifest. Entity detail,
+search, cases, graph expansion, and broader public pattern APIs still need
+lake-backed implementations or explicit graph-required behavior.
 
 ### 7.1 Goal
 
@@ -1017,9 +1024,9 @@ api/src/coacc/services/lakehouse_case_service.py
 
 ### 7.6 DoD
 
-- [ ] `coacc-etl signals materialize --all` writes signal hits and evidence
+- [x] `coacc-etl signals materialize --all` writes signal hits and evidence
       bundles from `lake/curated/` without Neo4j running.
-- [ ] At least 3 demo signals are non-empty, including one PACO-backed
+- [x] At least 3 demo signals are non-empty, including one PACO-backed
       sanctions signal.
 - [ ] `/api/v1/signals` and case evidence reads work from DuckDB-backed
       repositories.
@@ -1558,7 +1565,8 @@ reality.
 | `docs/runbooks/lake_reality.md` | Phase 8 | How to read reality reports + tune thresholds |
 | `docs/runbooks/custom_adapters.md` | Phase 9 | Per-adapter operational + ethical notes |
 | `docs/runbooks/curate.md` | Phase 10 | How to rebuild `lake/curated/` from scratch |
-| `docs/runbooks/graph_loader.md` | Phase 11 | Reload, recovery, parity check ops |
+| `docs/runbooks/signals.md` | Phase 11 | Rebuild, recovery, and signal-run manifest behavior |
+| `docs/runbooks/graph_loader.md` | Phase 11.5 | Reload, recovery, parity check ops |
 | `docs/runbooks/anomaly_model.md` | Phase 13 | Retrain, monitor, recalibrate |
 | `docs/runbooks/narrator.md` | Phase 14 | Provider failover, cost cap, cache invalidation |
 | `docs/runbooks/env.md` | Phase 7 (created) | Every env var the system reads |
@@ -1770,9 +1778,9 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   probed nine raw datasets and five curated tables with 0 failures and
   0 warnings, and `make api` served `/health`, `/api/v1/signals/`, and
   signal detail routes from the repo-level `lake/` with Neo4j offline.
-  This does not close the full plan: `coacc-etl signals materialize`,
-  Phase 13 anomaly modeling, Phase 14 narration, Phase 15 frontend,
-  and Phase 16 competition submission remain separate acceptance units.
+  This does not close the full plan: Phase 13 anomaly modeling,
+  Phase 14 narration, Phase 15 frontend, and Phase 16 competition
+  submission remain separate acceptance units.
 - **2026-06-01** — Phase 10 typed dimensions shipped in the current
   `procurement.py` builder: `dim_company`, `dim_buyer`, and `dim_person`
   now rebuild from the local lake using NIT MOD-11 and cedula
@@ -1781,6 +1789,14 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   lake-reality` probed eight curated tables successfully. The two
   schema-hash warnings are expected because `dim_subject_document` and
   `fct_procurement_contract_awards` gained canonical NIT columns.
+- **2026-06-01** — Phase 11 signal materialization shipped for the
+  three existing curated signal feature tables. Local evidence:
+  `make materialize-all RUN_ID=phase11-local-20260601` wrote 30,397
+  `signal_hits` rows and 91,433 `evidence_bundles` rows without Neo4j;
+  contract probes found 0 missing required hit/evidence fields. The
+  API now reports the latest completed lake signal run manifest, but
+  case evidence, entity detail, search, and broader public routes still
+  need lake-backed repositories before Phase 11 is fully closed.
 
 (Append new decisions as they're made. One line per decision.)
 

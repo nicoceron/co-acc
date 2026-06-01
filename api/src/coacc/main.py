@@ -114,12 +114,19 @@ async def health(
 ) -> dict[str, str | int | None]:
     if session is None:
         latest_run_id, latest_run_at = await get_latest_materializer_run(None)
+        latest_run_status = (
+            "curated"
+            if latest_run_id and latest_run_id.startswith("curated:")
+            else "completed"
+            if latest_run_id
+            else None
+        )
         return {
             "status": "ok",
             "neo4j": "unavailable",
             "last_signal_run_id": latest_run_id,
             "last_signal_run_at": latest_run_at,
-            "last_signal_run_status": "curated" if latest_run_id else None,
+            "last_signal_run_status": latest_run_status,
             "last_signal_hit_count": None,
         }
     latest_run = await execute_query_single(session, "signal_latest_completed_run")

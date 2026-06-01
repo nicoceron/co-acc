@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
 import pyarrow as pa
@@ -46,6 +47,21 @@ def _write_curated_signal(root: Path) -> None:
             }
         ]),
         out / "part-00000.parquet",
+    )
+
+
+def _write_signal_run_manifest(root: Path) -> None:
+    out = root / "meta" / "signal_runs"
+    out.mkdir(parents=True)
+    (out / "test-run.json").write_text(
+        json.dumps({
+            "run_id": "test-run",
+            "generated_at": "2026-06-01T01:00:00+00:00",
+            "finished_at": "2026-06-01T01:01:00+00:00",
+            "status": "completed",
+            "hit_count": 1,
+        }),
+        encoding="utf-8",
     )
 
 
@@ -168,6 +184,25 @@ async def test_signal_list_counts_curated_hits_without_neo4j(
 
 
 @pytest.mark.anyio
+async def test_signal_list_reports_latest_lake_signal_run(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    app.state.neo4j_driver = None
+    _write_curated_signal(tmp_path)
+    _write_signal_run_manifest(tmp_path)
+
+    response = await client.get("/api/v1/signals/")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["last_run_id"] == "test-run"
+    assert data["last_refreshed_at"] == "2026-06-01T01:01:00+00:00"
+
+
+@pytest.mark.anyio
 async def test_supplier_concentration_detail_reads_curated_sample_without_neo4j(
     client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,
@@ -235,3 +270,22 @@ async def test_health_reports_ok_when_only_curated_lake_is_available(
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
     assert response.json()["neo4j"] == "unavailable"
+
+
+@pytest.mark.anyio
+async def test_health_reports_completed_lake_signal_run(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    app.state.neo4j_driver = None
+    _write_curated_signal(tmp_path)
+    _write_signal_run_manifest(tmp_path)
+
+    response = await client.get("/health")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["last_signal_run_id"] == "test-run"
+    assert data["last_signal_run_status"] == "completed"

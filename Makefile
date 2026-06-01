@@ -123,11 +123,10 @@ ingest-phase7-full: lake-init
 	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run coacc-etl ingest-phase7 --mode full $(PHASE7_ARGS)
 
 # ---------------------------------------------------------------------------
-# Downstream signal materialization (still served from the API workspace)
+# Downstream signal materialization from curated parquet
 # ---------------------------------------------------------------------------
 
-materialize-deps:
-	cd api && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python -m coacc.services.signal_materializer --advanced-sources="$(SOURCES)"
+materialize-deps: materialize-all
 
-materialize-all:
-	cd api && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run python -m coacc.services.signal_materializer --all
+materialize-all: lake-init
+	cd etl && COACC_LAKE_ROOT="$(LAKE_ROOT)" uv run coacc-etl signals materialize --all $(if $(RUN_ID),--run-id "$(RUN_ID)",) $(if $(ALLOW_EMPTY),--allow-empty,)

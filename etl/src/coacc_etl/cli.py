@@ -7,6 +7,7 @@ YAML-declared lake ingesters:
 - ``coacc-etl ingest <id>``      — pull one ingest-ready dataset into the lake
 - ``coacc-etl ingest-all``       — pull every ingest-ready tier=core dataset
 - ``coacc-etl curate``           — build curated DuckDB parquet outputs
+- ``coacc-etl signals ...``      — materialize signal runs from curated parquet
 - ``coacc-etl qualify ...``      — thin wrapper over ``coacc-source-qualification``
 """
 
@@ -20,6 +21,7 @@ from coacc_etl.curated import CuratedBuildError, build_curated
 from coacc_etl.ingest import IngestError
 from coacc_etl.ingest import ingest as run_ingest
 from coacc_etl.operations.phase7 import Phase7RunError, run_phase7
+from coacc_etl.signals import SignalMaterializationError, materialize_signals
 
 
 @click.group()
@@ -304,6 +306,63 @@ def curate_cmd(tables: tuple[str, ...], build_all: bool) -> None:
         raise click.ClickException(str(exc)) from exc
     for result in results:
         click.echo(f"{result.table}: wrote {result.rows:,} rows to {result.path}")
+
+
+@cli.group(name="signals")
+def signals_group() -> None:
+    """Materialize downstream signal outputs from curated parquet."""
+
+
+@signals_group.command(name="materialize")
+@click.option(
+    "--signal",
+    "signal_ids",
+    multiple=True,
+    help="Signal id to materialize; repeat for multiple signals. Defaults to all shipped signals.",
+)
+@click.option(
+    "--all",
+    "build_all",
+    is_flag=True,
+    help="Explicitly materialize every shipped signal (default when --signal is omitted).",
+)
+@click.option(
+    "--run-id",
+    default=None,
+    help="Optional run id for deterministic reruns and tests.",
+)
+@click.option(
+    "--allow-empty",
+    is_flag=True,
+    help="Write outputs even if a selected signal currently produces zero hits.",
+)
+def signals_materialize_cmd(
+    signal_ids: tuple[str, ...],
+    build_all: bool,
+    run_id: str | None,
+    allow_empty: bool,
+) -> None:
+    """Write signal_hits and evidence_bundles parquet from lake/curated."""
+    if build_all and signal_ids:
+        raise click.ClickException("use either --all or --signal, not both")
+    try:
+        result = materialize_signals(
+            None if build_all or not signal_ids else signal_ids,
+            run_id=run_id,
+            allow_empty=allow_empty,
+        )
+    except SignalMaterializationError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    for signal in result.signal_results:
+        click.echo(f"{signal.signal_id}: materialized {signal.hit_count:,} hits")
+    click.echo(
+        f"signal run {result.run_id}: wrote {result.hit_count:,} hits and "
+        f"{result.evidence_count:,} evidence rows"
+    )
+    click.echo(f"  signal_hits: {result.signal_hits_path}")
+    click.echo(f"  evidence_bundles: {result.evidence_bundles_path}")
+    click.echo(f"  manifest: {result.manifest_path}")
 
 
 @cli.command(name="qualify", context_settings={"ignore_unknown_options": True})
