@@ -1,13 +1,7 @@
 function resolveApiBase(): string {
   const configured = import.meta.env.VITE_API_URL?.trim();
   if (configured) {
-    return configured;
-  }
-  if (typeof window !== "undefined") {
-    const { protocol, hostname, port } = window.location;
-    if (port === "3000" || port === "3100") {
-      return `${protocol}//${hostname}:8000`;
-    }
+    return configured.replace(/\/$/, "");
   }
   return "";
 }

@@ -30,6 +30,10 @@ Never commit `.env`.
 | Variable | Default | Purpose |
 |---|---:|---|
 | `NEO4J_REQUIRED` | `false` | When `true`, API startup fails if Neo4j is unavailable. When `false`, graph-backed routes return 503 but lake-backed signal routes and `/health` can still run. |
+| `API_PORT` | `8000` | Host port for the API service in dev compose and the local Vite proxy target. |
+| `FRONTEND_PORT` | `3000` | Host port for the frontend service in dev compose. Use `3100` when another local dev server already owns `3000`. |
+| `NEO4J_HTTP_PORT` / `NEO4J_BOLT_PORT` | `7474` / `7687` | Host ports for the dev Neo4j browser and Bolt listener. |
+| `VITE_API_URL` | `http://localhost:8000` in `.env.example` | Optional Vite dev/build-time API base override for `make frontend`. The compose frontend does not pass it at runtime and defaults to same-origin `/api`. |
 | `COACC_CONFIG_DIR` | auto-discovered | Optional API override for mounted `config/` files such as `signal_registry.yml` and signal SQL. |
 | `COACC_DATASET_CATALOG_DIR` | auto-discovered | Optional API override for mounted `docs/datasets/` catalog CSVs. |
 | `COACC_DATASET_CONTRACT_DIR` | auto-discovered | Optional API override for mounted `etl/datasets/` YAML contracts. |

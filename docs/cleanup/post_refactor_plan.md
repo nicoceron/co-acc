@@ -1976,6 +1976,9 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   connected. Default compose serves public lake case lists/details and reports
   the latest lake signal run in `/health` while the graph remains an optional
   reviewer investigation overlay.
+- **2026-06-01** — Dev compose is now friendlier to this device's existing
+  processes: API, frontend, and Neo4j host ports are env-configurable, and the
+  frontend defaults to same-origin `/api` proxying unless `VITE_API_URL` is set.
 
 (Append new decisions as they're made. One line per decision.)
 

@@ -77,3 +77,17 @@ def test_signal_materializer_compose_command_expands_user_id_in_container() -> N
     materializer = compose["services"]["signal-materializer"]
 
     assert '--user-id "$${SIGNAL_MATERIALIZER_USER_ID}"' in materializer["command"]
+
+
+def test_dev_compose_host_ports_are_env_configurable() -> None:
+    repo = Path(__file__).resolve().parents[3]
+    compose = yaml.safe_load((repo / "docker-compose.yml").read_text(encoding="utf-8"))
+
+    assert compose["services"]["api"]["ports"] == ["${API_PORT:-8000}:8000"]
+    frontend = compose["services"]["frontend"]
+    assert frontend["ports"] == ["${FRONTEND_PORT:-3000}:3000"]
+    assert "VITE_API_URL" not in frontend.get("environment", {})
+    assert compose["services"]["neo4j"]["ports"] == [
+        "${NEO4J_HTTP_PORT:-7474}:7474",
+        "${NEO4J_BOLT_PORT:-7687}:7687",
+    ]
