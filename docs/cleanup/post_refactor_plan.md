@@ -903,9 +903,17 @@ now writes run-scoped `signal_hits` and `evidence_bundles` parquet from those
 three curated signal feature tables without Neo4j. On the local lake it wrote
 30,397 signal hits and 91,433 evidence rows: 20,184 PACO-backed sanctioned
 supplier hits, 497 supplier-concentration hits, and 9,716 repeat-awards hits.
-The API reports the newest completed lake signal run manifest. Entity detail,
-search, cases, graph expansion, and broader public pattern APIs still need
-lake-backed implementations or explicit graph-required behavior.
+The API reports the newest completed lake signal run manifest.
+
+**API repository slice added 2026-06-01:** `/api/v1/signals` now prefers the
+latest materialized `signal_hits` and `evidence_bundles` run for counts,
+samples, and evidence items, falling back to curated feature tables only when
+no signal run exists. When Neo4j is unavailable, `/api/v1/cases/` exposes a
+public-safe lake dossier view with one case per materialized signal hit, and
+`/api/v1/cases/{hit_id}` reads the corresponding evidence bundle directly from
+parquet. Entity detail, search, graph expansion, and broader public pattern
+APIs still need lake-backed implementations or explicit graph-required
+behavior.
 
 ### 7.1 Goal
 
@@ -1028,12 +1036,12 @@ api/src/coacc/services/lakehouse_case_service.py
       bundles from `lake/curated/` without Neo4j running.
 - [x] At least 3 demo signals are non-empty, including one PACO-backed
       sanctions signal.
-- [ ] `/api/v1/signals` and case evidence reads work from DuckDB-backed
+- [x] `/api/v1/signals` and case evidence reads work from DuckDB-backed
       repositories.
-- [ ] Existing response schemas stay compatible or OpenAPI snapshots are
+- [x] Existing response schemas stay compatible or OpenAPI snapshots are
       updated with a documented breaking-change rationale.
-- [ ] `make check` green.
-- [ ] `docs/runbooks/signals.md` documents rebuild, recovery, and feature
+- [x] `make check` green.
+- [x] `docs/runbooks/signals.md` documents rebuild, recovery, and feature
       flag behavior.
 
 ### 7.7 Risks / mitigations
@@ -1797,6 +1805,14 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   API now reports the latest completed lake signal run manifest, but
   case evidence, entity detail, search, and broader public routes still
   need lake-backed repositories before Phase 11 is fully closed.
+- **2026-06-01** — Phase 11 API readers now prefer materialized
+  `signal_hits`/`evidence_bundles` for `/api/v1/signals`; when Neo4j is
+  unavailable, `/api/v1/cases/` and `/api/v1/cases/{hit_id}` serve
+  public-safe lake dossiers directly from parquet. Existing API response
+  schemas were preserved; targeted route tests and `make check` cover
+  both graph-backed and Neo4j-offline paths. Entity detail, search,
+  graph expansion, Phase 13 anomaly scoring, Phase 14 narration, Phase
+  15 frontend, and Phase 16 submission remain separate acceptance units.
 
 (Append new decisions as they're made. One line per decision.)
 

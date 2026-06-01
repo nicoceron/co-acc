@@ -67,12 +67,17 @@ signal run exists.
 
 ## API Behavior
 
-There is no feature flag required for lake signal runs. When Neo4j is
-unavailable, `/api/v1/signals` still reads the lake-backed curated signal
-feature tables for counts and samples. When a completed signal-run manifest is
-present, the API exposes that `run_id` and timestamp as the latest materializer
-run. Neo4j-backed materialization remains a compatibility path only when a
-Neo4j session is available.
+There is no feature flag required for lake signal runs. When a completed
+signal-run manifest is present, `/api/v1/signals` reads counts, samples, and
+evidence items from `signal_hits` and `evidence_bundles`. If no signal run is
+present yet, it falls back to the shipped curated signal feature tables for
+counts and samples.
+
+When Neo4j is unavailable, `/api/v1/cases/` exposes a public-safe lake dossier
+view with one case per materialized signal hit. `/api/v1/cases/{hit_id}` reads
+the corresponding signal hit and evidence bundle directly from parquet.
+Graph-backed case creation and refresh remain available only when Neo4j is
+connected.
 
 ## Reality Notes
 

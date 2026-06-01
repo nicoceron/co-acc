@@ -24,6 +24,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Added `coacc-etl signals materialize --all` to write lake-backed
   `signal_hits`, `evidence_bundles`, and signal run manifests from the shipped
   curated signal feature tables.
+- Added API readers for materialized lake signal runs, including offline
+  `/api/v1/signals` samples and public-safe case evidence dossiers when Neo4j
+  is unavailable.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.

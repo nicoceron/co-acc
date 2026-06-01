@@ -24,7 +24,7 @@ from coacc.models.signal import (
     SignalHitResponse,
     SignalListItem,
 )
-from coacc.services import dependency_registry, lakehouse_query
+from coacc.services import dependency_registry, lakehouse_query, lakehouse_signal_service
 from coacc.services.neo4j_service import execute_query, execute_query_single
 from coacc.services.signal_registry import (
     get_signal_definition,
@@ -564,24 +564,7 @@ def _latest_curated_run() -> tuple[str | None, str | None]:
 
 
 def _latest_signal_run() -> tuple[str | None, str | None]:
-    manifest_dir = lakehouse_query.lake_root() / "meta" / "signal_runs"
-    if not manifest_dir.exists():
-        return None, None
-    manifests = sorted(path for path in manifest_dir.glob("*.json") if path.is_file())
-    for path in reversed(manifests):
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            logger.warning("Skipping unreadable signal run manifest: %s", path)
-            continue
-        if payload.get("status") != "completed":
-            continue
-        run_id = str(payload.get("run_id") or path.stem)
-        refreshed_at = payload.get("finished_at") or payload.get("generated_at")
-        if refreshed_at is None:
-            refreshed_at = datetime.fromtimestamp(path.stat().st_mtime, UTC).isoformat()
-        return run_id, str(refreshed_at)
-    return None, None
+    return lakehouse_signal_service.latest_signal_run_tuple()
 
 
 def _latest_lake_run() -> tuple[str | None, str | None]:
@@ -1095,7 +1078,9 @@ async def list_signal_summaries(session: AsyncSession | None) -> list[SignalList
             meta["last_seen_at"] is None or row_last_seen > str(meta["last_seen_at"])
         ):
             meta["last_seen_at"] = row_last_seen
-    for signal_id, (hit_count, observed_at) in _curated_signal_counts().items():
+    lake_counts = lakehouse_signal_service.materialized_signal_counts()
+    fallback_counts = _curated_signal_counts() if not lake_counts else {}
+    for signal_id, (hit_count, observed_at) in (lake_counts or fallback_counts).items():
         meta = counts_by_id.setdefault(signal_id, {"hit_count": 0, "last_seen_at": None})
         meta["hit_count"] = max(int(meta["hit_count"] or 0), hit_count)
         if observed_at and (
@@ -1163,7 +1148,16 @@ async def get_signal_samples(
             logger.exception("Failed to load Neo4j signal samples; using curated samples only")
     if len(hits) < limit:
         existing_hit_ids = {hit.hit_id for hit in hits}
-        for hit in _curated_signal_samples(canonical_signal_id, limit - len(hits)):
+        lake_samples = lakehouse_signal_service.materialized_signal_samples(
+            canonical_signal_id,
+            limit - len(hits),
+        )
+        fallback_samples = (
+            _curated_signal_samples(canonical_signal_id, limit - len(hits))
+            if not lake_samples
+            else []
+        )
+        for hit in [*lake_samples, *fallback_samples]:
             if hit.hit_id not in existing_hit_ids:
                 hits.append(hit)
                 existing_hit_ids.add(hit.hit_id)
