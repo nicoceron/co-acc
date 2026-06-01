@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import Any
 
 import pyarrow as pa
 import pyarrow.parquet as pq
+import pytest
 from click.testing import CliRunner
 
 from coacc_etl.cli import cli
@@ -13,14 +15,15 @@ from coacc_etl.models.narrator import (
     CaseSubgraph,
     EvidenceCitation,
     SubgraphNode,
+    SubgraphSignal,
     build_prompt,
     build_templated_narrative,
     check,
+    generate_narrative,
     top_scored_case_ids,
 )
 
-if TYPE_CHECKING:
-    from pathlib import Path
+_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "subgraphs" / "recorded_narrator_cases.json"
 
 
 def _fixture_subgraph() -> CaseSubgraph:
@@ -59,6 +62,28 @@ def _fixture_subgraph() -> CaseSubgraph:
                 url="https://secop.example/C-1",
             )
         ],
+    )
+
+
+def _load_recorded_cases() -> list[dict[str, Any]]:
+    return json.loads(_FIXTURE_PATH.read_text(encoding="utf-8"))
+
+
+def _subgraph_from_dict(payload: dict[str, Any]) -> CaseSubgraph:
+    return CaseSubgraph(
+        case_id=str(payload["case_id"]),
+        contract_id=str(payload["contract_id"]),
+        contract_reference=payload.get("contract_reference"),
+        process_url=payload.get("process_url"),
+        buyer_name=payload.get("buyer_name"),
+        supplier_name=payload.get("supplier_name"),
+        procurement_modality=payload.get("procurement_modality"),
+        contract_value=payload.get("contract_value"),
+        signing_date=payload.get("signing_date"),
+        anomaly=AnomalyContext(**payload["anomaly"]),
+        nodes=[SubgraphNode(**node) for node in payload.get("nodes", [])],
+        signals=[SubgraphSignal(**signal) for signal in payload.get("signals", [])],
+        evidence=[EvidenceCitation(**citation) for citation in payload.get("evidence", [])],
     )
 
 
@@ -169,6 +194,44 @@ def test_verify_rejects_fake_dataset_id() -> None:
     assert any("unknown dataset citation: fake-dataset" in error for error in result.errors)
 
 
+def test_verify_rejects_unresolved_citation() -> None:
+    subgraph = _fixture_subgraph()
+    narrative = build_templated_narrative(subgraph).replace(
+        "(jbjy-vk9h, C-1)",
+        "(jbjy-vk9h, C-404)",
+        1,
+    )
+
+    result = check(narrative, subgraph)
+
+    assert not result.valid
+    assert any("unresolved citation: (jbjy-vk9h, C-404)" in error for error in result.errors)
+
+
+def test_verify_rejects_forbidden_ethics_term() -> None:
+    subgraph = _fixture_subgraph()
+    narrative = build_templated_narrative(subgraph).replace(
+        "La lectura no afirma una irregularidad",
+        "Proveedor Sancionado SAS es corrupto. La lectura no afirma una irregularidad",
+        1,
+    )
+
+    result = check(narrative, subgraph)
+
+    assert not result.valid
+    assert any("forbidden ethics term: corrupto" in error for error in result.errors)
+
+
+def test_verify_rejects_missing_section() -> None:
+    subgraph = _fixture_subgraph()
+    narrative = build_templated_narrative(subgraph).replace("## Fuentes", "## Fuente", 1)
+
+    result = check(narrative, subgraph)
+
+    assert not result.valid
+    assert any("missing section: ## Fuentes" in error for error in result.errors)
+
+
 def test_verify_word_count() -> None:
     subgraph = _fixture_subgraph()
     narrative = (
@@ -189,6 +252,55 @@ def test_template_narrative_verifies() -> None:
 
     assert result.valid, result.errors
     assert 250 <= result.word_count <= 400
+
+
+@pytest.mark.parametrize(
+    "case_payload",
+    _load_recorded_cases(),
+    ids=lambda case_payload: str(case_payload["case_id"]),
+)
+def test_full_pipeline_against_recorded_fixture(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    case_payload: dict[str, Any],
+) -> None:
+    subgraph = _subgraph_from_dict(case_payload["subgraph"])
+    recorded_response = "\n".join(case_payload["recorded_response"])
+    calls: list[str] = []
+
+    def fake_extract(case_id: str) -> CaseSubgraph:
+        assert case_id == subgraph.case_id
+        return subgraph
+
+    def fake_call_llm(
+        prompt: str,
+        *,
+        provider: str,
+        model: str | None = None,
+        api_key: str | None = None,
+        max_tokens: int = 600,
+    ) -> str:
+        assert "Subgraph YAML:" in prompt
+        assert subgraph.contract_id in prompt
+        assert provider == "gemini"
+        assert model is None
+        assert api_key is None
+        assert max_tokens == 600
+        calls.append(prompt)
+        return recorded_response
+
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    monkeypatch.setenv("GEMINI_API_KEY", "fixture-key")
+    monkeypatch.setattr("coacc_etl.models.narrator.generate.extract", fake_extract)
+    monkeypatch.setattr("coacc_etl.models.narrator.generate.call_llm", fake_call_llm)
+
+    result = generate_narrative(subgraph.case_id, provider="gemini")
+
+    assert result.provider == "gemini"
+    assert result.valid
+    assert 250 <= result.word_count <= 400
+    assert len(calls) == 1
+    assert Path(result.narrative_path).read_text(encoding="utf-8") == recorded_response
 
 
 def test_narrator_cli_generate_uses_template_fallback(

@@ -74,7 +74,11 @@ dataset ids, and the ethics guard against culpability language.
 This slice proves the narrator runtime path and safety checks. Remaining Phase
 14 work:
 
-- recorded LLM fixture responses for 10 subgraphs;
 - frontend narrative display;
 - richer subgraph extraction beyond contract, buyer, supplier, signals, and
   evidence rows.
+
+The backend fixture gate is covered by
+`etl/tests/fixtures/subgraphs/recorded_narrator_cases.json`: 10 recorded
+subgraphs and provider responses are replayed through `generate_narrative`
+without live LLM calls.

@@ -21,10 +21,10 @@ all factual claims to cite evidence rows from the case subgraph.
 - Batch path: `coacc-etl narrator generate-batch --limit N --min-score X`
   precomputes top promoted anomaly cases and skips existing Markdown by default.
 
-This is a Phase 14 foundation slice. It adds extraction, prompt construction,
-provider call wiring, verifier checks, fallback generation, CLI, and tests. It
-does not yet close the full Phase 14 fixture requirement: recorded LLM
-responses for 10 fixture subgraphs and frontend display remain open.
+This is a Phase 14 backend slice. It adds extraction, prompt construction,
+provider call wiring, verifier checks, fallback generation, CLI, batch
+precompute, API serving support, and recorded no-network fixture coverage for
+10 subgraphs. Frontend display remains outside this backend slice.
 
 ## Verifier Contract
 

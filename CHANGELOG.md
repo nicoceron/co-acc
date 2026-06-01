@@ -43,6 +43,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), version
 - Added lake-backed case API fields for precomputed narrator Markdown.
 - Added `coacc-etl narrator generate-batch` to precompute narratives for top
   promoted anomaly cases.
+- Added recorded no-network narrator fixture coverage for 10 subgraphs and
+  expanded verifier guard tests.
 - Added curated-table coverage to `make lake-reality`, including row counts,
   freshness, manifest reconciliation, schema hashes, and evidence-ref checks
   for signal feature tables.

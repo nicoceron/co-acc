@@ -1,0 +1,462 @@
+[
+  {
+    "case_id": "anomaly:fixture-01",
+    "recorded_response": [
+      "# Lead",
+      "El contrato C-FIX-01 queda priorizado para revision publica porque el modelo de anomalias asigno una puntuacion de 0.925 al expediente. La lectura se limita a ordenar indicios documentales: no afirma responsabilidad, dolo ni irregularidad. En el subgrafo figuran Entidad Norte como entidad compradora y Proveedor Alfa SAS como proveedor registrado. El soporte principal es el registro contractual de SECOP II (jbjy-vk9h, C-FIX-01), que permite volver a la fila usada por el lago curado.",
+      "",
+      "## Evidencia",
+      "La evidencia revisada conecta el identificador del contrato, la modalidad Contratacion directa, el valor reportado y las partes que aparecen en el subgrafo. Esa combinacion permite confirmar que Entidad Norte y Proveedor Alfa SAS proceden del mismo registro reproducible, sin agregar nombres externos ni inferencias no citadas. La cita (jbjy-vk9h, C-FIX-01) debe permanecer junto al resumen para que otro analista pueda revisar el proceso original, contrastar el enlace de SECOP II y reconstruir la extraccion con los artefactos del lago.",
+      "",
+      "## Señales",
+      "El puntaje proviene de Isolation Forest y se interpreta como priorizacion, no como dictamen. Los impulsores registrados para este caso incluyen log_value_z_buyer y timing_anomaly_score. Esas variables sugieren revisar comparables de valor, historial reciente y comportamiento temporal antes de escalar el caso. Si el expediente se usa en una historia publica, el texto debe conservar el lenguaje de patron observable y no reemplazar la revision humana. La utilidad del resumen esta en juntar puntaje, partes y fuente verificable en un formato breve.",
+      "",
+      "## Fuentes",
+      "Fuente citada: registro contractual SECOP II (jbjy-vk9h, C-FIX-01). Esta narrativa grabada se usa como respuesta de prueba sin llamada externa al proveedor externo. Al regenerar el expediente, el verificador debe comprobar las cuatro secciones, la longitud, las entidades mencionadas y la resolucion exacta de cada cita contra el subgrafo."
+    ],
+    "subgraph": {
+      "case_id": "anomaly:fixture-01",
+      "contract_id": "C-FIX-01",
+      "contract_reference": "REF-FIX-01",
+      "process_url": "https://secop.example/C-FIX-01",
+      "buyer_name": "Entidad Norte",
+      "supplier_name": "Proveedor Alfa SAS",
+      "procurement_modality": "Contratacion directa",
+      "contract_value": 187000000.0,
+      "signing_date": "2026-06-01",
+      "anomaly": {
+        "score": 0.925,
+        "score_confidence": "standard",
+        "top_features": ["log_value_z_buyer", "timing_anomaly_score"],
+        "score_run_id": "recorded-score-run",
+        "model_run_id": "recorded-model-run",
+        "scored_at": "2026-06-01T02:00:00+00:00"
+      },
+      "nodes": [
+        {"node_id": "contract:C-FIX-01", "name": "C-FIX-01", "node_type": "contract"},
+        {"node_id": "buyer:01", "name": "Entidad Norte", "node_type": "buyer"},
+        {"node_id": "supplier:01", "name": "Proveedor Alfa SAS", "node_type": "supplier"}
+      ],
+      "signals": [
+        {"signal_id": "fixture-signal-01", "title": "Priorizacion de revision", "severity": "medium", "score": 0.925, "evidence_refs": ["jbjy-vk9h:C-FIX-01"]}
+      ],
+      "evidence": [
+        {"dataset_id": "jbjy-vk9h", "row_key": "C-FIX-01", "label": "SECOP II contract", "url": "https://secop.example/C-FIX-01"}
+      ]
+    }
+  },
+  {
+    "case_id": "anomaly:fixture-02",
+    "recorded_response": [
+      "# Lead",
+      "El contrato C-FIX-02 queda priorizado para revision publica porque el modelo de anomalias asigno una puntuacion de 0.900 al expediente. La lectura se limita a ordenar indicios documentales: no afirma responsabilidad, dolo ni irregularidad. En el subgrafo figuran Entidad Centro como entidad compradora y Proveedor Beta SAS como proveedor registrado. El soporte principal es el registro contractual de SECOP II (jbjy-vk9h, C-FIX-02), que permite volver a la fila usada por el lago curado.",
+      "",
+      "## Evidencia",
+      "La evidencia revisada conecta el identificador del contrato, la modalidad Licitacion publica, el valor reportado y las partes que aparecen en el subgrafo. Esa combinacion permite confirmar que Entidad Centro y Proveedor Beta SAS proceden del mismo registro reproducible, sin agregar nombres externos ni inferencias no citadas. La cita (jbjy-vk9h, C-FIX-02) debe permanecer junto al resumen para que otro analista pueda revisar el proceso original, contrastar el enlace de SECOP II y reconstruir la extraccion con los artefactos del lago.",
+      "",
+      "## Señales",
+      "El puntaje proviene de Isolation Forest y se interpreta como priorizacion, no como dictamen. Los impulsores registrados para este caso incluyen buyer_supplier_concentration y share_of_buyer_total_value_12mo. Esas variables sugieren revisar comparables de valor, historial reciente y comportamiento temporal antes de escalar el caso. Si el expediente se usa en una historia publica, el texto debe conservar el lenguaje de patron observable y no reemplazar la revision humana. La utilidad del resumen esta en juntar puntaje, partes y fuente verificable en un formato breve.",
+      "",
+      "## Fuentes",
+      "Fuente citada: registro contractual SECOP II (jbjy-vk9h, C-FIX-02). Esta narrativa grabada se usa como respuesta de prueba sin llamada externa al proveedor externo. Al regenerar el expediente, el verificador debe comprobar las cuatro secciones, la longitud, las entidades mencionadas y la resolucion exacta de cada cita contra el subgrafo."
+    ],
+    "subgraph": {
+      "case_id": "anomaly:fixture-02",
+      "contract_id": "C-FIX-02",
+      "contract_reference": "REF-FIX-02",
+      "process_url": "https://secop.example/C-FIX-02",
+      "buyer_name": "Entidad Centro",
+      "supplier_name": "Proveedor Beta SAS",
+      "procurement_modality": "Licitacion publica",
+      "contract_value": 224000000.0,
+      "signing_date": "2026-06-02",
+      "anomaly": {
+        "score": 0.9,
+        "score_confidence": "standard",
+        "top_features": ["buyer_supplier_concentration", "share_of_buyer_total_value_12mo"],
+        "score_run_id": "recorded-score-run",
+        "model_run_id": "recorded-model-run",
+        "scored_at": "2026-06-02T02:00:00+00:00"
+      },
+      "nodes": [
+        {"node_id": "contract:C-FIX-02", "name": "C-FIX-02", "node_type": "contract"},
+        {"node_id": "buyer:02", "name": "Entidad Centro", "node_type": "buyer"},
+        {"node_id": "supplier:02", "name": "Proveedor Beta SAS", "node_type": "supplier"}
+      ],
+      "signals": [
+        {"signal_id": "fixture-signal-02", "title": "Priorizacion de revision", "severity": "medium", "score": 0.9, "evidence_refs": ["jbjy-vk9h:C-FIX-02"]}
+      ],
+      "evidence": [
+        {"dataset_id": "jbjy-vk9h", "row_key": "C-FIX-02", "label": "SECOP II contract", "url": "https://secop.example/C-FIX-02"}
+      ]
+    }
+  },
+  {
+    "case_id": "anomaly:fixture-03",
+    "recorded_response": [
+      "# Lead",
+      "El contrato C-FIX-03 queda priorizado para revision publica porque el modelo de anomalias asigno una puntuacion de 0.875 al expediente. La lectura se limita a ordenar indicios documentales: no afirma responsabilidad, dolo ni irregularidad. En el subgrafo figuran Entidad Sur como entidad compradora y Proveedor Gamma SAS como proveedor registrado. El soporte principal es el registro contractual de SECOP II (jbjy-vk9h, C-FIX-03), que permite volver a la fila usada por el lago curado.",
+      "",
+      "## Evidencia",
+      "La evidencia revisada conecta el identificador del contrato, la modalidad Seleccion abreviada, el valor reportado y las partes que aparecen en el subgrafo. Esa combinacion permite confirmar que Entidad Sur y Proveedor Gamma SAS proceden del mismo registro reproducible, sin agregar nombres externos ni inferencias no citadas. La cita (jbjy-vk9h, C-FIX-03) debe permanecer junto al resumen para que otro analista pueda revisar el proceso original, contrastar el enlace de SECOP II y reconstruir la extraccion con los artefactos del lago.",
+      "",
+      "## Señales",
+      "El puntaje proviene de Isolation Forest y se interpreta como priorizacion, no como dictamen. Los impulsores registrados para este caso incluyen log_value_z_modality y modality_value_mismatch. Esas variables sugieren revisar comparables de valor, historial reciente y comportamiento temporal antes de escalar el caso. Si el expediente se usa en una historia publica, el texto debe conservar el lenguaje de patron observable y no reemplazar la revision humana. La utilidad del resumen esta en juntar puntaje, partes y fuente verificable en un formato breve.",
+      "",
+      "## Fuentes",
+      "Fuente citada: registro contractual SECOP II (jbjy-vk9h, C-FIX-03). Esta narrativa grabada se usa como respuesta de prueba sin llamada externa al proveedor externo. Al regenerar el expediente, el verificador debe comprobar las cuatro secciones, la longitud, las entidades mencionadas y la resolucion exacta de cada cita contra el subgrafo."
+    ],
+    "subgraph": {
+      "case_id": "anomaly:fixture-03",
+      "contract_id": "C-FIX-03",
+      "contract_reference": "REF-FIX-03",
+      "process_url": "https://secop.example/C-FIX-03",
+      "buyer_name": "Entidad Sur",
+      "supplier_name": "Proveedor Gamma SAS",
+      "procurement_modality": "Seleccion abreviada",
+      "contract_value": 261000000.0,
+      "signing_date": "2026-06-03",
+      "anomaly": {
+        "score": 0.875,
+        "score_confidence": "low",
+        "top_features": ["log_value_z_modality", "modality_value_mismatch"],
+        "score_run_id": "recorded-score-run",
+        "model_run_id": "recorded-model-run",
+        "scored_at": "2026-06-03T02:00:00+00:00"
+      },
+      "nodes": [
+        {"node_id": "contract:C-FIX-03", "name": "C-FIX-03", "node_type": "contract"},
+        {"node_id": "buyer:03", "name": "Entidad Sur", "node_type": "buyer"},
+        {"node_id": "supplier:03", "name": "Proveedor Gamma SAS", "node_type": "supplier"}
+      ],
+      "signals": [
+        {"signal_id": "fixture-signal-03", "title": "Priorizacion de revision", "severity": "medium", "score": 0.875, "evidence_refs": ["jbjy-vk9h:C-FIX-03"]}
+      ],
+      "evidence": [
+        {"dataset_id": "jbjy-vk9h", "row_key": "C-FIX-03", "label": "SECOP II contract", "url": "https://secop.example/C-FIX-03"}
+      ]
+    }
+  },
+  {
+    "case_id": "anomaly:fixture-04",
+    "recorded_response": [
+      "# Lead",
+      "El contrato C-FIX-04 queda priorizado para revision publica porque el modelo de anomalias asigno una puntuacion de 0.850 al expediente. La lectura se limita a ordenar indicios documentales: no afirma responsabilidad, dolo ni irregularidad. En el subgrafo figuran Entidad Rio como entidad compradora y Proveedor Delta SAS como proveedor registrado. El soporte principal es el registro contractual de SECOP II (jbjy-vk9h, C-FIX-04), que permite volver a la fila usada por el lago curado.",
+      "",
+      "## Evidencia",
+      "La evidencia revisada conecta el identificador del contrato, la modalidad Minima cuantia, el valor reportado y las partes que aparecen en el subgrafo. Esa combinacion permite confirmar que Entidad Rio y Proveedor Delta SAS proceden del mismo registro reproducible, sin agregar nombres externos ni inferencias no citadas. La cita (jbjy-vk9h, C-FIX-04) debe permanecer junto al resumen para que otro analista pueda revisar el proceso original, contrastar el enlace de SECOP II y reconstruir la extraccion con los artefactos del lago.",
+      "",
+      "## Señales",
+      "El puntaje proviene de Isolation Forest y se interpreta como priorizacion, no como dictamen. Los impulsores registrados para este caso incluyen n_prior_contracts_12mo_supplier y buyer_supplier_concentration. Esas variables sugieren revisar comparables de valor, historial reciente y comportamiento temporal antes de escalar el caso. Si el expediente se usa en una historia publica, el texto debe conservar el lenguaje de patron observable y no reemplazar la revision humana. La utilidad del resumen esta en juntar puntaje, partes y fuente verificable en un formato breve.",
+      "",
+      "## Fuentes",
+      "Fuente citada: registro contractual SECOP II (jbjy-vk9h, C-FIX-04). Esta narrativa grabada se usa como respuesta de prueba sin llamada externa al proveedor externo. Al regenerar el expediente, el verificador debe comprobar las cuatro secciones, la longitud, las entidades mencionadas y la resolucion exacta de cada cita contra el subgrafo."
+    ],
+    "subgraph": {
+      "case_id": "anomaly:fixture-04",
+      "contract_id": "C-FIX-04",
+      "contract_reference": "REF-FIX-04",
+      "process_url": "https://secop.example/C-FIX-04",
+      "buyer_name": "Entidad Rio",
+      "supplier_name": "Proveedor Delta SAS",
+      "procurement_modality": "Minima cuantia",
+      "contract_value": 298000000.0,
+      "signing_date": "2026-06-04",
+      "anomaly": {
+        "score": 0.85,
+        "score_confidence": "standard",
+        "top_features": ["n_prior_contracts_12mo_supplier", "buyer_supplier_concentration"],
+        "score_run_id": "recorded-score-run",
+        "model_run_id": "recorded-model-run",
+        "scored_at": "2026-06-04T02:00:00+00:00"
+      },
+      "nodes": [
+        {"node_id": "contract:C-FIX-04", "name": "C-FIX-04", "node_type": "contract"},
+        {"node_id": "buyer:04", "name": "Entidad Rio", "node_type": "buyer"},
+        {"node_id": "supplier:04", "name": "Proveedor Delta SAS", "node_type": "supplier"}
+      ],
+      "signals": [
+        {"signal_id": "fixture-signal-04", "title": "Priorizacion de revision", "severity": "medium", "score": 0.85, "evidence_refs": ["jbjy-vk9h:C-FIX-04"]}
+      ],
+      "evidence": [
+        {"dataset_id": "jbjy-vk9h", "row_key": "C-FIX-04", "label": "SECOP II contract", "url": "https://secop.example/C-FIX-04"}
+      ]
+    }
+  },
+  {
+    "case_id": "anomaly:fixture-05",
+    "recorded_response": [
+      "# Lead",
+      "El contrato C-FIX-05 queda priorizado para revision publica porque el modelo de anomalias asigno una puntuacion de 0.825 al expediente. La lectura se limita a ordenar indicios documentales: no afirma responsabilidad, dolo ni irregularidad. En el subgrafo figuran Entidad Salud como entidad compradora y Proveedor Epsilon SAS como proveedor registrado. El soporte principal es el registro contractual de SECOP II (jbjy-vk9h, C-FIX-05), que permite volver a la fila usada por el lago curado.",
+      "",
+      "## Evidencia",
+      "La evidencia revisada conecta el identificador del contrato, la modalidad Concurso de meritos, el valor reportado y las partes que aparecen en el subgrafo. Esa combinacion permite confirmar que Entidad Salud y Proveedor Epsilon SAS proceden del mismo registro reproducible, sin agregar nombres externos ni inferencias no citadas. La cita (jbjy-vk9h, C-FIX-05) debe permanecer junto al resumen para que otro analista pueda revisar el proceso original, contrastar el enlace de SECOP II y reconstruir la extraccion con los artefactos del lago.",
+      "",
+      "## Señales",
+      "El puntaje proviene de Isolation Forest y se interpreta como priorizacion, no como dictamen. Los impulsores registrados para este caso incluyen timing_anomaly_score y share_of_buyer_total_value_12mo. Esas variables sugieren revisar comparables de valor, historial reciente y comportamiento temporal antes de escalar el caso. Si el expediente se usa en una historia publica, el texto debe conservar el lenguaje de patron observable y no reemplazar la revision humana. La utilidad del resumen esta en juntar puntaje, partes y fuente verificable en un formato breve.",
+      "",
+      "## Fuentes",
+      "Fuente citada: registro contractual SECOP II (jbjy-vk9h, C-FIX-05). Esta narrativa grabada se usa como respuesta de prueba sin llamada externa al proveedor externo. Al regenerar el expediente, el verificador debe comprobar las cuatro secciones, la longitud, las entidades mencionadas y la resolucion exacta de cada cita contra el subgrafo."
+    ],
+    "subgraph": {
+      "case_id": "anomaly:fixture-05",
+      "contract_id": "C-FIX-05",
+      "contract_reference": "REF-FIX-05",
+      "process_url": "https://secop.example/C-FIX-05",
+      "buyer_name": "Entidad Salud",
+      "supplier_name": "Proveedor Epsilon SAS",
+      "procurement_modality": "Concurso de meritos",
+      "contract_value": 335000000.0,
+      "signing_date": "2026-06-05",
+      "anomaly": {
+        "score": 0.825,
+        "score_confidence": "standard",
+        "top_features": ["timing_anomaly_score", "share_of_buyer_total_value_12mo"],
+        "score_run_id": "recorded-score-run",
+        "model_run_id": "recorded-model-run",
+        "scored_at": "2026-06-05T02:00:00+00:00"
+      },
+      "nodes": [
+        {"node_id": "contract:C-FIX-05", "name": "C-FIX-05", "node_type": "contract"},
+        {"node_id": "buyer:05", "name": "Entidad Salud", "node_type": "buyer"},
+        {"node_id": "supplier:05", "name": "Proveedor Epsilon SAS", "node_type": "supplier"}
+      ],
+      "signals": [
+        {"signal_id": "fixture-signal-05", "title": "Priorizacion de revision", "severity": "medium", "score": 0.825, "evidence_refs": ["jbjy-vk9h:C-FIX-05"]}
+      ],
+      "evidence": [
+        {"dataset_id": "jbjy-vk9h", "row_key": "C-FIX-05", "label": "SECOP II contract", "url": "https://secop.example/C-FIX-05"}
+      ]
+    }
+  },
+  {
+    "case_id": "anomaly:fixture-06",
+    "recorded_response": [
+      "# Lead",
+      "El contrato C-FIX-06 queda priorizado para revision publica porque el modelo de anomalias asigno una puntuacion de 0.800 al expediente. La lectura se limita a ordenar indicios documentales: no afirma responsabilidad, dolo ni irregularidad. En el subgrafo figuran Entidad Vial como entidad compradora y Proveedor Zeta SAS como proveedor registrado. El soporte principal es el registro contractual de SECOP II (jbjy-vk9h, C-FIX-06), que permite volver a la fila usada por el lago curado.",
+      "",
+      "## Evidencia",
+      "La evidencia revisada conecta el identificador del contrato, la modalidad Contratacion directa, el valor reportado y las partes que aparecen en el subgrafo. Esa combinacion permite confirmar que Entidad Vial y Proveedor Zeta SAS proceden del mismo registro reproducible, sin agregar nombres externos ni inferencias no citadas. La cita (jbjy-vk9h, C-FIX-06) debe permanecer junto al resumen para que otro analista pueda revisar el proceso original, contrastar el enlace de SECOP II y reconstruir la extraccion con los artefactos del lago.",
+      "",
+      "## Señales",
+      "El puntaje proviene de Isolation Forest y se interpreta como priorizacion, no como dictamen. Los impulsores registrados para este caso incluyen log_value_z_buyer y n_prior_contracts_12mo_buyer. Esas variables sugieren revisar comparables de valor, historial reciente y comportamiento temporal antes de escalar el caso. Si el expediente se usa en una historia publica, el texto debe conservar el lenguaje de patron observable y no reemplazar la revision humana. La utilidad del resumen esta en juntar puntaje, partes y fuente verificable en un formato breve.",
+      "",
+      "## Fuentes",
+      "Fuente citada: registro contractual SECOP II (jbjy-vk9h, C-FIX-06). Esta narrativa grabada se usa como respuesta de prueba sin llamada externa al proveedor externo. Al regenerar el expediente, el verificador debe comprobar las cuatro secciones, la longitud, las entidades mencionadas y la resolucion exacta de cada cita contra el subgrafo."
+    ],
+    "subgraph": {
+      "case_id": "anomaly:fixture-06",
+      "contract_id": "C-FIX-06",
+      "contract_reference": "REF-FIX-06",
+      "process_url": "https://secop.example/C-FIX-06",
+      "buyer_name": "Entidad Vial",
+      "supplier_name": "Proveedor Zeta SAS",
+      "procurement_modality": "Contratacion directa",
+      "contract_value": 372000000.0,
+      "signing_date": "2026-06-06",
+      "anomaly": {
+        "score": 0.8,
+        "score_confidence": "low",
+        "top_features": ["log_value_z_buyer", "n_prior_contracts_12mo_buyer"],
+        "score_run_id": "recorded-score-run",
+        "model_run_id": "recorded-model-run",
+        "scored_at": "2026-06-06T02:00:00+00:00"
+      },
+      "nodes": [
+        {"node_id": "contract:C-FIX-06", "name": "C-FIX-06", "node_type": "contract"},
+        {"node_id": "buyer:06", "name": "Entidad Vial", "node_type": "buyer"},
+        {"node_id": "supplier:06", "name": "Proveedor Zeta SAS", "node_type": "supplier"}
+      ],
+      "signals": [
+        {"signal_id": "fixture-signal-06", "title": "Priorizacion de revision", "severity": "medium", "score": 0.8, "evidence_refs": ["jbjy-vk9h:C-FIX-06"]}
+      ],
+      "evidence": [
+        {"dataset_id": "jbjy-vk9h", "row_key": "C-FIX-06", "label": "SECOP II contract", "url": "https://secop.example/C-FIX-06"}
+      ]
+    }
+  },
+  {
+    "case_id": "anomaly:fixture-07",
+    "recorded_response": [
+      "# Lead",
+      "El contrato C-FIX-07 queda priorizado para revision publica porque el modelo de anomalias asigno una puntuacion de 0.775 al expediente. La lectura se limita a ordenar indicios documentales: no afirma responsabilidad, dolo ni irregularidad. En el subgrafo figuran Entidad Escolar como entidad compradora y Proveedor Eta SAS como proveedor registrado. El soporte principal es el registro contractual de SECOP II (jbjy-vk9h, C-FIX-07), que permite volver a la fila usada por el lago curado.",
+      "",
+      "## Evidencia",
+      "La evidencia revisada conecta el identificador del contrato, la modalidad Licitacion publica, el valor reportado y las partes que aparecen en el subgrafo. Esa combinacion permite confirmar que Entidad Escolar y Proveedor Eta SAS proceden del mismo registro reproducible, sin agregar nombres externos ni inferencias no citadas. La cita (jbjy-vk9h, C-FIX-07) debe permanecer junto al resumen para que otro analista pueda revisar el proceso original, contrastar el enlace de SECOP II y reconstruir la extraccion con los artefactos del lago.",
+      "",
+      "## Señales",
+      "El puntaje proviene de Isolation Forest y se interpreta como priorizacion, no como dictamen. Los impulsores registrados para este caso incluyen modality_value_mismatch y single_bidder. Esas variables sugieren revisar comparables de valor, historial reciente y comportamiento temporal antes de escalar el caso. Si el expediente se usa en una historia publica, el texto debe conservar el lenguaje de patron observable y no reemplazar la revision humana. La utilidad del resumen esta en juntar puntaje, partes y fuente verificable en un formato breve.",
+      "",
+      "## Fuentes",
+      "Fuente citada: registro contractual SECOP II (jbjy-vk9h, C-FIX-07). Esta narrativa grabada se usa como respuesta de prueba sin llamada externa al proveedor externo. Al regenerar el expediente, el verificador debe comprobar las cuatro secciones, la longitud, las entidades mencionadas y la resolucion exacta de cada cita contra el subgrafo."
+    ],
+    "subgraph": {
+      "case_id": "anomaly:fixture-07",
+      "contract_id": "C-FIX-07",
+      "contract_reference": "REF-FIX-07",
+      "process_url": "https://secop.example/C-FIX-07",
+      "buyer_name": "Entidad Escolar",
+      "supplier_name": "Proveedor Eta SAS",
+      "procurement_modality": "Licitacion publica",
+      "contract_value": 409000000.0,
+      "signing_date": "2026-06-07",
+      "anomaly": {
+        "score": 0.775,
+        "score_confidence": "standard",
+        "top_features": ["modality_value_mismatch", "single_bidder"],
+        "score_run_id": "recorded-score-run",
+        "model_run_id": "recorded-model-run",
+        "scored_at": "2026-06-07T02:00:00+00:00"
+      },
+      "nodes": [
+        {"node_id": "contract:C-FIX-07", "name": "C-FIX-07", "node_type": "contract"},
+        {"node_id": "buyer:07", "name": "Entidad Escolar", "node_type": "buyer"},
+        {"node_id": "supplier:07", "name": "Proveedor Eta SAS", "node_type": "supplier"}
+      ],
+      "signals": [
+        {"signal_id": "fixture-signal-07", "title": "Priorizacion de revision", "severity": "medium", "score": 0.775, "evidence_refs": ["jbjy-vk9h:C-FIX-07"]}
+      ],
+      "evidence": [
+        {"dataset_id": "jbjy-vk9h", "row_key": "C-FIX-07", "label": "SECOP II contract", "url": "https://secop.example/C-FIX-07"}
+      ]
+    }
+  },
+  {
+    "case_id": "anomaly:fixture-08",
+    "recorded_response": [
+      "# Lead",
+      "El contrato C-FIX-08 queda priorizado para revision publica porque el modelo de anomalias asigno una puntuacion de 0.750 al expediente. La lectura se limita a ordenar indicios documentales: no afirma responsabilidad, dolo ni irregularidad. En el subgrafo figuran Entidad Ambiental como entidad compradora y Proveedor Theta SAS como proveedor registrado. El soporte principal es el registro contractual de SECOP II (jbjy-vk9h, C-FIX-08), que permite volver a la fila usada por el lago curado.",
+      "",
+      "## Evidencia",
+      "La evidencia revisada conecta el identificador del contrato, la modalidad Seleccion abreviada, el valor reportado y las partes que aparecen en el subgrafo. Esa combinacion permite confirmar que Entidad Ambiental y Proveedor Theta SAS proceden del mismo registro reproducible, sin agregar nombres externos ni inferencias no citadas. La cita (jbjy-vk9h, C-FIX-08) debe permanecer junto al resumen para que otro analista pueda revisar el proceso original, contrastar el enlace de SECOP II y reconstruir la extraccion con los artefactos del lago.",
+      "",
+      "## Señales",
+      "El puntaje proviene de Isolation Forest y se interpreta como priorizacion, no como dictamen. Los impulsores registrados para este caso incluyen buyer_supplier_concentration y prior_sanction_supplier. Esas variables sugieren revisar comparables de valor, historial reciente y comportamiento temporal antes de escalar el caso. Si el expediente se usa en una historia publica, el texto debe conservar el lenguaje de patron observable y no reemplazar la revision humana. La utilidad del resumen esta en juntar puntaje, partes y fuente verificable en un formato breve.",
+      "",
+      "## Fuentes",
+      "Fuente citada: registro contractual SECOP II (jbjy-vk9h, C-FIX-08). Esta narrativa grabada se usa como respuesta de prueba sin llamada externa al proveedor externo. Al regenerar el expediente, el verificador debe comprobar las cuatro secciones, la longitud, las entidades mencionadas y la resolucion exacta de cada cita contra el subgrafo."
+    ],
+    "subgraph": {
+      "case_id": "anomaly:fixture-08",
+      "contract_id": "C-FIX-08",
+      "contract_reference": "REF-FIX-08",
+      "process_url": "https://secop.example/C-FIX-08",
+      "buyer_name": "Entidad Ambiental",
+      "supplier_name": "Proveedor Theta SAS",
+      "procurement_modality": "Seleccion abreviada",
+      "contract_value": 446000000.0,
+      "signing_date": "2026-06-08",
+      "anomaly": {
+        "score": 0.75,
+        "score_confidence": "standard",
+        "top_features": ["buyer_supplier_concentration", "prior_sanction_supplier"],
+        "score_run_id": "recorded-score-run",
+        "model_run_id": "recorded-model-run",
+        "scored_at": "2026-06-08T02:00:00+00:00"
+      },
+      "nodes": [
+        {"node_id": "contract:C-FIX-08", "name": "C-FIX-08", "node_type": "contract"},
+        {"node_id": "buyer:08", "name": "Entidad Ambiental", "node_type": "buyer"},
+        {"node_id": "supplier:08", "name": "Proveedor Theta SAS", "node_type": "supplier"}
+      ],
+      "signals": [
+        {"signal_id": "fixture-signal-08", "title": "Priorizacion de revision", "severity": "medium", "score": 0.75, "evidence_refs": ["jbjy-vk9h:C-FIX-08"]}
+      ],
+      "evidence": [
+        {"dataset_id": "jbjy-vk9h", "row_key": "C-FIX-08", "label": "SECOP II contract", "url": "https://secop.example/C-FIX-08"}
+      ]
+    }
+  },
+  {
+    "case_id": "anomaly:fixture-09",
+    "recorded_response": [
+      "# Lead",
+      "El contrato C-FIX-09 queda priorizado para revision publica porque el modelo de anomalias asigno una puntuacion de 0.725 al expediente. La lectura se limita a ordenar indicios documentales: no afirma responsabilidad, dolo ni irregularidad. En el subgrafo figuran Entidad Digital como entidad compradora y Proveedor Iota SAS como proveedor registrado. El soporte principal es el registro contractual de SECOP II (jbjy-vk9h, C-FIX-09), que permite volver a la fila usada por el lago curado.",
+      "",
+      "## Evidencia",
+      "La evidencia revisada conecta el identificador del contrato, la modalidad Minima cuantia, el valor reportado y las partes que aparecen en el subgrafo. Esa combinacion permite confirmar que Entidad Digital y Proveedor Iota SAS proceden del mismo registro reproducible, sin agregar nombres externos ni inferencias no citadas. La cita (jbjy-vk9h, C-FIX-09) debe permanecer junto al resumen para que otro analista pueda revisar el proceso original, contrastar el enlace de SECOP II y reconstruir la extraccion con los artefactos del lago.",
+      "",
+      "## Señales",
+      "El puntaje proviene de Isolation Forest y se interpreta como priorizacion, no como dictamen. Los impulsores registrados para este caso incluyen log_value_z_modality y timing_anomaly_score. Esas variables sugieren revisar comparables de valor, historial reciente y comportamiento temporal antes de escalar el caso. Si el expediente se usa en una historia publica, el texto debe conservar el lenguaje de patron observable y no reemplazar la revision humana. La utilidad del resumen esta en juntar puntaje, partes y fuente verificable en un formato breve.",
+      "",
+      "## Fuentes",
+      "Fuente citada: registro contractual SECOP II (jbjy-vk9h, C-FIX-09). Esta narrativa grabada se usa como respuesta de prueba sin llamada externa al proveedor externo. Al regenerar el expediente, el verificador debe comprobar las cuatro secciones, la longitud, las entidades mencionadas y la resolucion exacta de cada cita contra el subgrafo."
+    ],
+    "subgraph": {
+      "case_id": "anomaly:fixture-09",
+      "contract_id": "C-FIX-09",
+      "contract_reference": "REF-FIX-09",
+      "process_url": "https://secop.example/C-FIX-09",
+      "buyer_name": "Entidad Digital",
+      "supplier_name": "Proveedor Iota SAS",
+      "procurement_modality": "Minima cuantia",
+      "contract_value": 483000000.0,
+      "signing_date": "2026-06-09",
+      "anomaly": {
+        "score": 0.725,
+        "score_confidence": "low",
+        "top_features": ["log_value_z_modality", "timing_anomaly_score"],
+        "score_run_id": "recorded-score-run",
+        "model_run_id": "recorded-model-run",
+        "scored_at": "2026-06-09T02:00:00+00:00"
+      },
+      "nodes": [
+        {"node_id": "contract:C-FIX-09", "name": "C-FIX-09", "node_type": "contract"},
+        {"node_id": "buyer:09", "name": "Entidad Digital", "node_type": "buyer"},
+        {"node_id": "supplier:09", "name": "Proveedor Iota SAS", "node_type": "supplier"}
+      ],
+      "signals": [
+        {"signal_id": "fixture-signal-09", "title": "Priorizacion de revision", "severity": "medium", "score": 0.725, "evidence_refs": ["jbjy-vk9h:C-FIX-09"]}
+      ],
+      "evidence": [
+        {"dataset_id": "jbjy-vk9h", "row_key": "C-FIX-09", "label": "SECOP II contract", "url": "https://secop.example/C-FIX-09"}
+      ]
+    }
+  },
+  {
+    "case_id": "anomaly:fixture-10",
+    "recorded_response": [
+      "# Lead",
+      "El contrato C-FIX-10 queda priorizado para revision publica porque el modelo de anomalias asigno una puntuacion de 0.700 al expediente. La lectura se limita a ordenar indicios documentales: no afirma responsabilidad, dolo ni irregularidad. En el subgrafo figuran Entidad Rural como entidad compradora y Proveedor Kappa SAS como proveedor registrado. El soporte principal es el registro contractual de SECOP II (jbjy-vk9h, C-FIX-10), que permite volver a la fila usada por el lago curado.",
+      "",
+      "## Evidencia",
+      "La evidencia revisada conecta el identificador del contrato, la modalidad Concurso de meritos, el valor reportado y las partes que aparecen en el subgrafo. Esa combinacion permite confirmar que Entidad Rural y Proveedor Kappa SAS proceden del mismo registro reproducible, sin agregar nombres externos ni inferencias no citadas. La cita (jbjy-vk9h, C-FIX-10) debe permanecer junto al resumen para que otro analista pueda revisar el proceso original, contrastar el enlace de SECOP II y reconstruir la extraccion con los artefactos del lago.",
+      "",
+      "## Señales",
+      "El puntaje proviene de Isolation Forest y se interpreta como priorizacion, no como dictamen. Los impulsores registrados para este caso incluyen share_of_buyer_total_value_12mo y n_prior_contracts_12mo_supplier. Esas variables sugieren revisar comparables de valor, historial reciente y comportamiento temporal antes de escalar el caso. Si el expediente se usa en una historia publica, el texto debe conservar el lenguaje de patron observable y no reemplazar la revision humana. La utilidad del resumen esta en juntar puntaje, partes y fuente verificable en un formato breve.",
+      "",
+      "## Fuentes",
+      "Fuente citada: registro contractual SECOP II (jbjy-vk9h, C-FIX-10). Esta narrativa grabada se usa como respuesta de prueba sin llamada externa al proveedor externo. Al regenerar el expediente, el verificador debe comprobar las cuatro secciones, la longitud, las entidades mencionadas y la resolucion exacta de cada cita contra el subgrafo."
+    ],
+    "subgraph": {
+      "case_id": "anomaly:fixture-10",
+      "contract_id": "C-FIX-10",
+      "contract_reference": "REF-FIX-10",
+      "process_url": "https://secop.example/C-FIX-10",
+      "buyer_name": "Entidad Rural",
+      "supplier_name": "Proveedor Kappa SAS",
+      "procurement_modality": "Concurso de meritos",
+      "contract_value": 520000000.0,
+      "signing_date": "2026-06-10",
+      "anomaly": {
+        "score": 0.7,
+        "score_confidence": "standard",
+        "top_features": ["share_of_buyer_total_value_12mo", "n_prior_contracts_12mo_supplier"],
+        "score_run_id": "recorded-score-run",
+        "model_run_id": "recorded-model-run",
+        "scored_at": "2026-06-10T02:00:00+00:00"
+      },
+      "nodes": [
+        {"node_id": "contract:C-FIX-10", "name": "C-FIX-10", "node_type": "contract"},
+        {"node_id": "buyer:10", "name": "Entidad Rural", "node_type": "buyer"},
+        {"node_id": "supplier:10", "name": "Proveedor Kappa SAS", "node_type": "supplier"}
+      ],
+      "signals": [
+        {"signal_id": "fixture-signal-10", "title": "Priorizacion de revision", "severity": "medium", "score": 0.7, "evidence_refs": ["jbjy-vk9h:C-FIX-10"]}
+      ],
+      "evidence": [
+        {"dataset_id": "jbjy-vk9h", "row_key": "C-FIX-10", "label": "SECOP II contract", "url": "https://secop.example/C-FIX-10"}
+      ]
+    }
+  }
+]

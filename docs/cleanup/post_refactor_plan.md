@@ -1458,12 +1458,12 @@ etl/src/coacc_etl/models/narrator/
 
 ### 11.5 DoD
 
-- [ ] `coacc-etl narrator generate <case_id>` produces a valid
+- [x] `coacc-etl narrator generate <case_id>` produces a valid
       narrative.
-- [ ] 10 fixture subgraphs in `etl/tests/fixtures/subgraphs/` —
+- [x] 10 fixture subgraphs in `etl/tests/fixtures/subgraphs/` —
       all generate-and-verify green.
-- [ ] `docs/ai/generative_narrator.md` model card committed.
-- [ ] Verifier rejects every form of hallucination listed in §11.3.4.
+- [x] `docs/ai/generative_narrator.md` model card committed.
+- [x] Verifier rejects every form of hallucination listed in §11.3.4.
 
 ### 11.6 Risks
 
@@ -1893,6 +1893,11 @@ Format: `YYYY-MM-DD — decision — rationale — links`.
   promoted anomaly score run and writing one verified Markdown narrative per
   selected contract. Existing files are skipped by default for repeatable
   local/demo runs.
+- **2026-06-01** — Phase 14 recorded narrator fixtures now cover 10
+  subgraphs in `etl/tests/fixtures/subgraphs/`, replay provider responses
+  through `generate_narrative` without live LLM calls, and test the verifier
+  against missing sections, entity hallucination, fake datasets, unresolved
+  citations, word-count violations, and forbidden culpability language.
 
 (Append new decisions as they're made. One line per decision.)
 
