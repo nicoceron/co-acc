@@ -36,6 +36,23 @@
   color-scheme: dark;
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   background:
     linear-gradient(var(--coacc-line-1) 1px, transparent 1px),
@@ -44,6 +61,52 @@ body {
   background-size: 80px 80px;
   color: var(--coacc-fg-0);
   font-family: var(--coacc-font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid var(--coacc-line-2);
+  border-radius: var(--coacc-radius);
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--coacc-accent);
+}
+
+.co-error {
+  display: grid;
+  min-height: 60vh;
+  align-content: center;
+  gap: 12px;
+}
+
+.co-error h1 {
+  font-family: var(--coacc-font-display);
+  font-size: 3rem;
+}
+
+.co-error p {
+  color: var(--coacc-fg-2);
 }
 
 .co-page-grid {
