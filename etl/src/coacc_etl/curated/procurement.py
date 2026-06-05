@@ -37,6 +37,7 @@ _DEFAULT_TABLES = (
     "signal_feature_procurement_contract_execution_delay",
     "signal_feature_procurement_short_bidding_window",
     "signal_feature_procurement_offers_competition_drop",
+    "signal_feature_cuentas_claras_donor_supplier_overlap",
     "signal_feature_procurement_politically_exposed_position_supplier_overlap",
     "signal_feature_procurement_related_companies_shared_officer",
     "signal_feature_procurement_cross_source_identity_inconsistency",
@@ -79,6 +80,10 @@ _TABLE_SOURCES = {
     ),
     "signal_feature_procurement_short_bidding_window": ("secop_ii_processes",),
     "signal_feature_procurement_offers_competition_drop": ("secop_ii_processes",),
+    "signal_feature_cuentas_claras_donor_supplier_overlap": (
+        "secop_ii_contracts",
+        "cuentas_claras_income_2019",
+    ),
     "signal_feature_procurement_politically_exposed_position_supplier_overlap": (
         "secop_ii_contracts",
         "company_registry_c82u",
@@ -1972,6 +1977,278 @@ def _create_supplier_identity_views(
     """)
 
 
+def _create_cuentas_claras_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not ({"cuentas_claras_income_2019", "secop_ii_contracts"} <= set(required_sources)):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_cuentas_claras_donor_supplier_overlap AS
+        WITH supplier_exposure AS (
+            SELECT
+                supplier_document_key,
+                any_value(supplier_entity_id) AS supplier_entity_id,
+                any_value(supplier_name) AS supplier_name,
+                count(DISTINCT contract_id) AS post_2019_contract_count,
+                count(DISTINCT buyer_document_id) AS post_2019_buyer_count,
+                sum(coalesce(contract_value, 0.0)) AS post_2019_contract_value,
+                min(signing_date) AS first_post_2019_signing_date,
+                max(signing_date) AS last_post_2019_signing_date
+            FROM curated_contract_awards
+            WHERE supplier_nit_canonical IS NOT NULL
+                AND supplier_document_key IS NOT NULL
+                AND NOT regexp_matches(supplier_document_key, '^0+$')
+                AND signing_date >= DATE '2020-01-01'
+                AND contract_id IS NOT NULL
+                AND contract_value IS NOT NULL
+                AND contract_value > 0
+            GROUP BY supplier_document_key
+        ),
+        contract_evidence_ranked AS (
+            SELECT
+                supplier_document_key,
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id)
+                    AS evidence_ref,
+                contract_value,
+                signing_date,
+                contract_id,
+                row_number() OVER (
+                    PARTITION BY supplier_document_key
+                    ORDER BY contract_value DESC NULLS LAST,
+                        signing_date DESC NULLS LAST,
+                        contract_id
+                ) AS evidence_rank
+            FROM curated_contract_awards
+            WHERE supplier_nit_canonical IS NOT NULL
+                AND supplier_document_key IS NOT NULL
+                AND signing_date >= DATE '2020-01-01'
+                AND contract_id IS NOT NULL
+        ),
+        contract_evidence AS (
+            SELECT
+                supplier_document_key,
+                list(evidence_ref ORDER BY contract_value DESC, signing_date DESC)
+                    AS contract_evidence_refs
+            FROM contract_evidence_ranked
+            WHERE evidence_rank <= 3
+            GROUP BY supplier_document_key
+        ),
+        donor_income AS (
+            SELECT
+                row_number() OVER () AS income_row_id,
+                coacc_document_key(income_party_id, tid_name) AS donor_document_key,
+                coacc_nit_canonical(income_party_id, tid_name) AS donor_nit_canonical,
+                nullif(trim(income_party_id), '') AS donor_document_id,
+                nullif(trim(tid_name), '') AS donor_document_type,
+                nullif(trim(person_name), '') AS donor_name,
+                nullif(trim(candidate_id), '') AS candidate_document_id,
+                nullif(trim(candidate_name), '') AS candidate_name,
+                nullif(trim(cnd_name), '') AS office_name,
+                nullif(trim(class_name), '') AS election_class,
+                nullif(trim(department_name), '') AS campaign_department,
+                nullif(trim(municipality_name), '') AS campaign_municipality,
+                nullif(trim(organization_name), '') AS campaign_organization,
+                nullif(trim(party_coalition), '') AS party_coalition,
+                nullif(trim(cco_id), '') AS campaign_account_id,
+                nullif(trim(tdo_name), '') AS income_type,
+                nullif(trim(income_concept), '') AS income_concept,
+                nullif(trim(income_act), '') AS income_act,
+                nullif(trim(income_voucher), '') AS income_voucher,
+                coacc_money(income_amount) AS income_amount,
+                try_cast(voucher_date AS DATE) AS voucher_date
+            FROM src_cuentas_claras_income_2019
+            WHERE coacc_nit_canonical(income_party_id, tid_name) IS NOT NULL
+                AND coacc_document_key(income_party_id, tid_name) IS NOT NULL
+                AND NOT regexp_matches(
+                    coacc_document_key(income_party_id, tid_name),
+                    '^0+$'
+                )
+        ),
+        donor_rollup AS (
+            SELECT
+                donor_document_key,
+                any_value(donor_nit_canonical) AS donor_nit_canonical,
+                any_value(donor_document_id) AS donor_document_id,
+                any_value(donor_document_type) AS donor_document_type,
+                any_value(donor_name) AS donor_name,
+                coalesce(
+                    candidate_document_id,
+                    campaign_account_id,
+                    campaign_organization,
+                    party_coalition,
+                    'unknown'
+                ) AS campaign_key,
+                any_value(candidate_document_id) AS candidate_document_id,
+                any_value(candidate_name) AS candidate_name,
+                any_value(office_name) AS office_name,
+                any_value(election_class) AS election_class,
+                any_value(campaign_department) AS campaign_department,
+                any_value(campaign_municipality) AS campaign_municipality,
+                any_value(campaign_organization) AS campaign_organization,
+                any_value(party_coalition) AS party_coalition,
+                any_value(campaign_account_id) AS campaign_account_id,
+                count(*) AS income_record_count,
+                count(DISTINCT income_type) FILTER (WHERE income_type IS NOT NULL)
+                    AS income_type_count,
+                sum(coalesce(income_amount, 0.0)) AS total_income_amount,
+                max(coalesce(income_amount, 0.0)) AS max_income_amount,
+                min(voucher_date) FILTER (
+                    WHERE voucher_date BETWEEN DATE '2018-01-01' AND DATE '2021-12-31'
+                ) AS first_valid_voucher_date,
+                max(voucher_date) FILTER (
+                    WHERE voucher_date BETWEEN DATE '2018-01-01' AND DATE '2021-12-31'
+                ) AS last_valid_voucher_date
+            FROM donor_income
+            WHERE income_amount IS NOT NULL
+                AND income_amount > 0
+            GROUP BY
+                donor_document_key,
+                coalesce(
+                    candidate_document_id,
+                    campaign_account_id,
+                    campaign_organization,
+                    party_coalition,
+                    'unknown'
+                )
+        ),
+        donor_evidence_ranked AS (
+            SELECT
+                donor_document_key,
+                coalesce(
+                    candidate_document_id,
+                    campaign_account_id,
+                    campaign_organization,
+                    party_coalition,
+                    'unknown'
+                ) AS campaign_key,
+                'cuentas_claras_income_2019:' || coalesce(
+                    income_voucher,
+                    income_act,
+                    campaign_account_id,
+                    cast(income_row_id AS VARCHAR)
+                ) AS evidence_ref,
+                income_amount,
+                voucher_date,
+                row_number() OVER (
+                    PARTITION BY donor_document_key,
+                        coalesce(
+                            candidate_document_id,
+                            campaign_account_id,
+                            campaign_organization,
+                            party_coalition,
+                            'unknown'
+                        )
+                    ORDER BY income_amount DESC NULLS LAST,
+                        voucher_date DESC NULLS LAST,
+                        income_row_id
+                ) AS evidence_rank
+            FROM donor_income
+            WHERE income_amount IS NOT NULL
+                AND income_amount > 0
+        ),
+        donor_evidence AS (
+            SELECT
+                donor_document_key,
+                campaign_key,
+                list(evidence_ref ORDER BY income_amount DESC, voucher_date DESC)
+                    AS donor_evidence_refs
+            FROM donor_evidence_ranked
+            WHERE evidence_rank <= 3
+            GROUP BY donor_document_key, campaign_key
+        ),
+        eligible AS (
+            SELECT
+                e.supplier_entity_id,
+                e.supplier_document_key,
+                e.supplier_name,
+                e.post_2019_contract_count,
+                e.post_2019_buyer_count,
+                e.post_2019_contract_value,
+                e.first_post_2019_signing_date,
+                e.last_post_2019_signing_date,
+                d.donor_nit_canonical,
+                d.donor_document_id,
+                d.donor_document_type,
+                d.donor_name,
+                d.campaign_key,
+                d.candidate_document_id,
+                d.candidate_name,
+                d.office_name,
+                d.election_class,
+                d.campaign_department,
+                d.campaign_municipality,
+                d.campaign_organization,
+                d.party_coalition,
+                d.campaign_account_id,
+                d.income_record_count,
+                d.income_type_count,
+                d.total_income_amount,
+                d.max_income_amount,
+                d.first_valid_voucher_date,
+                d.last_valid_voucher_date,
+                list_concat(de.donor_evidence_refs, ce.contract_evidence_refs)
+                    AS evidence_refs
+            FROM donor_rollup d
+            JOIN supplier_exposure e
+                ON e.supplier_document_key = d.donor_document_key
+            JOIN donor_evidence de
+                ON de.donor_document_key = d.donor_document_key
+                AND de.campaign_key = d.campaign_key
+            JOIN contract_evidence ce
+                ON ce.supplier_document_key = d.donor_document_key
+            WHERE d.total_income_amount >= 1000000
+                AND e.post_2019_contract_value >= 100000000
+        )
+        SELECT
+            'cuentas_claras_donor_supplier_overlap' AS signal_id,
+            supplier_entity_id AS entity_id,
+            supplier_document_key AS entity_key,
+            'Company' AS entity_label,
+            'election:2019:' || supplier_document_key || ':' || campaign_key AS scope_key,
+            'election' AS scope_type,
+            'medium' AS severity,
+            least(
+                1.0,
+                0.50
+                    + least(log10(greatest(total_income_amount, 1)) / 120.0, 0.18)
+                    + least(log10(greatest(post_2019_contract_value, 1)) / 120.0, 0.18)
+                    + least(post_2019_buyer_count / 50.0, 0.14)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            supplier_name,
+            donor_nit_canonical,
+            donor_document_id,
+            donor_document_type,
+            donor_name,
+            candidate_document_id,
+            candidate_name,
+            office_name,
+            election_class,
+            campaign_department,
+            campaign_municipality,
+            campaign_organization,
+            party_coalition,
+            campaign_account_id,
+            income_record_count,
+            income_type_count,
+            total_income_amount,
+            max_income_amount,
+            first_valid_voucher_date,
+            last_valid_voucher_date,
+            post_2019_contract_count,
+            post_2019_buyer_count,
+            post_2019_contract_value,
+            first_post_2019_signing_date,
+            last_post_2019_signing_date,
+            evidence_refs
+        FROM eligible
+    """)
+
+
 def _create_large_modification_views(
     con: duckdb.DuckDBPyConnection,
     required_sources: Sequence[str],
@@ -2159,6 +2436,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         _create_contract_suspension_views(con, required_sources)
         _create_contract_execution_delay_views(con, required_sources)
         _create_supplier_identity_views(con, required_sources)
+        _create_cuentas_claras_views(con, required_sources)
         _create_large_modification_views(con, required_sources)
         return
 
@@ -2995,6 +3273,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
     """)
     _create_contract_suspension_views(con, required_sources)
     _create_contract_execution_delay_views(con, required_sources)
+    _create_cuentas_claras_views(con, required_sources)
     _create_large_modification_views(con, required_sources)
     con.execute("""
         CREATE OR REPLACE TEMP VIEW curated_repeat_awards_same_supplier AS
@@ -3306,6 +3585,8 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_short_bidding_window"
     if table == "signal_feature_procurement_offers_competition_drop":
         return "SELECT * FROM curated_offers_competition_drop"
+    if table == "signal_feature_cuentas_claras_donor_supplier_overlap":
+        return "SELECT * FROM curated_cuentas_claras_donor_supplier_overlap"
     if table == "signal_feature_procurement_politically_exposed_position_supplier_overlap":
         return "SELECT * FROM curated_politically_exposed_supplier_overlap"
     if table == "signal_feature_procurement_related_companies_shared_officer":

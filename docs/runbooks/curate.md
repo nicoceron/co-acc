@@ -146,13 +146,16 @@ or execution progress gaps on COP 100M+ contracts.
 Cross-source identity inconsistencies are computed from exact-NIT joins between
 RUES company registry records and SECOP supplier registry records, requiring at
 least two mismatch dimensions before emitting reviewer-only hits.
+Cuentas Claras donor/supplier overlaps are computed from exact company-NIT
+joins between 2019 campaign-finance income records and post-2019 SECOP II
+contract exposure.
 Shared-officer clusters are deduplicated by company document and
 representative document before DuckDB groups exposed suppliers into reviewer-only
 clusters.
 
 ## Reality Notes
 
-On the local lake after the 2026-06-05 execution/identity materialization work:
+On the local lake after the 2026-06-05 Cuentas Claras materialization work:
 
 - `dim_subject_document`: 1,215,832 rows
 - `dim_company`: 101,916 rows
@@ -172,6 +175,7 @@ On the local lake after the 2026-06-05 execution/identity materialization work:
 - `signal_feature_procurement_contract_execution_delay`: 48 rows
 - `signal_feature_procurement_short_bidding_window`: 90,592 rows
 - `signal_feature_procurement_offers_competition_drop`: 13 rows
+- `signal_feature_cuentas_claras_donor_supplier_overlap`: 533 rows
 - `signal_feature_procurement_politically_exposed_position_supplier_overlap`: 284 rows
 - `signal_feature_procurement_related_companies_shared_officer`: 1,482 rows
 - `signal_feature_procurement_cross_source_identity_inconsistency`: 50 rows
@@ -231,3 +235,9 @@ rows when an exact-NIT RUES/SECOP supplier match has at least two mismatch
 dimensions across normalized name, legal representative document, or active
 status. Evidence refs include one RUES company record and one SECOP supplier
 registry record.
+
+The Cuentas Claras donor/supplier feature emits public company rows when an
+exact-NIT campaign-finance income contributor has at least COP 1M income
+reported in Cuentas Claras 2019 and at least COP 100M post-2019 SECOP II
+contract exposure. Evidence refs include bounded Cuentas Claras income records
+and SECOP process URLs.

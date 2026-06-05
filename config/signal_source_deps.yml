@@ -130,9 +130,8 @@ signals:
     severity_on_partial: low
   cuentas_claras_donor_supplier_overlap:
     sources: [cuentas_claras_income_2019, secop_ii_contracts]
-    required: [secop_ii_contracts]
-    optional: [cuentas_claras_income_2019]
-    severity_on_partial: low
+    required: [cuentas_claras_income_2019, secop_ii_contracts]
+    optional: []
   procurement_cross_source_identity_inconsistency:
     sources: [company_registry_c82u, secop_suppliers]
     required: [company_registry_c82u, secop_suppliers]

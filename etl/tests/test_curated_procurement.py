@@ -499,6 +499,56 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     )
     _write_rows(
         tmp_path,
+        "jgra-rz2t",
+        [
+            {
+                "candidate_id": "700111222",
+                "cnd_name": "Alcaldia",
+                "class_name": "ALCALDE",
+                "department_name": "NARINO",
+                "municipality_name": "TUMACO",
+                "locality_name": "",
+                "organization_name": "Comite Ciudadano Uno",
+                "candidate_name": "Candidata Uno",
+                "cco_id": "CCO-1",
+                "tpe_name": "Persona Juridica",
+                "person_name": "Proveedor Sancionado SAS",
+                "income_amount": "5000000",
+                "tid_name": "Nit",
+                "income_party_id": "900123456-8",
+                "income_act": "ACT-1",
+                "tdo_name": "Donacion",
+                "party_coalition": "Coalicion Uno",
+                "voucher_date": "2019-08-15T00:00:00",
+                "income_voucher": "VOUCHER-1",
+                "income_concept": "Aporte campana",
+            },
+            {
+                "candidate_id": "700111333",
+                "cnd_name": "Concejo",
+                "class_name": "CONCEJAL",
+                "department_name": "NARINO",
+                "municipality_name": "TUMACO",
+                "locality_name": "",
+                "organization_name": "Comite Control",
+                "candidate_name": "Candidata Control",
+                "cco_id": "CCO-2",
+                "tpe_name": "Persona Juridica",
+                "person_name": "Donante No Proveedor SAS",
+                "income_amount": "9000000",
+                "tid_name": "Nit",
+                "income_party_id": "999999999-9",
+                "income_act": "ACT-2",
+                "tdo_name": "Donacion",
+                "party_coalition": "Coalicion Control",
+                "voucher_date": "2019-08-20T00:00:00",
+                "income_voucher": "VOUCHER-2",
+                "income_concept": "Aporte campana",
+            },
+        ],
+    )
+    _write_rows(
+        tmp_path,
         "p6dx-8zbt",
         [
             {
@@ -767,6 +817,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "signal_feature_procurement_contract_execution_delay",
         "signal_feature_procurement_short_bidding_window",
         "signal_feature_procurement_offers_competition_drop",
+        "signal_feature_cuentas_claras_donor_supplier_overlap",
         "signal_feature_procurement_politically_exposed_position_supplier_overlap",
         "signal_feature_procurement_related_companies_shared_officer",
         "signal_feature_procurement_cross_source_identity_inconsistency",
@@ -789,6 +840,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     assert rows_by_table["signal_feature_procurement_contract_execution_delay"] == 1
     assert rows_by_table["signal_feature_procurement_short_bidding_window"] == 1
     assert rows_by_table["signal_feature_procurement_offers_competition_drop"] == 1
+    assert rows_by_table["signal_feature_cuentas_claras_donor_supplier_overlap"] == 1
     assert (
         rows_by_table[
             "signal_feature_procurement_politically_exposed_position_supplier_overlap"
@@ -971,6 +1023,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     tmp_path
                     / "curated"
                     / "table=signal_feature_procurement_offers_competition_drop"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
+        cuentas_claras_rows = con.execute(
+            "SELECT entity_key, scope_key, donor_name, candidate_name, "
+            "total_income_amount, post_2019_contract_count, post_2019_contract_value, "
+            "evidence_refs[1], evidence_refs[2] "
+            "FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_cuentas_claras_donor_supplier_overlap"
                     / "*.parquet"
                 )
             ],
@@ -1189,6 +1255,19 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             1.0,
             0.0,
             "https://secop.example/PROC-DROP-R-19",
+        )
+    ]
+    assert cuentas_claras_rows == [
+        (
+            "900123456",
+            "election:2019:900123456:700111222",
+            "Proveedor Sancionado SAS",
+            "Candidata Uno",
+            5_000_000.0,
+            1,
+            125_000_000.0,
+            "cuentas_claras_income_2019:VOUCHER-1",
+            "https://secop.example/C-1",
         )
     ]
     assert exposed_position_rows == [

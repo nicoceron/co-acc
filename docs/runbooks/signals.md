@@ -41,6 +41,7 @@ The shipped materializer slice reads:
 - `lake/curated/table=signal_feature_procurement_contract_execution_delay/`
 - `lake/curated/table=signal_feature_procurement_short_bidding_window/`
 - `lake/curated/table=signal_feature_procurement_offers_competition_drop/`
+- `lake/curated/table=signal_feature_cuentas_claras_donor_supplier_overlap/`
 - `lake/curated/table=signal_feature_procurement_politically_exposed_position_supplier_overlap/`
 - `lake/curated/table=signal_feature_procurement_related_companies_shared_officer/`
 - `lake/curated/table=signal_feature_procurement_cross_source_identity_inconsistency/`
@@ -126,8 +127,9 @@ or graph-only location nodes.
 `/api/v1/public/patterns/company/{company_ref}` use the latest materialized
 signal run for mapped signal-backed patterns, including sanctioned supplier
 records, supplier concentration, recurring low-threshold awards, low competition,
-short bidding windows, execution-delay indicators, sensitive-position supplier
-overlap, and shared-officer supplier networks. Public guards still hide
+short bidding windows, execution-delay indicators, campaign-finance donor
+overlap, sensitive-position supplier overlap, and shared-officer supplier
+networks. Public guards still hide
 reviewer-only signals from public
 requests. Reviewer-only materialized signals without pattern mappings are still
 available through reviewer signal/case surfaces, not public pattern routes.
@@ -137,9 +139,9 @@ tables are shipped.
 ## Reality Notes
 
 On the local lake generated during the 2026-06-05
-`phase11-local-20260605-execution-identity` run:
+`phase11-local-20260605-cuentas-claras` run:
 
-- Materialized parquet: 161,172 `signal_hits` rows and 264,342
+- Materialized parquet: 161,705 `signal_hits` rows and 266,455
   `evidence_bundles` rows
 - `procurement_single_bidder_high_value`: 59,757 hits
 - `procurement_large_modifications`: 580 hits
@@ -154,10 +156,11 @@ On the local lake generated during the 2026-06-05
 - `procurement_contract_execution_delay`: 48 hits
 - `procurement_short_bidding_window`: 57,799 hits
 - `procurement_offers_competition_drop`: 13 hits
+- `cuentas_claras_donor_supplier_overlap`: 533 hits
 - `procurement_politically_exposed_position_supplier_overlap`: 249 hits
 - `procurement_related_companies_shared_officer`: 1,482 hits
 - `procurement_cross_source_identity_inconsistency`: 50 hits
 
-The production public catalog currently exposes the 9 public materialized
+The production public catalog currently exposes the 10 public materialized
 signals and hides the 7 reviewer-only materialized signals unless a reviewer
 path explicitly permits them.
