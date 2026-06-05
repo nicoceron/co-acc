@@ -1004,6 +1004,37 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 ]
                 for index in range(42)
             ],
+            *[
+                {
+                    "entity_level": "TERRITORIAL",
+                    "entity_secop_code": "700003",
+                    "entity_name": "Comprador BPIN Prioritario",
+                    "entity_nit": "800444557",
+                    "entity_department": "NARINO",
+                    "entity_municipality": "TUMACO",
+                    "process_status": "Celebrado",
+                    "procurement_modality": "Licitacion publica",
+                    "contract_object": object_text,
+                    "process_object": object_text,
+                    "contract_type": "Obra",
+                    "contract_signing_date": f"2026-03-0{index}",
+                    "contract_start_date": f"2026-03-0{index}",
+                    "contract_end_date": "2026-12-31",
+                    "contract_number": f"BPIN-PRIO-{index}",
+                    "process_number": f"PROC-BPIN-PRIO-{index}",
+                    "contract_value": "10000000000",
+                    "contractor_business_name": "Proveedor BPIN Prioritario SAS",
+                    "contract_url": f"https://secop-integrado.example/BPIN-PRIO-{index}",
+                    "origin": "SECOPII",
+                    "supplier_doc_type": "NIT",
+                    "supplier_document": "901222335-2",
+                }
+                for index, object_text in [
+                    (1, "obra de infraestructura vial prioritaria"),
+                    (2, "construccion de acueducto prioritario"),
+                    (3, "mejoramiento de hospital prioritario"),
+                ]
+            ],
         ],
     )
     _write_rows(
@@ -1049,6 +1080,30 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 "id_proceso": "REQ-BPIN-2",
                 "id_contracto": "BPIN-C-2",
                 "id_portafolio": "PORT-BPIN-2",
+                "validacion_bpin": "Validado",
+            },
+            {
+                "codigo_bpin": "202699990000001",
+                "anno_bpin": "2026",
+                "id_proceso": "REQ-BPIN-PRIO-1",
+                "id_contracto": "BPIN-PRIO-1",
+                "id_portafolio": "PORT-BPIN-PRIO-1",
+                "validacion_bpin": "Validado",
+            },
+            {
+                "codigo_bpin": "202699990000001",
+                "anno_bpin": "2026",
+                "id_proceso": "REQ-BPIN-PRIO-2",
+                "id_contracto": "BPIN-PRIO-2",
+                "id_portafolio": "PORT-BPIN-PRIO-2",
+                "validacion_bpin": "Validado",
+            },
+            {
+                "codigo_bpin": "202699990000001",
+                "anno_bpin": "2026",
+                "id_proceso": "REQ-BPIN-PRIO-3",
+                "id_contracto": "BPIN-PRIO-3",
+                "id_portafolio": "PORT-BPIN-PRIO-3",
                 "validacion_bpin": "Validado",
             },
         ],
@@ -1153,6 +1208,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "signal_feature_procurement_contract_execution_delay",
         "signal_feature_project_bpin_procurement_overlap",
         "signal_feature_project_regalias_execution_procurement_overlap",
+        "signal_feature_bpin_dnp_vs_pida27_obras_prioritarias",
         "signal_feature_procurement_short_bidding_window",
         "signal_feature_procurement_offers_competition_drop",
         "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
@@ -1185,6 +1241,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         rows_by_table["signal_feature_project_regalias_execution_procurement_overlap"]
         == 1
     )
+    assert rows_by_table["signal_feature_bpin_dnp_vs_pida27_obras_prioritarias"] == 1
     assert rows_by_table["signal_feature_procurement_short_bidding_window"] == 1
     assert rows_by_table["signal_feature_procurement_offers_competition_drop"] == 1
     assert (
@@ -1381,6 +1438,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     tmp_path
                     / "curated"
                     / "table=signal_feature_project_regalias_execution_procurement_overlap"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
+        bpin_priority_rows = con.execute(
+            "SELECT entity_key, scope_key, severity, department, municipality, "
+            "priority_contract_count, priority_category_count, "
+            "priority_contract_value, evidence_refs[1], evidence_refs[6] "
+            "FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_bpin_dnp_vs_pida27_obras_prioritarias"
                     / "*.parquet"
                 )
             ],
@@ -1704,6 +1775,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             "sgr_expense_execution:202612345678901:20260901:700001:2.3.2.02",
             "secop_process_bpin:202612345678901:BPIN-C-1",
             "https://secop.example/BPIN-C-1",
+        )
+    ]
+    assert bpin_priority_rows == [
+        (
+            "202699990000001",
+            "bpin_priority_work:202699990000001",
+            "medium",
+            "NARINO",
+            "TUMACO",
+            3,
+            3,
+            30_000_000_000.0,
+            "secop_process_bpin:202699990000001:BPIN-PRIO-1",
+            "https://secop-integrado.example/BPIN-PRIO-1",
         )
     ]
     assert short_window_rows == [

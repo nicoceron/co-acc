@@ -198,10 +198,10 @@ signals:
     optional: [mindeporte_actores]
     severity_on_partial: low
   bpin_dnp_vs_pida27_obras_prioritarias:
-    sources: [secop_process_bpin, dnp_obras_prioritarias, secop_integrado]
-    required: [secop_process_bpin]
-    optional: [dnp_obras_prioritarias, secop_integrado]
-    severity_on_partial: low
+    sources: [secop_process_bpin, secop_integrado]
+    required: [secop_process_bpin, secop_integrado]
+    optional: []
+    severity_on_partial: medium
   pida5_pida27_pida4_chain:
     sources: [secop_integrado, secop_sanctions, dnp_obras_prioritarias]
     required: [secop_integrado, secop_sanctions]

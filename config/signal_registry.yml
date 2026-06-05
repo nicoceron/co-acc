@@ -1020,15 +1020,15 @@ signals:
   - id: bpin_dnp_vs_pida27_obras_prioritarias
     version: 1
     engine: duckdb
-    title: BPIN projects on priority infrastructure list
-    description: Flags BPIN-backed procurement links that also appear in priority infrastructure records.
+    title: BPIN projects with priority-work SECOP awards
+    description: Flags BPIN-backed procurement links where SECOP Integrado records show multiple priority infrastructure or public-work contracts.
     category: projects
     severity: high
     public_safe: true
     public_presentation: territorial
     review_only_expansion: by_entity
-    sources: [secop_process_bpin, dnp_obras_prioritarias, secop_integrado]
-    sources_required: [secop_process_bpin]
+    sources: [secop_process_bpin, secop_integrado]
+    sources_required: [secop_process_bpin, secop_integrado]
     scope_type: project
     dedup_fields: [scope_key]
     runner: {kind: duckdb, ref: bpin_dnp_vs_pida27_obras_prioritarias}

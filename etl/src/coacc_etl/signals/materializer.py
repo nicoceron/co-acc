@@ -40,6 +40,7 @@ SUPPORTED_SIGNAL_IDS = (
     "pida5_pida27_pida4_chain",
     "project_bpin_procurement_overlap",
     "project_regalias_execution_procurement_overlap",
+    "bpin_dnp_vs_pida27_obras_prioritarias",
     "tvec_multi_entity_capture",
     "procurement_politically_exposed_position_supplier_overlap",
     "procurement_related_companies_shared_officer",
@@ -319,7 +320,11 @@ def _evidence_bundles_query(signal_hits_sql: str) -> str:
                 )
                     AND (evidence_ref LIKE 'http://%' OR evidence_ref LIKE 'https://%')
                     THEN 'secop_ii_processes'
-                WHEN signal_id IN ('pida_full30_meta', 'pida5_pida27_pida4_chain')
+                WHEN signal_id IN (
+                    'bpin_dnp_vs_pida27_obras_prioritarias',
+                    'pida_full30_meta',
+                    'pida5_pida27_pida4_chain'
+                )
                     AND (evidence_ref LIKE 'http://%' OR evidence_ref LIKE 'https://%')
                     THEN 'secop_integrado'
                 WHEN evidence_ref LIKE 'http://%' OR evidence_ref LIKE 'https://%'

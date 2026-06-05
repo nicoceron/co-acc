@@ -31,6 +31,7 @@ make curate TABLE=signal_feature_pida_full30_meta
 make curate TABLE=signal_feature_pida5_pida27_pida4_chain
 make curate TABLE=signal_feature_project_bpin_procurement_overlap
 make curate TABLE=signal_feature_project_regalias_execution_procurement_overlap
+make curate TABLE=signal_feature_bpin_dnp_vs_pida27_obras_prioritarias
 make curate TABLE=signal_feature_tvec_multi_entity_capture
 make curate TABLE=signal_feature_procurement_related_companies_shared_officer
 make curate TABLE=dim_company
@@ -77,6 +78,7 @@ make curate LAKE_ROOT=/path/to/lake
 - `lake/curated/table=signal_feature_pida5_pida27_pida4_chain/`
 - `lake/curated/table=signal_feature_project_bpin_procurement_overlap/`
 - `lake/curated/table=signal_feature_project_regalias_execution_procurement_overlap/`
+- `lake/curated/table=signal_feature_bpin_dnp_vs_pida27_obras_prioritarias/`
 - `lake/curated/table=signal_feature_tvec_multi_entity_capture/`
 - `lake/curated/table=signal_feature_procurement_politically_exposed_position_supplier_overlap/`
 - `lake/curated/table=signal_feature_procurement_related_companies_shared_officer/`
@@ -127,6 +129,8 @@ requires `conflict_disclosures` and `secop_ii_contracts`;
 `signal_feature_project_regalias_execution_procurement_overlap` requires
 `sgr_expense_execution`, `sgr_projects`, `secop_process_bpin`, and
 `secop_ii_contracts`;
+`signal_feature_bpin_dnp_vs_pida27_obras_prioritarias` requires
+`secop_process_bpin` and `secop_integrado`;
 `signal_feature_tvec_multi_entity_capture` requires
 `tvec_orders_consolidated` and `secop_ii_contracts`;
 `signal_feature_procurement_related_companies_shared_officer`
@@ -198,6 +202,9 @@ future-dated sanction outliers before aggregating by territory.
 BPIN project-procurement rows are computed from validated numeric BPIN process
 links joined to exact SECOP II contract IDs, then aggregated by BPIN before the
 high-value project cap is applied.
+BPIN priority-work rows are computed from validated numeric BPIN links joined
+to exact SECOP Integrado contract IDs, keeping only projects with multiple
+priority infrastructure or public-work contract records.
 SGR project/procurement rows are computed from SGR project metadata and SGR
 expense-execution amounts joined to the same validated BPIN-to-SECOP contract
 links, requiring both material SGR execution exposure and material procurement
@@ -211,7 +218,7 @@ clusters.
 
 ## Reality Notes
 
-On the local lake after the 2026-06-05 PIDA full30 materialization work:
+On the local lake after the 2026-06-05 BPIN priority-work materialization work:
 
 - `dim_subject_document`: 1,215,832 rows
 - `dim_company`: 101,916 rows
@@ -237,6 +244,7 @@ On the local lake after the 2026-06-05 PIDA full30 materialization work:
 - `signal_feature_pida5_pida27_pida4_chain`: 38 rows
 - `signal_feature_project_bpin_procurement_overlap`: 654 rows
 - `signal_feature_project_regalias_execution_procurement_overlap`: 41 rows
+- `signal_feature_bpin_dnp_vs_pida27_obras_prioritarias`: 796 rows
 - `signal_feature_tvec_multi_entity_capture`: 87 rows
 - `signal_feature_procurement_politically_exposed_position_supplier_overlap`: 284 rows
 - `signal_feature_procurement_related_companies_shared_officer`: 1,482 rows
@@ -269,6 +277,13 @@ The BPIN project feature emits public project rows when validated SECOP
 process-to-BPIN links join to at least two SECOP II contracts and COP 100B total
 contract value. The 2026-06-05 local build produced 654 rows, including 82 high
 severity rows and 572 medium severity rows.
+
+The BPIN priority-work feature emits public project rows when validated SECOP
+process-to-BPIN links join to SECOP Integrado priority infrastructure or
+public-work records with at least 3 contracts and COP 25B linked value. The
+2026-06-05 local build produced 796 rows, including 604 high severity rows and
+192 medium severity rows, covering 162,594 priority-work contracts and COP
+125,718,370,853,838 linked value.
 
 The SGR project/procurement feature emits public project rows when SGR project
 metadata and SGR expense execution join to validated SECOP BPIN links with at
