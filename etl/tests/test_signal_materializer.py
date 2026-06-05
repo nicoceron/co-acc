@@ -398,6 +398,31 @@ def _write_demo_feature_tables(root: Path) -> None:
     )
     _write_feature_rows(
         root,
+        "project_regalias_execution_procurement_overlap",
+        [
+            {
+                "signal_id": "project_regalias_execution_procurement_overlap",
+                "entity_id": "project:202612345678901",
+                "entity_key": "202612345678901",
+                "entity_label": "Project",
+                "scope_key": "sgr_bpin:202612345678901",
+                "scope_type": "project",
+                "severity": "medium",
+                "risk_signal": 0.78,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_BPIN",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "sgr_projects:202612345678901",
+                    "sgr_expense_execution:202612345678901:20260901:700001:2.3.2.02",
+                    "secop_process_bpin:202612345678901:BPIN-C-1",
+                    "https://secop.example/BPIN-C-1",
+                ],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
         "tvec_multi_entity_capture",
         [
             {
@@ -524,8 +549,8 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     result = materialize_signals(run_id="test-run")
 
     assert result.run_id == "test-run"
-    assert result.hit_count == 22
-    assert result.evidence_count == 44
+    assert result.hit_count == 23
+    assert result.evidence_count == 48
     assert {row.signal_id: row.hit_count for row in result.signal_results} == {
         "procurement_single_bidder_high_value": 1,
         "procurement_large_modifications": 1,
@@ -543,6 +568,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "cuentas_claras_donor_supplier_overlap": 1,
         "pida5_pida27_pida4_chain": 1,
         "project_bpin_procurement_overlap": 1,
+        "project_regalias_execution_procurement_overlap": 1,
         "tvec_multi_entity_capture": 1,
         "procurement_politically_exposed_position_supplier_overlap": 1,
         "procurement_public_servant_conflict_disclosure_overlap": 1,
@@ -601,6 +627,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_single_bidder_high_value",
         "procurement_supplier_concentration_across_entities",
         "project_bpin_procurement_overlap",
+        "project_regalias_execution_procurement_overlap",
         "tvec_multi_entity_capture",
     ]
     evidence_counts = {row["signal_id"]: row["evidence_count"] for row in hit_payloads}
@@ -625,6 +652,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_single_bidder_high_value": 1,
         "procurement_supplier_concentration_across_entities": 2,
         "project_bpin_procurement_overlap": 2,
+        "project_regalias_execution_procurement_overlap": 4,
         "tvec_multi_entity_capture": 2,
     }
     single_bidder = next(
@@ -728,6 +756,13 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         if row["url"] == "https://secop.example/BPIN-C-1"
     )
     assert bpin_contract_evidence["source_id"] == "secop_ii_contracts"
+    sgr_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["label"]
+        == "sgr_expense_execution:202612345678901:20260901:700001:2.3.2.02"
+    )
+    assert sgr_evidence["source_id"] == "sgr_expense_execution"
     tvec_evidence = next(
         row
         for row in evidence_payloads
@@ -737,8 +772,8 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
 
     manifest = json.loads((tmp_path / "meta" / "signal_runs" / "test-run.json").read_text())
     assert manifest["status"] == "completed"
-    assert manifest["hit_count"] == 22
-    assert manifest["evidence_count"] == 44
+    assert manifest["hit_count"] == 23
+    assert manifest["evidence_count"] == 48
 
 
 def test_materialize_signals_deduplicates_repeated_feature_rows(
@@ -811,5 +846,5 @@ def test_signals_materialize_cli(
     result = CliRunner().invoke(cli, ["signals", "materialize", "--all", "--run-id", "cli-run"])
 
     assert result.exit_code == 0, result.output
-    assert "signal run cli-run: wrote 22 hits and 44 evidence rows" in result.output
+    assert "signal run cli-run: wrote 23 hits and 48 evidence rows" in result.output
     assert (tmp_path / "meta" / "signal_runs" / "cli-run.json").exists()

@@ -115,3 +115,5 @@ Resource evidence:
 | 2026-06-05T02:40:43.324859+00:00 | `3hdv-smhz` | full | failed | 0 | - | - | 3hdv-smhz is not ingest-ready |
 | 2026-06-05T02:43:18.496328+00:00 | `3hdv-smhz` | full | failed | 0 | - | - | 3hdv-smhz: exceeded max_pages=20 |
 | 2026-06-05T02:45:59.524774+00:00 | `3hdv-smhz` | full | ok | 1400581 | pass | - | - |
+| 2026-06-05T03:50:31.361006+00:00 | `mzgh-shtp` | full | ok | 35006 | pass | - | - |
+| 2026-06-05T03:51:30.956369+00:00 | `qkv4-ek54` | full | ok | 386293 | pass | 2025-09-01T00:00:00+00:00 | - |

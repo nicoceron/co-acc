@@ -34,10 +34,10 @@ signals:
     optional: [dnp_project_contract_links, dnp_project_locations]
     severity_on_partial: medium
   project_regalias_execution_procurement_overlap:
-    sources: [sgr_expense_execution, sgr_projects, dnp_project_contract_links, secop_process_bpin]
-    required: [secop_process_bpin]
-    optional: [sgr_expense_execution, sgr_projects, dnp_project_contract_links]
-    severity_on_partial: low
+    sources: [sgr_expense_execution, sgr_projects, secop_process_bpin]
+    required: [sgr_expense_execution, sgr_projects, secop_process_bpin]
+    optional: []
+    severity_on_partial: medium
   judicial_case_contract_overlap:
     sources: [judicial_providencias, secop_ii_contracts]
     required: [secop_ii_contracts]

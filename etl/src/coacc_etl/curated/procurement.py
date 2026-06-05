@@ -36,6 +36,7 @@ _DEFAULT_TABLES = (
     "signal_feature_procurement_contract_suspensions",
     "signal_feature_procurement_contract_execution_delay",
     "signal_feature_project_bpin_procurement_overlap",
+    "signal_feature_project_regalias_execution_procurement_overlap",
     "signal_feature_procurement_short_bidding_window",
     "signal_feature_procurement_offers_competition_drop",
     "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
@@ -83,6 +84,12 @@ _TABLE_SOURCES = {
         "secop_ii_contracts",
     ),
     "signal_feature_project_bpin_procurement_overlap": (
+        "secop_process_bpin",
+        "secop_ii_contracts",
+    ),
+    "signal_feature_project_regalias_execution_procurement_overlap": (
+        "sgr_expense_execution",
+        "sgr_projects",
         "secop_process_bpin",
         "secop_ii_contracts",
     ),
@@ -1992,6 +1999,359 @@ def _create_project_bpin_views(
     """)
 
 
+def _create_project_regalias_execution_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not (
+        {
+            "sgr_expense_execution",
+            "sgr_projects",
+            "secop_process_bpin",
+            "secop_ii_contracts",
+        }
+        <= set(required_sources)
+    ):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_project_regalias_execution_procurement_overlap AS
+        WITH bpin_links AS (
+            SELECT DISTINCT
+                nullif(trim(codigo_bpin), '') AS bpin_code,
+                nullif(trim(anno_bpin), '') AS bpin_year,
+                nullif(trim(id_proceso), '') AS process_id,
+                nullif(trim(id_contracto), '') AS contract_id,
+                nullif(trim(id_portafolio), '') AS portfolio_id,
+                nullif(trim(validacion_bpin), '') AS validation_status
+            FROM src_secop_process_bpin
+            WHERE nullif(trim(codigo_bpin), '') IS NOT NULL
+                AND nullif(trim(id_contracto), '') IS NOT NULL
+                AND lower(trim(coalesce(id_contracto, ''))) != 'no definido'
+                AND regexp_matches(nullif(trim(codigo_bpin), ''), '^[0-9]{8,}$')
+                AND NOT regexp_matches(nullif(trim(codigo_bpin), ''), '^0+$')
+                AND lower(coalesce(validacion_bpin, '')) NOT LIKE '%no validado%'
+        ),
+        contract_joined AS (
+            SELECT *
+            FROM (
+                SELECT
+                    b.bpin_code,
+                    b.bpin_year,
+                    b.process_id AS bpin_process_id,
+                    b.contract_id,
+                    b.portfolio_id,
+                    b.validation_status,
+                    c.supplier_document_key,
+                    c.supplier_name,
+                    c.buyer_document_id,
+                    c.buyer_name,
+                    c.department,
+                    c.city AS municipality,
+                    c.sector,
+                    c.contract_reference,
+                    c.process_url,
+                    c.contract_value,
+                    c.signing_date,
+                    row_number() OVER (
+                        PARTITION BY b.bpin_code, b.contract_id
+                        ORDER BY c.contract_value DESC NULLS LAST,
+                            c.signing_date DESC NULLS LAST,
+                            c.award_row_id
+                    ) AS contract_rank
+                FROM bpin_links b
+                JOIN curated_contract_awards c
+                    ON c.contract_id = b.contract_id
+                WHERE c.contract_value IS NOT NULL
+                    AND c.contract_value > 0
+            )
+            WHERE contract_rank = 1
+        ),
+        contract_rollup AS (
+            SELECT
+                bpin_code,
+                min(bpin_year) AS bpin_year,
+                count(DISTINCT contract_id) AS contract_count,
+                count(DISTINCT supplier_document_key)
+                    FILTER (WHERE supplier_document_key IS NOT NULL)
+                    AS supplier_count,
+                count(DISTINCT buyer_document_id)
+                    FILTER (WHERE buyer_document_id IS NOT NULL)
+                    AS buyer_count,
+                count(DISTINCT coalesce(department, ''))
+                    FILTER (WHERE department IS NOT NULL)
+                    AS department_count,
+                sum(contract_value) AS total_contract_value,
+                max(contract_value) AS max_contract_value,
+                min(signing_date) AS first_signing_date,
+                max(signing_date) AS last_signing_date
+            FROM contract_joined
+            GROUP BY bpin_code
+        ),
+        expense_raw AS (
+            SELECT
+                nullif(trim(bpin), '') AS bpin_code,
+                nullif(trim(period), '') AS period_code,
+                try_strptime(nullif(trim(period), ''), '%Y%m%d') AS period_date,
+                nullif(trim(entity_code), '') AS entity_code,
+                nullif(trim(entity_name), '') AS entity_name,
+                nullif(trim(account), '') AS account,
+                nullif(trim(account_name), '') AS account_name,
+                try_cast(replace(cast(commitments AS VARCHAR), ',', '.') AS DOUBLE)
+                    AS commitments_value,
+                try_cast(replace(cast(obligations AS VARCHAR), ',', '.') AS DOUBLE)
+                    AS obligations_value,
+                try_cast(replace(cast(payments AS VARCHAR), ',', '.') AS DOUBLE)
+                    AS payments_value
+            FROM src_sgr_expense_execution
+            WHERE regexp_matches(nullif(trim(bpin), ''), '^[0-9]{8,}$')
+                AND NOT regexp_matches(nullif(trim(bpin), ''), '^0+$')
+        ),
+        expense_rollup AS (
+            SELECT
+                bpin_code,
+                count(*) AS expense_row_count,
+                count(DISTINCT entity_code)
+                    FILTER (WHERE entity_code IS NOT NULL)
+                    AS execution_entity_count,
+                sum(coalesce(commitments_value, 0)) AS commitments_total,
+                sum(coalesce(obligations_value, 0)) AS obligations_total,
+                sum(coalesce(payments_value, 0)) AS payments_total,
+                min(period_date) AS first_execution_period,
+                max(period_date) AS last_execution_period
+            FROM expense_raw
+            GROUP BY bpin_code
+        ),
+        project_rollup AS (
+            SELECT
+                nullif(trim(codigobpin), '') AS bpin_code,
+                any_value(nullif(trim(nombre), '')) AS project_title,
+                any_value(nullif(trim(estado), '')) AS project_status,
+                any_value(nullif(trim(departamento), '')) AS project_department,
+                any_value(nullif(trim(sector), '')) AS project_sector,
+                any_value(nullif(trim(codejecutor), '')) AS executor_code,
+                any_value(nullif(trim(entidadejecutora), '')) AS executor_name,
+                max(try_cast(replace(cast(valortotal AS VARCHAR), ',', '.') AS DOUBLE))
+                    AS project_total_value,
+                max(
+                    try_cast(replace(cast(ejecucionfinanciera AS VARCHAR), ',', '.') AS DOUBLE)
+                ) AS financial_execution_pct,
+                max(
+                    try_cast(replace(cast(ejecucionfisica AS VARCHAR), ',', '.') AS DOUBLE)
+                ) AS physical_execution_pct
+            FROM src_sgr_projects
+            WHERE regexp_matches(nullif(trim(codigobpin), ''), '^[0-9]{8,}$')
+                AND NOT regexp_matches(nullif(trim(codigobpin), ''), '^0+$')
+            GROUP BY nullif(trim(codigobpin), '')
+        ),
+        joined AS (
+            SELECT
+                c.bpin_code,
+                c.bpin_year,
+                p.project_title,
+                p.project_status,
+                p.project_department,
+                p.project_sector,
+                p.executor_code,
+                p.executor_name,
+                p.project_total_value,
+                p.financial_execution_pct,
+                p.physical_execution_pct,
+                c.contract_count,
+                c.supplier_count,
+                c.buyer_count,
+                c.department_count,
+                c.total_contract_value,
+                c.max_contract_value,
+                c.first_signing_date,
+                c.last_signing_date,
+                e.expense_row_count,
+                e.execution_entity_count,
+                e.commitments_total,
+                e.obligations_total,
+                e.payments_total,
+                greatest(
+                    coalesce(e.commitments_total, 0),
+                    coalesce(e.obligations_total, 0),
+                    coalesce(e.payments_total, 0)
+                ) AS max_sgr_execution_value,
+                e.first_execution_period,
+                e.last_execution_period
+            FROM contract_rollup c
+            JOIN expense_rollup e
+                ON e.bpin_code = c.bpin_code
+            JOIN project_rollup p
+                ON p.bpin_code = c.bpin_code
+            WHERE c.contract_count >= 2
+                AND c.total_contract_value >= 50000000000
+                AND greatest(
+                    coalesce(e.commitments_total, 0),
+                    coalesce(e.obligations_total, 0),
+                    coalesce(e.payments_total, 0)
+                ) >= 50000000000
+        ),
+        project_evidence AS (
+            SELECT
+                bpin_code,
+                ['sgr_projects:' || bpin_code] AS project_evidence_refs
+            FROM joined
+        ),
+        expense_evidence_ranked AS (
+            SELECT
+                bpin_code,
+                'sgr_expense_execution:' || bpin_code || ':' ||
+                    coalesce(period_code, 'period') || ':' ||
+                    coalesce(entity_code, 'entity') || ':' ||
+                    coalesce(account, 'account') AS evidence_ref,
+                greatest(
+                    coalesce(commitments_value, 0),
+                    coalesce(obligations_value, 0),
+                    coalesce(payments_value, 0)
+                ) AS execution_value,
+                period_date,
+                row_number() OVER (
+                    PARTITION BY bpin_code
+                    ORDER BY greatest(
+                            coalesce(commitments_value, 0),
+                            coalesce(obligations_value, 0),
+                            coalesce(payments_value, 0)
+                        ) DESC NULLS LAST,
+                        period_date DESC NULLS LAST,
+                        entity_code,
+                        account
+                ) AS evidence_rank
+            FROM expense_raw
+        ),
+        expense_evidence AS (
+            SELECT
+                bpin_code,
+                list(evidence_ref ORDER BY execution_value DESC, period_date DESC, evidence_ref)
+                    AS expense_evidence_refs
+            FROM expense_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY bpin_code
+        ),
+        bpin_evidence_ranked AS (
+            SELECT
+                bpin_code,
+                'secop_process_bpin:' || bpin_code || ':' || contract_id
+                    AS evidence_ref,
+                contract_value,
+                contract_id,
+                row_number() OVER (
+                    PARTITION BY bpin_code
+                    ORDER BY contract_value DESC NULLS LAST, contract_id
+                ) AS evidence_rank
+            FROM contract_joined
+        ),
+        bpin_evidence AS (
+            SELECT
+                bpin_code,
+                list(evidence_ref ORDER BY contract_value DESC, evidence_ref)
+                    AS bpin_evidence_refs
+            FROM bpin_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY bpin_code
+        ),
+        contract_evidence_ranked AS (
+            SELECT
+                bpin_code,
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id)
+                    AS evidence_ref,
+                contract_value,
+                signing_date,
+                contract_id,
+                row_number() OVER (
+                    PARTITION BY bpin_code
+                    ORDER BY contract_value DESC NULLS LAST,
+                        signing_date DESC NULLS LAST,
+                        contract_id
+                ) AS evidence_rank
+            FROM contract_joined
+        ),
+        contract_evidence AS (
+            SELECT
+                bpin_code,
+                list(evidence_ref ORDER BY contract_value DESC, signing_date DESC, contract_id)
+                    AS contract_evidence_refs
+            FROM contract_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY bpin_code
+        )
+        SELECT
+            'project_regalias_execution_procurement_overlap' AS signal_id,
+            'project:' || j.bpin_code AS entity_id,
+            j.bpin_code AS entity_key,
+            'Project' AS entity_label,
+            'sgr_bpin:' || j.bpin_code AS scope_key,
+            'project' AS scope_type,
+            CASE
+                WHEN j.total_contract_value >= 100000000000
+                    AND j.max_sgr_execution_value >= 100000000000
+                    THEN 'high'
+                ELSE 'medium'
+            END AS severity,
+            least(
+                1.0,
+                0.50
+                    + least(log10(greatest(j.total_contract_value, 1)) / 120.0, 0.16)
+                    + least(log10(greatest(j.max_sgr_execution_value, 1)) / 120.0, 0.16)
+                    + least(j.contract_count / 1000.0, 0.10)
+                    + least(j.expense_row_count / 100.0, 0.08)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_BPIN' AS identity_match_type,
+            'exact' AS identity_quality,
+            j.bpin_year,
+            j.project_title,
+            j.project_status,
+            j.project_department,
+            j.project_sector,
+            j.executor_code,
+            j.executor_name,
+            j.project_total_value,
+            j.financial_execution_pct,
+            j.physical_execution_pct,
+            j.contract_count,
+            j.supplier_count,
+            j.buyer_count,
+            j.department_count,
+            j.total_contract_value,
+            j.max_contract_value,
+            j.first_signing_date,
+            j.last_signing_date,
+            j.expense_row_count,
+            j.execution_entity_count,
+            j.commitments_total,
+            j.obligations_total,
+            j.payments_total,
+            j.max_sgr_execution_value,
+            j.first_execution_period,
+            j.last_execution_period,
+            list_concat(
+                list_concat(
+                    list_concat(pe.project_evidence_refs, ee.expense_evidence_refs),
+                    be.bpin_evidence_refs
+                ),
+                ce.contract_evidence_refs
+            ) AS evidence_refs
+        FROM joined j
+        JOIN project_evidence pe
+            ON pe.bpin_code = j.bpin_code
+        JOIN expense_evidence ee
+            ON ee.bpin_code = j.bpin_code
+        JOIN bpin_evidence be
+            ON be.bpin_code = j.bpin_code
+        JOIN contract_evidence ce
+            ON ce.bpin_code = j.bpin_code
+        QUALIFY row_number() OVER (
+            ORDER BY j.total_contract_value DESC NULLS LAST,
+                j.max_sgr_execution_value DESC NULLS LAST,
+                j.bpin_code
+        ) <= 1000
+    """)
+
+
 def _create_tvec_multi_entity_capture_views(
     con: duckdb.DuckDBPyConnection,
     required_sources: Sequence[str],
@@ -3402,6 +3762,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         _create_contract_suspension_views(con, required_sources)
         _create_contract_execution_delay_views(con, required_sources)
         _create_project_bpin_views(con, required_sources)
+        _create_project_regalias_execution_views(con, required_sources)
         _create_supplier_identity_views(con, required_sources)
         _create_cuentas_claras_views(con, required_sources)
         _create_public_servant_conflict_disclosure_views(con, required_sources)
@@ -4244,6 +4605,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
     _create_contract_suspension_views(con, required_sources)
     _create_contract_execution_delay_views(con, required_sources)
     _create_project_bpin_views(con, required_sources)
+    _create_project_regalias_execution_views(con, required_sources)
     _create_cuentas_claras_views(con, required_sources)
     _create_public_servant_conflict_disclosure_views(con, required_sources)
     _create_pida_chain_views(con, required_sources)
@@ -4557,6 +4919,8 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_contract_execution_delay"
     if table == "signal_feature_project_bpin_procurement_overlap":
         return "SELECT * FROM curated_project_bpin_procurement_overlap"
+    if table == "signal_feature_project_regalias_execution_procurement_overlap":
+        return "SELECT * FROM curated_project_regalias_execution_procurement_overlap"
     if table == "signal_feature_procurement_short_bidding_window":
         return "SELECT * FROM curated_short_bidding_window"
     if table == "signal_feature_procurement_offers_competition_drop":

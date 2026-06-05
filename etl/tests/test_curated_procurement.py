@@ -1010,6 +1010,63 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     )
     _write_rows(
         tmp_path,
+        "qkv4-ek54",
+        [
+            {
+                "period": "20260901",
+                "entity_code": "700001",
+                "entity_name": "Gobernacion Proyecto SGR",
+                "account": "2.3.2.02",
+                "account_name": "Inversion",
+                "scope_code": "A461",
+                "cpc_code": "0",
+                "cpc_name": "NO APLICA",
+                "sector_code": "24",
+                "sector_name": "Transporte",
+                "funding_sources_code": "4",
+                "funding_sources_name": "Asignaciones directas",
+                "resource_type_code": "2",
+                "resource_type_name": "Disponibilidad inicial",
+                "mga_program_code": "2402",
+                "mga_program_name": "Infraestructura vial",
+                "bpin": "202612345678901",
+                "thirdparty_code": "700001",
+                "thirdparty_name": "Gobernacion Proyecto SGR",
+                "public_policy_code": "0",
+                "public_policy_name": "NO APLICA",
+                "fund_situation_code": "1",
+                "fund_situation_name": "Con situacion de fondos",
+                "commitments": "60000000000",
+                "obligations": "55000000000",
+                "payments": "52000000000",
+            }
+        ],
+    )
+    _write_rows(
+        tmp_path,
+        "mzgh-shtp",
+        [
+            {
+                "codigobpin": "202612345678901",
+                "nombre": "Proyecto SGR con contratacion validada",
+                "estado": "EJECUCION",
+                "valortotal": "130000000000.00",
+                "codejecutor": "700001",
+                "entidadejecutora": "Gobernacion Proyecto SGR",
+                "departamento": "BOGOTA",
+                "ejecucionfinanciera": "42",
+                "nomocad": "OCAD TEST",
+                "interventor": "Interventor Test",
+                "proyecto_paz": "NO",
+                "proyecto_grupo_etnico": "Sin Enfoque Diferencial",
+                "proyecto_covid": "NO",
+                "sector": "Transporte",
+                "ejecucionfisica": "38",
+            }
+        ],
+    )
+    _write_rows(
+        tmp_path,
         "3hdv-smhz",
         [
             {
@@ -1050,6 +1107,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "signal_feature_procurement_contract_suspensions",
         "signal_feature_procurement_contract_execution_delay",
         "signal_feature_project_bpin_procurement_overlap",
+        "signal_feature_project_regalias_execution_procurement_overlap",
         "signal_feature_procurement_short_bidding_window",
         "signal_feature_procurement_offers_competition_drop",
         "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
@@ -1077,6 +1135,10 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     assert rows_by_table["signal_feature_procurement_contract_suspensions"] == 1
     assert rows_by_table["signal_feature_procurement_contract_execution_delay"] == 1
     assert rows_by_table["signal_feature_project_bpin_procurement_overlap"] == 1
+    assert (
+        rows_by_table["signal_feature_project_regalias_execution_procurement_overlap"]
+        == 1
+    )
     assert rows_by_table["signal_feature_procurement_short_bidding_window"] == 1
     assert rows_by_table["signal_feature_procurement_offers_competition_drop"] == 1
     assert (
@@ -1258,6 +1320,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     tmp_path
                     / "curated"
                     / "table=signal_feature_project_bpin_procurement_overlap"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
+        regalias_project_rows = con.execute(
+            "SELECT entity_key, scope_key, severity, project_title, contract_count, "
+            "total_contract_value, expense_row_count, commitments_total, "
+            "max_sgr_execution_value, evidence_refs[1], evidence_refs[2], "
+            "evidence_refs[3], evidence_refs[5] FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_project_regalias_execution_procurement_overlap"
                     / "*.parquet"
                 )
             ],
@@ -1548,6 +1624,23 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             2,
             1,
             120_000_000_000.0,
+            "secop_process_bpin:202612345678901:BPIN-C-1",
+            "https://secop.example/BPIN-C-1",
+        )
+    ]
+    assert regalias_project_rows == [
+        (
+            "202612345678901",
+            "sgr_bpin:202612345678901",
+            "medium",
+            "Proyecto SGR con contratacion validada",
+            2,
+            120_000_000_000.0,
+            1,
+            60_000_000_000.0,
+            60_000_000_000.0,
+            "sgr_projects:202612345678901",
+            "sgr_expense_execution:202612345678901:20260901:700001:2.3.2.02",
             "secop_process_bpin:202612345678901:BPIN-C-1",
             "https://secop.example/BPIN-C-1",
         )

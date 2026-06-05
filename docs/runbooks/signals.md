@@ -45,6 +45,7 @@ The shipped materializer slice reads:
 - `lake/curated/table=signal_feature_cuentas_claras_donor_supplier_overlap/`
 - `lake/curated/table=signal_feature_pida5_pida27_pida4_chain/`
 - `lake/curated/table=signal_feature_project_bpin_procurement_overlap/`
+- `lake/curated/table=signal_feature_project_regalias_execution_procurement_overlap/`
 - `lake/curated/table=signal_feature_tvec_multi_entity_capture/`
 - `lake/curated/table=signal_feature_procurement_politically_exposed_position_supplier_overlap/`
 - `lake/curated/table=signal_feature_procurement_related_companies_shared_officer/`
@@ -143,9 +144,9 @@ tables are shipped.
 ## Reality Notes
 
 On the local lake generated during the 2026-06-05
-`phase11-local-20260605-tvec-capture` run:
+`phase11-local-20260605-sgr-projects` run:
 
-- Materialized parquet: 162,549 `signal_hits` rows and 274,157
+- Materialized parquet: 162,590 `signal_hits` rows and 274,689
   `evidence_bundles` rows
 - `procurement_single_bidder_high_value`: 59,757 hits
 - `procurement_large_modifications`: 580 hits
@@ -164,11 +165,12 @@ On the local lake generated during the 2026-06-05
 - `cuentas_claras_donor_supplier_overlap`: 533 hits
 - `pida5_pida27_pida4_chain`: 38 hits
 - `project_bpin_procurement_overlap`: 654 hits
+- `project_regalias_execution_procurement_overlap`: 41 hits
 - `tvec_multi_entity_capture`: 87 hits
 - `procurement_politically_exposed_position_supplier_overlap`: 249 hits
 - `procurement_related_companies_shared_officer`: 1,482 hits
 - `procurement_cross_source_identity_inconsistency`: 50 hits
 
-The production public catalog currently exposes the 14 public materialized
+The production public catalog currently exposes the 15 public materialized
 signals and hides the 7 reviewer-only materialized signals unless a reviewer
 path explicitly permits them.
