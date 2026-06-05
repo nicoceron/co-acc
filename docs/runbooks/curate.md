@@ -27,6 +27,7 @@ make curate TABLE=signal_feature_procurement_cartel_risk_cobidding
 make curate TABLE=signal_feature_procurement_payment_plan_anomalies
 make curate TABLE=signal_feature_procurement_contract_suspensions
 make curate TABLE=signal_feature_procurement_public_servant_conflict_disclosure_overlap
+make curate TABLE=signal_feature_pida5_pida27_pida4_chain
 make curate TABLE=signal_feature_procurement_related_companies_shared_officer
 make curate TABLE=dim_company
 make curate TABLE=dim_buyer
@@ -68,6 +69,7 @@ make curate LAKE_ROOT=/path/to/lake
 - `lake/curated/table=signal_feature_procurement_offers_competition_drop/`
 - `lake/curated/table=signal_feature_procurement_public_servant_conflict_disclosure_overlap/`
 - `lake/curated/table=signal_feature_cuentas_claras_donor_supplier_overlap/`
+- `lake/curated/table=signal_feature_pida5_pida27_pida4_chain/`
 - `lake/curated/table=signal_feature_procurement_politically_exposed_position_supplier_overlap/`
 - `lake/curated/table=signal_feature_procurement_related_companies_shared_officer/`
 - `lake/curated/table=signal_feature_procurement_cross_source_identity_inconsistency/`
@@ -84,6 +86,8 @@ The full default builder requires:
 - `secop_suppliers`, resolved from raw source `qmzu-gj57`
 - `conflict_disclosures`, resolved from raw source `gbry-rnq4`
 - `cuentas_claras_income_2019`, resolved from raw source `jgra-rz2t`
+- `secop_integrado`, resolved from raw source `rpmr-utcd`
+- `secop_sanctions`, resolved from raw source `it5q-hg94`
 - `paco_sanctions`
 - `company_registry_c82u`, resolved from raw source `c82u-588k`
 - `5u9e-g5w9` (SIGEP corruption-sensitive posts)
@@ -103,6 +107,8 @@ requires only `secop_ii_contracts` for the current contract-field partial;
 `signal_feature_procurement_cartel_risk_cobidding` requires only `secop_offers` and `secop_ii_processes`;
 `signal_feature_procurement_public_servant_conflict_disclosure_overlap`
 requires `conflict_disclosures` and `secop_ii_contracts`;
+`signal_feature_pida5_pida27_pida4_chain` requires
+`secop_integrado` and `secop_sanctions`;
 `signal_feature_procurement_related_companies_shared_officer`
 requires only `secop_ii_contracts` and `company_registry_c82u`.
 
@@ -163,13 +169,16 @@ Public-servant conflict-disclosure overlaps are computed from exact
 person-document joins between affirmative conflict disclosures and aggregate
 SECOP II person-supplier exposure, with exposure aggregated before disclosure
 selection to avoid duplicated contract value across multiple declaration forms.
+PIDA sanctioned-infrastructure chain rows are computed from exact contract-id
+joins between SECOP Integrado contracts and SECOP II sanctions, excluding
+future-dated sanction outliers before aggregating by territory.
 Shared-officer clusters are deduplicated by company document and
 representative document before DuckDB groups exposed suppliers into reviewer-only
 clusters.
 
 ## Reality Notes
 
-On the local lake after the 2026-06-05 conflict-disclosure materialization work:
+On the local lake after the 2026-06-05 SECOP sanctions/PIDA materialization work:
 
 - `dim_subject_document`: 1,215,832 rows
 - `dim_company`: 101,916 rows
@@ -191,6 +200,7 @@ On the local lake after the 2026-06-05 conflict-disclosure materialization work:
 - `signal_feature_procurement_offers_competition_drop`: 13 rows
 - `signal_feature_procurement_public_servant_conflict_disclosure_overlap`: 65 rows
 - `signal_feature_cuentas_claras_donor_supplier_overlap`: 533 rows
+- `signal_feature_pida5_pida27_pida4_chain`: 38 rows
 - `signal_feature_procurement_politically_exposed_position_supplier_overlap`: 284 rows
 - `signal_feature_procurement_related_companies_shared_officer`: 1,482 rows
 - `signal_feature_procurement_cross_source_identity_inconsistency`: 50 rows

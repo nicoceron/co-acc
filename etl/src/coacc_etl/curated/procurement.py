@@ -39,6 +39,7 @@ _DEFAULT_TABLES = (
     "signal_feature_procurement_offers_competition_drop",
     "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
     "signal_feature_cuentas_claras_donor_supplier_overlap",
+    "signal_feature_pida5_pida27_pida4_chain",
     "signal_feature_procurement_politically_exposed_position_supplier_overlap",
     "signal_feature_procurement_related_companies_shared_officer",
     "signal_feature_procurement_cross_source_identity_inconsistency",
@@ -88,6 +89,10 @@ _TABLE_SOURCES = {
     "signal_feature_cuentas_claras_donor_supplier_overlap": (
         "secop_ii_contracts",
         "cuentas_claras_income_2019",
+    ),
+    "signal_feature_pida5_pida27_pida4_chain": (
+        "secop_integrado",
+        "secop_sanctions",
     ),
     "signal_feature_procurement_politically_exposed_position_supplier_overlap": (
         "secop_ii_contracts",
@@ -2481,6 +2486,271 @@ def _create_public_servant_conflict_disclosure_views(
     """)
 
 
+def _create_pida_chain_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not ({"secop_integrado", "secop_sanctions"} <= set(required_sources)):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_pida5_pida27_pida4_chain AS
+        WITH sanctions AS (
+            SELECT
+                nullif(trim(contract_id), '') AS contract_id,
+                nullif(trim(process_id), '') AS sanction_process_id,
+                nullif(trim(process_reference), '') AS sanction_process_reference,
+                coalesce(
+                    nullif(trim(act_number), ''),
+                    nullif(trim(process_id), ''),
+                    nullif(trim(contract_id), '')
+                ) AS sanction_record_id,
+                nullif(trim(entity_id), '') AS sanction_entity_id,
+                nullif(trim(entity_name), '') AS sanction_entity_name,
+                nullif(trim(supplier_code), '') AS sanction_supplier_code,
+                nullif(trim(supplier_name), '') AS sanction_supplier_name,
+                coacc_money(amount) AS sanction_amount,
+                coacc_money(amount_paid) AS sanction_amount_paid,
+                try_cast(event_date AS DATE) AS sanction_event_date,
+                nullif(trim(applied_warranties), '') AS applied_warranties,
+                nullif(trim(sanction_type), '') AS sanction_type,
+                nullif(trim(status), '') AS sanction_status,
+                nullif(trim(type), '') AS sanction_event_type,
+                nullif(trim(version_number), '') AS sanction_version_number
+            FROM src_secop_sanctions
+            WHERE nullif(trim(contract_id), '') IS NOT NULL
+                AND (
+                    try_cast(event_date AS DATE) IS NULL
+                    OR try_cast(event_date AS DATE) <= current_date
+                )
+        ),
+        integrated_contracts AS (
+            SELECT *
+            FROM (
+                SELECT
+                    nullif(trim(contract_number), '') AS contract_id,
+                    nullif(trim(process_number), '') AS process_id,
+                    coacc_document_key(supplier_document, supplier_doc_type)
+                        AS supplier_document_key,
+                    coacc_nit_canonical(supplier_document, supplier_doc_type)
+                        AS supplier_nit_canonical,
+                    coacc_cedula_key(supplier_document, supplier_doc_type)
+                        AS supplier_person_key,
+                    nullif(trim(supplier_document), '') AS supplier_document_id,
+                    nullif(trim(supplier_doc_type), '') AS supplier_doc_type,
+                    nullif(trim(contractor_business_name), '') AS supplier_name,
+                    nullif(trim(entity_secop_code), '') AS buyer_secop_code,
+                    nullif(trim(entity_nit), '') AS buyer_document_id,
+                    nullif(trim(entity_name), '') AS buyer_name,
+                    coalesce(nullif(trim(entity_department), ''), 'NACIONAL')
+                        AS department,
+                    coalesce(nullif(trim(entity_municipality), ''), 'NACIONAL')
+                        AS municipality,
+                    nullif(trim(entity_level), '') AS entity_level,
+                    nullif(trim(process_status), '') AS process_status,
+                    nullif(trim(procurement_modality), '') AS procurement_modality,
+                    nullif(trim(contract_type), '') AS contract_type,
+                    nullif(trim(origin), '') AS origin,
+                    nullif(trim(contract_object), '') AS contract_object,
+                    nullif(trim(process_object), '') AS process_object,
+                    coacc_money(contract_value) AS contract_value,
+                    try_cast(contract_signing_date AS DATE) AS signing_date,
+                    try_cast(contract_start_date AS DATE) AS contract_start_date,
+                    try_cast(contract_end_date AS DATE) AS contract_end_date,
+                    coacc_reference_url(contract_url) AS contract_url,
+                    row_number() OVER (
+                        PARTITION BY nullif(trim(contract_number), '')
+                        ORDER BY coacc_money(contract_value) DESC NULLS LAST,
+                            try_cast(contract_signing_date AS DATE) DESC NULLS LAST
+                    ) AS contract_rank
+                FROM src_secop_integrado
+                WHERE nullif(trim(contract_number), '') IS NOT NULL
+                    AND coacc_money(contract_value) IS NOT NULL
+                    AND coacc_money(contract_value) > 0
+            )
+            WHERE contract_rank = 1
+        ),
+        joined AS (
+            SELECT
+                c.*,
+                s.sanction_process_id,
+                s.sanction_process_reference,
+                s.sanction_record_id,
+                s.sanction_entity_id,
+                s.sanction_entity_name,
+                s.sanction_supplier_code,
+                s.sanction_supplier_name,
+                s.sanction_amount,
+                s.sanction_amount_paid,
+                s.sanction_event_date,
+                s.applied_warranties,
+                s.sanction_type,
+                s.sanction_status,
+                s.sanction_event_type,
+                s.sanction_version_number,
+                department || ':' || municipality AS territory_key
+            FROM sanctions s
+            JOIN integrated_contracts c
+                ON c.contract_id = s.contract_id
+        ),
+        rollup AS (
+            SELECT
+                territory_key,
+                any_value(department) AS department,
+                any_value(municipality) AS municipality,
+                count(*) AS sanction_event_count,
+                count(DISTINCT contract_id) AS sanctioned_contract_count,
+                count(DISTINCT supplier_document_key)
+                    FILTER (WHERE supplier_document_key IS NOT NULL)
+                    AS sanctioned_supplier_count,
+                count(DISTINCT buyer_document_id)
+                    FILTER (WHERE buyer_document_id IS NOT NULL)
+                    AS buyer_count,
+                sum(contract_value) AS sanctioned_contract_value,
+                sum(coalesce(sanction_amount, 0.0)) AS sanction_amount_total,
+                max(contract_value) AS max_contract_value,
+                min(signing_date) AS first_contract_signing_date,
+                max(signing_date) AS last_contract_signing_date,
+                min(sanction_event_date) AS first_sanction_event_date,
+                max(sanction_event_date) AS last_sanction_event_date
+            FROM joined
+            GROUP BY territory_key
+        ),
+        sanction_evidence_ranked AS (
+            SELECT
+                territory_key,
+                'secop_sanctions:' || sanction_record_id AS evidence_ref,
+                coalesce(sanction_amount, 0.0) AS sanction_amount,
+                sanction_event_date,
+                contract_value,
+                row_number() OVER (
+                    PARTITION BY territory_key
+                    ORDER BY coalesce(sanction_amount, 0.0) DESC,
+                        contract_value DESC NULLS LAST,
+                        sanction_event_date DESC NULLS LAST,
+                        sanction_record_id
+                ) AS evidence_rank
+            FROM joined
+            WHERE sanction_record_id IS NOT NULL
+        ),
+        sanction_evidence AS (
+            SELECT
+                territory_key,
+                list(evidence_ref ORDER BY sanction_amount DESC, contract_value DESC)
+                    AS sanction_evidence_refs
+            FROM sanction_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY territory_key
+        ),
+        contract_evidence_ranked AS (
+            SELECT
+                territory_key,
+                coalesce(contract_url, 'secop_integrado:' || contract_id)
+                    AS evidence_ref,
+                contract_value,
+                signing_date,
+                contract_id,
+                row_number() OVER (
+                    PARTITION BY territory_key
+                    ORDER BY contract_value DESC NULLS LAST,
+                        signing_date DESC NULLS LAST,
+                        contract_id
+                ) AS evidence_rank
+            FROM joined
+            WHERE contract_id IS NOT NULL
+        ),
+        contract_evidence AS (
+            SELECT
+                territory_key,
+                list(evidence_ref ORDER BY contract_value DESC, signing_date DESC)
+                    AS contract_evidence_refs
+            FROM contract_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY territory_key
+        ),
+        supplier_samples_ranked AS (
+            SELECT
+                territory_key,
+                coalesce(supplier_name, sanction_supplier_name, supplier_document_key)
+                    AS supplier_sample,
+                sum(contract_value) AS supplier_contract_value,
+                row_number() OVER (
+                    PARTITION BY territory_key
+                    ORDER BY sum(contract_value) DESC NULLS LAST,
+                        coalesce(supplier_name, sanction_supplier_name, supplier_document_key)
+                ) AS sample_rank
+            FROM joined
+            GROUP BY territory_key,
+                coalesce(supplier_name, sanction_supplier_name, supplier_document_key)
+        ),
+        supplier_samples AS (
+            SELECT
+                territory_key,
+                list(supplier_sample ORDER BY supplier_contract_value DESC, supplier_sample)
+                    AS supplier_sample
+            FROM supplier_samples_ranked
+            WHERE sample_rank <= 10
+            GROUP BY territory_key
+        )
+        SELECT
+            'pida5_pida27_pida4_chain' AS signal_id,
+            'territory:' || r.territory_key AS entity_id,
+            r.territory_key AS entity_key,
+            'Territory' AS entity_label,
+            'pida5_pida27_pida4_chain:' || r.territory_key AS scope_key,
+            'territory' AS scope_type,
+            CASE
+                WHEN r.sanctioned_contract_value >= 1000000000000
+                    OR r.sanction_event_count >= 25
+                    THEN 'critical'
+                WHEN r.sanctioned_contract_value >= 10000000000
+                    OR r.sanction_event_count >= 5
+                    THEN 'high'
+                ELSE 'medium'
+            END AS severity,
+            least(
+                1.0,
+                0.55
+                    + least(log10(greatest(r.sanctioned_contract_value, 1)) / 120.0, 0.18)
+                    + least(r.sanction_event_count / 100.0, 0.15)
+                    + least(r.sanctioned_supplier_count / 50.0, 0.07)
+                    + least(r.buyer_count / 50.0, 0.05)
+            ) AS risk_signal,
+            0.9 AS identity_confidence,
+            'EXACT_CONTRACT_KEY_AGGREGATE' AS identity_match_type,
+            'aggregate' AS identity_quality,
+            r.department,
+            r.municipality,
+            r.sanction_event_count,
+            r.sanctioned_contract_count,
+            r.sanctioned_supplier_count,
+            r.buyer_count,
+            r.sanctioned_contract_value,
+            r.sanction_amount_total,
+            r.max_contract_value,
+            r.first_contract_signing_date,
+            r.last_contract_signing_date,
+            r.first_sanction_event_date,
+            r.last_sanction_event_date,
+            s.supplier_sample,
+            list_concat(se.sanction_evidence_refs, ce.contract_evidence_refs)
+                AS evidence_refs
+        FROM rollup r
+        JOIN sanction_evidence se
+            ON se.territory_key = r.territory_key
+        JOIN contract_evidence ce
+            ON ce.territory_key = r.territory_key
+        LEFT JOIN supplier_samples s
+            ON s.territory_key = r.territory_key
+        WHERE r.sanctioned_contract_value >= 100000000
+        QUALIFY row_number() OVER (
+            ORDER BY r.sanctioned_contract_value DESC NULLS LAST,
+                r.sanction_event_count DESC,
+                r.territory_key
+        ) <= 1000
+    """)
+
+
 def _create_large_modification_views(
     con: duckdb.DuckDBPyConnection,
     required_sources: Sequence[str],
@@ -2670,6 +2940,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         _create_supplier_identity_views(con, required_sources)
         _create_cuentas_claras_views(con, required_sources)
         _create_public_servant_conflict_disclosure_views(con, required_sources)
+        _create_pida_chain_views(con, required_sources)
         _create_large_modification_views(con, required_sources)
         return
 
@@ -3508,6 +3779,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
     _create_contract_execution_delay_views(con, required_sources)
     _create_cuentas_claras_views(con, required_sources)
     _create_public_servant_conflict_disclosure_views(con, required_sources)
+    _create_pida_chain_views(con, required_sources)
     _create_large_modification_views(con, required_sources)
     con.execute("""
         CREATE OR REPLACE TEMP VIEW curated_repeat_awards_same_supplier AS
@@ -3823,6 +4095,8 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_public_servant_conflict_disclosure_overlap"
     if table == "signal_feature_cuentas_claras_donor_supplier_overlap":
         return "SELECT * FROM curated_cuentas_claras_donor_supplier_overlap"
+    if table == "signal_feature_pida5_pida27_pida4_chain":
+        return "SELECT * FROM curated_pida5_pida27_pida4_chain"
     if table == "signal_feature_procurement_politically_exposed_position_supplier_overlap":
         return "SELECT * FROM curated_politically_exposed_supplier_overlap"
     if table == "signal_feature_procurement_related_companies_shared_officer":

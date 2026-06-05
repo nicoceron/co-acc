@@ -889,6 +889,61 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             }
         ],
     )
+    _write_rows(
+        tmp_path,
+        "rpmr-utcd",
+        [
+            {
+                "entity_level": "TERRITORIAL",
+                "entity_secop_code": "700001",
+                "entity_name": "Comprador Integrado",
+                "entity_nit": "800444555",
+                "entity_department": "BOGOTA",
+                "entity_municipality": "BOGOTA",
+                "process_status": "Celebrado",
+                "procurement_modality": "Licitacion publica",
+                "contract_object": "Obra prioritaria con sancion",
+                "process_object": "Obra prioritaria con sancion",
+                "contract_type": "Obra",
+                "contract_signing_date": "2026-05-01",
+                "contract_start_date": "2026-05-02",
+                "contract_end_date": "2026-12-31",
+                "contract_number": "INT-1",
+                "process_number": "PROC-INT-1",
+                "contract_value": "150000000",
+                "contractor_business_name": "Proveedor Integrado SAS",
+                "contract_url": "https://secop-integrado.example/INT-1",
+                "origin": "SECOPII",
+                "supplier_doc_type": "NIT",
+                "supplier_document": "901222333-4",
+            }
+        ],
+    )
+    _write_rows(
+        tmp_path,
+        "it5q-hg94",
+        [
+            {
+                "process_id": "CO1.BDOS.TEST",
+                "process_reference": "REF-SAN-1",
+                "contract_id": "INT-1",
+                "entity_id": "700001",
+                "entity_name": "Comprador Integrado",
+                "supplier_code": "901222333",
+                "supplier_name": "Proveedor Integrado SAS",
+                "amount": "10000000",
+                "amount_paid": "10000000",
+                "event_date": "2026-05-20",
+                "applied_warranties": "False",
+                "act_number": "ACT-SAN-1",
+                "sanction_type": "Multa",
+                "description_other_type": "",
+                "status": "Publicado",
+                "type": "Incumplimiento",
+                "version_number": "1",
+            }
+        ],
+    )
 
     results = build_curated()
 
@@ -913,6 +968,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "signal_feature_procurement_offers_competition_drop",
         "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
         "signal_feature_cuentas_claras_donor_supplier_overlap",
+        "signal_feature_pida5_pida27_pida4_chain",
         "signal_feature_procurement_politically_exposed_position_supplier_overlap",
         "signal_feature_procurement_related_companies_shared_officer",
         "signal_feature_procurement_cross_source_identity_inconsistency",
@@ -942,6 +998,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         == 1
     )
     assert rows_by_table["signal_feature_cuentas_claras_donor_supplier_overlap"] == 1
+    assert rows_by_table["signal_feature_pida5_pida27_pida4_chain"] == 1
     assert (
         rows_by_table[
             "signal_feature_procurement_politically_exposed_position_supplier_overlap"
@@ -1152,6 +1209,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     tmp_path
                     / "curated"
                     / "table=signal_feature_cuentas_claras_donor_supplier_overlap"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
+        pida_chain_rows = con.execute(
+            "SELECT entity_key, scope_key, severity, department, municipality, "
+            "sanction_event_count, sanctioned_contract_count, "
+            "sanctioned_contract_value, evidence_refs[1], evidence_refs[2] "
+            "FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_pida5_pida27_pida4_chain"
                     / "*.parquet"
                 )
             ],
@@ -1397,6 +1468,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             125_000_000.0,
             "cuentas_claras_income_2019:VOUCHER-1",
             "https://secop.example/C-1",
+        )
+    ]
+    assert pida_chain_rows == [
+        (
+            "BOGOTA:BOGOTA",
+            "pida5_pida27_pida4_chain:BOGOTA:BOGOTA",
+            "medium",
+            "BOGOTA",
+            "BOGOTA",
+            1,
+            1,
+            150_000_000.0,
+            "secop_sanctions:ACT-SAN-1",
+            "https://secop-integrado.example/INT-1",
         )
     ]
     assert exposed_position_rows == [

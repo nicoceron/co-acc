@@ -352,6 +352,29 @@ def _write_demo_feature_tables(root: Path) -> None:
     )
     _write_feature_rows(
         root,
+        "pida5_pida27_pida4_chain",
+        [
+            {
+                "signal_id": "pida5_pida27_pida4_chain",
+                "entity_id": "territory:BOGOTA:BOGOTA",
+                "entity_key": "BOGOTA:BOGOTA",
+                "entity_label": "Territory",
+                "scope_key": "pida5_pida27_pida4_chain:BOGOTA:BOGOTA",
+                "scope_type": "territory",
+                "severity": "medium",
+                "risk_signal": 0.81,
+                "identity_confidence": 0.9,
+                "identity_match_type": "EXACT_CONTRACT_KEY_AGGREGATE",
+                "identity_quality": "aggregate",
+                "evidence_refs": [
+                    "secop_sanctions:ACT-SAN-1",
+                    "https://secop-integrado.example/INT-1",
+                ],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
         "procurement_politically_exposed_position_supplier_overlap",
         [
             {
@@ -455,8 +478,8 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     result = materialize_signals(run_id="test-run")
 
     assert result.run_id == "test-run"
-    assert result.hit_count == 19
-    assert result.evidence_count == 38
+    assert result.hit_count == 20
+    assert result.evidence_count == 40
     assert {row.signal_id: row.hit_count for row in result.signal_results} == {
         "procurement_single_bidder_high_value": 1,
         "procurement_large_modifications": 1,
@@ -472,6 +495,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_short_bidding_window": 1,
         "procurement_offers_competition_drop": 1,
         "cuentas_claras_donor_supplier_overlap": 1,
+        "pida5_pida27_pida4_chain": 1,
         "procurement_politically_exposed_position_supplier_overlap": 1,
         "procurement_public_servant_conflict_disclosure_overlap": 1,
         "procurement_related_companies_shared_officer": 1,
@@ -509,6 +533,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     EvidenceBundleRow.model_validate(evidence_payloads[0])
     assert [row["signal_id"] for row in hit_payloads] == [
         "cuentas_claras_donor_supplier_overlap",
+        "pida5_pida27_pida4_chain",
         "procurement_buyer_supplier_network_density",
         "procurement_cartel_risk_cobidding",
         "procurement_cartel_risk_cobidding",
@@ -536,6 +561,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_contract_suspensions": 3,
         "procurement_cross_source_identity_inconsistency": 2,
         "cuentas_claras_donor_supplier_overlap": 2,
+        "pida5_pida27_pida4_chain": 2,
         "procurement_payment_plan_anomalies": 1,
         "procurement_large_modifications": 2,
         "procurement_offers_competition_drop": 2,
@@ -626,11 +652,23 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         if row["label"] == "conflict_disclosures:FORM-1"
     )
     assert disclosure_evidence["source_id"] == "conflict_disclosures"
+    secop_sanction_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["label"] == "secop_sanctions:ACT-SAN-1"
+    )
+    assert secop_sanction_evidence["source_id"] == "secop_sanctions"
+    secop_integrado_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["url"] == "https://secop-integrado.example/INT-1"
+    )
+    assert secop_integrado_evidence["source_id"] == "secop_integrado"
 
     manifest = json.loads((tmp_path / "meta" / "signal_runs" / "test-run.json").read_text())
     assert manifest["status"] == "completed"
-    assert manifest["hit_count"] == 19
-    assert manifest["evidence_count"] == 38
+    assert manifest["hit_count"] == 20
+    assert manifest["evidence_count"] == 40
 
 
 def test_materialize_signals_deduplicates_repeated_feature_rows(
@@ -703,5 +741,5 @@ def test_signals_materialize_cli(
     result = CliRunner().invoke(cli, ["signals", "materialize", "--all", "--run-id", "cli-run"])
 
     assert result.exit_code == 0, result.output
-    assert "signal run cli-run: wrote 19 hits and 38 evidence rows" in result.output
+    assert "signal run cli-run: wrote 20 hits and 40 evidence rows" in result.output
     assert (tmp_path / "meta" / "signal_runs" / "cli-run.json").exists()

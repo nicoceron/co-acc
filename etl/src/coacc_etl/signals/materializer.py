@@ -36,6 +36,7 @@ SUPPORTED_SIGNAL_IDS = (
     "procurement_offers_competition_drop",
     "procurement_public_servant_conflict_disclosure_overlap",
     "cuentas_claras_donor_supplier_overlap",
+    "pida5_pida27_pida4_chain",
     "procurement_politically_exposed_position_supplier_overlap",
     "procurement_related_companies_shared_officer",
     "procurement_cross_source_identity_inconsistency",
@@ -314,6 +315,9 @@ def _evidence_bundles_query(signal_hits_sql: str) -> str:
                 )
                     AND (evidence_ref LIKE 'http://%' OR evidence_ref LIKE 'https://%')
                     THEN 'secop_ii_processes'
+                WHEN signal_id = 'pida5_pida27_pida4_chain'
+                    AND (evidence_ref LIKE 'http://%' OR evidence_ref LIKE 'https://%')
+                    THEN 'secop_integrado'
                 WHEN evidence_ref LIKE 'http://%' OR evidence_ref LIKE 'https://%'
                     THEN 'secop_ii_contracts'
                 WHEN strpos(evidence_ref, ':') > 0 THEN split_part(evidence_ref, ':', 1)
