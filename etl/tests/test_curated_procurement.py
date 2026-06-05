@@ -1008,6 +1008,27 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             },
         ],
     )
+    _write_rows(
+        tmp_path,
+        "3hdv-smhz",
+        [
+            {
+                "order_id": f"TVEC-{index}",
+                "order_date": f"2026-05-{(index % 28) + 1:02d}",
+                "buyer_name": f"Comprador TVEC {index % 50}",
+                "buyer_nit": f"810{index % 50:06d}",
+                "supplier_name": "Proveedor Red Densa SAS",
+                "supplier_nit": "906000111-6",
+                "item_name": "Item TVEC QA",
+                "unit_price": "10000000",
+                "quantity": "1",
+                "unit": "Unidad",
+                "line_total": str(20_000_000 if index == 0 else 10_000_000),
+                "cdp": f"CDP-TVEC-{index}",
+            }
+            for index in range(100)
+        ],
+    )
 
     results = build_curated()
 
@@ -1035,6 +1056,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "signal_feature_cuentas_claras_donor_supplier_overlap",
         "signal_feature_pida5_pida27_pida4_chain",
         "signal_feature_procurement_politically_exposed_position_supplier_overlap",
+        "signal_feature_tvec_multi_entity_capture",
         "signal_feature_procurement_related_companies_shared_officer",
         "signal_feature_procurement_cross_source_identity_inconsistency",
     }
@@ -1065,6 +1087,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     )
     assert rows_by_table["signal_feature_cuentas_claras_donor_supplier_overlap"] == 1
     assert rows_by_table["signal_feature_pida5_pida27_pida4_chain"] == 1
+    assert rows_by_table["signal_feature_tvec_multi_entity_capture"] == 1
     assert (
         rows_by_table[
             "signal_feature_procurement_politically_exposed_position_supplier_overlap"
@@ -1303,6 +1326,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     tmp_path
                     / "curated"
                     / "table=signal_feature_pida5_pida27_pida4_chain"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
+        tvec_capture_rows = con.execute(
+            "SELECT entity_key, scope_key, severity, tvec_order_count, "
+            "tvec_buyer_count, tvec_total_value, secop_contract_count, "
+            "secop_total_contract_value, evidence_refs[1], evidence_refs[6] "
+            "FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_tvec_multi_entity_capture"
                     / "*.parquet"
                 )
             ],
@@ -1576,6 +1613,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             150_000_000.0,
             "secop_sanctions:ACT-SAN-1",
             "https://secop-integrado.example/INT-1",
+        )
+    ]
+    assert tvec_capture_rows == [
+        (
+            "906000111",
+            "tvec_supplier:906000111",
+            "medium",
+            100,
+            50,
+            1_010_000_000.0,
+            50,
+            5_000_000_000.0,
+            "tvec_orders_consolidated:TVEC-0",
+            "https://secop.example/CN-0-0",
         )
     ]
     assert exposed_position_rows == [

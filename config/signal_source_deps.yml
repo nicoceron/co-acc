@@ -60,9 +60,9 @@ signals:
     severity_on_partial: low
   tvec_multi_entity_capture:
     sources: [tvec_orders_consolidated, secop_ii_contracts]
-    required: [secop_ii_contracts]
-    optional: [tvec_orders_consolidated]
-    severity_on_partial: low
+    required: [tvec_orders_consolidated, secop_ii_contracts]
+    optional: []
+    severity_on_partial: medium
   procurement_contract_suspensions:
     sources: [secop_contract_suspensions, secop_ii_contracts]
     required: [secop_ii_contracts]

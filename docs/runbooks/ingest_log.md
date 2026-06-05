@@ -112,3 +112,6 @@ Resource evidence:
 | 2026-06-05T01:45:09.455477+00:00 | `gbry-rnq4` | full | ok | 328799 | pass | 2022-12-13T14:57:31.146000+00:00 | - |
 | 2026-06-05T02:06:26.172367+00:00 | `it5q-hg94` | full | ok | 538 | pass | 2026-05-28T00:00:00+00:00 | - |
 | 2026-06-05T02:25:10.355918+00:00 | `d9na-abhe` | full | ok | 2450545 | pass | - | - |
+| 2026-06-05T02:40:43.324859+00:00 | `3hdv-smhz` | full | failed | 0 | - | - | 3hdv-smhz is not ingest-ready |
+| 2026-06-05T02:43:18.496328+00:00 | `3hdv-smhz` | full | failed | 0 | - | - | 3hdv-smhz: exceeded max_pages=20 |
+| 2026-06-05T02:45:59.524774+00:00 | `3hdv-smhz` | full | ok | 1400581 | pass | - | - |

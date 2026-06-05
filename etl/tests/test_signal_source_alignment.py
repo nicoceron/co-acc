@@ -46,7 +46,6 @@ _KNOWN_DEFERRED_SOURCES = {
     "control_politico",
     "environmental_files_corantioquia",
     "rub_beneficial_owners",
-    "tvec_orders_consolidated",
     "anim_inmuebles",
     "pnis_beneficiarios",
     # In the legacy CSV but with non-Socrata URLs — bridge to a future

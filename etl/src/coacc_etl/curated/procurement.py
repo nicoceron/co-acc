@@ -41,6 +41,7 @@ _DEFAULT_TABLES = (
     "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
     "signal_feature_cuentas_claras_donor_supplier_overlap",
     "signal_feature_pida5_pida27_pida4_chain",
+    "signal_feature_tvec_multi_entity_capture",
     "signal_feature_procurement_politically_exposed_position_supplier_overlap",
     "signal_feature_procurement_related_companies_shared_officer",
     "signal_feature_procurement_cross_source_identity_inconsistency",
@@ -98,6 +99,10 @@ _TABLE_SOURCES = {
     "signal_feature_pida5_pida27_pida4_chain": (
         "secop_integrado",
         "secop_sanctions",
+    ),
+    "signal_feature_tvec_multi_entity_capture": (
+        "tvec_orders_consolidated",
+        "secop_ii_contracts",
     ),
     "signal_feature_procurement_politically_exposed_position_supplier_overlap": (
         "secop_ii_contracts",
@@ -1987,6 +1992,244 @@ def _create_project_bpin_views(
     """)
 
 
+def _create_tvec_multi_entity_capture_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not ({"tvec_orders_consolidated", "secop_ii_contracts"} <= set(required_sources)):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_tvec_multi_entity_capture AS
+        WITH raw_tvec AS (
+            SELECT
+                coacc_document_key(supplier_nit, 'NIT') AS supplier_document_key,
+                coacc_doc_digits(supplier_nit) AS supplier_document_digits,
+                nullif(trim(supplier_name), '') AS supplier_name,
+                coacc_doc_digits(buyer_nit) AS buyer_document_digits,
+                nullif(trim(buyer_name), '') AS buyer_name,
+                nullif(trim(order_id), '') AS order_id,
+                try_cast(order_date AS DATE) AS order_date,
+                nullif(trim(item_name), '') AS item_name,
+                try_cast(replace(cast(line_total AS VARCHAR), ',', '.') AS DOUBLE)
+                    AS line_value
+            FROM src_tvec_orders_consolidated
+            WHERE nullif(trim(order_id), '') IS NOT NULL
+                AND coacc_document_key(supplier_nit, 'NIT') IS NOT NULL
+                AND coacc_doc_digits(buyer_nit) IS NOT NULL
+        ),
+        valid_tvec AS (
+            SELECT *
+            FROM raw_tvec
+            WHERE length(supplier_document_key) = 9
+                AND NOT regexp_matches(supplier_document_key, '^0+$')
+                AND length(buyer_document_digits) BETWEEN 8 AND 10
+                AND NOT regexp_matches(buyer_document_digits, '^0+$')
+                AND line_value IS NOT NULL
+                AND line_value > 0
+        ),
+        order_rollup AS (
+            SELECT
+                supplier_document_key,
+                any_value(supplier_name) AS supplier_name,
+                buyer_document_digits,
+                any_value(buyer_name) AS buyer_name,
+                order_id,
+                min(order_date) AS order_date,
+                sum(line_value) AS order_value,
+                count(*) AS order_line_count
+            FROM valid_tvec
+            GROUP BY supplier_document_key, buyer_document_digits, order_id
+        ),
+        tvec_supplier_rollup AS (
+            SELECT
+                supplier_document_key,
+                any_value(supplier_name) AS supplier_name,
+                count(DISTINCT order_id) AS tvec_order_count,
+                count(DISTINCT buyer_document_digits) AS tvec_buyer_count,
+                sum(order_value) AS tvec_total_value,
+                sum(order_line_count) AS tvec_line_count,
+                min(order_date) AS first_tvec_order_date,
+                max(order_date) AS last_tvec_order_date
+            FROM order_rollup
+            GROUP BY supplier_document_key
+        ),
+        secop_rollup AS (
+            SELECT
+                supplier_document_key,
+                any_value(supplier_entity_id) AS supplier_entity_id,
+                any_value(supplier_name) AS secop_supplier_name,
+                count(DISTINCT contract_id) AS secop_contract_count,
+                count(DISTINCT buyer_document_id)
+                    FILTER (WHERE buyer_document_id IS NOT NULL)
+                    AS secop_buyer_count,
+                sum(contract_value) AS secop_total_contract_value,
+                min(signing_date) AS first_secop_signing_date,
+                max(signing_date) AS last_secop_signing_date
+            FROM curated_contract_awards
+            WHERE supplier_document_key IS NOT NULL
+                AND contract_id IS NOT NULL
+                AND contract_value IS NOT NULL
+                AND contract_value > 0
+            GROUP BY supplier_document_key
+        ),
+        tvec_evidence_ranked AS (
+            SELECT
+                supplier_document_key,
+                'tvec_orders_consolidated:' || order_id AS evidence_ref,
+                order_value,
+                order_date,
+                order_id,
+                row_number() OVER (
+                    PARTITION BY supplier_document_key
+                    ORDER BY order_value DESC NULLS LAST,
+                        order_date DESC NULLS LAST,
+                        order_id
+                ) AS evidence_rank
+            FROM order_rollup
+        ),
+        tvec_evidence AS (
+            SELECT
+                supplier_document_key,
+                list(evidence_ref ORDER BY order_value DESC, order_date DESC, order_id)
+                    AS tvec_evidence_refs
+            FROM tvec_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY supplier_document_key
+        ),
+        secop_evidence_ranked AS (
+            SELECT
+                supplier_document_key,
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id)
+                    AS evidence_ref,
+                contract_value,
+                signing_date,
+                contract_id,
+                row_number() OVER (
+                    PARTITION BY supplier_document_key
+                    ORDER BY contract_value DESC NULLS LAST,
+                        signing_date DESC NULLS LAST,
+                        contract_id
+                ) AS evidence_rank
+            FROM curated_contract_awards
+            WHERE supplier_document_key IS NOT NULL
+                AND contract_id IS NOT NULL
+                AND contract_value IS NOT NULL
+                AND contract_value > 0
+        ),
+        secop_evidence AS (
+            SELECT
+                supplier_document_key,
+                list(evidence_ref ORDER BY contract_value DESC, signing_date DESC, contract_id)
+                    AS secop_evidence_refs
+            FROM secop_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY supplier_document_key
+        ),
+        buyer_samples_ranked AS (
+            SELECT
+                supplier_document_key,
+                coalesce(buyer_name, buyer_document_digits) AS buyer_sample,
+                sum(order_value) AS buyer_order_value,
+                row_number() OVER (
+                    PARTITION BY supplier_document_key
+                    ORDER BY sum(order_value) DESC NULLS LAST,
+                        coalesce(buyer_name, buyer_document_digits)
+                ) AS sample_rank
+            FROM order_rollup
+            GROUP BY supplier_document_key,
+                coalesce(buyer_name, buyer_document_digits)
+        ),
+        buyer_samples AS (
+            SELECT
+                supplier_document_key,
+                list(buyer_sample ORDER BY buyer_order_value DESC, buyer_sample)
+                    AS tvec_buyer_sample
+            FROM buyer_samples_ranked
+            WHERE sample_rank <= 10
+            GROUP BY supplier_document_key
+        ),
+        joined AS (
+            SELECT
+                t.supplier_document_key,
+                coalesce(s.supplier_entity_id, 'doc:' || t.supplier_document_key)
+                    AS supplier_entity_id,
+                coalesce(t.supplier_name, s.secop_supplier_name) AS supplier_name,
+                t.tvec_order_count,
+                t.tvec_buyer_count,
+                t.tvec_total_value,
+                t.tvec_line_count,
+                t.first_tvec_order_date,
+                t.last_tvec_order_date,
+                s.secop_contract_count,
+                s.secop_buyer_count,
+                s.secop_total_contract_value,
+                s.first_secop_signing_date,
+                s.last_secop_signing_date
+            FROM tvec_supplier_rollup t
+            JOIN secop_rollup s
+                ON s.supplier_document_key = t.supplier_document_key
+            WHERE t.tvec_buyer_count >= 50
+                AND t.tvec_order_count >= 100
+                AND t.tvec_total_value >= 1000000000
+                AND s.secop_contract_count >= 20
+                AND s.secop_total_contract_value >= 5000000000
+        )
+            SELECT
+                'tvec_multi_entity_capture' AS signal_id,
+                j.supplier_entity_id AS entity_id,
+                j.supplier_document_key AS entity_key,
+                'Company' AS entity_label,
+                'tvec_supplier:' || j.supplier_document_key AS scope_key,
+                'tvec_order' AS scope_type,
+                CASE
+                    WHEN j.tvec_buyer_count >= 200
+                        OR j.tvec_total_value >= 100000000000
+                        OR j.secop_total_contract_value >= 100000000000
+                        THEN 'high'
+                    ELSE 'medium'
+                END AS severity,
+                least(
+                    1.0,
+                    0.50
+                        + least(j.tvec_buyer_count / 1000.0, 0.20)
+                        + least(j.tvec_order_count / 5000.0, 0.15)
+                        + least(log10(greatest(j.tvec_total_value, 1)) / 120.0, 0.08)
+                        + least(j.secop_buyer_count / 500.0, 0.07)
+                ) AS risk_signal,
+                1.0 AS identity_confidence,
+                'EXACT_COMPANY_NIT' AS identity_match_type,
+                'exact' AS identity_quality,
+                j.supplier_name,
+                j.tvec_order_count,
+                j.tvec_buyer_count,
+                j.tvec_total_value,
+                j.tvec_line_count,
+                j.first_tvec_order_date,
+                j.last_tvec_order_date,
+                j.secop_contract_count,
+                j.secop_buyer_count,
+                j.secop_total_contract_value,
+                j.first_secop_signing_date,
+                j.last_secop_signing_date,
+                b.tvec_buyer_sample,
+                list_concat(te.tvec_evidence_refs, se.secop_evidence_refs)
+                    AS evidence_refs
+        FROM joined j
+        JOIN tvec_evidence te
+            ON te.supplier_document_key = j.supplier_document_key
+        JOIN secop_evidence se
+            ON se.supplier_document_key = j.supplier_document_key
+        LEFT JOIN buyer_samples b
+            ON b.supplier_document_key = j.supplier_document_key
+            QUALIFY row_number() OVER (
+                ORDER BY j.tvec_buyer_count DESC,
+                    j.tvec_total_value DESC NULLS LAST,
+                    j.supplier_document_key
+            ) <= 1000
+    """)
+
+
 def _create_supplier_identity_views(
     con: duckdb.DuckDBPyConnection,
     required_sources: Sequence[str],
@@ -3163,6 +3406,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         _create_cuentas_claras_views(con, required_sources)
         _create_public_servant_conflict_disclosure_views(con, required_sources)
         _create_pida_chain_views(con, required_sources)
+        _create_tvec_multi_entity_capture_views(con, required_sources)
         _create_large_modification_views(con, required_sources)
         return
 
@@ -4004,6 +4248,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
     _create_public_servant_conflict_disclosure_views(con, required_sources)
     _create_pida_chain_views(con, required_sources)
     _create_large_modification_views(con, required_sources)
+    _create_tvec_multi_entity_capture_views(con, required_sources)
     con.execute("""
         CREATE OR REPLACE TEMP VIEW curated_repeat_awards_same_supplier AS
         WITH eligible AS (
@@ -4322,6 +4567,8 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_cuentas_claras_donor_supplier_overlap"
     if table == "signal_feature_pida5_pida27_pida4_chain":
         return "SELECT * FROM curated_pida5_pida27_pida4_chain"
+    if table == "signal_feature_tvec_multi_entity_capture":
+        return "SELECT * FROM curated_tvec_multi_entity_capture"
     if table == "signal_feature_procurement_politically_exposed_position_supplier_overlap":
         return "SELECT * FROM curated_politically_exposed_supplier_overlap"
     if table == "signal_feature_procurement_related_companies_shared_officer":

@@ -29,6 +29,7 @@ make curate TABLE=signal_feature_procurement_contract_suspensions
 make curate TABLE=signal_feature_procurement_public_servant_conflict_disclosure_overlap
 make curate TABLE=signal_feature_pida5_pida27_pida4_chain
 make curate TABLE=signal_feature_project_bpin_procurement_overlap
+make curate TABLE=signal_feature_tvec_multi_entity_capture
 make curate TABLE=signal_feature_procurement_related_companies_shared_officer
 make curate TABLE=dim_company
 make curate TABLE=dim_buyer
@@ -72,6 +73,7 @@ make curate LAKE_ROOT=/path/to/lake
 - `lake/curated/table=signal_feature_cuentas_claras_donor_supplier_overlap/`
 - `lake/curated/table=signal_feature_pida5_pida27_pida4_chain/`
 - `lake/curated/table=signal_feature_project_bpin_procurement_overlap/`
+- `lake/curated/table=signal_feature_tvec_multi_entity_capture/`
 - `lake/curated/table=signal_feature_procurement_politically_exposed_position_supplier_overlap/`
 - `lake/curated/table=signal_feature_procurement_related_companies_shared_officer/`
 - `lake/curated/table=signal_feature_procurement_cross_source_identity_inconsistency/`
@@ -91,6 +93,7 @@ The full default builder requires:
 - `secop_integrado`, resolved from raw source `rpmr-utcd`
 - `secop_sanctions`, resolved from raw source `it5q-hg94`
 - `secop_process_bpin`, resolved from raw source `d9na-abhe`
+- `tvec_orders_consolidated`, resolved from raw source `3hdv-smhz`
 - `paco_sanctions`
 - `company_registry_c82u`, resolved from raw source `c82u-588k`
 - `5u9e-g5w9` (SIGEP corruption-sensitive posts)
@@ -114,6 +117,8 @@ requires `conflict_disclosures` and `secop_ii_contracts`;
 `secop_integrado` and `secop_sanctions`;
 `signal_feature_project_bpin_procurement_overlap` requires
 `secop_process_bpin` and `secop_ii_contracts`;
+`signal_feature_tvec_multi_entity_capture` requires
+`tvec_orders_consolidated` and `secop_ii_contracts`;
 `signal_feature_procurement_related_companies_shared_officer`
 requires only `secop_ii_contracts` and `company_registry_c82u`.
 
@@ -180,13 +185,16 @@ future-dated sanction outliers before aggregating by territory.
 BPIN project-procurement rows are computed from validated numeric BPIN process
 links joined to exact SECOP II contract IDs, then aggregated by BPIN before the
 high-value project cap is applied.
+TVEC multi-entity capture rows are computed from exact supplier-NIT TVEC order
+rollups joined to exact-NIT SECOP II supplier exposure, with item-level TVEC
+values parsed directly from the source decimal fields.
 Shared-officer clusters are deduplicated by company document and
 representative document before DuckDB groups exposed suppliers into reviewer-only
 clusters.
 
 ## Reality Notes
 
-On the local lake after the 2026-06-05 BPIN project materialization work:
+On the local lake after the 2026-06-05 TVEC capture materialization work:
 
 - `dim_subject_document`: 1,215,832 rows
 - `dim_company`: 101,916 rows
@@ -210,6 +218,7 @@ On the local lake after the 2026-06-05 BPIN project materialization work:
 - `signal_feature_cuentas_claras_donor_supplier_overlap`: 533 rows
 - `signal_feature_pida5_pida27_pida4_chain`: 38 rows
 - `signal_feature_project_bpin_procurement_overlap`: 654 rows
+- `signal_feature_tvec_multi_entity_capture`: 87 rows
 - `signal_feature_procurement_politically_exposed_position_supplier_overlap`: 284 rows
 - `signal_feature_procurement_related_companies_shared_officer`: 1,482 rows
 - `signal_feature_procurement_cross_source_identity_inconsistency`: 50 rows
@@ -241,6 +250,12 @@ The BPIN project feature emits public project rows when validated SECOP
 process-to-BPIN links join to at least two SECOP II contracts and COP 100B total
 contract value. The 2026-06-05 local build produced 654 rows, including 82 high
 severity rows and 572 medium severity rows.
+
+The TVEC multi-entity capture feature emits public supplier rows when an
+exact-NIT supplier appears across at least 50 TVEC buying entities, 100 TVEC
+orders, COP 1B TVEC item value, 20 SECOP II contracts, and COP 5B SECOP II
+contract value. The 2026-06-05 local build produced 87 rows, including 53 high
+severity rows and 34 medium severity rows.
 
 The co-bidding cartel risk feature emits reviewer-only company rows for both
 companies in each repeated co-bid pair when exact non-placeholder supplier NITs

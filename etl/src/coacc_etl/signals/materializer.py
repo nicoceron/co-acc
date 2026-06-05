@@ -38,6 +38,7 @@ SUPPORTED_SIGNAL_IDS = (
     "cuentas_claras_donor_supplier_overlap",
     "pida5_pida27_pida4_chain",
     "project_bpin_procurement_overlap",
+    "tvec_multi_entity_capture",
     "procurement_politically_exposed_position_supplier_overlap",
     "procurement_related_companies_shared_officer",
     "procurement_cross_source_identity_inconsistency",

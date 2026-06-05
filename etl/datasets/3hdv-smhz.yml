@@ -10,8 +10,24 @@ join_keys:
   - nit_proveedor
 watermark_column: null
 partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+columns_map:
+  buyer_name: entidad
+  buyer_nit: nit_entidad
+  cdp: cdp
+  item_name: item
+  line_total: line_total
+  order_date: fecha
+  order_id: orden_de_compra
+  quantity: qty
+  supplier_name: provedor
+  supplier_nit: nit_proveedor
+  unit: unidad_de_medida
+  unit_price: price
+required_coverage:
+  nit_proveedor: 0.9
+  orden_de_compra: 0.9
+freq: weekly
 url: https://www.datos.gov.co/d/3hdv-smhz
-notes: ''
+notes: 'Colombia: TVEC item-level purchases (about 1.4M rows). Snapshot source
+  for virtual store order aggregation by supplier and buyer NIT.'
+full_refresh_only: true
