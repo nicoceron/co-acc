@@ -34,10 +34,12 @@ _DEFAULT_TABLES = (
     "signal_feature_procurement_cartel_risk_cobidding",
     "signal_feature_procurement_payment_plan_anomalies",
     "signal_feature_procurement_contract_suspensions",
+    "signal_feature_procurement_contract_execution_delay",
     "signal_feature_procurement_short_bidding_window",
     "signal_feature_procurement_offers_competition_drop",
     "signal_feature_procurement_politically_exposed_position_supplier_overlap",
     "signal_feature_procurement_related_companies_shared_officer",
+    "signal_feature_procurement_cross_source_identity_inconsistency",
 )
 _TABLE_SOURCES = {
     "dim_subject_document": ("secop_ii_contracts", "paco_sanctions"),
@@ -71,6 +73,10 @@ _TABLE_SOURCES = {
         "secop_contract_suspensions",
         "secop_ii_contracts",
     ),
+    "signal_feature_procurement_contract_execution_delay": (
+        "secop_contract_execution",
+        "secop_ii_contracts",
+    ),
     "signal_feature_procurement_short_bidding_window": ("secop_ii_processes",),
     "signal_feature_procurement_offers_competition_drop": ("secop_ii_processes",),
     "signal_feature_procurement_politically_exposed_position_supplier_overlap": (
@@ -81,6 +87,10 @@ _TABLE_SOURCES = {
     "signal_feature_procurement_related_companies_shared_officer": (
         "secop_ii_contracts",
         "company_registry_c82u",
+    ),
+    "signal_feature_procurement_cross_source_identity_inconsistency": (
+        "company_registry_c82u",
+        "secop_suppliers",
     ),
 }
 
@@ -1471,6 +1481,497 @@ def _create_contract_suspension_views(
     """)
 
 
+def _create_contract_execution_delay_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not ({"secop_contract_execution", "secop_ii_contracts"} <= set(required_sources)):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_contract_execution_delay AS
+        WITH raw_execution AS (
+            SELECT
+                nullif(trim(identificadorcontrato), '') AS contract_id,
+                coalesce(
+                    nullif(trim(referencia_de_articulos), ''),
+                    nullif(trim(nombreplan), ''),
+                    nullif(trim(identificadorcontrato), '') || ':' ||
+                        cast(row_number() OVER () AS VARCHAR)
+                ) AS execution_item_id,
+                nullif(trim(tipoejecucion), '') AS execution_type,
+                nullif(trim(nombreplan), '') AS execution_plan_name,
+                nullif(trim(referencia_de_articulos), '') AS article_reference,
+                nullif(trim(descripci_n), '') AS execution_description,
+                nullif(trim(unidad), '') AS unit,
+                try_cast(fechadeentregaesperada AS TIMESTAMP) AS expected_delivery_at,
+                try_cast(fechadeentregareal AS TIMESTAMP) AS actual_delivery_at,
+                try_cast(fechacreacion AS TIMESTAMP) AS observed_at,
+                try_cast(
+                    replace(
+                        regexp_replace(
+                            coalesce(cast(porcentajedeavanceesperado AS VARCHAR), ''),
+                            '[^0-9,.-]',
+                            '',
+                            'g'
+                        ),
+                        ',',
+                        '.'
+                    )
+                    AS DOUBLE
+                ) AS expected_progress_pct,
+                try_cast(
+                    replace(
+                        regexp_replace(
+                            coalesce(cast(porcentaje_de_avance_real AS VARCHAR), ''),
+                            '[^0-9,.-]',
+                            '',
+                            'g'
+                        ),
+                        ',',
+                        '.'
+                    )
+                    AS DOUBLE
+                ) AS actual_progress_pct,
+                try_cast(
+                    replace(
+                        regexp_replace(
+                            coalesce(cast(cantidad_planeada AS VARCHAR), ''),
+                            '[^0-9,.-]',
+                            '',
+                            'g'
+                        ),
+                        ',',
+                        '.'
+                    )
+                    AS DOUBLE
+                ) AS planned_quantity,
+                try_cast(
+                    replace(
+                        regexp_replace(
+                            coalesce(cast(cantidadrecibida AS VARCHAR), ''),
+                            '[^0-9,.-]',
+                            '',
+                            'g'
+                        ),
+                        ',',
+                        '.'
+                    )
+                    AS DOUBLE
+                ) AS received_quantity
+            FROM src_secop_contract_execution
+            WHERE nullif(trim(identificadorcontrato), '') IS NOT NULL
+        ),
+        scored_execution AS (
+            SELECT
+                *,
+                CASE
+                    WHEN expected_delivery_at IS NOT NULL
+                        AND actual_delivery_at IS NOT NULL
+                        THEN date_diff('day', expected_delivery_at, actual_delivery_at)
+                    ELSE NULL
+                END AS delivery_delay_days,
+                CASE
+                    WHEN expected_delivery_at IS NOT NULL
+                        AND actual_delivery_at IS NULL
+                        AND observed_at IS NOT NULL
+                        AND observed_at > expected_delivery_at
+                        THEN date_diff('day', expected_delivery_at, observed_at)
+                    ELSE NULL
+                END AS unresolved_delay_days,
+                expected_progress_pct - actual_progress_pct AS progress_gap_pct,
+                planned_quantity - received_quantity AS quantity_gap
+            FROM raw_execution
+        ),
+        delayed_items AS (
+            SELECT
+                *,
+                greatest(
+                    coalesce(delivery_delay_days, 0),
+                    coalesce(unresolved_delay_days, 0)
+                ) AS effective_delay_days,
+                (
+                    coalesce(delivery_delay_days, unresolved_delay_days, 0) >= 30
+                    OR (
+                        expected_progress_pct >= 50
+                        AND coalesce(progress_gap_pct, 0) >= 30
+                    )
+                    OR (
+                        planned_quantity IS NOT NULL
+                        AND planned_quantity > 0
+                        AND coalesce(received_quantity, 0) / planned_quantity <= 0.50
+                        AND expected_delivery_at IS NOT NULL
+                        AND observed_at IS NOT NULL
+                        AND observed_at > expected_delivery_at
+                    )
+                ) AS lag_flag
+            FROM scored_execution
+        ),
+        execution_rollup AS (
+            SELECT
+                contract_id,
+                count(*) AS execution_item_count,
+                count(*) FILTER (WHERE lag_flag) AS delayed_item_count,
+                max(effective_delay_days) AS max_delay_days,
+                max(progress_gap_pct) AS max_progress_gap_pct,
+                max(quantity_gap) AS max_quantity_gap,
+                min(expected_delivery_at) AS first_expected_delivery_at,
+                max(expected_delivery_at) AS last_expected_delivery_at,
+                max(actual_delivery_at) AS last_actual_delivery_at,
+                max(observed_at) AS last_execution_observed_at
+            FROM delayed_items
+            GROUP BY contract_id
+        ),
+        execution_evidence_ranked AS (
+            SELECT
+                contract_id,
+                'secop_contract_execution:' || contract_id || ':' || execution_item_id
+                    AS evidence_ref,
+                effective_delay_days,
+                progress_gap_pct,
+                execution_item_id,
+                row_number() OVER (
+                    PARTITION BY contract_id
+                    ORDER BY effective_delay_days DESC NULLS LAST,
+                        progress_gap_pct DESC NULLS LAST,
+                        execution_item_id
+                ) AS evidence_rank
+            FROM delayed_items
+            WHERE lag_flag
+        ),
+        execution_evidence AS (
+            SELECT
+                contract_id,
+                list(evidence_ref ORDER BY effective_delay_days DESC, progress_gap_pct DESC)
+                    AS execution_evidence_refs
+            FROM execution_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY contract_id
+        ),
+        eligible AS (
+            SELECT
+                a.supplier_entity_id,
+                a.supplier_document_key,
+                a.supplier_name,
+                a.supplier_doc_type,
+                a.buyer_document_id,
+                a.buyer_name,
+                a.department,
+                a.city,
+                a.sector,
+                a.procurement_modality,
+                a.contract_type,
+                a.contract_id,
+                a.contract_reference,
+                a.process_id,
+                a.process_url,
+                a.contract_value,
+                a.signing_date,
+                a.contract_start_date,
+                a.contract_end_date,
+                r.execution_item_count,
+                r.delayed_item_count,
+                r.max_delay_days,
+                r.max_progress_gap_pct,
+                r.max_quantity_gap,
+                r.first_expected_delivery_at,
+                r.last_expected_delivery_at,
+                r.last_actual_delivery_at,
+                r.last_execution_observed_at,
+                list_concat(
+                    [
+                        coalesce(a.process_url, 'secop_ii_contracts:' || a.contract_id)
+                    ],
+                    e.execution_evidence_refs
+                ) AS evidence_refs
+            FROM execution_rollup r
+            JOIN curated_contract_awards a
+                ON a.contract_id = r.contract_id
+            JOIN execution_evidence e
+                ON e.contract_id = r.contract_id
+            WHERE a.supplier_nit_canonical IS NOT NULL
+                AND NOT regexp_matches(a.supplier_document_key, '^0+$')
+                AND a.contract_value IS NOT NULL
+                AND a.contract_value >= 100000000
+                AND r.delayed_item_count > 0
+        )
+        SELECT
+            'procurement_contract_execution_delay' AS signal_id,
+            supplier_entity_id AS entity_id,
+            supplier_document_key AS entity_key,
+            'Company' AS entity_label,
+            contract_id AS scope_key,
+            'contract' AS scope_type,
+            CASE
+                WHEN max_delay_days >= 180
+                    OR coalesce(max_progress_gap_pct, 0) >= 70
+                    THEN 'medium'
+                ELSE 'low'
+            END AS severity,
+            least(
+                1.0,
+                0.45
+                    + least(coalesce(max_delay_days, 0) / 365.0, 0.25)
+                    + least(coalesce(max_progress_gap_pct, 0) / 200.0, 0.15)
+                    + least(log10(greatest(contract_value, 1)) / 120.0, 0.15)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            supplier_name,
+            supplier_doc_type,
+            buyer_document_id,
+            buyer_name,
+            department,
+            city,
+            sector,
+            procurement_modality,
+            contract_type,
+            contract_id,
+            contract_reference,
+            process_id,
+            process_url,
+            contract_value,
+            signing_date,
+            contract_start_date,
+            contract_end_date,
+            execution_item_count,
+            delayed_item_count,
+            max_delay_days,
+            max_progress_gap_pct,
+            max_quantity_gap,
+            first_expected_delivery_at,
+            last_expected_delivery_at,
+            last_actual_delivery_at,
+            last_execution_observed_at,
+            evidence_refs
+        FROM eligible
+        WHERE max_delay_days >= 30
+            OR coalesce(max_progress_gap_pct, 0) >= 30
+    """)
+
+
+def _create_supplier_identity_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not ({"company_registry_c82u", "secop_suppliers"} <= set(required_sources)):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_cross_source_identity_inconsistency AS
+        WITH registry_companies AS (
+            SELECT
+                coacc_document_key(document_id, identification_class) AS company_document_key,
+                coacc_nit_canonical(document_id, identification_class)
+                    AS company_nit_canonical,
+                nullif(trim(document_id), '') AS company_document_id,
+                nullif(trim(identification_class), '') AS company_document_type,
+                nullif(trim(business_name), '') AS company_name,
+                regexp_replace(
+                    regexp_replace(
+                        lower(coalesce(cast(business_name AS VARCHAR), '')),
+                        '[^a-z0-9]+',
+                        '',
+                        'g'
+                    ),
+                    '(sociedadporaccionessimplificada|sas|sa|ltda|limitada)$',
+                    '',
+                    'g'
+                ) AS company_name_key,
+                nullif(trim(matricula), '') AS matricula,
+                nullif(trim(chamber_of_commerce), '') AS chamber_of_commerce,
+                nullif(trim(matricula_status), '') AS matricula_status,
+                lower(coalesce(cast(matricula_status AS VARCHAR), '')) AS matricula_status_norm,
+                coacc_cedula_key(
+                    num_identificacion_representante_legal,
+                    clase_identificacion_rl
+                ) AS registry_representative_document_key,
+                nullif(trim(num_identificacion_representante_legal), '')
+                    AS registry_representative_document_id,
+                nullif(trim(representante_legal), '') AS registry_representative_name,
+                nullif(trim(clase_identificacion_rl), '') AS registry_representative_doc_type,
+                coalesce(
+                    nullif(trim(cast(":id" AS VARCHAR)), ''),
+                    nullif(trim(matricula), ''),
+                    nullif(trim(document_id), '')
+                ) AS company_record_id
+            FROM src_company_registry_c82u
+            WHERE coacc_document_key(document_id, identification_class) IS NOT NULL
+        ),
+        supplier_registry AS (
+            SELECT
+                coacc_document_key(nit, 'NIT') AS supplier_document_key,
+                coacc_nit_canonical(nit, 'NIT') AS supplier_nit_canonical,
+                nullif(trim(nit), '') AS supplier_document_id,
+                nullif(trim(codigo), '') AS supplier_code,
+                nullif(trim(nombre), '') AS supplier_name,
+                regexp_replace(
+                    regexp_replace(
+                        lower(coalesce(cast(nombre AS VARCHAR), '')),
+                        '[^a-z0-9]+',
+                        '',
+                        'g'
+                    ),
+                    '(sociedadporaccionessimplificada|sas|sa|ltda|limitada)$',
+                    '',
+                    'g'
+                ) AS supplier_name_key,
+                nullif(trim(esta_activa), '') AS supplier_active_raw,
+                lower(coalesce(cast(esta_activa AS VARCHAR), '')) AS supplier_active_norm,
+                nullif(trim(es_entidad), '') AS supplier_is_entity_raw,
+                nullif(trim(es_grupo), '') AS supplier_is_group_raw,
+                nullif(trim(espyme), '') AS supplier_is_pyme_raw,
+                nullif(trim(tipo_empresa), '') AS supplier_company_type,
+                nullif(trim(departamento), '') AS supplier_department,
+                nullif(trim(municipio), '') AS supplier_municipality,
+                nullif(trim(direccion), '') AS supplier_address,
+                nullif(trim(correo), '') AS supplier_email,
+                nullif(trim(sitio_web), '') AS supplier_website,
+                coacc_cedula_key(
+                    n_mero_doc_representante_legal,
+                    tipo_doc_representante_legal
+                ) AS supplier_representative_document_key,
+                nullif(trim(n_mero_doc_representante_legal), '')
+                    AS supplier_representative_document_id,
+                nullif(trim(nombre_representante_legal), '')
+                    AS supplier_representative_name,
+                nullif(trim(tipo_doc_representante_legal), '')
+                    AS supplier_representative_doc_type
+            FROM src_secop_suppliers
+            WHERE coacc_document_key(nit, 'NIT') IS NOT NULL
+        ),
+        joined AS (
+            SELECT
+                r.*,
+                s.supplier_nit_canonical,
+                s.supplier_document_id,
+                s.supplier_code,
+                s.supplier_name,
+                s.supplier_name_key,
+                s.supplier_active_raw,
+                s.supplier_active_norm,
+                s.supplier_is_entity_raw,
+                s.supplier_is_group_raw,
+                s.supplier_is_pyme_raw,
+                s.supplier_company_type,
+                s.supplier_department,
+                s.supplier_municipality,
+                s.supplier_address,
+                s.supplier_email,
+                s.supplier_website,
+                s.supplier_representative_document_key,
+                s.supplier_representative_document_id,
+                s.supplier_representative_name,
+                s.supplier_representative_doc_type,
+                (
+                    length(coalesce(r.company_name_key, '')) >= 8
+                    AND length(coalesce(s.supplier_name_key, '')) >= 8
+                    AND r.company_name_key != s.supplier_name_key
+                    AND strpos(r.company_name_key, s.supplier_name_key) = 0
+                    AND strpos(s.supplier_name_key, r.company_name_key) = 0
+                ) AS name_mismatch_flag,
+                (
+                    r.registry_representative_document_key IS NOT NULL
+                    AND s.supplier_representative_document_key IS NOT NULL
+                    AND r.registry_representative_document_key
+                        != s.supplier_representative_document_key
+                ) AS representative_document_mismatch_flag,
+                (
+                    regexp_matches(r.matricula_status_norm, 'cancel|inactiv|suspend')
+                    AND s.supplier_active_norm IN ('true', 't', 'si', 'sí', '1', 'activo')
+                ) AS status_mismatch_flag
+            FROM registry_companies r
+            JOIN supplier_registry s
+                ON s.supplier_document_key = r.company_document_key
+            WHERE length(r.company_document_key) >= 5
+                AND NOT regexp_matches(r.company_document_key, '^0+$')
+        ),
+        scored AS (
+            SELECT
+                *,
+                cast(name_mismatch_flag AS INTEGER)
+                    + cast(representative_document_mismatch_flag AS INTEGER)
+                    + cast(status_mismatch_flag AS INTEGER) AS mismatch_dimension_count,
+                list_filter(
+                    [
+                        CASE WHEN name_mismatch_flag THEN 'name_mismatch' ELSE NULL END,
+                        CASE
+                            WHEN representative_document_mismatch_flag
+                                THEN 'representative_document_mismatch'
+                            ELSE NULL
+                        END,
+                        CASE WHEN status_mismatch_flag THEN 'status_mismatch' ELSE NULL END
+                    ],
+                    item -> item IS NOT NULL
+                ) AS inconsistency_types
+            FROM joined
+        )
+        SELECT
+            'procurement_cross_source_identity_inconsistency' AS signal_id,
+            'doc:' || company_document_key AS entity_id,
+            company_document_key AS entity_key,
+            'Company' AS entity_label,
+            'alias_cluster:' || company_document_key AS scope_key,
+            'alias_cluster' AS scope_type,
+            'low' AS severity,
+            least(
+                1.0,
+                0.42
+                    + least(mismatch_dimension_count * 0.16, 0.40)
+                    + CASE WHEN status_mismatch_flag THEN 0.08 ELSE 0.0 END
+                    + CASE
+                        WHEN representative_document_mismatch_flag THEN 0.06
+                        ELSE 0.0
+                    END
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            company_nit_canonical,
+            company_document_id,
+            company_document_type,
+            company_name,
+            supplier_nit_canonical,
+            supplier_document_id,
+            supplier_code,
+            supplier_name,
+            name_mismatch_flag,
+            representative_document_mismatch_flag,
+            status_mismatch_flag,
+            mismatch_dimension_count,
+            inconsistency_types,
+            matricula,
+            chamber_of_commerce,
+            matricula_status,
+            supplier_active_raw,
+            supplier_is_entity_raw,
+            supplier_is_group_raw,
+            supplier_is_pyme_raw,
+            supplier_company_type,
+            supplier_department,
+            supplier_municipality,
+            supplier_address,
+            supplier_email,
+            supplier_website,
+            registry_representative_document_key,
+            registry_representative_document_id,
+            registry_representative_name,
+            registry_representative_doc_type,
+            supplier_representative_document_key,
+            supplier_representative_document_id,
+            supplier_representative_name,
+            supplier_representative_doc_type,
+            [
+                'company_registry_c82u:' || company_record_id,
+                'secop_suppliers:' || coalesce(supplier_code, company_document_key)
+            ] AS evidence_refs
+        FROM scored
+        WHERE mismatch_dimension_count >= 2
+            AND company_record_id IS NOT NULL
+    """)
+
+
 def _create_large_modification_views(
     con: duckdb.DuckDBPyConnection,
     required_sources: Sequence[str],
@@ -1656,6 +2157,8 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         _create_cobidding_views(con, required_sources)
         _create_company_registry_overlap_views(con, required_sources)
         _create_contract_suspension_views(con, required_sources)
+        _create_contract_execution_delay_views(con, required_sources)
+        _create_supplier_identity_views(con, required_sources)
         _create_large_modification_views(con, required_sources)
         return
 
@@ -2491,6 +2994,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         WHERE anomaly_type IS NOT NULL
     """)
     _create_contract_suspension_views(con, required_sources)
+    _create_contract_execution_delay_views(con, required_sources)
     _create_large_modification_views(con, required_sources)
     con.execute("""
         CREATE OR REPLACE TEMP VIEW curated_repeat_awards_same_supplier AS
@@ -2762,6 +3266,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
     _create_process_views(con, required_sources)
     _create_cobidding_views(con, required_sources)
     _create_company_registry_overlap_views(con, required_sources)
+    _create_supplier_identity_views(con, required_sources)
 
 
 def _table_sql(table: str) -> str:
@@ -2795,6 +3300,8 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_payment_plan_anomalies"
     if table == "signal_feature_procurement_contract_suspensions":
         return "SELECT * FROM curated_contract_suspensions"
+    if table == "signal_feature_procurement_contract_execution_delay":
+        return "SELECT * FROM curated_contract_execution_delay"
     if table == "signal_feature_procurement_short_bidding_window":
         return "SELECT * FROM curated_short_bidding_window"
     if table == "signal_feature_procurement_offers_competition_drop":
@@ -2803,6 +3310,8 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_politically_exposed_supplier_overlap"
     if table == "signal_feature_procurement_related_companies_shared_officer":
         return "SELECT * FROM curated_related_companies_shared_officer"
+    if table == "signal_feature_procurement_cross_source_identity_inconsistency":
+        return "SELECT * FROM curated_cross_source_identity_inconsistency"
     raise CuratedBuildError(f"unknown curated table: {table}")
 
 

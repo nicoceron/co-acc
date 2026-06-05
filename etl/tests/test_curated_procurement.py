@@ -370,6 +370,48 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     )
     _write_rows(
         tmp_path,
+        "mfmm-jqmq",
+        [
+            {
+                "identificadorcontrato": "C-1",
+                "tipoejecucion": "Entrega",
+                "nombreplan": "Plan de entrega con retraso",
+                "fechadeentregaesperada": "2026-05-10T00:00:00",
+                "porcentajedeavanceesperado": "100",
+                "fechadeentregareal": "2026-06-25T00:00:00",
+                "porcentaje_de_avance_real": "100",
+                "estado_del_contrato": "En ejecucion",
+                "referencia_de_articulos": "ITEM-C-1",
+                "descripci_n": "Entrega posterior a la fecha esperada",
+                "unidad": "unidad",
+                "cantidad_adjudicada": "1",
+                "cantidad_planeada": "1",
+                "cantidadrecibida": "1",
+                "cantidadporrecibir": "0",
+                "fechacreacion": "2026-06-26T00:00:00",
+            },
+            {
+                "identificadorcontrato": "C-2",
+                "tipoejecucion": "Entrega",
+                "nombreplan": "Plan de entrega normal",
+                "fechadeentregaesperada": "2026-05-10T00:00:00",
+                "porcentajedeavanceesperado": "100",
+                "fechadeentregareal": "2026-05-11T00:00:00",
+                "porcentaje_de_avance_real": "100",
+                "estado_del_contrato": "Finalizado",
+                "referencia_de_articulos": "ITEM-C-2",
+                "descripci_n": "Entrega dentro de margen",
+                "unidad": "unidad",
+                "cantidad_adjudicada": "1",
+                "cantidad_planeada": "1",
+                "cantidadrecibida": "1",
+                "cantidadporrecibir": "0",
+                "fechacreacion": "2026-05-12T00:00:00",
+            },
+        ],
+    )
+    _write_rows(
+        tmp_path,
         "c82u-588k",
         [
             {
@@ -407,6 +449,51 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 "num_identificacion_representante_legal": "222.222.222",
                 "clase_identificacion_rl": "CC",
                 "representante_legal": "Representante Compartida",
+            },
+        ],
+    )
+    _write_rows(
+        tmp_path,
+        "qmzu-gj57",
+        [
+            {
+                "codigo": "SUP-902",
+                "nombre": "Comercial Valor Alto Diferente SAS",
+                "nit": "902000111-1",
+                "es_entidad": "No",
+                "es_grupo": "No",
+                "esta_activa": "true",
+                "fecha_creacion": "2026-05-01T00:00:00",
+                "codigo_categoria_principal": "72100000",
+                "descripcion_categoria_principal": "Servicios de construccion",
+                "telefono": "6010000000",
+                "fax": "",
+                "correo": "contacto@example.test",
+                "direccion": "Calle 1 2 3",
+                "pais": "CO",
+                "departamento": "BOGOTA",
+                "municipio": "BOGOTA",
+                "sitio_web": "https://proveedor.example.test",
+                "tipo_empresa": "Persona juridica",
+                "nombre_representante_legal": "Representante Diferente",
+                "tipo_doc_representante_legal": "CC",
+                "n_mero_doc_representante_legal": "987.654.321",
+                "telefono_representante_legal": "3000000000",
+                "correo_representante_legal": "rep@example.test",
+                "espyme": "No",
+                "ubicacion": "BOGOTA",
+            },
+            {
+                "codigo": "SUP-900",
+                "nombre": "Proveedor Concentrado SAS",
+                "nit": "900765432-6",
+                "es_entidad": "No",
+                "es_grupo": "No",
+                "esta_activa": "true",
+                "fecha_creacion": "2026-05-01T00:00:00",
+                "nombre_representante_legal": "Representante Compartida",
+                "tipo_doc_representante_legal": "CC",
+                "n_mero_doc_representante_legal": "222.222.222",
             },
         ],
     )
@@ -677,10 +764,12 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "signal_feature_procurement_cartel_risk_cobidding",
         "signal_feature_procurement_payment_plan_anomalies",
         "signal_feature_procurement_contract_suspensions",
+        "signal_feature_procurement_contract_execution_delay",
         "signal_feature_procurement_short_bidding_window",
         "signal_feature_procurement_offers_competition_drop",
         "signal_feature_procurement_politically_exposed_position_supplier_overlap",
         "signal_feature_procurement_related_companies_shared_officer",
+        "signal_feature_procurement_cross_source_identity_inconsistency",
     }
     rows_by_table = {result.table: result.rows for result in results}
     assert rows_by_table["fct_procurement_contract_awards"] == 216
@@ -697,6 +786,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     assert rows_by_table["signal_feature_procurement_cartel_risk_cobidding"] == 2
     assert rows_by_table["signal_feature_procurement_payment_plan_anomalies"] == 1
     assert rows_by_table["signal_feature_procurement_contract_suspensions"] == 1
+    assert rows_by_table["signal_feature_procurement_contract_execution_delay"] == 1
     assert rows_by_table["signal_feature_procurement_short_bidding_window"] == 1
     assert rows_by_table["signal_feature_procurement_offers_competition_drop"] == 1
     assert (
@@ -706,6 +796,10 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         == 1
     )
     assert rows_by_table["signal_feature_procurement_related_companies_shared_officer"] == 2
+    assert (
+        rows_by_table["signal_feature_procurement_cross_source_identity_inconsistency"]
+        == 1
+    )
 
     con = duckdb.connect()
     try:
@@ -842,6 +936,19 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 )
             ],
         ).fetchall()
+        execution_delay_rows = con.execute(
+            "SELECT entity_key, scope_key, severity, contract_value, delayed_item_count, "
+            "max_delay_days, evidence_refs[1], evidence_refs[2] "
+            "FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_procurement_contract_execution_delay"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
         short_window_rows = con.execute(
             "SELECT entity_key, scope_key, severity, estimated_value, "
             "response_count, open_window_hours, evidence_refs[1] "
@@ -887,6 +994,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     tmp_path
                     / "curated"
                     / "table=signal_feature_procurement_related_companies_shared_officer"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
+        identity_inconsistency_rows = con.execute(
+            "SELECT entity_key, scope_key, company_name, supplier_name, "
+            "name_mismatch_flag, representative_document_mismatch_flag, "
+            "mismatch_dimension_count, evidence_refs[1], evidence_refs[2] "
+            "FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_procurement_cross_source_identity_inconsistency"
                     / "*.parquet"
                 )
             ],
@@ -1036,6 +1157,18 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             "secop_contract_modifications:MOD-C-1",
         )
     ]
+    assert execution_delay_rows == [
+        (
+            "900123456",
+            "C-1",
+            "low",
+            125_000_000.0,
+            1,
+            46,
+            "https://secop.example/C-1",
+            "secop_contract_execution:C-1:ITEM-C-1",
+        )
+    ]
     assert short_window_rows == [
         (
             "903000111",
@@ -1094,6 +1227,19 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             "company_registry_c82u:row-c82u-shared-2",
             "https://secop.example/CR-0",
         ),
+    ]
+    assert identity_inconsistency_rows == [
+        (
+            "902000111",
+            "alias_cluster:902000111",
+            "Proveedor Valor Alto SAS",
+            "Comercial Valor Alto Diferente SAS",
+            True,
+            True,
+            2,
+            "company_registry_c82u:row-c82u-1",
+            "secop_suppliers:SUP-902",
+        )
     ]
     assert company_rows == [
         ("9001234568", ["paco_sanctions", "secop_ii_contracts"]),

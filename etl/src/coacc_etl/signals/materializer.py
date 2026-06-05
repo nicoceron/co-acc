@@ -31,10 +31,12 @@ SUPPORTED_SIGNAL_IDS = (
     "procurement_cartel_risk_cobidding",
     "procurement_payment_plan_anomalies",
     "procurement_contract_suspensions",
+    "procurement_contract_execution_delay",
     "procurement_short_bidding_window",
     "procurement_offers_competition_drop",
     "procurement_politically_exposed_position_supplier_overlap",
     "procurement_related_companies_shared_officer",
+    "procurement_cross_source_identity_inconsistency",
 )
 _RUN_ID_SAFE = re.compile(r"[^A-Za-z0-9_.=-]+")
 

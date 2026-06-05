@@ -140,13 +140,19 @@ joined back to exact-NIT SECOP II contracts and require either a large absolute
 modification value or a large value-share increase.
 Contract suspensions are computed from deduplicated SECOP suspension-event
 fingerprints joined back to exact-NIT SECOP II contracts.
+Contract execution delay rows are computed from SECOP execution item schedules
+joined back to exact-NIT SECOP II contracts and require material delivery delay
+or execution progress gaps on COP 100M+ contracts.
+Cross-source identity inconsistencies are computed from exact-NIT joins between
+RUES company registry records and SECOP supplier registry records, requiring at
+least two mismatch dimensions before emitting reviewer-only hits.
 Shared-officer clusters are deduplicated by company document and
 representative document before DuckDB groups exposed suppliers into reviewer-only
 clusters.
 
 ## Reality Notes
 
-On the local lake after the 2026-06-05 large-modifications materialization work:
+On the local lake after the 2026-06-05 execution/identity materialization work:
 
 - `dim_subject_document`: 1,215,832 rows
 - `dim_company`: 101,916 rows
@@ -163,10 +169,12 @@ On the local lake after the 2026-06-05 large-modifications materialization work:
 - `signal_feature_procurement_cartel_risk_cobidding`: 866 rows
 - `signal_feature_procurement_payment_plan_anomalies`: 375 rows
 - `signal_feature_procurement_contract_suspensions`: 10,460 rows
+- `signal_feature_procurement_contract_execution_delay`: 48 rows
 - `signal_feature_procurement_short_bidding_window`: 90,592 rows
 - `signal_feature_procurement_offers_competition_drop`: 13 rows
 - `signal_feature_procurement_politically_exposed_position_supplier_overlap`: 284 rows
 - `signal_feature_procurement_related_companies_shared_officer`: 1,482 rows
+- `signal_feature_procurement_cross_source_identity_inconsistency`: 50 rows
 
 The first signal feature table joined 13,423 distinct SECOP contracts, 664
 distinct supplier document keys, and PACO evidence from `multas_secop`,
@@ -207,7 +215,19 @@ SECOP suspension events show at least two distinct suspension dates on a COP
 100M+ exact-NIT contract. Evidence refs include the SECOP process URL and
 bounded suspension-event record ids.
 
+The contract-execution-delay feature emits public contract rows when SECOP
+execution item schedules show at least 30 days of delivery delay, unresolved
+overdue delivery, or a material expected-vs-actual progress gap on a COP 100M+
+exact-NIT contract. Evidence refs include the SECOP process URL and bounded
+execution-item record ids.
+
 The shared-officer feature emits reviewer-only supplier rows when at least two
 SECOP-exposed supplier companies share the same RUES legal representative, each
 company has at least 3 contracts and COP 100M total awarded value, and the
 company identity is an exact NIT match.
+
+The cross-source identity-inconsistency feature emits reviewer-only supplier
+rows when an exact-NIT RUES/SECOP supplier match has at least two mismatch
+dimensions across normalized name, legal representative document, or active
+status. Evidence refs include one RUES company record and one SECOP supplier
+registry record.

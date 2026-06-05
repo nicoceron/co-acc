@@ -538,7 +538,7 @@ signals:
     public_safe: true
     reviewer_only: false
     requires_identity: [EXACT_COMPANY_NIT]
-    sources_required: [secop_contract_execution, secop_invoices]
+    sources_required: [secop_contract_execution, secop_ii_contracts]
     scope_type: contract
     dedup_fields: [scope_key]
     runner:

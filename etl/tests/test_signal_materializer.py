@@ -284,6 +284,29 @@ def _write_demo_feature_tables(root: Path) -> None:
     )
     _write_feature_rows(
         root,
+        "procurement_contract_execution_delay",
+        [
+            {
+                "signal_id": "procurement_contract_execution_delay",
+                "entity_id": "doc:900123456",
+                "entity_key": "900123456",
+                "entity_label": "Company",
+                "scope_key": "C-1",
+                "scope_type": "contract",
+                "severity": "low",
+                "risk_signal": 0.68,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "https://secop.example/C-1",
+                    "secop_contract_execution:C-1:ITEM-C-1",
+                ],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
         "procurement_offers_competition_drop",
         [
             {
@@ -351,6 +374,29 @@ def _write_demo_feature_tables(root: Path) -> None:
             }
         ],
     )
+    _write_feature_rows(
+        root,
+        "procurement_cross_source_identity_inconsistency",
+        [
+            {
+                "signal_id": "procurement_cross_source_identity_inconsistency",
+                "entity_id": "doc:902000111",
+                "entity_key": "902000111",
+                "entity_label": "Company",
+                "scope_key": "alias_cluster:902000111",
+                "scope_type": "alias_cluster",
+                "severity": "low",
+                "risk_signal": 0.74,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "company_registry_c82u:row-c82u-1",
+                    "secop_suppliers:SUP-902",
+                ],
+            }
+        ],
+    )
 
 
 def test_materialize_signals_writes_hits_evidence_and_manifest(
@@ -363,8 +409,8 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     result = materialize_signals(run_id="test-run")
 
     assert result.run_id == "test-run"
-    assert result.hit_count == 15
-    assert result.evidence_count == 30
+    assert result.hit_count == 17
+    assert result.evidence_count == 34
     assert {row.signal_id: row.hit_count for row in result.signal_results} == {
         "procurement_single_bidder_high_value": 1,
         "procurement_large_modifications": 1,
@@ -376,10 +422,12 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_cartel_risk_cobidding": 2,
         "procurement_payment_plan_anomalies": 1,
         "procurement_contract_suspensions": 1,
+        "procurement_contract_execution_delay": 1,
         "procurement_short_bidding_window": 1,
         "procurement_offers_competition_drop": 1,
         "procurement_politically_exposed_position_supplier_overlap": 1,
         "procurement_related_companies_shared_officer": 1,
+        "procurement_cross_source_identity_inconsistency": 1,
     }
 
     con = duckdb.connect()
@@ -415,8 +463,10 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_buyer_supplier_network_density",
         "procurement_cartel_risk_cobidding",
         "procurement_cartel_risk_cobidding",
+        "procurement_contract_execution_delay",
         "procurement_contract_suspensions",
         "procurement_contract_value_outlier_by_category",
+        "procurement_cross_source_identity_inconsistency",
         "procurement_large_modifications",
         "procurement_offers_competition_drop",
         "procurement_payment_plan_anomalies",
@@ -432,7 +482,9 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     assert evidence_counts == {
         "procurement_buyer_supplier_network_density": 2,
         "procurement_cartel_risk_cobidding": 2,
+        "procurement_contract_execution_delay": 2,
         "procurement_contract_suspensions": 3,
+        "procurement_cross_source_identity_inconsistency": 2,
         "procurement_payment_plan_anomalies": 1,
         "procurement_large_modifications": 2,
         "procurement_offers_competition_drop": 2,
@@ -476,6 +528,12 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         if row["label"] == "secop_contract_suspensions:CSUSP-1:2026-06-11"
     )
     assert suspension_evidence["source_id"] == "secop_contract_suspensions"
+    execution_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["label"] == "secop_contract_execution:C-1:ITEM-C-1"
+    )
+    assert execution_evidence["source_id"] == "secop_contract_execution"
     modification_evidence = next(
         row
         for row in evidence_payloads
@@ -500,11 +558,15 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         if row["label"] == "sigep_sensitive_positions:123456789"
     )
     assert sigep_evidence["source_id"] == "sigep_sensitive_positions"
+    supplier_registry_evidence = next(
+        row for row in evidence_payloads if row["label"] == "secop_suppliers:SUP-902"
+    )
+    assert supplier_registry_evidence["source_id"] == "secop_suppliers"
 
     manifest = json.loads((tmp_path / "meta" / "signal_runs" / "test-run.json").read_text())
     assert manifest["status"] == "completed"
-    assert manifest["hit_count"] == 15
-    assert manifest["evidence_count"] == 30
+    assert manifest["hit_count"] == 17
+    assert manifest["evidence_count"] == 34
 
 
 def test_materialize_signals_deduplicates_repeated_feature_rows(
@@ -577,5 +639,5 @@ def test_signals_materialize_cli(
     result = CliRunner().invoke(cli, ["signals", "materialize", "--all", "--run-id", "cli-run"])
 
     assert result.exit_code == 0, result.output
-    assert "signal run cli-run: wrote 15 hits and 30 evidence rows" in result.output
+    assert "signal run cli-run: wrote 17 hits and 34 evidence rows" in result.output
     assert (tmp_path / "meta" / "signal_runs" / "cli-run.json").exists()

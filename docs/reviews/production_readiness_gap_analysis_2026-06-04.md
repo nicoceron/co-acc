@@ -51,7 +51,9 @@ Eighteenth update on 2026-06-05: the dedicated SECOP II suspension-event source 
 
 Nineteenth update on 2026-06-05: the SECOP II modification-event source `u8cx-r425` has been ingested through the Phase 7 smoke path for a recent 63,000-row slice with coverage pass and watermark `2026-06-03T00:00:00Z`. `procurement_large_modifications` is now implemented as a public materializer from SECOP II modification values joined to exact-NIT SECOP II contracts; it requires COP 100M+ contracts and either COP 100M+ total modification value or at least 50% modification value share, with SECOP process plus modification-event evidence. The local feature table produced 582 rows, and the run `phase11-local-20260605-large-modifications` materialized 14 signal IDs total, including 8 public signals and 6 reviewer-only signals, with 161,074 hits and 264,092 evidence rows.
 
-Twentieth update on 2026-06-05: a local lake backup/verify/restore drill passed against the current 10 GB lake. `infra/scripts/backup-lake.sh` wrote `/tmp/coacc-lake-drill/coacc_lake_20260605T010250Z.tar.gz` (9.9 GB), `verify-lake-backup.sh` passed with `PASS 14 curated contract(s)`, and `restore-lake-backup.sh` restored to `/tmp/coacc-restore-drill` with the same contract check. The restored lake contains 14 signal feature tables and the `u8cx-r425` watermark plus 63 raw modification parquet files. This proves the scripts locally, but it is not yet an off-host production-volume restore drill.
+Twentieth update on 2026-06-05: a local lake backup/verify/restore drill passed against the then-current 10 GB lake. `infra/scripts/backup-lake.sh` wrote `/tmp/coacc-lake-drill/coacc_lake_20260605T010250Z.tar.gz` (9.9 GB), `verify-lake-backup.sh` passed with `PASS 14 curated contract(s)`, and `restore-lake-backup.sh` restored to `/tmp/coacc-restore-drill` with the same contract check. The restored lake contains 14 signal feature tables and the `u8cx-r425` watermark plus 63 raw modification parquet files. This proves the scripts locally, but it is not yet an off-host production-volume restore drill.
+
+Twenty-first update on 2026-06-05: two more required SECOP sources were loaded through the Phase 7 smoke path: `mfmm-jqmq` (`secop_contract_execution`) wrote 9,535 rows with coverage pass and watermark `2026-06-04T00:00:00Z`, and `qmzu-gj57` (`secop_suppliers`) wrote 924 rows with coverage pass and watermark `2026-06-03T00:00:00Z`. `procurement_contract_execution_delay` is now a public materializer from SECOP execution rows joined to exact-NIT SECOP II contract awards; it emits 48 current hits with contract plus execution-item evidence. `procurement_cross_source_identity_inconsistency` is now a reviewer-only materializer from RUES company registry and SECOP supplier registry exact-NIT joins; it emits 50 current hits with company-registry plus supplier-registry evidence. The run `phase11-local-20260605-execution-identity` materialized 16 signal IDs total, including 9 public signals and 7 reviewer-only signals, with 161,172 hits and 264,342 evidence rows.
 
 ## Dataset Loading Reality
 
@@ -70,7 +72,7 @@ Current state:
 - Socrata ingestion is paged with `$limit`, `$offset`, `$order`, `--page-size`, `--max-pages`, and watermark/full-refresh controls.
 - Curated tables are stored as Parquet and queried through DuckDB.
 - Some anomaly scoring paths support bounded rows and prediction batch size.
-- The current lake materializer supports 14 signal patterns: 8 public and 6 reviewer-only.
+- The current lake materializer supports 16 signal patterns: 9 public and 7 reviewer-only.
 
 So the lake does handle batch-oriented processing, but only for the parts that have actually been implemented. The architecture is right; the coverage is incomplete.
 
@@ -80,10 +82,10 @@ So the lake does handle batch-oriented processing, but only for the parts that h
 | --- | --- | --- |
 | Dataset catalog | `docs/datasets/catalog.signed.csv` has 311 rows; `docs/datasets/catalog.proven.csv` has 148 rows; `etl/datasets` has 149 YAML specs | Catalog counts are inconsistent with stale README claims |
 | Ingest-ready datasets | 43 ingest-ready specs total, including 42 Socrata and 1 PACO sanctions custom adapter | Partial |
-| Source registry | 44 source entries; 42 implemented; 11 loaded locally; 33 promoted; 11 enrichment-only; 2 discovered but uningested | Partial |
+| Source registry | 44 source entries; 42 implemented; 13 loaded locally; 33 promoted; 11 enrichment-only; 2 discovered but uningested | Partial |
 | Curated lake | Key curated tables exist, including procurement awards, companies, buyers, persons, and subject documents | Working for current slice |
 | Signal registry | 43 registered signals validate successfully | Registry complete enough to describe intended patterns |
-| Materialized signals | 14 signal IDs materialized from current lake; 8 are public and 6 are reviewer-only; production signal catalog can now expose only materialized public signals; remaining registry definitions are marked `registered_only` | Honest launch scope; full pattern coverage still incomplete |
+| Materialized signals | 16 signal IDs materialized from current lake; 9 are public and 7 are reviewer-only; production signal catalog can now expose only materialized public signals; remaining registry definitions are marked `registered_only` | Honest launch scope; full pattern coverage still incomplete |
 | API smoke | Lake-backed smoke passes with strict readiness, materialized public signals, cases, citations, source stats, and run metadata | Working for current slice |
 | Frontend desktop | Production-safe local screenshots show live landing, dashboard, signals, search, entity, and source registry views without page overflow | Working for current slice |
 | Frontend mobile | Production-safe local screenshots show stacked signal rows, readable entity detail, dashboard feed cards, and source registry cards without page overflow | Working for current slice |
@@ -103,7 +105,7 @@ So the lake does handle batch-oriented processing, but only for the parts that h
 
 ### Assumption: The lake already detects every registered pattern in batches.
 
-- Evidence: `SUPPORTED_SIGNAL_IDS` currently covers only `procurement_single_bidder_high_value`, `procurement_large_modifications`, `procurement_sanctioned_supplier_awarded`, `procurement_supplier_concentration_across_entities`, `procurement_contract_value_outlier_by_category`, `procurement_repeat_awards_same_supplier`, `procurement_buyer_supplier_network_density`, `procurement_cartel_risk_cobidding`, `procurement_payment_plan_anomalies`, `procurement_contract_suspensions`, `procurement_short_bidding_window`, `procurement_offers_competition_drop`, `procurement_politically_exposed_position_supplier_overlap`, and `procurement_related_companies_shared_officer`. The API now labels registered-only signals and production compose hides them from public signal listing.
+- Evidence: `SUPPORTED_SIGNAL_IDS` currently covers only `procurement_single_bidder_high_value`, `procurement_large_modifications`, `procurement_sanctioned_supplier_awarded`, `procurement_supplier_concentration_across_entities`, `procurement_contract_value_outlier_by_category`, `procurement_repeat_awards_same_supplier`, `procurement_buyer_supplier_network_density`, `procurement_cartel_risk_cobidding`, `procurement_payment_plan_anomalies`, `procurement_contract_suspensions`, `procurement_contract_execution_delay`, `procurement_short_bidding_window`, `procurement_offers_competition_drop`, `procurement_politically_exposed_position_supplier_overlap`, `procurement_related_companies_shared_officer`, and `procurement_cross_source_identity_inconsistency`. The API now labels registered-only signals and production compose hides them from public signal listing.
 - Status: Invalid for full pattern completion; valid for scoped launch behavior.
 - Risk: If operators disable the materialized-only scope without implementing more materializers, the UI/API can imply broader pattern coverage than the backend can currently produce.
 - Action: Keep `COACC_SIGNALS_REQUIRE_MATERIALIZED=true` for production until additional materializers are implemented and verified.
@@ -130,7 +132,7 @@ These block a credible production launch.
 | --- | --- | --- |
 | Production architecture decision | Lake-first with optional Neo4j is now reflected in API readiness, prod compose, and deploy smoke | Run the smoke against the real production host with mounted lake assets |
 | Production lake storage | Full datasets should not live on a laptop, but production needs durable shared data | Add object store or persistent volume strategy, permissions, and production restore drill against the backup scripts |
-| Signal materialization coverage | 43 signals are registered, but only 14 are materialized from lake data; production now reduces public listing to public materialized signals | Implement remaining materializers before broadening public signal scope |
+| Signal materialization coverage | 43 signals are registered, but only 16 are materialized from lake data; production now reduces public listing to public materialized signals | Implement remaining materializers before broadening public signal scope |
 | Frontend fixture leakage | Production-safe frontend now disables silent fixture fallback via `VITE_ALLOW_FIXTURES=false`; entity detail is live-wired; remaining non-live geography/sector surfaces show empty or derived states | Wire geography/sector views to live APIs or remove them from launch scope |
 | Mobile signal table | Signals table has stacked mobile rows and passed local Chrome visual QA against the live API | Re-run through the real production host after deployment |
 | Production container config | Compose/env docs now mount required config, dataset contracts, catalogs, and lake paths; deploy smoke now verifies `/ready` and lake-backed routes | Run it against real `DOMAIN`, `JWT_SECRET_KEY`, and durable lake mount |
@@ -142,7 +144,7 @@ These are needed for a stable public or reviewer-facing beta.
 
 | Gap | Why it matters | Required fix |
 | --- | --- | --- |
-| Dataset readiness | Only 43 of 149 ETL specs are ingest-ready; only 11 sources are loaded locally | Decide the launch source set and finish contracts/adapters for that set |
+| Dataset readiness | Only 43 of 149 ETL specs are ingest-ready; only 13 sources are loaded locally | Decide the launch source set and finish contracts/adapters for that set |
 | Registry/readme drift | README claims are stale relative to actual catalog and ETL counts | Update docs from generated counts or add a count-check CI gate |
 | API readiness semantics | `/ready` now fails closed for missing registry, catalog, contract, lake, materialized signal outputs, and required Neo4j; strict runtime check passed against current lake | Add CI/deploy smoke that asserts `/ready` passes only with production assets mounted |
 | CORS/local dev defaults | Vite ports are now included in default API CORS and `.env.example` | Verify browser smoke in local dev and production same-origin mode |
