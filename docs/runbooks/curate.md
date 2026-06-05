@@ -28,6 +28,7 @@ make curate TABLE=signal_feature_procurement_payment_plan_anomalies
 make curate TABLE=signal_feature_procurement_contract_suspensions
 make curate TABLE=signal_feature_procurement_public_servant_conflict_disclosure_overlap
 make curate TABLE=signal_feature_pida5_pida27_pida4_chain
+make curate TABLE=signal_feature_project_bpin_procurement_overlap
 make curate TABLE=signal_feature_procurement_related_companies_shared_officer
 make curate TABLE=dim_company
 make curate TABLE=dim_buyer
@@ -70,6 +71,7 @@ make curate LAKE_ROOT=/path/to/lake
 - `lake/curated/table=signal_feature_procurement_public_servant_conflict_disclosure_overlap/`
 - `lake/curated/table=signal_feature_cuentas_claras_donor_supplier_overlap/`
 - `lake/curated/table=signal_feature_pida5_pida27_pida4_chain/`
+- `lake/curated/table=signal_feature_project_bpin_procurement_overlap/`
 - `lake/curated/table=signal_feature_procurement_politically_exposed_position_supplier_overlap/`
 - `lake/curated/table=signal_feature_procurement_related_companies_shared_officer/`
 - `lake/curated/table=signal_feature_procurement_cross_source_identity_inconsistency/`
@@ -88,6 +90,7 @@ The full default builder requires:
 - `cuentas_claras_income_2019`, resolved from raw source `jgra-rz2t`
 - `secop_integrado`, resolved from raw source `rpmr-utcd`
 - `secop_sanctions`, resolved from raw source `it5q-hg94`
+- `secop_process_bpin`, resolved from raw source `d9na-abhe`
 - `paco_sanctions`
 - `company_registry_c82u`, resolved from raw source `c82u-588k`
 - `5u9e-g5w9` (SIGEP corruption-sensitive posts)
@@ -109,6 +112,8 @@ requires only `secop_ii_contracts` for the current contract-field partial;
 requires `conflict_disclosures` and `secop_ii_contracts`;
 `signal_feature_pida5_pida27_pida4_chain` requires
 `secop_integrado` and `secop_sanctions`;
+`signal_feature_project_bpin_procurement_overlap` requires
+`secop_process_bpin` and `secop_ii_contracts`;
 `signal_feature_procurement_related_companies_shared_officer`
 requires only `secop_ii_contracts` and `company_registry_c82u`.
 
@@ -172,13 +177,16 @@ selection to avoid duplicated contract value across multiple declaration forms.
 PIDA sanctioned-infrastructure chain rows are computed from exact contract-id
 joins between SECOP Integrado contracts and SECOP II sanctions, excluding
 future-dated sanction outliers before aggregating by territory.
+BPIN project-procurement rows are computed from validated numeric BPIN process
+links joined to exact SECOP II contract IDs, then aggregated by BPIN before the
+high-value project cap is applied.
 Shared-officer clusters are deduplicated by company document and
 representative document before DuckDB groups exposed suppliers into reviewer-only
 clusters.
 
 ## Reality Notes
 
-On the local lake after the 2026-06-05 SECOP sanctions/PIDA materialization work:
+On the local lake after the 2026-06-05 BPIN project materialization work:
 
 - `dim_subject_document`: 1,215,832 rows
 - `dim_company`: 101,916 rows
@@ -201,6 +209,7 @@ On the local lake after the 2026-06-05 SECOP sanctions/PIDA materialization work
 - `signal_feature_procurement_public_servant_conflict_disclosure_overlap`: 65 rows
 - `signal_feature_cuentas_claras_donor_supplier_overlap`: 533 rows
 - `signal_feature_pida5_pida27_pida4_chain`: 38 rows
+- `signal_feature_project_bpin_procurement_overlap`: 654 rows
 - `signal_feature_procurement_politically_exposed_position_supplier_overlap`: 284 rows
 - `signal_feature_procurement_related_companies_shared_officer`: 1,482 rows
 - `signal_feature_procurement_cross_source_identity_inconsistency`: 50 rows
@@ -227,6 +236,11 @@ statistically extreme against the peer median, standard deviation, or IQR.
 The buyer-supplier network density feature emits reviewer-only supplier rows
 when exact-NIT suppliers have at least 10 buyers, 8 repeated buyer pairs, 55%
 of contracts in repeated relationships, and COP 2B total exposure.
+
+The BPIN project feature emits public project rows when validated SECOP
+process-to-BPIN links join to at least two SECOP II contracts and COP 100B total
+contract value. The 2026-06-05 local build produced 654 rows, including 82 high
+severity rows and 572 medium severity rows.
 
 The co-bidding cartel risk feature emits reviewer-only company rows for both
 companies in each repeated co-bid pair when exact non-placeholder supplier NITs

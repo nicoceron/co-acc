@@ -35,6 +35,7 @@ _DEFAULT_TABLES = (
     "signal_feature_procurement_payment_plan_anomalies",
     "signal_feature_procurement_contract_suspensions",
     "signal_feature_procurement_contract_execution_delay",
+    "signal_feature_project_bpin_procurement_overlap",
     "signal_feature_procurement_short_bidding_window",
     "signal_feature_procurement_offers_competition_drop",
     "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
@@ -78,6 +79,10 @@ _TABLE_SOURCES = {
     ),
     "signal_feature_procurement_contract_execution_delay": (
         "secop_contract_execution",
+        "secop_ii_contracts",
+    ),
+    "signal_feature_project_bpin_procurement_overlap": (
+        "secop_process_bpin",
         "secop_ii_contracts",
     ),
     "signal_feature_procurement_short_bidding_window": ("secop_ii_processes",),
@@ -1766,6 +1771,222 @@ def _create_contract_execution_delay_views(
     """)
 
 
+def _create_project_bpin_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not ({"secop_process_bpin", "secop_ii_contracts"} <= set(required_sources)):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_project_bpin_procurement_overlap AS
+        WITH bpin_links AS (
+            SELECT DISTINCT
+                nullif(trim(codigo_bpin), '') AS bpin_code,
+                nullif(trim(anno_bpin), '') AS bpin_year,
+                nullif(trim(id_proceso), '') AS process_id,
+                nullif(trim(id_contracto), '') AS contract_id,
+                nullif(trim(id_portafolio), '') AS portfolio_id,
+                nullif(trim(validacion_bpin), '') AS validation_status
+            FROM src_secop_process_bpin
+            WHERE nullif(trim(codigo_bpin), '') IS NOT NULL
+                AND nullif(trim(id_contracto), '') IS NOT NULL
+                AND lower(trim(coalesce(id_contracto, ''))) != 'no definido'
+                AND regexp_matches(nullif(trim(codigo_bpin), ''), '^[0-9]{8,}$')
+                AND NOT regexp_matches(nullif(trim(codigo_bpin), ''), '^0+$')
+                AND lower(coalesce(validacion_bpin, '')) NOT LIKE '%no validado%'
+        ),
+        joined AS (
+            SELECT *
+            FROM (
+                SELECT
+                    b.bpin_code,
+                    b.bpin_year,
+                    b.process_id AS bpin_process_id,
+                    b.contract_id,
+                    b.portfolio_id,
+                    b.validation_status,
+                    c.supplier_entity_id,
+                    c.supplier_document_key,
+                    c.supplier_nit_canonical,
+                    c.supplier_name,
+                    c.buyer_document_id,
+                    c.buyer_name,
+                    c.department,
+                    c.city AS municipality,
+                    c.sector,
+                    c.procurement_modality,
+                    c.contract_type,
+                    c.contract_reference,
+                    c.process_id AS contract_process_id,
+                    c.process_url,
+                    c.contract_value,
+                    c.signing_date,
+                    c.contract_start_date,
+                    c.contract_end_date,
+                    row_number() OVER (
+                        PARTITION BY b.bpin_code, b.contract_id
+                        ORDER BY c.contract_value DESC NULLS LAST,
+                            c.signing_date DESC NULLS LAST,
+                            c.award_row_id
+                    ) AS contract_rank
+                FROM bpin_links b
+                JOIN curated_contract_awards c
+                    ON c.contract_id = b.contract_id
+                WHERE c.contract_value IS NOT NULL
+                    AND c.contract_value > 0
+            )
+            WHERE contract_rank = 1
+        ),
+        rollup AS (
+            SELECT
+                bpin_code,
+                min(bpin_year) AS bpin_year,
+                count(DISTINCT contract_id) AS contract_count,
+                count(DISTINCT supplier_document_key)
+                    FILTER (WHERE supplier_document_key IS NOT NULL)
+                    AS supplier_count,
+                count(DISTINCT buyer_document_id)
+                    FILTER (WHERE buyer_document_id IS NOT NULL)
+                    AS buyer_count,
+                count(DISTINCT coalesce(department, ''))
+                    FILTER (WHERE department IS NOT NULL)
+                    AS department_count,
+                sum(contract_value) AS total_contract_value,
+                max(contract_value) AS max_contract_value,
+                min(signing_date) AS first_signing_date,
+                max(signing_date) AS last_signing_date
+            FROM joined
+            GROUP BY bpin_code
+        ),
+        contract_evidence_ranked AS (
+            SELECT
+                bpin_code,
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id)
+                    AS evidence_ref,
+                contract_value,
+                signing_date,
+                contract_id,
+                row_number() OVER (
+                    PARTITION BY bpin_code
+                    ORDER BY contract_value DESC NULLS LAST,
+                        signing_date DESC NULLS LAST,
+                        contract_id
+                ) AS evidence_rank
+            FROM joined
+        ),
+        contract_evidence AS (
+            SELECT
+                bpin_code,
+                list(evidence_ref ORDER BY contract_value DESC, signing_date DESC, contract_id)
+                    AS contract_evidence_refs
+            FROM contract_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY bpin_code
+        ),
+        bpin_evidence_ranked AS (
+            SELECT
+                bpin_code,
+                'secop_process_bpin:' || bpin_code || ':' || contract_id
+                    AS evidence_ref,
+                contract_value,
+                contract_id,
+                row_number() OVER (
+                    PARTITION BY bpin_code
+                    ORDER BY contract_value DESC NULLS LAST, contract_id
+                ) AS evidence_rank
+            FROM joined
+        ),
+        bpin_evidence AS (
+            SELECT
+                bpin_code,
+                list(evidence_ref ORDER BY contract_value DESC, evidence_ref)
+                    AS bpin_evidence_refs
+            FROM bpin_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY bpin_code
+        ),
+        territory_samples_ranked AS (
+            SELECT
+                bpin_code,
+                coalesce(department, 'NACIONAL') || ':' || coalesce(municipality, 'NACIONAL')
+                    AS territory_sample,
+                sum(contract_value) AS territory_value,
+                row_number() OVER (
+                    PARTITION BY bpin_code
+                    ORDER BY sum(contract_value) DESC NULLS LAST,
+                        coalesce(department, 'NACIONAL'),
+                        coalesce(municipality, 'NACIONAL')
+                ) AS sample_rank
+            FROM joined
+            GROUP BY bpin_code,
+                coalesce(department, 'NACIONAL'),
+                coalesce(municipality, 'NACIONAL')
+        ),
+        territory_samples AS (
+            SELECT
+                bpin_code,
+                list(territory_sample ORDER BY territory_value DESC, territory_sample)
+                    AS territory_sample
+            FROM territory_samples_ranked
+            WHERE sample_rank <= 10
+            GROUP BY bpin_code
+        )
+        SELECT
+            'project_bpin_procurement_overlap' AS signal_id,
+            'project:' || r.bpin_code AS entity_id,
+            r.bpin_code AS entity_key,
+            'Project' AS entity_label,
+            'bpin:' || r.bpin_code AS scope_key,
+            'project' AS scope_type,
+            CASE
+                WHEN r.total_contract_value >= 1000000000000
+                    OR r.contract_count >= 5000
+                    THEN 'high'
+                WHEN r.total_contract_value >= 100000000000
+                    THEN 'medium'
+                ELSE 'low'
+            END AS severity,
+            least(
+                1.0,
+                0.50
+                    + least(log10(greatest(r.total_contract_value, 1)) / 120.0, 0.18)
+                    + least(r.contract_count / 10000.0, 0.14)
+                    + least(r.supplier_count / 10000.0, 0.10)
+                    + least(r.department_count / 50.0, 0.08)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_BPIN' AS identity_match_type,
+            'exact' AS identity_quality,
+            r.bpin_year,
+            r.contract_count,
+            r.supplier_count,
+            r.buyer_count,
+            r.department_count,
+            r.total_contract_value,
+            r.max_contract_value,
+            r.first_signing_date,
+            r.last_signing_date,
+            t.territory_sample,
+            list_concat(be.bpin_evidence_refs, ce.contract_evidence_refs)
+                AS evidence_refs
+        FROM rollup r
+        JOIN bpin_evidence be
+            ON be.bpin_code = r.bpin_code
+        JOIN contract_evidence ce
+            ON ce.bpin_code = r.bpin_code
+        LEFT JOIN territory_samples t
+            ON t.bpin_code = r.bpin_code
+        WHERE r.total_contract_value >= 100000000000
+            AND r.contract_count >= 2
+        QUALIFY row_number() OVER (
+            ORDER BY r.total_contract_value DESC NULLS LAST,
+                r.contract_count DESC,
+                r.bpin_code
+        ) <= 1000
+    """)
+
+
 def _create_supplier_identity_views(
     con: duckdb.DuckDBPyConnection,
     required_sources: Sequence[str],
@@ -2937,6 +3158,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         _create_company_registry_overlap_views(con, required_sources)
         _create_contract_suspension_views(con, required_sources)
         _create_contract_execution_delay_views(con, required_sources)
+        _create_project_bpin_views(con, required_sources)
         _create_supplier_identity_views(con, required_sources)
         _create_cuentas_claras_views(con, required_sources)
         _create_public_servant_conflict_disclosure_views(con, required_sources)
@@ -3777,6 +3999,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
     """)
     _create_contract_suspension_views(con, required_sources)
     _create_contract_execution_delay_views(con, required_sources)
+    _create_project_bpin_views(con, required_sources)
     _create_cuentas_claras_views(con, required_sources)
     _create_public_servant_conflict_disclosure_views(con, required_sources)
     _create_pida_chain_views(con, required_sources)
@@ -4087,6 +4310,8 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_contract_suspensions"
     if table == "signal_feature_procurement_contract_execution_delay":
         return "SELECT * FROM curated_contract_execution_delay"
+    if table == "signal_feature_project_bpin_procurement_overlap":
+        return "SELECT * FROM curated_project_bpin_procurement_overlap"
     if table == "signal_feature_procurement_short_bidding_window":
         return "SELECT * FROM curated_short_bidding_window"
     if table == "signal_feature_procurement_offers_competition_drop":

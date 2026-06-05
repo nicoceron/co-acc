@@ -180,14 +180,14 @@ signals:
   - id: project_bpin_procurement_overlap
     version: 1
     title: BPIN project linked to procurement contracts
-    description: Project-level overlap between BPIN-backed projects and procurement exposure.
+    description: Validated BPIN process links joined to exact SECOP II procurement contracts.
     category: projects
     severity: medium
     entity_types: [Project]
     public_safe: true
     reviewer_only: false
     requires_identity: [EXACT_BPIN]
-    sources_required: [dnp_project_contract_links, dnp_project_locations, secop_process_bpin, secop_ii_contracts]
+    sources_required: [secop_process_bpin, secop_ii_contracts]
     scope_type: project
     dedup_fields: [scope_key]
     runner:

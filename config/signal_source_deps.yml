@@ -30,9 +30,9 @@ signals:
     optional: []
   project_bpin_procurement_overlap:
     sources: [dnp_project_contract_links, dnp_project_locations, secop_process_bpin, secop_ii_contracts]
-    required: [secop_process_bpin]
-    optional: [dnp_project_contract_links, dnp_project_locations, secop_ii_contracts]
-    severity_on_partial: low
+    required: [secop_process_bpin, secop_ii_contracts]
+    optional: [dnp_project_contract_links, dnp_project_locations]
+    severity_on_partial: medium
   project_regalias_execution_procurement_overlap:
     sources: [sgr_expense_execution, sgr_projects, dnp_project_contract_links, secop_process_bpin]
     required: [secop_process_bpin]

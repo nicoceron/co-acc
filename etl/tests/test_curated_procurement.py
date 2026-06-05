@@ -352,6 +352,48 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 "contract_end_date": "2026-12-31",
                 "last_update": "2026-05-03T00:00:00",
             },
+            {
+                "contract_id": "BPIN-C-1",
+                "contract_reference": "REF-BPIN-1",
+                "procurement_process": "PROC-BPIN-1",
+                "process_url": "https://secop.example/BPIN-C-1",
+                "supplier_document": "903333111-4",
+                "supplier_doc_type": "NIT",
+                "awarded_supplier": "Proveedor BPIN Uno SAS",
+                "entity_nit": "800777888",
+                "entity_name": "Comprador BPIN",
+                "department": "BOGOTA",
+                "city": "BOGOTA",
+                "sector": "BPIN QA",
+                "procurement_modality": "Licitacion publica",
+                "contract_type": "Obra",
+                "contract_value": "70000000000",
+                "signing_date": "2026-05-04",
+                "contract_start_date": "2026-05-05",
+                "contract_end_date": "2026-12-31",
+                "last_update": "2026-05-06T00:00:00",
+            },
+            {
+                "contract_id": "BPIN-C-2",
+                "contract_reference": "REF-BPIN-2",
+                "procurement_process": "PROC-BPIN-2",
+                "process_url": "https://secop.example/BPIN-C-2",
+                "supplier_document": "903333222-3",
+                "supplier_doc_type": "NIT",
+                "awarded_supplier": "Proveedor BPIN Dos SAS",
+                "entity_nit": "800777888",
+                "entity_name": "Comprador BPIN",
+                "department": "BOGOTA",
+                "city": "BOGOTA",
+                "sector": "BPIN QA",
+                "procurement_modality": "Licitacion publica",
+                "contract_type": "Obra",
+                "contract_value": "50000000000",
+                "signing_date": "2026-05-03",
+                "contract_start_date": "2026-05-04",
+                "contract_end_date": "2026-12-31",
+                "last_update": "2026-05-05T00:00:00",
+            },
         ],
     )
     _write_rows(
@@ -944,6 +986,28 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             }
         ],
     )
+    _write_rows(
+        tmp_path,
+        "d9na-abhe",
+        [
+            {
+                "codigo_bpin": "202612345678901",
+                "anno_bpin": "2026",
+                "id_proceso": "REQ-BPIN-1",
+                "id_contracto": "BPIN-C-1",
+                "id_portafolio": "PORT-BPIN-1",
+                "validacion_bpin": "Validado",
+            },
+            {
+                "codigo_bpin": "202612345678901",
+                "anno_bpin": "2026",
+                "id_proceso": "REQ-BPIN-2",
+                "id_contracto": "BPIN-C-2",
+                "id_portafolio": "PORT-BPIN-2",
+                "validacion_bpin": "Validado",
+            },
+        ],
+    )
 
     results = build_curated()
 
@@ -964,6 +1028,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "signal_feature_procurement_payment_plan_anomalies",
         "signal_feature_procurement_contract_suspensions",
         "signal_feature_procurement_contract_execution_delay",
+        "signal_feature_project_bpin_procurement_overlap",
         "signal_feature_procurement_short_bidding_window",
         "signal_feature_procurement_offers_competition_drop",
         "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
@@ -974,9 +1039,9 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "signal_feature_procurement_cross_source_identity_inconsistency",
     }
     rows_by_table = {result.table: result.rows for result in results}
-    assert rows_by_table["fct_procurement_contract_awards"] == 219
-    assert rows_by_table["dim_company"] == 7
-    assert rows_by_table["dim_buyer"] == 54
+    assert rows_by_table["fct_procurement_contract_awards"] == 221
+    assert rows_by_table["dim_company"] == 9
+    assert rows_by_table["dim_buyer"] == 55
     assert rows_by_table["dim_person"] == 1
     assert rows_by_table["signal_feature_procurement_single_bidder_high_value"] == 1
     assert rows_by_table["signal_feature_procurement_large_modifications"] == 1
@@ -989,6 +1054,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     assert rows_by_table["signal_feature_procurement_payment_plan_anomalies"] == 1
     assert rows_by_table["signal_feature_procurement_contract_suspensions"] == 1
     assert rows_by_table["signal_feature_procurement_contract_execution_delay"] == 1
+    assert rows_by_table["signal_feature_project_bpin_procurement_overlap"] == 1
     assert rows_by_table["signal_feature_procurement_short_bidding_window"] == 1
     assert rows_by_table["signal_feature_procurement_offers_competition_drop"] == 1
     assert (
@@ -1155,6 +1221,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     tmp_path
                     / "curated"
                     / "table=signal_feature_procurement_contract_execution_delay"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
+        bpin_project_rows = con.execute(
+            "SELECT entity_key, scope_key, severity, bpin_year, contract_count, "
+            "supplier_count, buyer_count, total_contract_value, evidence_refs[1], "
+            "evidence_refs[3] "
+            "FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_project_bpin_procurement_overlap"
                     / "*.parquet"
                 )
             ],
@@ -1421,6 +1501,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             "secop_contract_execution:C-1:ITEM-C-1",
         )
     ]
+    assert bpin_project_rows == [
+        (
+            "202612345678901",
+            "bpin:202612345678901",
+            "medium",
+            "2026",
+            2,
+            2,
+            1,
+            120_000_000_000.0,
+            "secop_process_bpin:202612345678901:BPIN-C-1",
+            "https://secop.example/BPIN-C-1",
+        )
+    ]
     assert short_window_rows == [
         (
             "903000111",
@@ -1539,6 +1633,8 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         ("9007654326", ["secop_ii_contracts"]),
         ("9010001118", ["secop_ii_contracts"]),
         ("9020001111", ["secop_ii_contracts"]),
+        ("9033331114", ["secop_ii_contracts"]),
+        ("9033332223", ["secop_ii_contracts"]),
         ("9060001116", ["secop_ii_contracts"]),
         ("9070001134", ["secop_ii_contracts"]),
         ("9080001138", ["secop_ii_contracts"]),
