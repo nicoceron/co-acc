@@ -26,6 +26,7 @@ make curate TABLE=signal_feature_procurement_buyer_supplier_network_density
 make curate TABLE=signal_feature_procurement_cartel_risk_cobidding
 make curate TABLE=signal_feature_procurement_payment_plan_anomalies
 make curate TABLE=signal_feature_procurement_contract_suspensions
+make curate TABLE=signal_feature_procurement_public_servant_conflict_disclosure_overlap
 make curate TABLE=signal_feature_procurement_related_companies_shared_officer
 make curate TABLE=dim_company
 make curate TABLE=dim_buyer
@@ -65,8 +66,11 @@ make curate LAKE_ROOT=/path/to/lake
 - `lake/curated/table=signal_feature_procurement_contract_suspensions/`
 - `lake/curated/table=signal_feature_procurement_short_bidding_window/`
 - `lake/curated/table=signal_feature_procurement_offers_competition_drop/`
+- `lake/curated/table=signal_feature_procurement_public_servant_conflict_disclosure_overlap/`
+- `lake/curated/table=signal_feature_cuentas_claras_donor_supplier_overlap/`
 - `lake/curated/table=signal_feature_procurement_politically_exposed_position_supplier_overlap/`
 - `lake/curated/table=signal_feature_procurement_related_companies_shared_officer/`
+- `lake/curated/table=signal_feature_procurement_cross_source_identity_inconsistency/`
 - `lake/meta/curated/<timestamp>.json`
 
 The full default builder requires:
@@ -76,6 +80,10 @@ The full default builder requires:
 - `secop_offers`, resolved from raw source `wi7w-2nvm`
 - `secop_contract_modifications`, resolved from raw source `u8cx-r425`
 - `secop_contract_suspensions`, resolved from raw source `u99c-7mfm`
+- `secop_contract_execution`, resolved from raw source `mfmm-jqmq`
+- `secop_suppliers`, resolved from raw source `qmzu-gj57`
+- `conflict_disclosures`, resolved from raw source `gbry-rnq4`
+- `cuentas_claras_income_2019`, resolved from raw source `jgra-rz2t`
 - `paco_sanctions`
 - `company_registry_c82u`, resolved from raw source `c82u-588k`
 - `5u9e-g5w9` (SIGEP corruption-sensitive posts)
@@ -93,6 +101,8 @@ requires only `secop_ii_contracts` for the current contract-field partial;
 `signal_feature_procurement_contract_suspensions` requires
 `secop_contract_suspensions` and `secop_ii_contracts`;
 `signal_feature_procurement_cartel_risk_cobidding` requires only `secop_offers` and `secop_ii_processes`;
+`signal_feature_procurement_public_servant_conflict_disclosure_overlap`
+requires `conflict_disclosures` and `secop_ii_contracts`;
 `signal_feature_procurement_related_companies_shared_officer`
 requires only `secop_ii_contracts` and `company_registry_c82u`.
 
@@ -149,13 +159,17 @@ least two mismatch dimensions before emitting reviewer-only hits.
 Cuentas Claras donor/supplier overlaps are computed from exact company-NIT
 joins between 2019 campaign-finance income records and post-2019 SECOP II
 contract exposure.
+Public-servant conflict-disclosure overlaps are computed from exact
+person-document joins between affirmative conflict disclosures and aggregate
+SECOP II person-supplier exposure, with exposure aggregated before disclosure
+selection to avoid duplicated contract value across multiple declaration forms.
 Shared-officer clusters are deduplicated by company document and
 representative document before DuckDB groups exposed suppliers into reviewer-only
 clusters.
 
 ## Reality Notes
 
-On the local lake after the 2026-06-05 Cuentas Claras materialization work:
+On the local lake after the 2026-06-05 conflict-disclosure materialization work:
 
 - `dim_subject_document`: 1,215,832 rows
 - `dim_company`: 101,916 rows
@@ -175,6 +189,7 @@ On the local lake after the 2026-06-05 Cuentas Claras materialization work:
 - `signal_feature_procurement_contract_execution_delay`: 48 rows
 - `signal_feature_procurement_short_bidding_window`: 90,592 rows
 - `signal_feature_procurement_offers_competition_drop`: 13 rows
+- `signal_feature_procurement_public_servant_conflict_disclosure_overlap`: 65 rows
 - `signal_feature_cuentas_claras_donor_supplier_overlap`: 533 rows
 - `signal_feature_procurement_politically_exposed_position_supplier_overlap`: 284 rows
 - `signal_feature_procurement_related_companies_shared_officer`: 1,482 rows

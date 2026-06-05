@@ -92,7 +92,7 @@ Local drill on 2026-06-05 against the then-current 14-signal lake:
 Both verification and restore reported `PASS 14 curated contract(s)`. The
 restored lake had 14 signal feature tables and preserved the `u8cx-r425`
 watermark at `2026-06-03T00:00:00Z`. This proves the scripts locally. The
-later 17-signal lake should be included in the next scheduled/off-host drill; a
+later 18-signal lake should be included in the next scheduled/off-host drill; a
 production-ready drill still needs the production volume and off-host archive
 storage.
 

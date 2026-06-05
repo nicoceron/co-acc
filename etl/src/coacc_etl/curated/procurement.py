@@ -37,6 +37,7 @@ _DEFAULT_TABLES = (
     "signal_feature_procurement_contract_execution_delay",
     "signal_feature_procurement_short_bidding_window",
     "signal_feature_procurement_offers_competition_drop",
+    "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
     "signal_feature_cuentas_claras_donor_supplier_overlap",
     "signal_feature_procurement_politically_exposed_position_supplier_overlap",
     "signal_feature_procurement_related_companies_shared_officer",
@@ -80,6 +81,10 @@ _TABLE_SOURCES = {
     ),
     "signal_feature_procurement_short_bidding_window": ("secop_ii_processes",),
     "signal_feature_procurement_offers_competition_drop": ("secop_ii_processes",),
+    "signal_feature_procurement_public_servant_conflict_disclosure_overlap": (
+        "conflict_disclosures",
+        "secop_ii_contracts",
+    ),
     "signal_feature_cuentas_claras_donor_supplier_overlap": (
         "secop_ii_contracts",
         "cuentas_claras_income_2019",
@@ -2249,6 +2254,233 @@ def _create_cuentas_claras_views(
     """)
 
 
+def _create_public_servant_conflict_disclosure_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not ({"conflict_disclosures", "secop_ii_contracts"} <= set(required_sources)):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_public_servant_conflict_disclosure_overlap AS
+        WITH normalized_disclosures AS (
+            SELECT
+                coacc_cedula_key(document_id, document_type) AS person_document_key,
+                coacc_doc_digits(document_id) AS person_document_id,
+                nullif(trim(document_type), '') AS person_doc_type,
+                nullif(trim(form_number), '') AS form_number,
+                try_cast(publication_date AS TIMESTAMP) AS publication_at,
+                nullif(trim(declaration_status), '') AS declaration_status,
+                nullif(trim(declaration_type), '') AS declaration_type,
+                nullif(trim(entity_name), '') AS disclosure_entity_name,
+                nullif(trim(declarant_role), '') AS declarant_role,
+                nullif(trim(concat_ws(
+                    ' ',
+                    declarant_first_name,
+                    declarant_second_name,
+                    declarant_first_lastname,
+                    declarant_second_lastname
+                )), '') AS person_name,
+                lower(trim(coalesce(declarant_is_contractor, '')))
+                    IN ('si', 'sí', 'true', '1', 'x') AS declarant_is_contractor_flag,
+                lower(trim(coalesce(direct_interest_actions, '')))
+                    IN ('si', 'sí', 'true', '1', 'x') AS direct_interest_flag,
+                lower(trim(coalesce(conflict_relatives, '')))
+                    IN ('si', 'sí', 'true', '1', 'x') AS relative_conflict_flag,
+                lower(trim(coalesce(conflict_donations, '')))
+                    IN ('si', 'sí', 'true', '1', 'x') AS donation_conflict_flag,
+                lower(trim(coalesce(other_potential_conflicts, '')))
+                    IN ('si', 'sí', 'true', '1', 'x') AS other_conflict_flag,
+                lower(trim(coalesce(conflict_trusts, '')))
+                    IN ('si', 'sí', 'true', '1', 'x') AS trust_conflict_flag,
+                lower(trim(coalesce(other_conflict_investments, '')))
+                    IN ('si', 'sí', 'true', '1', 'x') AS investment_conflict_flag
+            FROM src_conflict_disclosures
+            WHERE coacc_cedula_key(document_id, document_type) IS NOT NULL
+                AND nullif(trim(form_number), '') IS NOT NULL
+        ),
+        scored_disclosures AS (
+            SELECT
+                *,
+                cast(direct_interest_flag AS INTEGER)
+                    + cast(relative_conflict_flag AS INTEGER)
+                    + cast(donation_conflict_flag AS INTEGER)
+                    + cast(other_conflict_flag AS INTEGER)
+                    + cast(trust_conflict_flag AS INTEGER)
+                    + cast(investment_conflict_flag AS INTEGER)
+                    AS conflict_flag_count
+            FROM normalized_disclosures
+        ),
+        selected_disclosures AS (
+            SELECT *
+            FROM scored_disclosures
+            WHERE declarant_is_contractor_flag
+                AND conflict_flag_count > 0
+            QUALIFY row_number() OVER (
+                PARTITION BY person_document_key
+                ORDER BY conflict_flag_count DESC,
+                    publication_at DESC NULLS LAST,
+                    form_number DESC
+            ) = 1
+        ),
+        person_contracts AS (
+            SELECT
+                coacc_cedula_key(supplier_document_digits, supplier_doc_type)
+                    AS person_document_key,
+                supplier_document_digits AS supplier_document_id,
+                supplier_doc_type,
+                supplier_name,
+                buyer_document_id,
+                buyer_name,
+                department,
+                city,
+                sector,
+                procurement_modality,
+                contract_type,
+                contract_id,
+                contract_reference,
+                process_id,
+                process_url,
+                contract_value,
+                signing_date,
+                contract_start_date,
+                contract_end_date,
+                last_update_at
+            FROM curated_contract_awards
+            WHERE coacc_cedula_key(supplier_document_digits, supplier_doc_type)
+                    IS NOT NULL
+                AND contract_id IS NOT NULL
+                AND contract_value IS NOT NULL
+                AND contract_value > 0
+        ),
+        exposure AS (
+            SELECT
+                person_document_key,
+                any_value(supplier_document_id) AS supplier_document_id,
+                any_value(supplier_doc_type) AS supplier_doc_type,
+                any_value(supplier_name) AS supplier_name,
+                count(DISTINCT contract_id) AS contract_count,
+                count(DISTINCT coalesce(buyer_document_id, buyer_name))
+                    FILTER (WHERE coalesce(buyer_document_id, buyer_name) IS NOT NULL)
+                    AS buyer_count,
+                sum(contract_value) AS total_contract_value,
+                max(contract_value) AS max_contract_value,
+                min(signing_date) AS first_signing_date,
+                max(signing_date) AS last_signing_date
+            FROM person_contracts
+            GROUP BY person_document_key
+        ),
+        contract_evidence_ranked AS (
+            SELECT
+                person_document_key,
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id)
+                    AS evidence_ref,
+                contract_value,
+                signing_date,
+                contract_id,
+                row_number() OVER (
+                    PARTITION BY person_document_key
+                    ORDER BY contract_value DESC NULLS LAST,
+                        signing_date DESC NULLS LAST,
+                        contract_id
+                ) AS evidence_rank
+            FROM person_contracts
+            WHERE contract_id IS NOT NULL
+        ),
+        contract_evidence AS (
+            SELECT
+                person_document_key,
+                list(evidence_ref ORDER BY contract_value DESC, signing_date DESC)
+                    AS contract_evidence_refs
+            FROM contract_evidence_ranked
+            WHERE evidence_rank <= 3
+            GROUP BY person_document_key
+        ),
+        eligible AS (
+            SELECT
+                d.*,
+                e.supplier_document_id,
+                e.supplier_doc_type,
+                e.supplier_name,
+                e.contract_count,
+                e.buyer_count,
+                e.total_contract_value,
+                e.max_contract_value,
+                e.first_signing_date,
+                e.last_signing_date,
+                ce.contract_evidence_refs
+            FROM selected_disclosures d
+            JOIN exposure e
+                ON e.person_document_key = d.person_document_key
+            JOIN contract_evidence ce
+                ON ce.person_document_key = d.person_document_key
+            WHERE e.contract_count >= 3
+                AND e.buyer_count >= 2
+                AND e.total_contract_value >= 2000000000
+        )
+        SELECT
+            'procurement_public_servant_conflict_disclosure_overlap' AS signal_id,
+            'person:' || person_document_key AS entity_id,
+            person_document_key AS entity_key,
+            'Person' AS entity_label,
+            'disclosure:' || form_number || ':' || person_document_key AS scope_key,
+            'disclosure' AS scope_type,
+            CASE
+                WHEN total_contract_value >= 5000000000 OR contract_count >= 10
+                    THEN 'high'
+                ELSE 'medium'
+            END AS severity,
+            least(
+                1.0,
+                0.55
+                    + least(log10(greatest(total_contract_value, 1)) / 120.0, 0.18)
+                    + least(contract_count / 120.0, 0.12)
+                    + least(buyer_count / 50.0, 0.10)
+                    + least(conflict_flag_count / 20.0, 0.05)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_PERSON_DOCUMENT' AS identity_match_type,
+            'exact' AS identity_quality,
+            person_document_id,
+            person_doc_type,
+            person_name,
+            form_number,
+            publication_at,
+            declaration_status,
+            declaration_type,
+            disclosure_entity_name,
+            declarant_role,
+            declarant_is_contractor_flag,
+            conflict_flag_count,
+            direct_interest_flag,
+            relative_conflict_flag,
+            donation_conflict_flag,
+            other_conflict_flag,
+            trust_conflict_flag,
+            investment_conflict_flag,
+            supplier_document_id,
+            supplier_doc_type,
+            supplier_name,
+            contract_count,
+            buyer_count,
+            total_contract_value,
+            max_contract_value,
+            first_signing_date,
+            last_signing_date,
+            list_concat(
+                ['conflict_disclosures:' || form_number],
+                contract_evidence_refs
+            ) AS evidence_refs
+        FROM eligible
+        QUALIFY row_number() OVER (
+            ORDER BY total_contract_value DESC NULLS LAST,
+                contract_count DESC NULLS LAST,
+                buyer_count DESC NULLS LAST,
+                person_document_key
+        ) <= 1000
+    """)
+
+
 def _create_large_modification_views(
     con: duckdb.DuckDBPyConnection,
     required_sources: Sequence[str],
@@ -2437,6 +2669,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         _create_contract_execution_delay_views(con, required_sources)
         _create_supplier_identity_views(con, required_sources)
         _create_cuentas_claras_views(con, required_sources)
+        _create_public_servant_conflict_disclosure_views(con, required_sources)
         _create_large_modification_views(con, required_sources)
         return
 
@@ -3274,6 +3507,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
     _create_contract_suspension_views(con, required_sources)
     _create_contract_execution_delay_views(con, required_sources)
     _create_cuentas_claras_views(con, required_sources)
+    _create_public_servant_conflict_disclosure_views(con, required_sources)
     _create_large_modification_views(con, required_sources)
     con.execute("""
         CREATE OR REPLACE TEMP VIEW curated_repeat_awards_same_supplier AS
@@ -3585,6 +3819,8 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_short_bidding_window"
     if table == "signal_feature_procurement_offers_competition_drop":
         return "SELECT * FROM curated_offers_competition_drop"
+    if table == "signal_feature_procurement_public_servant_conflict_disclosure_overlap":
+        return "SELECT * FROM curated_public_servant_conflict_disclosure_overlap"
     if table == "signal_feature_cuentas_claras_donor_supplier_overlap":
         return "SELECT * FROM curated_cuentas_claras_donor_supplier_overlap"
     if table == "signal_feature_procurement_politically_exposed_position_supplier_overlap":

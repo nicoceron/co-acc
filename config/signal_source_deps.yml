@@ -21,9 +21,9 @@ signals:
     severity_on_partial: high
   procurement_public_servant_conflict_disclosure_overlap:
     sources: [conflict_disclosures, sigep_public_servants, secop_ii_contracts]
-    required: [secop_ii_contracts]
-    optional: [conflict_disclosures, sigep_public_servants]
-    severity_on_partial: low
+    required: [conflict_disclosures, secop_ii_contracts]
+    optional: [sigep_public_servants]
+    severity_on_partial: medium
   procurement_related_companies_shared_officer:
     sources: [company_registry_c82u, secop_ii_contracts]
     required: [company_registry_c82u, secop_ii_contracts]

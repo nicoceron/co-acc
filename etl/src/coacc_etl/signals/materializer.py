@@ -34,6 +34,7 @@ SUPPORTED_SIGNAL_IDS = (
     "procurement_contract_execution_delay",
     "procurement_short_bidding_window",
     "procurement_offers_competition_drop",
+    "procurement_public_servant_conflict_disclosure_overlap",
     "cuentas_claras_donor_supplier_overlap",
     "procurement_politically_exposed_position_supplier_overlap",
     "procurement_related_companies_shared_officer",

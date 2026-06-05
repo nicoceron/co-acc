@@ -109,3 +109,4 @@ Resource evidence:
 | 2026-06-05T01:24:24.169003+00:00 | `mfmm-jqmq` | smoke | ok | 9535 | pass | 2026-06-04T00:00:00+00:00 | smoke: seeded watermark 2026-05-28T00:00:00+00:00 from max(fechacreacion) |
 | 2026-06-05T01:24:25.760276+00:00 | `qmzu-gj57` | smoke | ok | 924 | pass | 2026-06-03T00:00:00+00:00 | smoke: seeded watermark 2026-05-27T00:00:00+00:00 from max(fecha_creacion) |
 | 2026-06-05T01:33:05.231204+00:00 | `jgra-rz2t` | full | ok | 188171 | pass | 2025-08-09T00:00:00+00:00 | - |
+| 2026-06-05T01:45:09.455477+00:00 | `gbry-rnq4` | full | ok | 328799 | pass | 2022-12-13T14:57:31.146000+00:00 | - |

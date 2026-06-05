@@ -375,6 +375,29 @@ def _write_demo_feature_tables(root: Path) -> None:
     )
     _write_feature_rows(
         root,
+        "procurement_public_servant_conflict_disclosure_overlap",
+        [
+            {
+                "signal_id": "procurement_public_servant_conflict_disclosure_overlap",
+                "entity_id": "person:1001234567",
+                "entity_key": "1001234567",
+                "entity_label": "Person",
+                "scope_key": "disclosure:FORM-1:1001234567",
+                "scope_type": "disclosure",
+                "severity": "medium",
+                "risk_signal": 0.82,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_PERSON_DOCUMENT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "conflict_disclosures:FORM-1",
+                    "https://secop.example/CPER-1",
+                ],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
         "procurement_related_companies_shared_officer",
         [
             {
@@ -432,8 +455,8 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     result = materialize_signals(run_id="test-run")
 
     assert result.run_id == "test-run"
-    assert result.hit_count == 18
-    assert result.evidence_count == 36
+    assert result.hit_count == 19
+    assert result.evidence_count == 38
     assert {row.signal_id: row.hit_count for row in result.signal_results} == {
         "procurement_single_bidder_high_value": 1,
         "procurement_large_modifications": 1,
@@ -450,6 +473,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_offers_competition_drop": 1,
         "cuentas_claras_donor_supplier_overlap": 1,
         "procurement_politically_exposed_position_supplier_overlap": 1,
+        "procurement_public_servant_conflict_disclosure_overlap": 1,
         "procurement_related_companies_shared_officer": 1,
         "procurement_cross_source_identity_inconsistency": 1,
     }
@@ -496,6 +520,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_offers_competition_drop",
         "procurement_payment_plan_anomalies",
         "procurement_politically_exposed_position_supplier_overlap",
+        "procurement_public_servant_conflict_disclosure_overlap",
         "procurement_related_companies_shared_officer",
         "procurement_repeat_awards_same_supplier",
         "procurement_sanctioned_supplier_awarded",
@@ -516,6 +541,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_offers_competition_drop": 2,
         "procurement_contract_value_outlier_by_category": 1,
         "procurement_politically_exposed_position_supplier_overlap": 3,
+        "procurement_public_servant_conflict_disclosure_overlap": 2,
         "procurement_related_companies_shared_officer": 4,
         "procurement_repeat_awards_same_supplier": 2,
         "procurement_sanctioned_supplier_awarded": 2,
@@ -594,11 +620,17 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         if row["label"] == "cuentas_claras_income_2019:VOUCHER-1"
     )
     assert cuentas_evidence["source_id"] == "cuentas_claras_income_2019"
+    disclosure_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["label"] == "conflict_disclosures:FORM-1"
+    )
+    assert disclosure_evidence["source_id"] == "conflict_disclosures"
 
     manifest = json.loads((tmp_path / "meta" / "signal_runs" / "test-run.json").read_text())
     assert manifest["status"] == "completed"
-    assert manifest["hit_count"] == 18
-    assert manifest["evidence_count"] == 36
+    assert manifest["hit_count"] == 19
+    assert manifest["evidence_count"] == 38
 
 
 def test_materialize_signals_deduplicates_repeated_feature_rows(
@@ -671,5 +703,5 @@ def test_signals_materialize_cli(
     result = CliRunner().invoke(cli, ["signals", "materialize", "--all", "--run-id", "cli-run"])
 
     assert result.exit_code == 0, result.output
-    assert "signal run cli-run: wrote 18 hits and 36 evidence rows" in result.output
+    assert "signal run cli-run: wrote 19 hits and 38 evidence rows" in result.output
     assert (tmp_path / "meta" / "signal_runs" / "cli-run.json").exists()

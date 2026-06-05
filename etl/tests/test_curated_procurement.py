@@ -86,6 +86,69 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 "last_update": "2026-05-03T00:00:00",
             },
             {
+                "contract_id": "CPER-1",
+                "contract_reference": "REF-PER-1",
+                "procurement_process": "PPER-1",
+                "process_url": "https://secop.example/CPER-1",
+                "supplier_document": "1001234567",
+                "supplier_doc_type": "CC",
+                "awarded_supplier": "Persona Conflicto",
+                "entity_nit": "800111222",
+                "entity_name": "Comprador Uno",
+                "department": "NARINO",
+                "city": "TUMACO",
+                "sector": "Salud",
+                "procurement_modality": "Contratacion directa",
+                "contract_type": "Servicios",
+                "contract_value": "800000000",
+                "signing_date": "2026-05-02",
+                "contract_start_date": "2026-05-03",
+                "contract_end_date": "2026-12-31",
+                "last_update": "2026-05-04T00:00:00",
+            },
+            {
+                "contract_id": "CPER-2",
+                "contract_reference": "REF-PER-2",
+                "procurement_process": "PPER-2",
+                "process_url": "https://secop.example/CPER-2",
+                "supplier_document": "1001234567",
+                "supplier_doc_type": "CC",
+                "awarded_supplier": "Persona Conflicto",
+                "entity_nit": "800111333",
+                "entity_name": "Comprador Dos",
+                "department": "CAUCA",
+                "city": "POPAYAN",
+                "sector": "Educacion",
+                "procurement_modality": "Licitacion",
+                "contract_type": "Suministro",
+                "contract_value": "750000000",
+                "signing_date": "2026-05-03",
+                "contract_start_date": "2026-05-04",
+                "contract_end_date": "2026-12-31",
+                "last_update": "2026-05-05T00:00:00",
+            },
+            {
+                "contract_id": "CPER-3",
+                "contract_reference": "REF-PER-3",
+                "procurement_process": "PPER-3",
+                "process_url": "https://secop.example/CPER-3",
+                "supplier_document": "1001234567",
+                "supplier_doc_type": "CC",
+                "awarded_supplier": "Persona Conflicto",
+                "entity_nit": "800111333",
+                "entity_name": "Comprador Dos",
+                "department": "CAUCA",
+                "city": "POPAYAN",
+                "sector": "Educacion",
+                "procurement_modality": "Licitacion",
+                "contract_type": "Suministro",
+                "contract_value": "500000000",
+                "signing_date": "2026-05-04",
+                "contract_start_date": "2026-05-05",
+                "contract_end_date": "2026-12-31",
+                "last_update": "2026-05-06T00:00:00",
+            },
+            {
                 "contract_id": "CV-1",
                 "contract_reference": "REF-V-1",
                 "procurement_process": "PV-1",
@@ -795,6 +858,37 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             }
         ],
     )
+    _write_rows(
+        tmp_path,
+        "gbry-rnq4",
+        [
+            {
+                "document_type": "CEDULA DE CIUDADANIA",
+                "document_id": "1001234567",
+                "declarant_first_name": "Persona",
+                "declarant_second_name": "",
+                "declarant_first_lastname": "Conflicto",
+                "declarant_second_lastname": "",
+                "form_number": "FORM-1",
+                "publication_date": "2026-01-15T00:00:00",
+                "declaration_status": "FINALIZADO",
+                "declaration_type": "PERIÓDICO",
+                "entity_name": "Entidad Uno",
+                "declarant_is_contractor": "SI",
+                "declarant_role": "Contratista",
+                "taxable_year": "2025",
+                "has_spouse_partner": "NO",
+                "spouse_partner": "NO",
+                "conflict_relatives": "NO",
+                "direct_interest_actions": "SI",
+                "conflict_trusts": "NO",
+                "other_conflict_investments": "NO",
+                "conflict_donations": "NO",
+                "other_potential_conflicts": "NO",
+                "other_potential_conflicts_desc": "",
+            }
+        ],
+    )
 
     results = build_curated()
 
@@ -817,15 +911,16 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "signal_feature_procurement_contract_execution_delay",
         "signal_feature_procurement_short_bidding_window",
         "signal_feature_procurement_offers_competition_drop",
+        "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
         "signal_feature_cuentas_claras_donor_supplier_overlap",
         "signal_feature_procurement_politically_exposed_position_supplier_overlap",
         "signal_feature_procurement_related_companies_shared_officer",
         "signal_feature_procurement_cross_source_identity_inconsistency",
     }
     rows_by_table = {result.table: result.rows for result in results}
-    assert rows_by_table["fct_procurement_contract_awards"] == 216
+    assert rows_by_table["fct_procurement_contract_awards"] == 219
     assert rows_by_table["dim_company"] == 7
-    assert rows_by_table["dim_buyer"] == 53
+    assert rows_by_table["dim_buyer"] == 54
     assert rows_by_table["dim_person"] == 1
     assert rows_by_table["signal_feature_procurement_single_bidder_high_value"] == 1
     assert rows_by_table["signal_feature_procurement_large_modifications"] == 1
@@ -840,6 +935,12 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
     assert rows_by_table["signal_feature_procurement_contract_execution_delay"] == 1
     assert rows_by_table["signal_feature_procurement_short_bidding_window"] == 1
     assert rows_by_table["signal_feature_procurement_offers_competition_drop"] == 1
+    assert (
+        rows_by_table[
+            "signal_feature_procurement_public_servant_conflict_disclosure_overlap"
+        ]
+        == 1
+    )
     assert rows_by_table["signal_feature_cuentas_claras_donor_supplier_overlap"] == 1
     assert (
         rows_by_table[
@@ -1023,6 +1124,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     tmp_path
                     / "curated"
                     / "table=signal_feature_procurement_offers_competition_drop"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
+        conflict_disclosure_rows = con.execute(
+            "SELECT entity_key, scope_key, severity, form_number, conflict_flag_count, "
+            "contract_count, buyer_count, total_contract_value, evidence_refs[1], "
+            "evidence_refs[2] "
+            "FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_procurement_public_servant_conflict_disclosure_overlap"
                     / "*.parquet"
                 )
             ],
@@ -1255,6 +1370,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             1.0,
             0.0,
             "https://secop.example/PROC-DROP-R-19",
+        )
+    ]
+    assert conflict_disclosure_rows == [
+        (
+            "1001234567",
+            "disclosure:FORM-1:1001234567",
+            "medium",
+            "FORM-1",
+            1,
+            4,
+            2,
+            2_095_000_000.0,
+            "conflict_disclosures:FORM-1",
+            "https://secop.example/CPER-1",
         )
     ]
     assert cuentas_claras_rows == [

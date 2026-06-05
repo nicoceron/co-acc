@@ -126,14 +126,14 @@ signals:
   - id: procurement_public_servant_conflict_disclosure_overlap
     version: 1
     title: Public servant conflict disclosure overlaps procurement exposure
-    description: Person-level overlap between conflict disclosures, public office, and linked supplier procurement.
+    description: Person-level overlap between affirmative conflict disclosures and linked supplier procurement exposure.
     category: conflict
     severity: medium
     entity_types: [Person]
     public_safe: true
     reviewer_only: false
     requires_identity: [EXACT_PERSON_DOCUMENT]
-    sources_required: [conflict_disclosures, sigep_public_servants, secop_ii_contracts]
+    sources_required: [conflict_disclosures, secop_ii_contracts]
     scope_type: disclosure
     dedup_fields: [scope_key]
     runner:
