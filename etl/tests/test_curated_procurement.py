@@ -958,7 +958,52 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                 "origin": "SECOPII",
                 "supplier_doc_type": "NIT",
                 "supplier_document": "901222333-4",
-            }
+            },
+            *[
+                {
+                    "entity_level": "TERRITORIAL",
+                    "entity_secop_code": "700002",
+                    "entity_name": "Comprador PIDA Full",
+                    "entity_nit": "800444556",
+                    "entity_department": "BOGOTA",
+                    "entity_municipality": "BOGOTA",
+                    "process_status": "Celebrado",
+                    "procurement_modality": "Licitacion publica",
+                    "contract_object": object_text,
+                    "process_object": object_text,
+                    "contract_type": "Obra",
+                    "contract_signing_date": f"2026-04-{(index % 28) + 1:02d}",
+                    "contract_start_date": f"2026-04-{(index % 28) + 1:02d}",
+                    "contract_end_date": "2026-12-31",
+                    "contract_number": f"PIDA-FULL-{category}-{index:03d}",
+                    "process_number": f"PROC-PIDA-FULL-{category}-{index:03d}",
+                    "contract_value": str(
+                        30_000_000_000
+                        if category == "school_feeding" and index == 0
+                        else 20_000_000_000 if index == 0 else 10_000_000_000
+                    ),
+                    "contractor_business_name": "Proveedor PIDA Full SAS",
+                    "contract_url": f"https://secop-integrado.example/PIDA-FULL-{category}-{index:03d}",
+                    "origin": "SECOPII",
+                    "supplier_doc_type": "NIT",
+                    "supplier_document": "901222334-5",
+                }
+                for category, object_text in [
+                    ("school_feeding", "alimentacion escolar PAE"),
+                    ("health", "hospital salud medicamentos"),
+                    ("water_sanitation", "acueducto y saneamiento"),
+                    ("roads_transport", "via vial carretera pavimento"),
+                    ("housing", "vivienda habitacional"),
+                    ("education", "educacion colegio aula"),
+                    ("energy", "energia electrica alumbrado"),
+                    ("digital_connectivity", "internet conectividad software"),
+                    ("security", "seguridad policia convivencia"),
+                    ("sport_culture", "deporte recreacion cultura"),
+                    ("environment_risk", "ambiental residuos riesgo"),
+                    ("agriculture_rural", "agro rural agricola"),
+                ]
+                for index in range(42)
+            ],
         ],
     )
     _write_rows(
@@ -1112,6 +1157,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         "signal_feature_procurement_offers_competition_drop",
         "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
         "signal_feature_cuentas_claras_donor_supplier_overlap",
+        "signal_feature_pida_full30_meta",
         "signal_feature_pida5_pida27_pida4_chain",
         "signal_feature_procurement_politically_exposed_position_supplier_overlap",
         "signal_feature_tvec_multi_entity_capture",
@@ -1148,6 +1194,7 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
         == 1
     )
     assert rows_by_table["signal_feature_cuentas_claras_donor_supplier_overlap"] == 1
+    assert rows_by_table["signal_feature_pida_full30_meta"] == 1
     assert rows_by_table["signal_feature_pida5_pida27_pida4_chain"] == 1
     assert rows_by_table["signal_feature_tvec_multi_entity_capture"] == 1
     assert (
@@ -1402,6 +1449,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
                     tmp_path
                     / "curated"
                     / "table=signal_feature_pida5_pida27_pida4_chain"
+                    / "*.parquet"
+                )
+            ],
+        ).fetchall()
+        pida_full_rows = con.execute(
+            "SELECT entity_key, scope_key, severity, department, municipality, "
+            "contract_count, pida_category_count, total_contract_value, "
+            "very_high_value_contract_count, evidence_refs[1] "
+            "FROM read_parquet(?)",
+            [
+                str(
+                    tmp_path
+                    / "curated"
+                    / "table=signal_feature_pida_full30_meta"
                     / "*.parquet"
                 )
             ],
@@ -1706,6 +1767,20 @@ def test_build_curated_procurement_signal_uses_catalog_aliases(
             150_000_000.0,
             "secop_sanctions:ACT-SAN-1",
             "https://secop-integrado.example/INT-1",
+        )
+    ]
+    assert pida_full_rows == [
+        (
+            "BOGOTA:BOGOTA",
+            "pida_full30_meta:BOGOTA:BOGOTA",
+            "medium",
+            "BOGOTA",
+            "BOGOTA",
+            504,
+            12,
+            5_170_000_000_000.0,
+            504,
+            "https://secop-integrado.example/PIDA-FULL-school_feeding-000",
         )
     ]
     assert tvec_capture_rows == [

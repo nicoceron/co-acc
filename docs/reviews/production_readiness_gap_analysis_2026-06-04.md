@@ -67,6 +67,8 @@ Twenty-sixth update on 2026-06-05: the TVEC item-level purchase source `3hdv-smh
 
 Twenty-seventh update on 2026-06-05: the SGR sources `mzgh-shtp` (`sgr_projects`) and `qkv4-ek54` (`sgr_expense_execution`) were loaded through full refreshes, writing 35,006 project rows and 386,293 expense-execution rows with coverage pass. `project_regalias_execution_procurement_overlap` is now a public project materializer from SGR project metadata, SGR execution amounts, and validated SECOP process-to-BPIN links joined to SECOP II contracts. The feature table produced 41 project rows: 10 high severity and 31 medium severity, covering COP 3.73T in joined procurement value and COP 12.43T in SGR execution exposure. The run `phase11-local-20260605-sgr-projects` materialized 22 signal IDs total, including 15 public signals and 7 reviewer-only signals, with 162,590 hits and 274,689 evidence rows.
 
+Twenty-eighth update on 2026-06-05: `pida_full30_meta` is now a public territory materializer from SECOP Integrado text-category rollups. No additional raw source was loaded for this slice; it uses the already loaded `rpmr-utcd` (`secop_integrado`) source. The feature table produced 93 territory rows: 7 high severity and 86 medium severity, covering 541,240 tagged contracts and COP 12,124,250,151,149,100 in total contract value. The run `phase11-local-20260605-pida-full30` materialized 23 signal IDs total, including 16 public signals and 7 reviewer-only signals, with 162,683 hits and 275,154 evidence rows.
+
 ## Dataset Loading Reality
 
 You do not need to load the entire national datasets onto a personal computer for normal operation.
@@ -84,7 +86,7 @@ Current state:
 - Socrata ingestion is paged with `$limit`, `$offset`, `$order`, `--page-size`, `--max-pages`, and watermark/full-refresh controls.
 - Curated tables are stored as Parquet and queried through DuckDB.
 - Some anomaly scoring paths support bounded rows and prediction batch size.
-- The current lake materializer supports 22 signal patterns: 15 public and 7 reviewer-only.
+- The current lake materializer supports 23 signal patterns: 16 public and 7 reviewer-only.
 
 So the lake does handle batch-oriented processing, but only for the parts that have actually been implemented. The architecture is right; the coverage is incomplete.
 
@@ -97,7 +99,7 @@ So the lake does handle batch-oriented processing, but only for the parts that h
 | Source registry | 45 source entries; 43 implemented; 20 loaded locally; 33 promoted; 11 enrichment-only; 2 discovered but uningested | Partial |
 | Curated lake | Key curated tables exist, including procurement awards, companies, buyers, persons, and subject documents | Working for current slice |
 | Signal registry | 43 registered signals validate successfully | Registry complete enough to describe intended patterns |
-| Materialized signals | 22 signal IDs materialized from current lake; 15 are public and 7 are reviewer-only; production signal catalog can now expose only materialized public signals; remaining registry definitions are marked `registered_only` | Honest launch scope; full pattern coverage still incomplete |
+| Materialized signals | 23 signal IDs materialized from current lake; 16 are public and 7 are reviewer-only; production signal catalog can now expose only materialized public signals; remaining registry definitions are marked `registered_only` | Honest launch scope; full pattern coverage still incomplete |
 | API smoke | Lake-backed smoke passes with strict readiness, materialized public signals, cases, citations, source stats, and run metadata | Working for current slice |
 | Frontend desktop | Production-safe local screenshots show live landing, dashboard, signals, search, entity, and source registry views without page overflow | Working for current slice |
 | Frontend mobile | Production-safe local screenshots show stacked signal rows, readable entity detail, dashboard feed cards, and source registry cards without page overflow | Working for current slice |
@@ -117,7 +119,7 @@ So the lake does handle batch-oriented processing, but only for the parts that h
 
 ### Assumption: The lake already detects every registered pattern in batches.
 
-- Evidence: `SUPPORTED_SIGNAL_IDS` currently covers only `procurement_single_bidder_high_value`, `procurement_large_modifications`, `procurement_sanctioned_supplier_awarded`, `procurement_supplier_concentration_across_entities`, `procurement_contract_value_outlier_by_category`, `procurement_repeat_awards_same_supplier`, `procurement_buyer_supplier_network_density`, `procurement_cartel_risk_cobidding`, `procurement_payment_plan_anomalies`, `procurement_contract_suspensions`, `procurement_contract_execution_delay`, `procurement_short_bidding_window`, `procurement_offers_competition_drop`, `procurement_public_servant_conflict_disclosure_overlap`, `cuentas_claras_donor_supplier_overlap`, `pida5_pida27_pida4_chain`, `project_bpin_procurement_overlap`, `project_regalias_execution_procurement_overlap`, `tvec_multi_entity_capture`, `procurement_politically_exposed_position_supplier_overlap`, `procurement_related_companies_shared_officer`, and `procurement_cross_source_identity_inconsistency`. The API now labels registered-only signals and production compose hides them from public signal listing.
+- Evidence: `SUPPORTED_SIGNAL_IDS` currently covers only `procurement_single_bidder_high_value`, `procurement_large_modifications`, `procurement_sanctioned_supplier_awarded`, `procurement_supplier_concentration_across_entities`, `procurement_contract_value_outlier_by_category`, `procurement_repeat_awards_same_supplier`, `procurement_buyer_supplier_network_density`, `procurement_cartel_risk_cobidding`, `procurement_payment_plan_anomalies`, `procurement_contract_suspensions`, `procurement_contract_execution_delay`, `procurement_short_bidding_window`, `procurement_offers_competition_drop`, `procurement_public_servant_conflict_disclosure_overlap`, `cuentas_claras_donor_supplier_overlap`, `pida_full30_meta`, `pida5_pida27_pida4_chain`, `project_bpin_procurement_overlap`, `project_regalias_execution_procurement_overlap`, `tvec_multi_entity_capture`, `procurement_politically_exposed_position_supplier_overlap`, `procurement_related_companies_shared_officer`, and `procurement_cross_source_identity_inconsistency`. The API now labels registered-only signals and production compose hides them from public signal listing.
 - Status: Invalid for full pattern completion; valid for scoped launch behavior.
 - Risk: If operators disable the materialized-only scope without implementing more materializers, the UI/API can imply broader pattern coverage than the backend can currently produce.
 - Action: Keep `COACC_SIGNALS_REQUIRE_MATERIALIZED=true` for production until additional materializers are implemented and verified.
@@ -144,7 +146,7 @@ These block a credible production launch.
 | --- | --- | --- |
 | Production architecture decision | Lake-first with optional Neo4j is now reflected in API readiness, prod compose, and deploy smoke | Run the smoke against the real production host with mounted lake assets |
 | Production lake storage | Full datasets should not live on a laptop, but production needs durable shared data | Add object store or persistent volume strategy, permissions, and production restore drill against the backup scripts |
-| Signal materialization coverage | 43 signals are registered, but only 22 are materialized from lake data; production now reduces public listing to public materialized signals | Implement remaining materializers before broadening public signal scope |
+| Signal materialization coverage | 43 signals are registered, but only 23 are materialized from lake data; production now reduces public listing to public materialized signals | Implement remaining materializers before broadening public signal scope |
 | Frontend fixture leakage | Production-safe frontend now disables silent fixture fallback via `VITE_ALLOW_FIXTURES=false`; entity detail is live-wired; remaining non-live geography/sector surfaces show empty or derived states | Wire geography/sector views to live APIs or remove them from launch scope |
 | Mobile signal table | Signals table has stacked mobile rows and passed local Chrome visual QA against the live API | Re-run through the real production host after deployment |
 | Production container config | Compose/env docs now mount required config, dataset contracts, catalogs, and lake paths; deploy smoke now verifies `/ready` and lake-backed routes | Run it against real `DOMAIN`, `JWT_SECRET_KEY`, and durable lake mount |

@@ -138,10 +138,10 @@ signals:
     optional: []
 
   pida_full30_meta:
-    sources: [secop_integrado, pida_category_hits]
+    sources: [secop_integrado]
     required: [secop_integrado]
-    optional: [pida_category_hits]
-    severity_on_partial: low
+    optional: []
+    severity_on_partial: medium
   reincorporacion_sirr_vs_contractor:
     sources: [sirr_reincorporacion, secop_integrado, secop_suppliers]
     required: [secop_suppliers]

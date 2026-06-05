@@ -375,6 +375,29 @@ def _write_demo_feature_tables(root: Path) -> None:
     )
     _write_feature_rows(
         root,
+        "pida_full30_meta",
+        [
+            {
+                "signal_id": "pida_full30_meta",
+                "entity_id": "territory:BOGOTA:BOGOTA",
+                "entity_key": "BOGOTA:BOGOTA",
+                "entity_label": "Territory",
+                "scope_key": "pida_full30_meta:BOGOTA:BOGOTA",
+                "scope_type": "territory",
+                "severity": "medium",
+                "risk_signal": 0.82,
+                "identity_confidence": 0.9,
+                "identity_match_type": "TERRITORY_AGGREGATE",
+                "identity_quality": "aggregate",
+                "evidence_refs": [
+                    "https://secop-integrado.example/PIDA-FULL-school_feeding-000",
+                    "secop_integrado:PIDA-FULL-school_feeding-001",
+                ],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
         "project_bpin_procurement_overlap",
         [
             {
@@ -549,8 +572,8 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     result = materialize_signals(run_id="test-run")
 
     assert result.run_id == "test-run"
-    assert result.hit_count == 23
-    assert result.evidence_count == 48
+    assert result.hit_count == 24
+    assert result.evidence_count == 50
     assert {row.signal_id: row.hit_count for row in result.signal_results} == {
         "procurement_single_bidder_high_value": 1,
         "procurement_large_modifications": 1,
@@ -566,6 +589,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_short_bidding_window": 1,
         "procurement_offers_competition_drop": 1,
         "cuentas_claras_donor_supplier_overlap": 1,
+        "pida_full30_meta": 1,
         "pida5_pida27_pida4_chain": 1,
         "project_bpin_procurement_overlap": 1,
         "project_regalias_execution_procurement_overlap": 1,
@@ -608,6 +632,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     assert [row["signal_id"] for row in hit_payloads] == [
         "cuentas_claras_donor_supplier_overlap",
         "pida5_pida27_pida4_chain",
+        "pida_full30_meta",
         "procurement_buyer_supplier_network_density",
         "procurement_cartel_risk_cobidding",
         "procurement_cartel_risk_cobidding",
@@ -638,6 +663,7 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         "procurement_contract_suspensions": 3,
         "procurement_cross_source_identity_inconsistency": 2,
         "cuentas_claras_donor_supplier_overlap": 2,
+        "pida_full30_meta": 2,
         "pida5_pida27_pida4_chain": 2,
         "procurement_payment_plan_anomalies": 1,
         "procurement_large_modifications": 2,
@@ -756,6 +782,12 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
         if row["url"] == "https://secop.example/BPIN-C-1"
     )
     assert bpin_contract_evidence["source_id"] == "secop_ii_contracts"
+    pida_full_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["url"] == "https://secop-integrado.example/PIDA-FULL-school_feeding-000"
+    )
+    assert pida_full_evidence["source_id"] == "secop_integrado"
     sgr_evidence = next(
         row
         for row in evidence_payloads
@@ -772,8 +804,8 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
 
     manifest = json.loads((tmp_path / "meta" / "signal_runs" / "test-run.json").read_text())
     assert manifest["status"] == "completed"
-    assert manifest["hit_count"] == 23
-    assert manifest["evidence_count"] == 48
+    assert manifest["hit_count"] == 24
+    assert manifest["evidence_count"] == 50
 
 
 def test_materialize_signals_deduplicates_repeated_feature_rows(
@@ -846,5 +878,5 @@ def test_signals_materialize_cli(
     result = CliRunner().invoke(cli, ["signals", "materialize", "--all", "--run-id", "cli-run"])
 
     assert result.exit_code == 0, result.output
-    assert "signal run cli-run: wrote 23 hits and 48 evidence rows" in result.output
+    assert "signal run cli-run: wrote 24 hits and 50 evidence rows" in result.output
     assert (tmp_path / "meta" / "signal_runs" / "cli-run.json").exists()

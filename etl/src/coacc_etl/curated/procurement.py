@@ -41,6 +41,7 @@ _DEFAULT_TABLES = (
     "signal_feature_procurement_offers_competition_drop",
     "signal_feature_procurement_public_servant_conflict_disclosure_overlap",
     "signal_feature_cuentas_claras_donor_supplier_overlap",
+    "signal_feature_pida_full30_meta",
     "signal_feature_pida5_pida27_pida4_chain",
     "signal_feature_tvec_multi_entity_capture",
     "signal_feature_procurement_politically_exposed_position_supplier_overlap",
@@ -103,6 +104,7 @@ _TABLE_SOURCES = {
         "secop_ii_contracts",
         "cuentas_claras_income_2019",
     ),
+    "signal_feature_pida_full30_meta": ("secop_integrado",),
     "signal_feature_pida5_pida27_pida4_chain": (
         "secop_integrado",
         "secop_sanctions",
@@ -3310,6 +3312,214 @@ def _create_public_servant_conflict_disclosure_views(
     """)
 
 
+def _create_pida_full30_meta_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if "secop_integrado" not in set(required_sources):
+        return
+
+    con.execute(r"""
+        CREATE OR REPLACE TEMP VIEW curated_pida_full30_meta AS
+        WITH raw AS (
+            SELECT
+                upper(coalesce(nullif(trim(entity_department), ''), 'NACIONAL'))
+                    AS department,
+                upper(coalesce(nullif(trim(entity_municipality), ''), 'NACIONAL'))
+                    AS municipality,
+                coalesce(
+                    nullif(trim(contract_number), ''),
+                    nullif(trim(process_number), '')
+                ) AS contract_key,
+                coalesce(
+                    nullif(trim(contract_url), ''),
+                    'secop_integrado:' || coalesce(
+                        nullif(trim(contract_number), ''),
+                        nullif(trim(process_number), '')
+                    )
+                ) AS evidence_ref,
+                coacc_money(contract_value) AS contract_value,
+                try_cast(contract_signing_date AS DATE) AS signing_date,
+                lower(
+                    coalesce(contract_object, '') || ' ' ||
+                    coalesce(process_object, '') || ' ' ||
+                    coalesce(contract_type, '') || ' ' ||
+                    coalesce(procurement_modality, '')
+                ) AS text_blob
+            FROM src_secop_integrado
+            WHERE coalesce(
+                    nullif(trim(contract_number), ''),
+                    nullif(trim(process_number), '')
+                ) IS NOT NULL
+        ),
+        tagged AS (
+            SELECT
+                *,
+                CASE
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(' ||
+                        'alimentaci[oó]n escolar|\bpae\b|restaurante escolar|' ||
+                        'complemento alimentario)'
+                    ) THEN 'school_feeding'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(hospital|salud|m[eé]dic|ambulancia|vacuna|biom[eé]dic|medicamento)'
+                    ) THEN 'health'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(acueducto|alcantarillado|agua potable|saneamiento|ptar|ptap)'
+                    ) THEN 'water_sanitation'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(v[ií]a |vial|carretera|paviment|placa huella|puente|camino|transporte)'
+                    ) THEN 'roads_transport'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(vivienda|habitacional|urbanizaci[oó]n)'
+                    ) THEN 'housing'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(' ||
+                        'educaci[oó]n|colegio|instituci[oó]n educativa|' ||
+                        'aula|biblioteca|universidad)'
+                    ) THEN 'education'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(energ[ií]a|el[eé]ctric|alumbrado|solar|gas combustible)'
+                    ) THEN 'energy'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(' ||
+                        'internet|conectividad|software|tecnolog|' ||
+                        'sistemas de informaci[oó]n|\btic\b)'
+                    ) THEN 'digital_connectivity'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(seguridad|polic[ií]a|c[aá]mara|convivencia|defensa|militar)'
+                    ) THEN 'security'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(deporte|recreaci[oó]n|cancha|parque|cultura|escenario deportivo)'
+                    ) THEN 'sport_culture'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(ambiente|ambiental|residuos|reforestaci[oó]n|riesgo|desastre|emergencia)'
+                    ) THEN 'environment_risk'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(agro|rural|campesin|productiv|riego|pecuario|agr[ií]col)'
+                    ) THEN 'agriculture_rural'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(minero|miner[ií]a|hidrocarburo|licencia ambiental)'
+                    ) THEN 'extractives'
+                    WHEN regexp_matches(
+                        text_blob,
+                        '(v[ií]ctima|paz|reincorporaci[oó]n|\bpdet\b|\bpnis\b|posconflicto)'
+                    ) THEN 'peace_victims'
+                    ELSE NULL
+                END AS pida_category
+            FROM raw
+            WHERE contract_value IS NOT NULL
+                AND contract_value >= 100000000
+                AND municipality NOT IN ('NO DEFINIDO', 'NACIONAL')
+        ),
+        categorized AS (
+            SELECT *
+            FROM tagged
+            WHERE pida_category IS NOT NULL
+        ),
+        rollup AS (
+            SELECT
+                department,
+                municipality,
+                department || ':' || municipality AS territory_key,
+                count(DISTINCT contract_key) AS contract_count,
+                count(DISTINCT pida_category) AS pida_category_count,
+                sum(contract_value) AS total_contract_value,
+                max(contract_value) AS max_contract_value,
+                count(DISTINCT contract_key)
+                    FILTER (WHERE contract_value >= 1000000000)
+                    AS very_high_value_contract_count,
+                min(signing_date) AS first_signing_date,
+                max(signing_date) AS last_signing_date,
+                list(DISTINCT pida_category ORDER BY pida_category) AS pida_categories
+            FROM categorized
+            GROUP BY department, municipality
+        ),
+        evidence_ranked AS (
+            SELECT
+                department || ':' || municipality AS territory_key,
+                evidence_ref,
+                contract_value,
+                signing_date,
+                contract_key,
+                row_number() OVER (
+                    PARTITION BY department, municipality
+                    ORDER BY contract_value DESC NULLS LAST,
+                        signing_date DESC NULLS LAST,
+                        contract_key
+                ) AS evidence_rank
+            FROM categorized
+        ),
+        evidence AS (
+            SELECT
+                territory_key,
+                list(evidence_ref ORDER BY contract_value DESC, signing_date DESC, contract_key)
+                    AS evidence_refs
+            FROM evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY territory_key
+        )
+        SELECT
+            'pida_full30_meta' AS signal_id,
+            'territory:' || r.territory_key AS entity_id,
+            r.territory_key AS entity_key,
+            'Territory' AS entity_label,
+            'pida_full30_meta:' || r.territory_key AS scope_key,
+            'territory' AS scope_type,
+            CASE
+                WHEN r.pida_category_count >= 14
+                    AND r.total_contract_value >= 50000000000000 THEN 'high'
+                ELSE 'medium'
+            END AS severity,
+            least(
+                1.0,
+                0.45
+                    + least(r.pida_category_count / 20.0, 0.25)
+                    + least(log10(greatest(r.total_contract_value, 1)) / 90.0, 0.20)
+                    + least(r.very_high_value_contract_count / 1000.0, 0.10)
+            ) AS risk_signal,
+            0.9 AS identity_confidence,
+            'TERRITORY_AGGREGATE' AS identity_match_type,
+            'aggregate' AS identity_quality,
+            r.department,
+            r.municipality,
+            r.contract_count,
+            r.pida_category_count,
+            r.total_contract_value,
+            r.max_contract_value,
+            r.very_high_value_contract_count,
+            r.first_signing_date,
+            r.last_signing_date,
+            r.pida_categories,
+            e.evidence_refs
+        FROM rollup r
+        JOIN evidence e
+            ON e.territory_key = r.territory_key
+        WHERE r.pida_category_count >= 12
+            AND r.contract_count >= 500
+            AND r.very_high_value_contract_count >= 50
+            AND r.total_contract_value >= 1000000000000
+        QUALIFY row_number() OVER (
+            ORDER BY r.total_contract_value DESC NULLS LAST,
+                r.pida_category_count DESC,
+                r.territory_key
+        ) <= 1000
+    """)
+
+
 def _create_pida_chain_views(
     con: duckdb.DuckDBPyConnection,
     required_sources: Sequence[str],
@@ -3766,6 +3976,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         _create_supplier_identity_views(con, required_sources)
         _create_cuentas_claras_views(con, required_sources)
         _create_public_servant_conflict_disclosure_views(con, required_sources)
+        _create_pida_full30_meta_views(con, required_sources)
         _create_pida_chain_views(con, required_sources)
         _create_tvec_multi_entity_capture_views(con, required_sources)
         _create_large_modification_views(con, required_sources)
@@ -4608,6 +4819,7 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
     _create_project_regalias_execution_views(con, required_sources)
     _create_cuentas_claras_views(con, required_sources)
     _create_public_servant_conflict_disclosure_views(con, required_sources)
+    _create_pida_full30_meta_views(con, required_sources)
     _create_pida_chain_views(con, required_sources)
     _create_large_modification_views(con, required_sources)
     _create_tvec_multi_entity_capture_views(con, required_sources)
@@ -4929,6 +5141,8 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_public_servant_conflict_disclosure_overlap"
     if table == "signal_feature_cuentas_claras_donor_supplier_overlap":
         return "SELECT * FROM curated_cuentas_claras_donor_supplier_overlap"
+    if table == "signal_feature_pida_full30_meta":
+        return "SELECT * FROM curated_pida_full30_meta"
     if table == "signal_feature_pida5_pida27_pida4_chain":
         return "SELECT * FROM curated_pida5_pida27_pida4_chain"
     if table == "signal_feature_tvec_multi_entity_capture":

@@ -805,13 +805,13 @@ signals:
     version: 1
     engine: duckdb
     title: PIDA category convergence by territory
-    description: Flags territories where procurement records span three or more PIDA categories.
+    description: Flags high-exposure territories where SECOP Integrado records span many PIDA-style policy categories.
     category: cross_sector
     severity: high
     public_safe: true
     public_presentation: territorial
     review_only_expansion: by_entity
-    sources: [secop_integrado, pida_category_hits]
+    sources: [secop_integrado]
     sources_required: [secop_integrado]
     scope_type: territory
     dedup_fields: [scope_key]

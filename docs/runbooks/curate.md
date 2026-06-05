@@ -27,6 +27,7 @@ make curate TABLE=signal_feature_procurement_cartel_risk_cobidding
 make curate TABLE=signal_feature_procurement_payment_plan_anomalies
 make curate TABLE=signal_feature_procurement_contract_suspensions
 make curate TABLE=signal_feature_procurement_public_servant_conflict_disclosure_overlap
+make curate TABLE=signal_feature_pida_full30_meta
 make curate TABLE=signal_feature_pida5_pida27_pida4_chain
 make curate TABLE=signal_feature_project_bpin_procurement_overlap
 make curate TABLE=signal_feature_project_regalias_execution_procurement_overlap
@@ -72,6 +73,7 @@ make curate LAKE_ROOT=/path/to/lake
 - `lake/curated/table=signal_feature_procurement_offers_competition_drop/`
 - `lake/curated/table=signal_feature_procurement_public_servant_conflict_disclosure_overlap/`
 - `lake/curated/table=signal_feature_cuentas_claras_donor_supplier_overlap/`
+- `lake/curated/table=signal_feature_pida_full30_meta/`
 - `lake/curated/table=signal_feature_pida5_pida27_pida4_chain/`
 - `lake/curated/table=signal_feature_project_bpin_procurement_overlap/`
 - `lake/curated/table=signal_feature_project_regalias_execution_procurement_overlap/`
@@ -117,6 +119,7 @@ requires only `secop_ii_contracts` for the current contract-field partial;
 `signal_feature_procurement_cartel_risk_cobidding` requires only `secop_offers` and `secop_ii_processes`;
 `signal_feature_procurement_public_servant_conflict_disclosure_overlap`
 requires `conflict_disclosures` and `secop_ii_contracts`;
+`signal_feature_pida_full30_meta` requires `secop_integrado`;
 `signal_feature_pida5_pida27_pida4_chain` requires
 `secop_integrado` and `secop_sanctions`;
 `signal_feature_project_bpin_procurement_overlap` requires
@@ -186,6 +189,9 @@ Public-servant conflict-disclosure overlaps are computed from exact
 person-document joins between affirmative conflict disclosures and aggregate
 SECOP II person-supplier exposure, with exposure aggregated before disclosure
 selection to avoid duplicated contract value across multiple declaration forms.
+PIDA full30 meta rows are computed from SECOP Integrado text-category tags and
+territory rollups, keeping only territories with broad multi-category exposure
+and material high-value contract volume.
 PIDA sanctioned-infrastructure chain rows are computed from exact contract-id
 joins between SECOP Integrado contracts and SECOP II sanctions, excluding
 future-dated sanction outliers before aggregating by territory.
@@ -205,7 +211,7 @@ clusters.
 
 ## Reality Notes
 
-On the local lake after the 2026-06-05 SGR project materialization work:
+On the local lake after the 2026-06-05 PIDA full30 materialization work:
 
 - `dim_subject_document`: 1,215,832 rows
 - `dim_company`: 101,916 rows
@@ -227,6 +233,7 @@ On the local lake after the 2026-06-05 SGR project materialization work:
 - `signal_feature_procurement_offers_competition_drop`: 13 rows
 - `signal_feature_procurement_public_servant_conflict_disclosure_overlap`: 65 rows
 - `signal_feature_cuentas_claras_donor_supplier_overlap`: 533 rows
+- `signal_feature_pida_full30_meta`: 93 rows
 - `signal_feature_pida5_pida27_pida4_chain`: 38 rows
 - `signal_feature_project_bpin_procurement_overlap`: 654 rows
 - `signal_feature_project_regalias_execution_procurement_overlap`: 41 rows
@@ -296,6 +303,13 @@ execution item schedules show at least 30 days of delivery delay, unresolved
 overdue delivery, or a material expected-vs-actual progress gap on a COP 100M+
 exact-NIT contract. Evidence refs include the SECOP process URL and bounded
 execution-item record ids.
+
+The PIDA full30 meta feature emits public territory rows when SECOP Integrado
+records span at least 12 PIDA-style policy categories, at least 500 contracts,
+at least 50 COP 1B+ contracts, and at least COP 1T total contract value. The
+2026-06-05 local build produced 93 rows, including 7 high severity rows and 86
+medium severity rows, covering 541,240 tagged contracts and COP
+12,124,250,151,149,100 total contract value.
 
 The shared-officer feature emits reviewer-only supplier rows when at least two
 SECOP-exposed supplier companies share the same RUES legal representative, each

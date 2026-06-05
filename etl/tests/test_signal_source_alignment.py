@@ -69,7 +69,6 @@ _ASPIRATIONAL_SOURCES = {
     "igac_parcelas",
     "mindeporte_actores",
     "pdet_municipios",
-    "pida_category_hits",
     "presidencia_iniciativas_33007",
     "sirr_reincorporacion",
     "ungrd_damnificados",
