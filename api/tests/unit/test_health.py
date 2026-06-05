@@ -23,6 +23,81 @@ async def test_health_returns_ok(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
+async def test_ready_returns_ok_with_repo_lake_in_dev(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from coacc.config import settings
+
+    monkeypatch.setattr(settings, "app_env", "dev")
+    monkeypatch.setattr(settings, "coacc_require_lake_assets", False)
+    monkeypatch.setattr(settings, "coacc_ready_min_loaded_sources", 0)
+
+    response = await client.get("/ready")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "ready"
+    assert payload["strict"] is False
+    check_names = {check["name"] for check in payload["checks"]}
+    assert "signal_registry" in check_names
+    assert "materialized_signal_run" in check_names or "materialized_signal_hits" in check_names
+
+
+@pytest.mark.anyio
+async def test_ready_fails_closed_when_lake_assets_are_required(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    missing = tmp_path / "missing"
+    monkeypatch.setenv("COACC_CONFIG_DIR", str(missing / "config"))
+    monkeypatch.setenv("COACC_DATASET_CATALOG_DIR", str(missing / "datasets"))
+    monkeypatch.setenv("COACC_DATASET_CONTRACT_DIR", str(missing / "contracts"))
+    monkeypatch.setenv(
+        "COACC_SOURCE_REGISTRY_PATH",
+        str(missing / "datasets" / "catalog.signed.csv"),
+    )
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(missing / "lake"))
+
+    from coacc.config import settings
+
+    monkeypatch.setattr(settings, "coacc_require_lake_assets", True)
+    monkeypatch.setattr(settings, "coacc_ready_min_loaded_sources", 1)
+
+    response = await client.get("/ready")
+
+    assert response.status_code == 503
+    payload = response.json()
+    assert payload["status"] == "not_ready"
+    failed_checks = {check["name"] for check in payload["checks"] if check["status"] == "fail"}
+    assert "signal_registry" in failed_checks
+    assert "lake_root" in failed_checks
+    assert "materialized_signal_run" in failed_checks
+
+
+@pytest.mark.anyio
+async def test_ready_fails_when_required_lake_ops_status_is_missing(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    from coacc.config import settings
+
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    monkeypatch.setattr(settings, "coacc_require_lake_assets", True)
+    monkeypatch.setattr(settings, "coacc_ready_max_lake_ops_age_hours", 48.0)
+
+    response = await client.get("/ready")
+
+    assert response.status_code == 503
+    payload = response.json()
+    lake_ops_check = next(check for check in payload["checks"] if check["name"] == "lake_ops")
+    assert lake_ops_check["status"] == "fail"
+    assert "no lake operations status manifest" in lake_ops_check["detail"]
+
+
+@pytest.mark.anyio
 async def test_health_uses_lake_run_when_connected_graph_has_no_signal_run(
     client: AsyncClient,
 ) -> None:

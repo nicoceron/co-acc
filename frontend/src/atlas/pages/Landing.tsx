@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import { AtlasMap, BarChart } from "../components/visuals";
-import { DataStatus, Eyebrow, Frame, MetricTile, MiniBar, Pill, Rule, Sparkline } from "../components/ui";
+import { DataStatus, EmptyState, Eyebrow, Frame, MetricTile, MiniBar, Pill, Rule, Sparkline } from "../components/ui";
 import { atlasFixture, type FeedItem } from "../data/prototype";
 import { formatNumber, toPercent } from "../lib/format";
 import { useAtlasOverview } from "../lib/useAtlasData";
@@ -13,11 +13,23 @@ function FeedTicker({ feed }: { feed: FeedItem[] }) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
+    if (!feed.length) return undefined;
     const timer = window.setInterval(() => setIndex((value) => (value + 1) % feed.length), 2400);
     return () => window.clearInterval(timer);
   }, [feed.length]);
 
-  const item = feed[index] ?? feed[0] ?? atlasFixture.feed[0]!;
+  const item = feed[index] ?? feed[0];
+  if (!item) {
+    return (
+      <div className="co-feed-ticker">
+        <span>lake</span>
+        <em>live</em>
+        <strong>Sin hits materializados</strong>
+        <span>esperando corrida de senales</span>
+      </div>
+    );
+  }
+
   return (
     <div className="co-feed-ticker" key={`${item.signal}-${index}`}>
       <span>{item.t}</span>
@@ -53,6 +65,7 @@ function Pillar({
 
 export function Landing() {
   const { data, status } = useAtlasOverview();
+  const fixtureMode = status === "fixture";
   const sectorBars = useMemo(() => {
     return data.sectors
       .map((sector) => ({
@@ -68,7 +81,7 @@ export function Landing() {
     <main>
       <section className="co-container co-hero">
         <div className="co-hero__copy">
-          <Rule accent>Atlas abierto · Colombia · 32 departamentos · 16 fuentes</Rule>
+          <Rule accent>Atlas abierto · Colombia · {data.metrics.sources} fuentes</Rule>
           <h1>
             Los datos publicos de Colombia, cartografiados.
           </h1>
@@ -112,10 +125,25 @@ export function Landing() {
       <section className="co-container co-metrics-band">
         <Rule>Indicadores del grafo</Rule>
         <div className="co-metrics-grid">
-          <MetricTile label="Registros indexados" value={data.metrics.records} sub="+184k esta semana" spark={data.seriesHits ?? atlasFixture.seriesHits} />
-          <MetricTile label="Nodos en grafo" value={data.metrics.nodes} sub="personas, empresas, contratos" spark={atlasFixture.seriesHits.map((value) => value * 0.7)} />
-          <MetricTile label="Senales activas" value={data.metrics.signals} sub="publicas + reviewer" spark={atlasFixture.seriesHits.map((value, index) => value * 0.5 + index)} />
-          <MetricTile label="Fuentes operativas" value={data.metrics.sources} sub="watermark y cobertura" spark={atlasFixture.seriesSourcesOk} />
+          <MetricTile
+            label="Registros indexados"
+            value={data.metrics.records}
+            sub={fixtureMode ? "+184k esta semana" : "documentos en lago"}
+            spark={data.seriesHits}
+          />
+          <MetricTile
+            label="Nodos en grafo"
+            value={data.metrics.nodes}
+            sub="personas, empresas, contratos"
+            spark={data.seriesHits.map((value) => value * 0.7)}
+          />
+          <MetricTile
+            label="Senales activas"
+            value={data.metrics.signals}
+            sub="publicas + reviewer"
+            spark={data.seriesHits.map((value, index) => value * 0.5 + index)}
+          />
+          <MetricTile label="Fuentes operativas" value={data.metrics.sources} sub="watermark y cobertura" spark={data.seriesSourcesOk} />
         </div>
       </section>
 
@@ -181,7 +209,7 @@ export function Landing() {
                 <th>fuente</th>
                 <th>descripcion</th>
                 <th>cobertura</th>
-                <th>filas</th>
+                <th>estado</th>
               </tr>
             </thead>
             <tbody>
@@ -201,6 +229,9 @@ export function Landing() {
               ))}
             </tbody>
           </table>
+          {!data.sources.length ? (
+            <EmptyState title="Sin fuentes cargadas" body="La API no entrego fuentes operativas para esta vista." />
+          ) : null}
         </div>
       </section>
 
@@ -215,7 +246,7 @@ export function Landing() {
               Buscar en el grafo
               <Search size={16} />
             </Link>
-            <Sparkline data={atlasFixture.seriesHits} width={140} />
+            <Sparkline data={fixtureMode ? atlasFixture.seriesHits : data.seriesHits} width={140} />
           </div>
         </Frame>
       </section>

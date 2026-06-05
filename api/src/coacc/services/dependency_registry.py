@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 import yaml  # type: ignore[import-untyped]
@@ -9,7 +10,6 @@ import yaml  # type: ignore[import-untyped]
 from coacc.services import lakehouse_query
 from coacc.services.runtime_paths import config_file
 
-_DEPS_PATH = config_file("signal_source_deps.yml")
 _SEVERITY_ORDER = ["low", "medium", "high", "critical"]
 
 
@@ -26,9 +26,13 @@ def _as_tuple(value: Any) -> tuple[str, ...]:
     return tuple(str(item).strip() for item in (value or []) if str(item).strip())
 
 
-@lru_cache(maxsize=1)
-def load_deps() -> dict[str, SignalDependency]:
-    payload = yaml.safe_load(_DEPS_PATH.read_text(encoding="utf-8")) or {}
+def deps_path() -> str:
+    return str(config_file("signal_source_deps.yml"))
+
+
+@lru_cache(maxsize=8)
+def _load_deps(path: str) -> dict[str, SignalDependency]:
+    payload = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
     signals = payload.get("signals") or {}
     deps: dict[str, SignalDependency] = {}
     for signal_id, cfg in signals.items():
@@ -46,8 +50,12 @@ def load_deps() -> dict[str, SignalDependency]:
     return deps
 
 
+def load_deps() -> dict[str, SignalDependency]:
+    return _load_deps(deps_path())
+
+
 def clear_dependency_registry_cache() -> None:
-    load_deps.cache_clear()
+    _load_deps.cache_clear()
 
 
 def signals_to_rerun(advanced_sources: set[str]) -> list[str]:

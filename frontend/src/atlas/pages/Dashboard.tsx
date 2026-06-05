@@ -2,12 +2,13 @@ import { Database, Search } from "lucide-react";
 import { Link } from "react-router";
 
 import { AtlasMap } from "../components/visuals";
-import { DataStatus, Frame, MetricTile, Panel, Rule, SeverityBadge } from "../components/ui";
+import { DataStatus, EmptyState, Frame, MetricTile, Panel, Rule, SeverityBadge } from "../components/ui";
 import { formatNumber, toPercent } from "../lib/format";
 import { useAtlasOverview } from "../lib/useAtlasData";
 
 export function Dashboard() {
   const { data, status } = useAtlasOverview();
+  const signalsWithHits = data.signals.filter((signal) => signal.hits > 0).length;
 
   return (
     <main className="co-container co-container--wide co-dashboard">
@@ -36,34 +37,23 @@ export function Dashboard() {
             </div>
             <DataStatus status={status} />
           </div>
-          <div className="co-table-wrap">
-            <table className="co-table">
-              <thead>
-                <tr>
-                  <th>cuando</th>
-                  <th>senal</th>
-                  <th>severidad</th>
-                  <th>entidad</th>
-                  <th>nota</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.feed.map((item) => (
-                  <tr key={`${item.t}-${item.entity}`}>
-                    <td className="co-mono">{item.t}</td>
-                    <td>
-                      <Link to={`/app/signals/${item.signal}`} className="co-mono">{item.signal}</Link>
-                    </td>
-                    <td><SeverityBadge severity={item.severity} /></td>
-                    <td>
-                      <Link to="/app/entity/ent_co_900412118">{item.entity}</Link>
-                    </td>
-                    <td>{item.note}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {data.feed.length ? (
+            <div className="co-event-feed">
+              {data.feed.map((item) => (
+                <article className="co-event-feed__row" key={`${item.t}-${item.entity}-${item.signal}`}>
+                  <time className="co-mono">{item.t}</time>
+                  <div>
+                    <Link to={`/app/signals/${item.signal}`} className="co-mono co-event-feed__signal">{item.signal}</Link>
+                    <span>{item.note}</span>
+                  </div>
+                  <SeverityBadge severity={item.severity} />
+                  <Link to="/app/entity/ent_co_900412118" className="co-event-feed__entity">{item.entity}</Link>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <EmptyState title="Sin hits recientes" body="No hay senales materializadas para alimentar el feed." />
+          )}
         </Frame>
 
         <aside className="co-dashboard__side">
@@ -79,8 +69,13 @@ export function Dashboard() {
 
           <Panel title="Indicadores" meta={<Database size={14} />}>
             <div className="co-mini-metrics">
-              <MetricTile label="hits 24h" value={formatNumber(1248)} sub="+12% vs media" spark={data.seriesHits} />
-              <MetricTile label="entidades nuevas" value={formatNumber(328)} sub="cruzadas hoy" spark={data.seriesHits.map((value) => value * 0.6)} />
+              <MetricTile label="hits recientes" value={formatNumber(data.feed.length)} sub="feed materializado" spark={data.seriesHits} />
+              <MetricTile
+                label="senales con hits"
+                value={formatNumber(signalsWithHits)}
+                sub="catalogo vivo"
+                spark={data.seriesHits.map((value) => value * 0.6)}
+              />
               <MetricTile label="contratos" value={data.metrics.contracts} sub="contratacion indexada" />
               <MetricTile label="sanciones" value={data.metrics.sanctions} sub="sanciones enlazables" />
             </div>
@@ -97,7 +92,7 @@ export function Dashboard() {
                 <th>codigo</th>
                 <th>fuente</th>
                 <th>cobertura</th>
-                <th>filas</th>
+                <th>estado</th>
                 <th>actualizado</th>
               </tr>
             </thead>
@@ -118,6 +113,9 @@ export function Dashboard() {
               ))}
             </tbody>
           </table>
+          {!data.sources.length ? (
+            <EmptyState title="Sin fuentes cargadas" body="La API no entrego salud de fuentes para esta vista." />
+          ) : null}
         </div>
       </section>
     </main>

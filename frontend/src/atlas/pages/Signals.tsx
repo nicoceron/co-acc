@@ -1,11 +1,13 @@
 import { ArrowLeft, GitBranch, ShieldCheck } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 
-import { Frame, Pill, Rule, SeverityBadge } from "../components/ui";
+import { getSignal, type SignalDetailResponse } from "@/api/client";
+
+import { EmptyState, Frame, Pill, Rule, SeverityBadge } from "../components/ui";
 import { atlasFixture, type Severity, type SignalDetail } from "../data/prototype";
 import { formatNumber } from "../lib/format";
-import { useAtlasOverview } from "../lib/useAtlasData";
+import { allowAtlasFixtures, useAtlasOverview } from "../lib/useAtlasData";
 
 const SEVERITY_FILTERS: ("all" | Severity)[] = ["all", "low", "medium", "high", "critical"];
 
@@ -21,11 +23,62 @@ function fallbackDetail(signalId: string): SignalDetail {
   };
 }
 
+function apiDetailToViewModel(response: SignalDetailResponse): SignalDetail {
+  const { definition } = response;
+  return {
+    version: String(definition.version),
+    scope: definition.scope_type,
+    runner: definition.runner ? `${definition.runner.kind}:${definition.runner.ref}` : `registry:${definition.id}`,
+    policy: {
+      public: definition.public_safe,
+      reviewer: definition.reviewer_only,
+      identity: definition.requires_identity,
+      dedup: definition.dedup_fields,
+    },
+    sourcesRequired: definition.sources_required,
+    entityTypes: definition.entity_types,
+    sampleHits: response.sample_hits.map((hit) => ({
+      label: [hit.entity_key, hit.scope_key].filter(Boolean).join(" · "),
+      conf: hit.identity_confidence,
+      ev: hit.evidence_count,
+      score: hit.score,
+    })),
+  };
+}
+
 export function SignalsPage() {
   const { signalId } = useParams();
   const { data } = useAtlasOverview();
+  const fixturesAllowed = allowAtlasFixtures();
   const [severity, setSeverity] = useState<"all" | Severity>("all");
   const [publicOnly, setPublicOnly] = useState(false);
+  const [apiDetail, setApiDetail] = useState<SignalDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setApiDetail(null);
+    if (!signalId || typeof globalThis.fetch !== "function") {
+      setDetailLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+    setDetailLoading(true);
+    getSignal(signalId)
+      .then((response) => {
+        if (!cancelled) setApiDetail(apiDetailToViewModel(response));
+      })
+      .catch(() => {
+        if (!cancelled) setApiDetail(null);
+      })
+      .finally(() => {
+        if (!cancelled) setDetailLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [signalId]);
 
   const filtered = useMemo(() => {
     return data.signals
@@ -34,8 +87,24 @@ export function SignalsPage() {
   }, [data.signals, publicOnly, severity]);
 
   if (signalId) {
-    const signal = data.signals.find((item) => item.id === signalId) ?? atlasFixture.signals.find((item) => item.id === signalId) ?? atlasFixture.signals[0]!;
-    const detail = atlasFixture.signalDetail[signal.id] ?? fallbackDetail(signal.id);
+    const signal = data.signals.find((item) => item.id === signalId)
+      ?? (fixturesAllowed ? atlasFixture.signals.find((item) => item.id === signalId) : undefined)
+      ?? (fixturesAllowed ? atlasFixture.signals[0] : undefined);
+
+    if (!signal) {
+      return (
+        <main className="co-container co-signal-detail">
+          <Link className="co-button co-button--ghost" to="/app/signals">
+            <ArrowLeft size={16} />
+            Senales
+          </Link>
+          <EmptyState title="Senal no disponible" body="No hay definicion materializada con ese identificador." />
+        </main>
+      );
+    }
+
+    const fixtureDetail = fixturesAllowed ? atlasFixture.signalDetail[signal.id] : undefined;
+    const detail: SignalDetail = apiDetail ?? fixtureDetail ?? fallbackDetail(signal.id);
 
     return (
       <main className="co-container co-signal-detail">
@@ -102,6 +171,11 @@ export function SignalsPage() {
                 ))}
               </tbody>
             </table>
+            {detailLoading && !detail.sampleHits.length ? (
+              <EmptyState title="Cargando muestra" body="Consultando hits materializados para esta senal." />
+            ) : !detail.sampleHits.length ? (
+              <EmptyState title="Sin hits de muestra" body="Esta senal no tiene hits de muestra disponibles en la API." />
+            ) : null}
           </div>
         </Frame>
       </main>
@@ -143,6 +217,7 @@ export function SignalsPage() {
               <th>senal</th>
               <th>categoria</th>
               <th>hits</th>
+              <th>estado</th>
               <th>publico</th>
             </tr>
           </thead>
@@ -159,11 +234,19 @@ export function SignalsPage() {
                 </td>
                 <td className="co-mono">{signal.category}</td>
                 <td className="co-num">{formatNumber(signal.hits)}</td>
+                <td>
+                  <Pill tone={signal.materialized ? "moss" : "neutral"}>
+                    {signal.materialized ? "materialized" : "registry"}
+                  </Pill>
+                </td>
                 <td>{signal.public ? <Pill tone="moss">public</Pill> : <Pill>reviewer</Pill>}</td>
               </tr>
             ))}
           </tbody>
         </table>
+        {!filtered.length ? (
+          <EmptyState title="Sin senales" body="No hay senales para los filtros activos." />
+        ) : null}
       </div>
     </main>
   );

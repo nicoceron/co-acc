@@ -59,8 +59,8 @@ class SourceRegistryEntry:
         }
 
 
-_SIGNED_CATALOG_PATH = docs_dataset_file("catalog.signed.csv")
-_DATASET_CONTRACT_DIR = dataset_contract_dir()
+_SIGNED_CATALOG_PATH: Path | None = None
+_DATASET_CONTRACT_DIR: Path | None = None
 _SOCRATA_URL_MARKER = "datos.gov.co/d/"
 _SIGNAL_STATE_BY_RELEVANCE = {
     "already_used": "promoted",
@@ -98,7 +98,7 @@ def _default_registry_path() -> Path:
             break
         current = current.parent
 
-    return _SIGNED_CATALOG_PATH
+    return _SIGNED_CATALOG_PATH or docs_dataset_file("catalog.signed.csv")
 
 
 def get_registry_path() -> Path:
@@ -142,10 +142,11 @@ def _split_refs(value: str) -> list[str]:
 
 
 def _load_dataset_contracts() -> dict[str, dict[str, Any]]:
-    if not _DATASET_CONTRACT_DIR.is_dir():
+    contract_dir = _DATASET_CONTRACT_DIR or dataset_contract_dir()
+    if not contract_dir.is_dir():
         return {}
     specs: dict[str, dict[str, Any]] = {}
-    for path in sorted(_DATASET_CONTRACT_DIR.glob("*.yml")):
+    for path in sorted(contract_dir.glob("*.yml")):
         if path.name.startswith("_"):
             continue
         payload = yaml.safe_load(path.read_text(encoding="utf-8"))

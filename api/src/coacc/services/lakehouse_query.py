@@ -11,7 +11,10 @@ import duckdb
 from coacc.services.runtime_paths import config_file, docs_dataset_file
 
 _SAFE_IDENTIFIER = re.compile(r"[^A-Za-z0-9_]+")
-_CATALOG_PATH = docs_dataset_file("catalog.proven.csv")
+
+
+def catalog_path() -> Path:
+    return docs_dataset_file("catalog.proven.csv")
 
 
 def lake_root() -> Path:
@@ -26,10 +29,11 @@ def source_view_name(source: str) -> str:
 @lru_cache(maxsize=1)
 def _source_aliases() -> dict[str, tuple[str, ...]]:
     """Map semantic source ids from registries to raw dataset ids."""
-    if not _CATALOG_PATH.exists():
+    path = catalog_path()
+    if not path.exists():
         return {}
     aliases: dict[str, list[str]] = {}
-    with _CATALOG_PATH.open(newline="", encoding="utf-8") as fh:
+    with path.open(newline="", encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
             dataset_id = (row.get("dataset_id") or "").strip()
             source_refs = (row.get("source_refs") or "").strip()

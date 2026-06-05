@@ -105,7 +105,7 @@ export function AtlasShell() {
         </div>
         <div className="co-container co-footer__bar">
           <span>2026 · co/acc</span>
-          <span>16 fuentes · 43 senales · 9.4M registros indexados</span>
+          <span>public_safe · AGPL-3.0 · atlas v3</span>
         </div>
       </footer>
     </>

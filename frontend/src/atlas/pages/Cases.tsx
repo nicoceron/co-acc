@@ -1,9 +1,9 @@
 import { ArrowLeft, ArrowRight, FileText, Network, ShieldCheck } from "lucide-react";
 import { Link, useParams } from "react-router";
 
-import { Eyebrow, Frame, Pill, Rule, SeverityBadge } from "../components/ui";
+import { EmptyState, Eyebrow, Frame, Pill, Rule, SeverityBadge } from "../components/ui";
 import { atlasFixture, type CaseStory } from "../data/prototype";
-import { useAtlasOverview } from "../lib/useAtlasData";
+import { allowAtlasFixtures, useAtlasOverview } from "../lib/useAtlasData";
 
 function CaseStats({ story }: { story: CaseStory }) {
   return (
@@ -28,7 +28,8 @@ function SignalList({ story }: { story: CaseStory }) {
 
 export function Cases() {
   const { data } = useAtlasOverview();
-  const featured = data.cases[0] ?? atlasFixture.cases[0]!;
+  const fixturesAllowed = allowAtlasFixtures();
+  const featured = data.cases[0] ?? (fixturesAllowed ? atlasFixture.cases[0] : undefined);
   const rest = data.cases.slice(1);
 
   return (
@@ -39,29 +40,33 @@ export function Cases() {
         <p>Investigaciones documentales armadas desde senales cruzadas y evidencia primaria.</p>
       </header>
 
-      <div className="co-cases__grid">
-        <Frame coord="DESTACADO · D-01" className="co-featured-case">
-          <Eyebrow accent>{featured.kicker} · {featured.date}</Eyebrow>
-          <h2>{featured.title}</h2>
-          <p>{featured.lede}</p>
-          <CaseStats story={featured} />
-          <SignalList story={featured} />
-          <Link className="co-button co-button--primary" to={`/casos/${featured.slug}`}>
-            Abrir dossier
-            <ArrowRight size={16} />
-          </Link>
-        </Frame>
-
-        <aside className="co-case-index">
-          {rest.map((story) => (
-            <Link className="co-case-row" key={story.slug} to={`/casos/${story.slug}`}>
-              <span>{story.date}</span>
-              <strong>{story.title}</strong>
-              <em>{story.kicker}</em>
+      {featured ? (
+        <div className="co-cases__grid">
+          <Frame coord="DESTACADO · D-01" className="co-featured-case">
+            <Eyebrow accent>{featured.kicker} · {featured.date}</Eyebrow>
+            <h2>{featured.title}</h2>
+            <p>{featured.lede}</p>
+            <CaseStats story={featured} />
+            <SignalList story={featured} />
+            <Link className="co-button co-button--primary" to={`/casos/${featured.slug}`}>
+              Abrir dossier
+              <ArrowRight size={16} />
             </Link>
-          ))}
-        </aside>
-      </div>
+          </Frame>
+
+          <aside className="co-case-index">
+            {rest.map((story) => (
+              <Link className="co-case-row" key={story.slug} to={`/casos/${story.slug}`}>
+                <span>{story.date}</span>
+                <strong>{story.title}</strong>
+                <em>{story.kicker}</em>
+              </Link>
+            ))}
+          </aside>
+        </div>
+      ) : (
+        <EmptyState title="Sin casos publicados" body="La API no entrego casos para esta superficie publica." />
+      )}
     </main>
   );
 }
@@ -69,7 +74,22 @@ export function Cases() {
 export function CaseDetail() {
   const { slug } = useParams();
   const { data } = useAtlasOverview();
-  const story = data.cases.find((item) => item.slug === slug) ?? atlasFixture.cases.find((item) => item.slug === slug) ?? atlasFixture.cases[0]!;
+  const fixturesAllowed = allowAtlasFixtures();
+  const story = data.cases.find((item) => item.slug === slug)
+    ?? (fixturesAllowed ? atlasFixture.cases.find((item) => item.slug === slug) : undefined)
+    ?? (fixturesAllowed ? atlasFixture.cases[0] : undefined);
+
+  if (!story) {
+    return (
+      <main className="co-container co-case-detail">
+        <Link className="co-button co-button--ghost" to="/casos">
+          <ArrowLeft size={16} />
+          Casos
+        </Link>
+        <EmptyState title="Dossier no disponible" body="No hay caso materializado con ese identificador." />
+      </main>
+    );
+  }
 
   return (
     <main className="co-container co-case-detail">

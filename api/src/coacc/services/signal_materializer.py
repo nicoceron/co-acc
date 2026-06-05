@@ -1079,6 +1079,7 @@ async def list_signal_summaries(session: AsyncSession | None) -> list[SignalList
         ):
             meta["last_seen_at"] = row_last_seen
     lake_counts = lakehouse_signal_service.materialized_signal_counts()
+    lake_severities = lakehouse_signal_service.materialized_signal_severities()
     fallback_counts = _curated_signal_counts() if not lake_counts else {}
     for signal_id, (hit_count, observed_at) in (lake_counts or fallback_counts).items():
         meta = counts_by_id.setdefault(signal_id, {"hit_count": 0, "last_seen_at": None})
@@ -1087,14 +1088,23 @@ async def list_signal_summaries(session: AsyncSession | None) -> list[SignalList
             meta["last_seen_at"] is None or observed_at > str(meta["last_seen_at"])
         ):
             meta["last_seen_at"] = observed_at
+        if signal_id in lake_severities:
+            meta["severity"] = lake_severities[signal_id]
     items: list[SignalListItem] = []
     for definition in list_signal_definitions():
         count_meta = counts_by_id.get(definition.id, {})
+        payload = definition.model_dump()
+        if count_meta.get("severity"):
+            payload["severity"] = count_meta["severity"]
         items.append(
             SignalListItem(
-                **definition.model_dump(),
+                **payload,
                 hit_count=int(count_meta.get("hit_count") or 0),
                 last_seen_at=count_meta.get("last_seen_at"),
+                materialized=definition.id in counts_by_id,
+                materialization_state=(
+                    "materialized" if definition.id in counts_by_id else "registered_only"
+                ),
             )
         )
     return items

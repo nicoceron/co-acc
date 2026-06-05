@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from neo4j import AsyncSession
 
+from coacc.config import settings
 from coacc.dependencies import (
     can_access_reviewer_content,
     get_optional_session,
@@ -10,6 +11,7 @@ from coacc.dependencies import (
 )
 from coacc.models.signal import SignalDetailResponse, SignalListResponse
 from coacc.models.user import UserResponse
+from coacc.services import lakehouse_signal_service
 from coacc.services.signal_materializer import (
     filter_signal_hits_for_viewer,
     get_latest_materializer_run,
@@ -34,6 +36,8 @@ async def list_signals(
     last_run_id, last_refreshed_at = await get_latest_materializer_run(session)
     if not can_access_reviewer_content(user):
         signals = [signal for signal in signals if not signal.reviewer_only]
+    if settings.coacc_signals_require_materialized and not can_access_reviewer_content(user):
+        signals = [signal for signal in signals if signal.materialized]
     return SignalListResponse(
         registry_version=registry.registry_version,
         last_run_id=last_run_id,
@@ -62,4 +66,9 @@ async def get_signal(
         sample_hits,
         can_view_reviewer=can_access_reviewer_content(user),
     )
+    materialized_severity = lakehouse_signal_service.materialized_signal_severities().get(
+        definition.id
+    )
+    if materialized_severity:
+        definition = definition.model_copy(update={"severity": materialized_severity})
     return SignalDetailResponse(definition=definition, sample_hits=sample_hits)

@@ -162,6 +162,8 @@ class SignalHitResponse(BaseModel):
 class SignalListItem(SignalDefinition):
     hit_count: int = 0
     last_seen_at: str | None = None
+    materialized: bool = False
+    materialization_state: Literal["materialized", "registered_only"] = "registered_only"
 
 
 class SignalListResponse(BaseModel):

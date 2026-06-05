@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING, Any, cast
 
 import yaml  # type: ignore[import-untyped]
 
+from coacc_etl.runtime_paths import config_file
+
 if TYPE_CHECKING:
     from coacc_etl.signals.contracts import SignalSeverity
-
-_REGISTRY_PATH = Path(__file__).resolve().parents[4] / "config" / "signal_registry.yml"
 
 
 @dataclass(frozen=True)
@@ -44,21 +44,33 @@ def _severity(value: object) -> SignalSeverity:
     raise ValueError(f"unsupported signal severity: {value!r}")
 
 
-def _signal_rows() -> list[dict[str, Any]]:
-    payload = yaml.safe_load(_REGISTRY_PATH.read_text(encoding="utf-8"))
+def _registry_path() -> Path:
+    return config_file("signal_registry.yml")
+
+
+@lru_cache(maxsize=8)
+def _registry_payload(path_key: str) -> dict[str, Any]:
+    payload = yaml.safe_load(Path(path_key).read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("signal registry root must be a mapping")
+    return payload
+
+
+def _signal_rows_for(path_key: str) -> list[dict[str, Any]]:
+    payload = _registry_payload(path_key)
     rows = payload.get("signals")
     if not isinstance(rows, list):
         raise ValueError("signal registry does not contain a signals list")
     return [row for row in rows if isinstance(row, dict)]
 
 
-@lru_cache(maxsize=1)
-def _aliases() -> dict[str, str]:
-    payload = yaml.safe_load(_REGISTRY_PATH.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        return {}
+def _signal_rows() -> list[dict[str, Any]]:
+    return _signal_rows_for(str(_registry_path()))
+
+
+@lru_cache(maxsize=8)
+def _aliases_for(path_key: str) -> dict[str, str]:
+    payload = _registry_payload(path_key)
     aliases = payload.get("aliases")
     if not isinstance(aliases, dict):
         return {}
@@ -66,13 +78,13 @@ def _aliases() -> dict[str, str]:
 
 
 def resolve_signal_id(signal_id: str) -> str:
-    return _aliases().get(signal_id, signal_id)
+    return _aliases_for(str(_registry_path())).get(signal_id, signal_id)
 
 
-@lru_cache(maxsize=1)
-def _definitions() -> dict[str, MaterializableSignalDefinition]:
+@lru_cache(maxsize=8)
+def _definitions_for(path_key: str) -> dict[str, MaterializableSignalDefinition]:
     definitions: dict[str, MaterializableSignalDefinition] = {}
-    for row in _signal_rows():
+    for row in _signal_rows_for(path_key):
         signal_id = str(row.get("id") or "").strip()
         if not signal_id:
             continue
@@ -93,4 +105,4 @@ def _definitions() -> dict[str, MaterializableSignalDefinition]:
 
 
 def get_signal_definition(signal_id: str) -> MaterializableSignalDefinition | None:
-    return _definitions().get(resolve_signal_id(signal_id))
+    return _definitions_for(str(_registry_path())).get(resolve_signal_id(signal_id))

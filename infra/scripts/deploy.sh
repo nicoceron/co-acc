@@ -76,14 +76,36 @@ else
   fi
 fi
 
-log "Waiting for health check..."
+log "Waiting for production readiness smoke..."
 if [ "$DRY_RUN" = false ]; then
-    sleep 15
-    HEALTH_URL="https://${DOMAIN}/health"
-    if curl -sf -k "$HEALTH_URL" > /dev/null 2>&1; then
-        log "Health check passed ($HEALTH_URL)."
+    sleep 10
+    SMOKE_URL="${COACC_PROD_SMOKE_BASE_URL:-https://${DOMAIN}}"
+    SMOKE_ARGS=("--base-url" "$SMOKE_URL" "--wait-timeout" "${COACC_PROD_SMOKE_WAIT_TIMEOUT:-120}")
+    if [ "${COACC_PROD_SMOKE_INSECURE:-true}" = "true" ]; then
+      SMOKE_ARGS+=("--insecure")
+    fi
+    if [ "${COACC_PROD_SMOKE_SKIP_FRONTEND:-false}" = "true" ]; then
+      SMOKE_ARGS+=("--skip-frontend")
+    fi
+    if [ "${COACC_PROD_SMOKE_REQUIRE_OPS:-true}" != "true" ]; then
+      SMOKE_ARGS+=("--no-require-ops")
+    fi
+    if [ "${COACC_PROD_SMOKE_REQUIRE_MATERIALIZED_ONLY:-true}" != "true" ]; then
+      SMOKE_ARGS+=("--no-require-materialized-only")
+    fi
+    if [ "${COACC_PROD_SMOKE_SKIP:-false}" = "true" ]; then
+        HEALTH_URL="${SMOKE_URL%/}/health"
+        log "Production smoke skipped; falling back to liveness check ($HEALTH_URL)."
+        if curl -sf -k "$HEALTH_URL" > /dev/null; then
+            log "Health check passed ($HEALTH_URL)."
+        else
+            log "Health check failed ($HEALTH_URL)!"
+            exit 1
+        fi
+    elif python3 "$DEPLOY_DIR/scripts/production_smoke.py" "${SMOKE_ARGS[@]}"; then
+        log "Production smoke passed ($SMOKE_URL)."
     else
-        log "Health check failed ($HEALTH_URL)!"
+        log "Production smoke failed ($SMOKE_URL)!"
         if [ "${USE_GHCR_IMAGES:-false}" = "true" ]; then
           docker compose -f "$COMPOSE_BASE" -f "$DEPLOY_DIR/infra/docker/docker-compose.prod.images.yml" logs --tail=50
         else

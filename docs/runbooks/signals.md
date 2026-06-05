@@ -26,11 +26,22 @@ hits; without it, zero-hit selected signals fail the run.
 
 ## Inputs
 
-The first shipped materializer slice reads:
+The shipped materializer slice reads:
 
+- `lake/curated/table=signal_feature_procurement_single_bidder_high_value/`
+- `lake/curated/table=signal_feature_procurement_large_modifications/`
 - `lake/curated/table=signal_feature_procurement_sanctioned_supplier_awarded/`
 - `lake/curated/table=signal_feature_procurement_supplier_concentration_across_entities/`
+- `lake/curated/table=signal_feature_procurement_contract_value_outlier_by_category/`
 - `lake/curated/table=signal_feature_procurement_repeat_awards_same_supplier/`
+- `lake/curated/table=signal_feature_procurement_buyer_supplier_network_density/`
+- `lake/curated/table=signal_feature_procurement_cartel_risk_cobidding/`
+- `lake/curated/table=signal_feature_procurement_payment_plan_anomalies/`
+- `lake/curated/table=signal_feature_procurement_contract_suspensions/`
+- `lake/curated/table=signal_feature_procurement_short_bidding_window/`
+- `lake/curated/table=signal_feature_procurement_offers_competition_drop/`
+- `lake/curated/table=signal_feature_procurement_politically_exposed_position_supplier_overlap/`
+- `lake/curated/table=signal_feature_procurement_related_companies_shared_officer/`
 
 Run `make curate` first when any of those feature tables are missing or stale.
 
@@ -111,19 +122,37 @@ or graph-only location nodes.
 
 `/api/v1/patterns/{entity_id}` and
 `/api/v1/public/patterns/company/{company_ref}` use the latest materialized
-signal run for the shipped signal-backed public patterns:
-sanctioned supplier record, supplier concentration, and recurring low-threshold
-awards. Legacy Cypher-only patterns still require Neo4j until their DuckDB
-feature tables are shipped.
+signal run for mapped signal-backed patterns, including sanctioned supplier
+records, supplier concentration, recurring low-threshold awards, low competition,
+short bidding windows, sensitive-position supplier overlap, and shared-officer
+supplier networks. Public guards still hide reviewer-only signals from public
+requests. Reviewer-only materialized signals without pattern mappings are still
+available through reviewer signal/case surfaces, not public pattern routes.
+Legacy Cypher-only patterns still require Neo4j until their DuckDB feature
+tables are shipped.
 
 ## Reality Notes
 
-On the local lake generated during the 2026-06-01 run:
+On the local lake generated during the 2026-06-05
+`phase11-local-20260605-large-modifications` run:
 
-- Raw materialized parquet: 30,397 `signal_hits` rows and 91,433
+- Materialized parquet: 161,074 `signal_hits` rows and 264,092
   `evidence_bundles` rows
-- API-deduplicated `procurement_sanctioned_supplier_awarded`: 16,894 hits
+- `procurement_single_bidder_high_value`: 59,757 hits
+- `procurement_large_modifications`: 580 hits
+- `procurement_sanctioned_supplier_awarded`: 16,894 hits
 - `procurement_supplier_concentration_across_entities`: 497 hits
+- `procurement_contract_value_outlier_by_category`: 2,022 hits
 - `procurement_repeat_awards_same_supplier`: 9,716 hits
-- Total API-deduplicated hits: 27,107
-- Total API-deduplicated evidence items: 84,853
+- `procurement_buyer_supplier_network_density`: 364 hits
+- `procurement_cartel_risk_cobidding`: 866 hits
+- `procurement_payment_plan_anomalies`: 375 hits
+- `procurement_contract_suspensions`: 10,460 hits
+- `procurement_short_bidding_window`: 57,799 hits
+- `procurement_offers_competition_drop`: 13 hits
+- `procurement_politically_exposed_position_supplier_overlap`: 249 hits
+- `procurement_related_companies_shared_officer`: 1,482 hits
+
+The production public catalog currently exposes the 8 public materialized
+signals and hides the 6 reviewer-only materialized signals unless a reviewer
+path explicitly permits them.

@@ -6,9 +6,16 @@ from coacc.services.lakehouse_entity_service import get_lake_entity
 from coacc.services.lakehouse_signal_service import materialized_entity_signals
 
 _SIGNAL_TO_PATTERN = {
+    "procurement_single_bidder_high_value": "low_competition_bidding",
+    "procurement_offers_competition_drop": "low_competition_bidding",
     "procurement_sanctioned_supplier_awarded": "sanctioned_supplier_record",
     "procurement_supplier_concentration_across_entities": "contract_concentration",
     "procurement_repeat_awards_same_supplier": "split_contracts_below_threshold",
+    "procurement_short_bidding_window": "procurement_short_bidding_window",
+    "procurement_politically_exposed_position_supplier_overlap": (
+        "sensitive_public_official_supplier_overlap"
+    ),
+    "procurement_related_companies_shared_officer": "shared_officer_supplier_network",
 }
 
 

@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 import yaml  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, Field
 
+from coacc_etl.runtime_paths import config_file
+
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from coacc_etl.lakehouse.reality import CuratedTableHealth, DatasetHealth
 
 Severity = Literal["info", "warn", "fail"]
@@ -46,7 +49,7 @@ class ThresholdConfig(BaseModel):
 
 def load_thresholds(path: Path | None = None) -> ThresholdConfig:
     if path is None:
-        path = Path(__file__).resolve().parents[4] / "config" / "reality_thresholds.yml"
+        path = config_file("reality_thresholds.yml")
     if not path.exists():
         return ThresholdConfig()
 

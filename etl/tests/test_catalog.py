@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from coacc_etl.catalog import DatasetSpec, clear_cache, load_catalog
+from coacc_etl.catalog import DatasetSpec, clear_cache, datasets_dir, load_catalog
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PROVEN_CSV = REPO_ROOT / "docs" / "datasets" / "catalog.proven.csv"
@@ -56,6 +56,34 @@ def test_catalog_loads_and_validates_every_yaml() -> None:
             assert spec.url.startswith("https://www.datos.gov.co/d/")
         else:
             assert spec.url.startswith("https://")
+
+
+def test_catalog_honors_dataset_contract_env(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    contract_dir = tmp_path / "contracts"
+    contract_dir.mkdir()
+    (contract_dir / "abcd-1234.yml").write_text(
+        "\n".join(
+            [
+                "id: abcd-1234",
+                "name: Mounted test dataset",
+                "tier: context",
+                "url: https://example.test/d/abcd-1234",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("COACC_DATASET_CONTRACT_DIR", str(contract_dir))
+    clear_cache()
+
+    specs = load_catalog()
+
+    assert datasets_dir() == contract_dir
+    assert list(specs) == ["abcd-1234"]
+    assert specs["abcd-1234"].name == "Mounted test dataset"
 
 
 def test_tier_distribution_matches_report() -> None:

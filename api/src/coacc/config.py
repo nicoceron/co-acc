@@ -25,13 +25,21 @@ class Settings(BaseSettings):
     cors_origins: str = (
         "http://localhost:3000,"
         "http://localhost:3100,"
+        "http://localhost:5173,"
+        "http://localhost:5174,"
         "http://127.0.0.1:3000,"
-        "http://127.0.0.1:3100"
+        "http://127.0.0.1:3100,"
+        "http://127.0.0.1:5173,"
+        "http://127.0.0.1:5174"
     )
     auth_cookie_name: str = "coacc_session"
     auth_cookie_secure: bool = False
     auth_cookie_samesite: Literal["lax", "strict", "none"] = "lax"
     trust_proxy_headers: bool = False
+    coacc_require_lake_assets: bool = False
+    coacc_ready_min_loaded_sources: int = 0
+    coacc_ready_max_lake_ops_age_hours: float = 0.0
+    coacc_signals_require_materialized: bool = False
     share_token_ttl_hours: int = 168  # 7 days
     product_tier: str = "community"
     patterns_enabled: bool = True

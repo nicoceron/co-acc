@@ -22,6 +22,8 @@ LAKE_REALITY_ARGS = $(if $(DATASET),--dataset $(DATASET),) \
 	lint type-check format \
 	test test-api test-etl test-frontend check \
 	lake-init lake-reality lake-compact curated-contracts api-smoke backend-ready \
+	lake-backup lake-backup-verify lake-backup-restore \
+	prod-smoke \
 	qualify ingest ingest-all ingest-phase7-smoke ingest-phase7-full curate \
 	materialize-deps materialize-all
 
@@ -104,12 +106,27 @@ curated-contracts:
 api-smoke:
 	python3 scripts/local_backend_smoke.py --lake-root "$(LAKE_ROOT)"
 
+prod-smoke:
+	python3 scripts/production_smoke.py $(if $(BASE_URL),--base-url "$(BASE_URL)",)
+
 backend-ready: lake-init
 	docker compose config >/dev/null
 	docker compose --profile etl --profile ops config >/dev/null
 	$(MAKE) curated-contracts
 	$(MAKE) lake-reality
 	$(MAKE) api-smoke
+
+lake-backup:
+	COACC_HOST_LAKE_ROOT="$(LAKE_ROOT)" infra/scripts/backup-lake.sh
+
+lake-backup-verify:
+	@test -n "$(ARCHIVE)" || (echo "ARCHIVE=/path/to/coacc_lake_*.tar.gz is required"; exit 1)
+	infra/scripts/verify-lake-backup.sh "$(ARCHIVE)"
+
+lake-backup-restore:
+	@test -n "$(ARCHIVE)" || (echo "ARCHIVE=/path/to/coacc_lake_*.tar.gz is required"; exit 1)
+	@test -n "$(RESTORE_ROOT)" || (echo "RESTORE_ROOT=/path/to/restore is required"; exit 1)
+	infra/scripts/restore-lake-backup.sh "$(ARCHIVE)" "$(RESTORE_ROOT)"
 
 # Qualify (re-)builds the signed catalog. Pass extra flags via QUALIFY_ARGS.
 qualify:

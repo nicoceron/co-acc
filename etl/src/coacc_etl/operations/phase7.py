@@ -11,16 +11,17 @@ import shutil
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from coacc_etl.catalog import DatasetSpec, load_catalog
 from coacc_etl.ingest.socrata import IngestResult, SocrataClient, _parse_ts, ingest
 from coacc_etl.lakehouse import watermark as wm
 from coacc_etl.lakehouse.paths import lake_root
+from coacc_etl.runtime_paths import runbook_file
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
+    from pathlib import Path
 
 Phase7Mode = Literal["smoke", "full"]
 
@@ -51,9 +52,6 @@ KEYSET_PAGINATION_DATASET_IDS: frozenset[str] = frozenset(
         "wi7w-2nvm",
     }
 )
-
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-_DEFAULT_LOG_PATH = _REPO_ROOT / "docs" / "runbooks" / "ingest_log.md"
 
 _SMOKE_FALLBACK_SINCE: dict[str, datetime] = {
     "5u9e-g5w9": datetime(2022, 1, 1, tzinfo=UTC),
@@ -109,7 +107,7 @@ class Phase7RunRecord:
 
 
 def default_log_path() -> Path:
-    return _DEFAULT_LOG_PATH
+    return runbook_file("ingest_log.md")
 
 
 def check_disk_budget(min_free_gb: float, *, path: Path | None = None) -> DiskStatus:

@@ -60,12 +60,25 @@ def _default_run_paths(run_id: str) -> tuple[str, str]:
     )
 
 
+def _manifest_finished_at_sort_key(path: Path, value: object) -> datetime:
+    if value is not None:
+        try:
+            parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=UTC)
+            return parsed.astimezone(UTC)
+        except ValueError:
+            logger.warning("Signal run manifest has invalid finished_at: %s", path)
+    return datetime.fromtimestamp(path.stat().st_mtime, UTC)
+
+
 def latest_signal_run() -> LakeSignalRun | None:
     manifest_dir = _manifest_dir()
     if not manifest_dir.exists():
         return None
     manifests = sorted(path for path in manifest_dir.glob("*.json") if path.is_file())
-    for path in reversed(manifests):
+    candidates: list[tuple[datetime, str, LakeSignalRun]] = []
+    for path in manifests:
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -85,13 +98,19 @@ def latest_signal_run() -> LakeSignalRun | None:
             signal_hits_path = str(_run_partition("signal_hits", run_id) / "*.parquet")
         if not evidence_bundles_path.endswith("*.parquet"):
             evidence_bundles_path = str(_run_partition("evidence_bundles", run_id) / "*.parquet")
-        return LakeSignalRun(
-            run_id=run_id,
-            finished_at=str(finished_at),
-            signal_hits_path=signal_hits_path,
-            evidence_bundles_path=evidence_bundles_path,
-        )
-    return None
+        candidates.append((
+            _manifest_finished_at_sort_key(path, finished_at),
+            path.name,
+            LakeSignalRun(
+                run_id=run_id,
+                finished_at=str(finished_at),
+                signal_hits_path=signal_hits_path,
+                evidence_bundles_path=evidence_bundles_path,
+            ),
+        ))
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: (item[0], item[1]))[2]
 
 
 def latest_signal_run_tuple() -> tuple[str | None, str | None]:
@@ -151,6 +170,50 @@ def materialized_signal_counts() -> dict[str, tuple[int, str | None]]:
     return {
         resolve_signal_id(str(signal_id)): (int(hit_count), str(last_seen_at or run.finished_at))
         for signal_id, hit_count, last_seen_at in rows
+    }
+
+
+def materialized_signal_severities() -> dict[str, str]:
+    run = latest_signal_run()
+    if run is None or not _run_has_parquet(run):
+        return {}
+    con = lakehouse_query.connect(read_only=True)
+    try:
+        rows = con.execute(
+            f"""
+            WITH hits AS ({_deduped_hits_sql(run)}),
+            ranked AS (
+                SELECT
+                    signal_id,
+                    max(CASE severity
+                        WHEN 'critical' THEN 4
+                        WHEN 'high' THEN 3
+                        WHEN 'medium' THEN 2
+                        WHEN 'low' THEN 1
+                        ELSE 0
+                    END) AS severity_rank
+                FROM hits
+                GROUP BY signal_id
+            )
+            SELECT
+                signal_id,
+                CASE severity_rank
+                    WHEN 4 THEN 'critical'
+                    WHEN 3 THEN 'high'
+                    WHEN 2 THEN 'medium'
+                    WHEN 1 THEN 'low'
+                    ELSE NULL
+                END AS severity
+            FROM ranked
+            WHERE severity_rank > 0
+            """
+        ).fetchall()
+    finally:
+        con.close()
+    return {
+        resolve_signal_id(str(signal_id)): str(severity)
+        for signal_id, severity in rows
+        if severity is not None
     }
 
 

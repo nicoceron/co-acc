@@ -18,8 +18,15 @@ Build one table:
 
 ```bash
 make curate TABLE=signal_feature_procurement_sanctioned_supplier_awarded
+make curate TABLE=signal_feature_procurement_large_modifications
 make curate TABLE=signal_feature_procurement_supplier_concentration_across_entities
+make curate TABLE=signal_feature_procurement_contract_value_outlier_by_category
 make curate TABLE=signal_feature_procurement_repeat_awards_same_supplier
+make curate TABLE=signal_feature_procurement_buyer_supplier_network_density
+make curate TABLE=signal_feature_procurement_cartel_risk_cobidding
+make curate TABLE=signal_feature_procurement_payment_plan_anomalies
+make curate TABLE=signal_feature_procurement_contract_suspensions
+make curate TABLE=signal_feature_procurement_related_companies_shared_officer
 make curate TABLE=dim_company
 make curate TABLE=dim_buyer
 make curate TABLE=dim_person
@@ -46,22 +53,48 @@ make curate LAKE_ROOT=/path/to/lake
 - `lake/curated/table=dim_buyer/`
 - `lake/curated/table=dim_person/`
 - `lake/curated/table=fct_procurement_contract_awards/`
+- `lake/curated/table=signal_feature_procurement_single_bidder_high_value/`
+- `lake/curated/table=signal_feature_procurement_large_modifications/`
 - `lake/curated/table=signal_feature_procurement_sanctioned_supplier_awarded/`
 - `lake/curated/table=signal_feature_procurement_supplier_concentration_across_entities/`
+- `lake/curated/table=signal_feature_procurement_contract_value_outlier_by_category/`
 - `lake/curated/table=signal_feature_procurement_repeat_awards_same_supplier/`
+- `lake/curated/table=signal_feature_procurement_buyer_supplier_network_density/`
+- `lake/curated/table=signal_feature_procurement_cartel_risk_cobidding/`
+- `lake/curated/table=signal_feature_procurement_payment_plan_anomalies/`
+- `lake/curated/table=signal_feature_procurement_contract_suspensions/`
+- `lake/curated/table=signal_feature_procurement_short_bidding_window/`
+- `lake/curated/table=signal_feature_procurement_offers_competition_drop/`
+- `lake/curated/table=signal_feature_procurement_politically_exposed_position_supplier_overlap/`
+- `lake/curated/table=signal_feature_procurement_related_companies_shared_officer/`
 - `lake/meta/curated/<timestamp>.json`
 
 The full default builder requires:
 
 - `secop_ii_contracts`, resolved from raw source `jbjy-vk9h`
+- `secop_ii_processes`, resolved from raw source `p6dx-8zbt`
+- `secop_offers`, resolved from raw source `wi7w-2nvm`
+- `secop_contract_modifications`, resolved from raw source `u8cx-r425`
+- `secop_contract_suspensions`, resolved from raw source `u99c-7mfm`
 - `paco_sanctions`
+- `company_registry_c82u`, resolved from raw source `c82u-588k`
 - `5u9e-g5w9` (SIGEP corruption-sensitive posts)
 - `8tz7-h3eu` (asset declarations)
 
 Table-specific builds only require their declared source inputs. For example,
 `signal_feature_procurement_supplier_concentration_across_entities` and
-`signal_feature_procurement_repeat_awards_same_supplier` require only
-`secop_ii_contracts`.
+`signal_feature_procurement_contract_value_outlier_by_category` and
+`signal_feature_procurement_repeat_awards_same_supplier` and
+`signal_feature_procurement_buyer_supplier_network_density` require only
+`secop_ii_contracts`; `signal_feature_procurement_payment_plan_anomalies`
+requires only `secop_ii_contracts` for the current contract-field partial;
+`signal_feature_procurement_large_modifications` requires
+`secop_contract_modifications` and `secop_ii_contracts`;
+`signal_feature_procurement_contract_suspensions` requires
+`secop_contract_suspensions` and `secop_ii_contracts`;
+`signal_feature_procurement_cartel_risk_cobidding` requires only `secop_offers` and `secop_ii_processes`;
+`signal_feature_procurement_related_companies_shared_officer`
+requires only `secop_ii_contracts` and `company_registry_c82u`.
 
 `dim_company` and `dim_buyer` canonicalize Colombian NITs with the DIAN
 MOD-11 verification-digit algorithm. `dim_person` uses cedula-style document
@@ -94,20 +127,46 @@ evaluating broad multi-condition joins across the full SECOP contract table.
 Supplier concentration is a grouped DuckDB aggregation over SECOP contracts and
 uses `COPY (SELECT ...) TO parquet`; Python only receives table row counts.
 Repeat awards is likewise grouped in DuckDB by supplier document key and buyer
-document key, then written directly to parquet.
+document key, then written directly to parquet. Contract value outliers are
+computed in DuckDB against department/year/sector/modality/type peer groups
+with a peer-count floor and per-group rank cap. Buyer-supplier network density
+is computed from supplier/buyer pair rollups with repeated-relationship
+thresholds. Co-bidding cartel risk is computed from SECOP offer process/supplier
+rollups, bounded to 2-8 valid company-NIT suppliers per process before
+self-joining supplier pairs. Payment-plan anomalies are computed from SECOP
+contract payment fields and avoid broad joins over pending-payment sources.
+Large modification rows are computed from SECOP modification-event values
+joined back to exact-NIT SECOP II contracts and require either a large absolute
+modification value or a large value-share increase.
+Contract suspensions are computed from deduplicated SECOP suspension-event
+fingerprints joined back to exact-NIT SECOP II contracts.
+Shared-officer clusters are deduplicated by company document and
+representative document before DuckDB groups exposed suppliers into reviewer-only
+clusters.
 
 ## Reality Notes
 
-On the local lake generated during the 2026-06-01 run:
+On the local lake after the 2026-06-05 large-modifications materialization work:
 
 - `dim_subject_document`: 1,215,832 rows
 - `dim_company`: 101,916 rows
 - `dim_buyer`: 4,914 rows
 - `dim_person`: 259,990 rows
 - `fct_procurement_contract_awards`: 5,442,058 rows
+- `signal_feature_procurement_single_bidder_high_value`: 61,542 rows
+- `signal_feature_procurement_large_modifications`: 582 rows
 - `signal_feature_procurement_sanctioned_supplier_awarded`: 20,184 rows
 - `signal_feature_procurement_supplier_concentration_across_entities`: 497 rows
+- `signal_feature_procurement_contract_value_outlier_by_category`: 2,022 rows
 - `signal_feature_procurement_repeat_awards_same_supplier`: 9,716 rows
+- `signal_feature_procurement_buyer_supplier_network_density`: 364 rows
+- `signal_feature_procurement_cartel_risk_cobidding`: 866 rows
+- `signal_feature_procurement_payment_plan_anomalies`: 375 rows
+- `signal_feature_procurement_contract_suspensions`: 10,460 rows
+- `signal_feature_procurement_short_bidding_window`: 90,592 rows
+- `signal_feature_procurement_offers_competition_drop`: 13 rows
+- `signal_feature_procurement_politically_exposed_position_supplier_overlap`: 284 rows
+- `signal_feature_procurement_related_companies_shared_officer`: 1,482 rows
 
 The first signal feature table joined 13,423 distinct SECOP contracts, 664
 distinct supplier document keys, and PACO evidence from `multas_secop`,
@@ -122,3 +181,33 @@ contract value.
 The repeat-awards feature emits buyer/supplier pair rows when the same buyer
 awards at least 10 contracts and COP 1B total value to the same supplier.
 Evidence refs are the top SECOP process URLs by contract value.
+
+The contract value outlier feature emits reviewer-only contract rows when a
+contract is among the top 3 high-value contracts in a department/year/sector/
+modality/type peer group with at least 100 contracts, is at least COP 5B, and is
+statistically extreme against the peer median, standard deviation, or IQR.
+
+The buyer-supplier network density feature emits reviewer-only supplier rows
+when exact-NIT suppliers have at least 10 buyers, 8 repeated buyer pairs, 55%
+of contracts in repeated relationships, and COP 2B total exposure.
+
+The co-bidding cartel risk feature emits reviewer-only company rows for both
+companies in each repeated co-bid pair when exact non-placeholder supplier NITs
+share at least 20 bounded-supplier processes, 5 buyers, and enough pair overlap
+to avoid one-off high-volume market peers. Evidence refs are the top SECOP
+process URLs by recency.
+
+The payment-plan anomaly feature emits reviewer-only contract rows when an
+exact-NIT supplier has a high advance-payment share, paid value materially
+exceeding contract value, or invoiced value materially exceeding contract value.
+Evidence refs are SECOP process URLs when available.
+
+The contract-suspension feature emits public contract rows when deduplicated
+SECOP suspension events show at least two distinct suspension dates on a COP
+100M+ exact-NIT contract. Evidence refs include the SECOP process URL and
+bounded suspension-event record ids.
+
+The shared-officer feature emits reviewer-only supplier rows when at least two
+SECOP-exposed supplier companies share the same RUES legal representative, each
+company has at least 3 contracts and COP 100M total awarded value, and the
+company identity is an exact NIT match.

@@ -43,6 +43,9 @@ export interface SignalSummary {
   category: string;
   hits: number;
   public: boolean;
+  lastSeen?: string | null;
+  materialized?: boolean;
+  materializationState?: "materialized" | "registered_only";
 }
 
 export interface SignalDetail {

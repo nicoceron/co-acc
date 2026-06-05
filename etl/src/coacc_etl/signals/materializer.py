@@ -21,9 +21,20 @@ if TYPE_CHECKING:
     from coacc_etl.signals.registry import MaterializableSignalDefinition
 
 SUPPORTED_SIGNAL_IDS = (
+    "procurement_single_bidder_high_value",
+    "procurement_large_modifications",
     "procurement_sanctioned_supplier_awarded",
     "procurement_supplier_concentration_across_entities",
+    "procurement_contract_value_outlier_by_category",
     "procurement_repeat_awards_same_supplier",
+    "procurement_buyer_supplier_network_density",
+    "procurement_cartel_risk_cobidding",
+    "procurement_payment_plan_anomalies",
+    "procurement_contract_suspensions",
+    "procurement_short_bidding_window",
+    "procurement_offers_competition_drop",
+    "procurement_politically_exposed_position_supplier_overlap",
+    "procurement_related_companies_shared_officer",
 )
 _RUN_ID_SAFE = re.compile(r"[^A-Za-z0-9_.=-]+")
 
@@ -106,6 +117,17 @@ def _feature_table_glob(signal_id: str) -> str:
     return str(table_dir / "*.parquet")
 
 
+def _feature_table_columns(parquet_glob: str) -> set[str]:
+    con = duckdb.connect(database=":memory:")
+    try:
+        rows = con.execute(
+            f"DESCRIBE SELECT * FROM read_parquet({_sql_string(parquet_glob)})"
+        ).fetchall()
+    finally:
+        con.close()
+    return {str(row[0]) for row in rows}
+
+
 def _selected_signals(signal_ids: Sequence[str] | None) -> tuple[str, ...]:
     selected = signal_ids or SUPPORTED_SIGNAL_IDS
     canonical: list[str] = []
@@ -150,6 +172,12 @@ def _hit_select(
 ) -> str:
     source_table = _feature_table(signal_id)
     source_path = str(_feature_table_dir(signal_id))
+    feature_columns = _feature_table_columns(parquet_glob)
+    severity_sql = (
+        "coalesce(nullif(trim(severity), ''), " + _sql_string(definition.severity) + ")"
+        if "severity" in feature_columns
+        else _sql_string(definition.severity)
+    )
     return f"""
         WITH normalized AS (
             SELECT
@@ -163,7 +191,7 @@ def _hit_select(
                 nullif(trim(scope_key), '') AS scope_key,
                 coalesce(nullif(trim(scope_type), ''), {_sql_string(definition.scope_type)})
                     AS scope_type,
-                {_sql_string(definition.severity)} AS severity,
+                {severity_sql} AS severity,
                 coalesce(try_cast(risk_signal AS DOUBLE), 0.0) AS score,
                 {_sql_string(definition.title)} AS title,
                 {_sql_string(definition.description)} AS description,
@@ -275,6 +303,13 @@ def _evidence_bundles_query(signal_hits_sql: str) -> str:
             cast(evidence_index AS INTEGER) AS item_index,
             CASE
                 WHEN evidence_ref LIKE '%paco%' THEN 'paco_sanctions'
+                WHEN signal_id IN (
+                    'procurement_short_bidding_window',
+                    'procurement_offers_competition_drop',
+                    'procurement_cartel_risk_cobidding'
+                )
+                    AND (evidence_ref LIKE 'http://%' OR evidence_ref LIKE 'https://%')
+                    THEN 'secop_ii_processes'
                 WHEN evidence_ref LIKE 'http://%' OR evidence_ref LIKE 'https://%'
                     THEN 'secop_ii_contracts'
                 WHEN strpos(evidence_ref, ':') > 0 THEN split_part(evidence_ref, ':', 1)

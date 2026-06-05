@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { Severity } from "../data/prototype";
+import type { AtlasDataStatus } from "../lib/useAtlasData";
 import { severityClass, toPercent } from "../lib/format";
 
 export function Brand() {
@@ -80,11 +81,12 @@ export function Sparkline({
   height?: number;
   stroke?: string;
 }) {
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const dx = width / Math.max(1, data.length - 1);
+  const points = data.length ? data : [0, 0];
+  const max = Math.max(...points);
+  const min = Math.min(...points);
+  const dx = width / Math.max(1, points.length - 1);
   const normalize = (value: number) => height - ((value - min) / Math.max(1, max - min)) * (height - 4) - 2;
-  const line = data
+  const line = points
     .map((value, index) => `${index === 0 ? "M" : "L"} ${(index * dx).toFixed(1)} ${normalize(value).toFixed(1)}`)
     .join(" ");
   const fill = `${line} L ${width} ${height} L 0 ${height} Z`;
@@ -93,7 +95,7 @@ export function Sparkline({
     <svg className="co-spark" width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
       <path d={fill} fill={stroke} fillOpacity="0.12" />
       <path d={line} fill="none" stroke={stroke} strokeWidth="1.4" />
-      <circle cx={width} cy={normalize(data[data.length - 1] ?? 0)} r="2.4" fill={stroke} />
+      <circle cx={width} cy={normalize(points[points.length - 1] ?? 0)} r="2.4" fill={stroke} />
     </svg>
   );
 }
@@ -141,9 +143,23 @@ export function MetricTile({
   );
 }
 
-export function DataStatus({ status }: { status: "loading" | "live" | "fixture" | "idle" }) {
-  const label = status === "live" ? "api live" : status === "loading" ? "sync" : "fixture";
-  const tone = status === "live" ? "moss" : status === "loading" ? "accent" : "neutral";
+export function EmptyState({ title, body }: { title: string; body?: string }) {
+  return (
+    <div className="co-empty-state">
+      <strong>{title}</strong>
+      {body ? <span>{body}</span> : null}
+    </div>
+  );
+}
+
+export function DataStatus({ status }: { status: AtlasDataStatus }) {
+  const label =
+    status === "live" ? "api live"
+      : status === "partial" ? "api parcial"
+        : status === "loading" ? "sync"
+          : status === "unavailable" ? "sin api"
+            : status === "idle" ? "idle" : "fixture";
+  const tone = status === "live" ? "moss" : status === "loading" || status === "partial" ? "accent" : "neutral";
   return (
     <Pill tone={tone}>
       <span className="co-pulse" />

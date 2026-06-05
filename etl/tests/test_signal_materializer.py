@@ -30,6 +30,26 @@ def _write_feature_rows(
 def _write_demo_feature_tables(root: Path) -> None:
     _write_feature_rows(
         root,
+        "procurement_single_bidder_high_value",
+        [
+            {
+                "signal_id": "procurement_single_bidder_high_value",
+                "entity_id": "doc:902000111",
+                "entity_key": "902000111",
+                "entity_label": "Company",
+                "scope_key": "PV-1",
+                "scope_type": "procurement_process",
+                "severity": "medium",
+                "risk_signal": 0.78,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": ["https://secop.example/CV-1"],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
         "procurement_sanctioned_supplier_awarded",
         [
             {
@@ -46,6 +66,29 @@ def _write_demo_feature_tables(root: Path) -> None:
                 "evidence_refs": [
                     "https://secop.example/C-1",
                     "https://paco.example/paco-1",
+                ],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
+        "procurement_large_modifications",
+        [
+            {
+                "signal_id": "procurement_large_modifications",
+                "entity_id": "doc:900123456",
+                "entity_key": "900123456",
+                "entity_label": "Company",
+                "scope_key": "C-1",
+                "scope_type": "contract",
+                "severity": "high",
+                "risk_signal": 0.84,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "https://secop.example/C-1",
+                    "secop_contract_modifications:MOD-C-1",
                 ],
             }
         ],
@@ -74,6 +117,25 @@ def _write_demo_feature_tables(root: Path) -> None:
     )
     _write_feature_rows(
         root,
+        "procurement_contract_value_outlier_by_category",
+        [
+            {
+                "signal_id": "procurement_contract_value_outlier_by_category",
+                "entity_id": "contract:CO-OUTLIER-1",
+                "entity_key": "CO-OUTLIER-1",
+                "entity_label": "Contract",
+                "scope_key": "CO-OUTLIER-1",
+                "scope_type": "contract",
+                "risk_signal": 0.88,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_CONTRACT_KEY",
+                "identity_quality": "exact",
+                "evidence_refs": ["https://secop.example/CO-OUTLIER-1"],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
         "procurement_repeat_awards_same_supplier",
         [
             {
@@ -94,6 +156,201 @@ def _write_demo_feature_tables(root: Path) -> None:
             }
         ],
     )
+    _write_feature_rows(
+        root,
+        "procurement_buyer_supplier_network_density",
+        [
+            {
+                "signal_id": "procurement_buyer_supplier_network_density",
+                "entity_id": "doc:906000111",
+                "entity_key": "906000111",
+                "entity_label": "Company",
+                "scope_key": "supplier_network:906000111",
+                "scope_type": "supplier_network",
+                "risk_signal": 0.86,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "https://secop.example/CN-0-0",
+                    "https://secop.example/CN-0-1",
+                ],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
+        "procurement_cartel_risk_cobidding",
+        [
+            {
+                "signal_id": "procurement_cartel_risk_cobidding",
+                "entity_id": "doc:907000111",
+                "entity_key": "907000111",
+                "entity_label": "Company",
+                "scope_key": "cobid_pair:907000111:907000112",
+                "scope_type": "cobid_cluster",
+                "severity": "high",
+                "risk_signal": 0.95,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "https://secop.example/PROC-COBID-19",
+                    "https://secop.example/PROC-COBID-18",
+                ],
+            },
+            {
+                "signal_id": "procurement_cartel_risk_cobidding",
+                "entity_id": "doc:907000112",
+                "entity_key": "907000112",
+                "entity_label": "Company",
+                "scope_key": "cobid_pair:907000111:907000112",
+                "scope_type": "cobid_cluster",
+                "severity": "high",
+                "risk_signal": 0.95,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "https://secop.example/PROC-COBID-19",
+                    "https://secop.example/PROC-COBID-18",
+                ],
+            },
+        ],
+    )
+    _write_feature_rows(
+        root,
+        "procurement_short_bidding_window",
+        [
+            {
+                "signal_id": "procurement_short_bidding_window",
+                "entity_id": "doc:903000111",
+                "entity_key": "903000111",
+                "entity_label": "Company",
+                "scope_key": "PROC-SHORT-1",
+                "scope_type": "procurement_process",
+                "severity": "low",
+                "risk_signal": 0.72,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": ["https://secop.example/PROC-SHORT-1"],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
+        "procurement_payment_plan_anomalies",
+        [
+            {
+                "signal_id": "procurement_payment_plan_anomalies",
+                "entity_id": "doc:907000113",
+                "entity_key": "907000113",
+                "entity_label": "Company",
+                "scope_key": "CPAY-1",
+                "scope_type": "contract",
+                "severity": "medium",
+                "risk_signal": 0.71,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": ["https://secop.example/CPAY-1"],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
+        "procurement_contract_suspensions",
+        [
+            {
+                "signal_id": "procurement_contract_suspensions",
+                "entity_id": "doc:908000113",
+                "entity_key": "908000113",
+                "entity_label": "Company",
+                "scope_key": "CSUSP-1",
+                "scope_type": "contract",
+                "severity": "medium",
+                "risk_signal": 0.74,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "https://secop.example/CSUSP-1",
+                    "secop_contract_suspensions:CSUSP-1:2026-06-11",
+                    "secop_contract_suspensions:CSUSP-1:2026-05-11",
+                ],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
+        "procurement_offers_competition_drop",
+        [
+            {
+                "signal_id": "procurement_offers_competition_drop",
+                "entity_id": "doc:800555666",
+                "entity_key": "800555666",
+                "entity_label": "Company",
+                "scope_key": "buyer:800555666",
+                "scope_type": "buyer",
+                "risk_signal": 0.92,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "https://secop.example/PROC-DROP-R-19",
+                    "https://secop.example/PROC-DROP-R-18",
+                ],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
+        "procurement_politically_exposed_position_supplier_overlap",
+        [
+            {
+                "signal_id": "procurement_politically_exposed_position_supplier_overlap",
+                "entity_id": "doc:902000111",
+                "entity_key": "902000111",
+                "entity_label": "Company",
+                "scope_key": "sensitive_position:123456789:INST-1:902000111",
+                "scope_type": "sensitive_position",
+                "risk_signal": 0.9,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "company_registry_c82u:row-c82u-1",
+                    "sigep_sensitive_positions:123456789",
+                    "https://secop.example/CV-1",
+                ],
+            }
+        ],
+    )
+    _write_feature_rows(
+        root,
+        "procurement_related_companies_shared_officer",
+        [
+            {
+                "signal_id": "procurement_related_companies_shared_officer",
+                "entity_id": "doc:900765432",
+                "entity_key": "900765432",
+                "entity_label": "Company",
+                "scope_key": "officer_cluster:222222222",
+                "scope_type": "officer_cluster",
+                "risk_signal": 0.9,
+                "identity_confidence": 1.0,
+                "identity_match_type": "EXACT_COMPANY_NIT",
+                "identity_quality": "exact",
+                "evidence_refs": [
+                    "company_registry_c82u:row-c82u-shared-1",
+                    "company_registry_c82u:row-c82u-shared-2",
+                    "https://secop.example/CX-1",
+                    "https://secop.example/CX-2",
+                ],
+            }
+        ],
+    )
 
 
 def test_materialize_signals_writes_hits_evidence_and_manifest(
@@ -106,12 +363,23 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     result = materialize_signals(run_id="test-run")
 
     assert result.run_id == "test-run"
-    assert result.hit_count == 3
-    assert result.evidence_count == 6
+    assert result.hit_count == 15
+    assert result.evidence_count == 30
     assert {row.signal_id: row.hit_count for row in result.signal_results} == {
+        "procurement_single_bidder_high_value": 1,
+        "procurement_large_modifications": 1,
         "procurement_sanctioned_supplier_awarded": 1,
         "procurement_supplier_concentration_across_entities": 1,
+        "procurement_contract_value_outlier_by_category": 1,
         "procurement_repeat_awards_same_supplier": 1,
+        "procurement_buyer_supplier_network_density": 1,
+        "procurement_cartel_risk_cobidding": 2,
+        "procurement_payment_plan_anomalies": 1,
+        "procurement_contract_suspensions": 1,
+        "procurement_short_bidding_window": 1,
+        "procurement_offers_competition_drop": 1,
+        "procurement_politically_exposed_position_supplier_overlap": 1,
+        "procurement_related_companies_shared_officer": 1,
     }
 
     con = duckdb.connect()
@@ -144,21 +412,99 @@ def test_materialize_signals_writes_hits_evidence_and_manifest(
     SignalHitRow.model_validate(hit_payloads[0])
     EvidenceBundleRow.model_validate(evidence_payloads[0])
     assert [row["signal_id"] for row in hit_payloads] == [
+        "procurement_buyer_supplier_network_density",
+        "procurement_cartel_risk_cobidding",
+        "procurement_cartel_risk_cobidding",
+        "procurement_contract_suspensions",
+        "procurement_contract_value_outlier_by_category",
+        "procurement_large_modifications",
+        "procurement_offers_competition_drop",
+        "procurement_payment_plan_anomalies",
+        "procurement_politically_exposed_position_supplier_overlap",
+        "procurement_related_companies_shared_officer",
         "procurement_repeat_awards_same_supplier",
         "procurement_sanctioned_supplier_awarded",
+        "procurement_short_bidding_window",
+        "procurement_single_bidder_high_value",
         "procurement_supplier_concentration_across_entities",
     ]
-    assert all(row["evidence_count"] == 2 for row in hit_payloads)
+    evidence_counts = {row["signal_id"]: row["evidence_count"] for row in hit_payloads}
+    assert evidence_counts == {
+        "procurement_buyer_supplier_network_density": 2,
+        "procurement_cartel_risk_cobidding": 2,
+        "procurement_contract_suspensions": 3,
+        "procurement_payment_plan_anomalies": 1,
+        "procurement_large_modifications": 2,
+        "procurement_offers_competition_drop": 2,
+        "procurement_contract_value_outlier_by_category": 1,
+        "procurement_politically_exposed_position_supplier_overlap": 3,
+        "procurement_related_companies_shared_officer": 4,
+        "procurement_repeat_awards_same_supplier": 2,
+        "procurement_sanctioned_supplier_awarded": 2,
+        "procurement_short_bidding_window": 1,
+        "procurement_single_bidder_high_value": 1,
+        "procurement_supplier_concentration_across_entities": 2,
+    }
+    single_bidder = next(
+        row for row in hit_payloads if row["signal_id"] == "procurement_single_bidder_high_value"
+    )
+    assert single_bidder["severity"] == "medium"
     paco_evidence = next(
         row for row in evidence_payloads if row["url"] == "https://paco.example/paco-1"
     )
     assert paco_evidence["source_id"] == "paco_sanctions"
     assert "scope_key=C-1:paco-1" in paco_evidence["row_selector"]
+    process_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["url"] == "https://secop.example/PROC-SHORT-1"
+    )
+    assert process_evidence["source_id"] == "secop_ii_processes"
+    competition_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["url"] == "https://secop.example/PROC-DROP-R-19"
+    )
+    assert competition_evidence["source_id"] == "secop_ii_processes"
+    payment_evidence = next(
+        row for row in evidence_payloads if row["url"] == "https://secop.example/CPAY-1"
+    )
+    assert payment_evidence["source_id"] == "secop_ii_contracts"
+    suspension_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["label"] == "secop_contract_suspensions:CSUSP-1:2026-06-11"
+    )
+    assert suspension_evidence["source_id"] == "secop_contract_suspensions"
+    modification_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["label"] == "secop_contract_modifications:MOD-C-1"
+    )
+    assert modification_evidence["source_id"] == "secop_contract_modifications"
+    cobidding_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["url"] == "https://secop.example/PROC-COBID-19"
+    )
+    assert cobidding_evidence["source_id"] == "secop_ii_processes"
+    company_registry_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["label"] == "company_registry_c82u:row-c82u-1"
+    )
+    assert company_registry_evidence["source_id"] == "company_registry_c82u"
+    sigep_evidence = next(
+        row
+        for row in evidence_payloads
+        if row["label"] == "sigep_sensitive_positions:123456789"
+    )
+    assert sigep_evidence["source_id"] == "sigep_sensitive_positions"
 
     manifest = json.loads((tmp_path / "meta" / "signal_runs" / "test-run.json").read_text())
     assert manifest["status"] == "completed"
-    assert manifest["hit_count"] == 3
-    assert manifest["evidence_count"] == 6
+    assert manifest["hit_count"] == 15
+    assert manifest["evidence_count"] == 30
 
 
 def test_materialize_signals_deduplicates_repeated_feature_rows(
@@ -231,5 +577,5 @@ def test_signals_materialize_cli(
     result = CliRunner().invoke(cli, ["signals", "materialize", "--all", "--run-id", "cli-run"])
 
     assert result.exit_code == 0, result.output
-    assert "signal run cli-run: wrote 3 hits and 6 evidence rows" in result.output
+    assert "signal run cli-run: wrote 15 hits and 30 evidence rows" in result.output
     assert (tmp_path / "meta" / "signal_runs" / "cli-run.json").exists()

@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { EmptyState } from "./ui";
 import type { Departamento, EntityExample } from "../data/prototype";
 import { severityVar } from "../lib/format";
 
@@ -15,7 +16,7 @@ export function AtlasMap({
   const [hover, setHover] = useState<Departamento | null>(null);
   const width = compact ? 390 : 540;
   const pad = 28;
-  const maxHits = Math.max(...departamentos.map((item) => item.hits));
+  const maxHits = Math.max(1, ...departamentos.map((item) => item.hits));
   const contours = Array.from({ length: 7 }, (_, index) => {
     const radius = 58 + index * 28;
     return `M ${width / 2} ${height / 2} m -${radius} 0 a ${radius} ${radius * 1.15} 0 1 0 ${radius * 2} 0 a ${radius} ${radius * 1.15} 0 1 0 -${radius * 2} 0`;
@@ -112,6 +113,11 @@ export function AtlasMap({
           <em>{hover.sev} · {hover.hits} hits</em>
         </div>
       ) : null}
+      {!departamentos.length ? (
+        <div className="co-map__empty">
+          Sin datos geograficos materializados
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -126,7 +132,10 @@ export function BarChart({
     color: string;
   }[];
 }) {
-  const max = Math.max(...items.map((item) => item.value));
+  if (!items.length) {
+    return <EmptyState title="Sin datos materializados" body="No hay agregados disponibles para esta vista." />;
+  }
+  const max = Math.max(1, ...items.map((item) => item.value));
   return (
     <div className="co-bars">
       {items.map((item) => (

@@ -2,8 +2,8 @@ import { Search as SearchIcon, SlidersHorizontal } from "lucide-react";
 import { FormEvent } from "react";
 import { Link } from "react-router";
 
-import { DataStatus, Frame, Pill, Rule } from "../components/ui";
-import { useAtlasSearch } from "../lib/useAtlasData";
+import { DataStatus, EmptyState, Frame, Pill, Rule } from "../components/ui";
+import { allowAtlasFixtures, useAtlasSearch } from "../lib/useAtlasData";
 
 const TYPES = [
   ["all", "todos"],
@@ -22,6 +22,7 @@ const ENTITY_TYPES = [
 
 export function SearchPage() {
   const search = useAtlasSearch();
+  const fixturesAllowed = allowAtlasFixtures();
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,6 +80,9 @@ export function SearchPage() {
                 ))}
               </tbody>
             </table>
+            {!search.results.length ? (
+              <EmptyState title="Sin resultados" body="Ejecuta una busqueda contra la API para ver entidades materializadas." />
+            ) : null}
           </div>
         </section>
 
@@ -87,7 +91,7 @@ export function SearchPage() {
             <div className="co-frame-title">
               <div>
                 <h2>Tipo de entidad</h2>
-                <span>conteo de fixture local</span>
+                <span>{fixturesAllowed ? "conteo de fixture local" : "conteo de resultados"}</span>
               </div>
               <SlidersHorizontal size={16} />
             </div>
@@ -107,11 +111,15 @@ export function SearchPage() {
           </Frame>
 
           <Frame coord="FUENTES · F-02">
-            <div className="co-chip-cloud">
-              {["SECOP-II", "RUES", "SIRI", "SIGEP", "TVEC", "SGR", "ANLA", "CGR"].map((source) => (
-                <Pill key={source}>{source}</Pill>
-              ))}
-            </div>
+            {fixturesAllowed ? (
+              <div className="co-chip-cloud">
+                {["SECOP-II", "RUES", "SIRI", "SIGEP", "TVEC", "SGR", "ANLA", "CGR"].map((source) => (
+                  <Pill key={source}>{source}</Pill>
+                ))}
+              </div>
+            ) : (
+              <EmptyState title="Fuentes segun resultados" body="Las fuentes se muestran en cada entidad devuelta por la API." />
+            )}
           </Frame>
         </aside>
       </div>

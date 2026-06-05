@@ -7,26 +7,24 @@ from pathlib import Path
 import yaml  # type: ignore[import-untyped]
 
 from coacc_etl.catalog.models import DatasetSpec
-
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-_DEFAULT_DATASETS_DIR = _REPO_ROOT / "etl" / "datasets"
+from coacc_etl.runtime_paths import dataset_contract_dir
 
 
 def datasets_dir() -> Path:
-    return _DEFAULT_DATASETS_DIR
+    return dataset_contract_dir()
 
 
 def _iter_yaml_paths(root: Path) -> list[Path]:
     return sorted(p for p in root.glob("*.yml") if not p.name.startswith("_"))
 
 
-@lru_cache(maxsize=1)
-def load_catalog(root: Path | None = None) -> dict[str, DatasetSpec]:
+@lru_cache(maxsize=8)
+def _load_catalog_cached(root_key: str) -> dict[str, DatasetSpec]:
     """Read every ``<id>.yml`` under ``etl/datasets/`` and validate.
 
     Raises ``ValueError`` on missing root, duplicate ids, or file/id mismatch.
     """
-    base = root or _DEFAULT_DATASETS_DIR
+    base = Path(root_key)
     if not base.is_dir():
         msg = f"datasets directory not found: {base}"
         raise ValueError(msg)
@@ -49,5 +47,10 @@ def load_catalog(root: Path | None = None) -> dict[str, DatasetSpec]:
     return specs
 
 
+def load_catalog(root: Path | None = None) -> dict[str, DatasetSpec]:
+    base = root or datasets_dir()
+    return _load_catalog_cached(str(base))
+
+
 def clear_cache() -> None:
-    load_catalog.cache_clear()
+    _load_catalog_cached.cache_clear()

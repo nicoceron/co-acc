@@ -5,6 +5,7 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from neo4j import AsyncSession
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -29,6 +30,7 @@ from coacc.routers import (
     signals,
 )
 from coacc.services.neo4j_service import ensure_schema, execute_query_single
+from coacc.services.readiness import build_readiness_report
 from coacc.services.signal_materializer import get_latest_materializer_run
 
 _logger = logging.getLogger(__name__)
@@ -157,3 +159,12 @@ async def health(
         "last_signal_run_status": latest_run_status,
         "last_signal_hit_count": latest_signal_hit_count,
     }
+
+
+@app.get("/ready")
+async def ready(
+    session: Annotated[AsyncSession | None, Depends(get_optional_session)],
+) -> JSONResponse:
+    payload = build_readiness_report(neo4j_connected=session is not None)
+    status_code = 200 if payload["status"] == "ready" else 503
+    return JSONResponse(status_code=status_code, content=payload)

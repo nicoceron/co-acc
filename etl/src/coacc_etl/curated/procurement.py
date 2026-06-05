@@ -24,9 +24,20 @@ _DEFAULT_TABLES = (
     "dim_buyer",
     "dim_person",
     "fct_procurement_contract_awards",
+    "signal_feature_procurement_single_bidder_high_value",
+    "signal_feature_procurement_large_modifications",
     "signal_feature_procurement_sanctioned_supplier_awarded",
     "signal_feature_procurement_supplier_concentration_across_entities",
+    "signal_feature_procurement_contract_value_outlier_by_category",
     "signal_feature_procurement_repeat_awards_same_supplier",
+    "signal_feature_procurement_buyer_supplier_network_density",
+    "signal_feature_procurement_cartel_risk_cobidding",
+    "signal_feature_procurement_payment_plan_anomalies",
+    "signal_feature_procurement_contract_suspensions",
+    "signal_feature_procurement_short_bidding_window",
+    "signal_feature_procurement_offers_competition_drop",
+    "signal_feature_procurement_politically_exposed_position_supplier_overlap",
+    "signal_feature_procurement_related_companies_shared_officer",
 )
 _TABLE_SOURCES = {
     "dim_subject_document": ("secop_ii_contracts", "paco_sanctions"),
@@ -34,6 +45,11 @@ _TABLE_SOURCES = {
     "dim_buyer": ("secop_ii_contracts",),
     "dim_person": ("5u9e-g5w9", "8tz7-h3eu"),
     "fct_procurement_contract_awards": ("secop_ii_contracts",),
+    "signal_feature_procurement_single_bidder_high_value": ("secop_ii_contracts",),
+    "signal_feature_procurement_large_modifications": (
+        "secop_ii_contracts",
+        "secop_contract_modifications",
+    ),
     "signal_feature_procurement_sanctioned_supplier_awarded": (
         "secop_ii_contracts",
         "paco_sanctions",
@@ -41,7 +57,31 @@ _TABLE_SOURCES = {
     "signal_feature_procurement_supplier_concentration_across_entities": (
         "secop_ii_contracts",
     ),
+    "signal_feature_procurement_contract_value_outlier_by_category": (
+        "secop_ii_contracts",
+    ),
     "signal_feature_procurement_repeat_awards_same_supplier": ("secop_ii_contracts",),
+    "signal_feature_procurement_buyer_supplier_network_density": ("secop_ii_contracts",),
+    "signal_feature_procurement_cartel_risk_cobidding": (
+        "secop_offers",
+        "secop_ii_processes",
+    ),
+    "signal_feature_procurement_payment_plan_anomalies": ("secop_ii_contracts",),
+    "signal_feature_procurement_contract_suspensions": (
+        "secop_contract_suspensions",
+        "secop_ii_contracts",
+    ),
+    "signal_feature_procurement_short_bidding_window": ("secop_ii_processes",),
+    "signal_feature_procurement_offers_competition_drop": ("secop_ii_processes",),
+    "signal_feature_procurement_politically_exposed_position_supplier_overlap": (
+        "secop_ii_contracts",
+        "company_registry_c82u",
+        "sigep_sensitive_positions",
+    ),
+    "signal_feature_procurement_related_companies_shared_officer": (
+        "secop_ii_contracts",
+        "company_registry_c82u",
+    ),
 }
 
 
@@ -241,9 +281,1382 @@ def _create_person_views(
     """)
 
 
+def _create_process_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if "secop_ii_processes" not in set(required_sources):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_short_bidding_window AS
+        WITH process_rows AS (
+            SELECT
+                coalesce(
+                    nullif(trim(id_del_proceso), ''),
+                    nullif(trim(referencia_del_proceso), ''),
+                    nullif(trim(id_adjudicacion), '')
+                ) AS process_id,
+                nullif(trim(referencia_del_proceso), '') AS process_reference,
+                nullif(trim(id_adjudicacion), '') AS award_id,
+                coacc_reference_url(urlproceso) AS process_url,
+                coacc_doc_digits(nit_del_proveedor_adjudicado)
+                    AS supplier_document_digits,
+                coacc_nit_base(nit_del_proveedor_adjudicado, 'NIT')
+                    AS supplier_nit_base,
+                coacc_nit_canonical(nit_del_proveedor_adjudicado, 'NIT')
+                    AS supplier_nit_canonical,
+                coacc_document_key(nit_del_proveedor_adjudicado, 'NIT')
+                    AS supplier_document_key,
+                'doc:' || coacc_document_key(nit_del_proveedor_adjudicado, 'NIT')
+                    AS supplier_entity_id,
+                nullif(trim(nombre_del_proveedor), '') AS supplier_name,
+                coacc_doc_digits(nit_entidad) AS buyer_document_digits,
+                coacc_nit_canonical(nit_entidad, 'NIT') AS buyer_nit_canonical,
+                nullif(trim(nit_entidad), '') AS buyer_document_id,
+                nullif(trim(entidad), '') AS buyer_name,
+                nullif(trim(departamento_entidad), '') AS department,
+                nullif(trim(ciudad_entidad), '') AS city,
+                nullif(trim(modalidad_de_contratacion), '') AS procurement_modality,
+                nullif(trim(tipo_de_contrato), '') AS contract_type,
+                nullif(trim(fase), '') AS phase,
+                nullif(trim(estado_del_procedimiento), '') AS process_status,
+                nullif(trim(estado_resumen), '') AS status_summary,
+                nullif(trim(adjudicado), '') AS awarded_flag,
+                coacc_money(coalesce(valor_total_adjudicacion, precio_base))
+                    AS estimated_value,
+                coalesce(
+                    try_cast(conteo_de_respuestas_a_ofertas AS INTEGER),
+                    try_cast(respuestas_al_procedimiento AS INTEGER),
+                    try_cast(respuestas_externas AS INTEGER),
+                    try_cast(proveedores_unicos_con AS INTEGER)
+                ) AS response_count,
+                coalesce(
+                    try_cast(proveedores_invitados AS INTEGER),
+                    try_cast(proveedores_con_invitacion AS INTEGER)
+                ) AS invited_supplier_count,
+                coalesce(
+                    try_cast(fecha_de_apertura_efectiva AS TIMESTAMP),
+                    try_cast(fecha_de_apertura_de_respuesta AS TIMESTAMP)
+                ) AS opened_at,
+                try_cast(fecha_de_recepcion_de AS TIMESTAMP) AS closed_at
+            FROM src_secop_ii_processes
+            WHERE coacc_document_key(nit_del_proveedor_adjudicado, 'NIT') IS NOT NULL
+        ),
+        eligible AS (
+            SELECT
+                *,
+                date_diff('hour', opened_at, closed_at) AS open_window_hours
+            FROM process_rows
+            WHERE process_id IS NOT NULL
+                AND opened_at IS NOT NULL
+                AND closed_at IS NOT NULL
+                AND estimated_value IS NOT NULL
+                AND estimated_value >= 100000000
+                AND (
+                    lower(coalesce(awarded_flag, '')) IN ('si', 'sí', 'true', '1')
+                    OR estimated_value > 0
+                )
+        )
+        SELECT
+            'procurement_short_bidding_window' AS signal_id,
+            supplier_entity_id AS entity_id,
+            supplier_document_key AS entity_key,
+            'Company' AS entity_label,
+            process_id AS scope_key,
+            'procurement_process' AS scope_type,
+            'low' AS severity,
+            least(
+                1.0,
+                0.45
+                    + least((72.0 - greatest(open_window_hours, 0)) / 240.0, 0.30)
+                    + CASE
+                        WHEN coalesce(response_count, 99) <= 1 THEN 0.15
+                        WHEN coalesce(response_count, 99) = 2 THEN 0.08
+                        ELSE 0.0
+                    END
+                    + least(log10(greatest(estimated_value, 1)) / 90.0, 0.10)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            supplier_name,
+            buyer_document_id,
+            buyer_name,
+            department,
+            city,
+            procurement_modality,
+            contract_type,
+            phase,
+            process_status,
+            status_summary,
+            awarded_flag,
+            estimated_value,
+            response_count,
+            invited_supplier_count,
+            opened_at,
+            closed_at,
+            open_window_hours,
+            process_reference,
+            award_id,
+            process_url,
+            [
+                coalesce(process_url, 'secop_ii_processes:' || process_id)
+            ] AS evidence_refs
+        FROM eligible
+        WHERE open_window_hours BETWEEN 0 AND 72
+            AND coalesce(response_count, 99) <= 2
+    """)
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_offers_competition_drop AS
+        WITH process_rows AS (
+            SELECT
+                coalesce(
+                    nullif(trim(id_del_proceso), ''),
+                    nullif(trim(referencia_del_proceso), ''),
+                    nullif(trim(id_adjudicacion), '')
+                ) AS process_id,
+                nullif(trim(referencia_del_proceso), '') AS process_reference,
+                coacc_reference_url(urlproceso) AS process_url,
+                coacc_document_key(nit_entidad, 'NIT') AS buyer_document_key,
+                coacc_doc_digits(nit_entidad) AS buyer_document_digits,
+                coacc_nit_canonical(nit_entidad, 'NIT') AS buyer_nit_canonical,
+                nullif(trim(nit_entidad), '') AS buyer_document_id,
+                nullif(trim(entidad), '') AS buyer_name,
+                nullif(trim(departamento_entidad), '') AS department,
+                nullif(trim(ciudad_entidad), '') AS city,
+                nullif(trim(modalidad_de_contratacion), '') AS procurement_modality,
+                nullif(trim(tipo_de_contrato), '') AS contract_type,
+                nullif(trim(estado_del_procedimiento), '') AS process_status,
+                nullif(trim(estado_resumen), '') AS status_summary,
+                coacc_money(coalesce(valor_total_adjudicacion, precio_base))
+                    AS estimated_value,
+                coalesce(
+                    try_cast(conteo_de_respuestas_a_ofertas AS INTEGER),
+                    try_cast(respuestas_al_procedimiento AS INTEGER),
+                    try_cast(respuestas_externas AS INTEGER),
+                    try_cast(proveedores_unicos_con AS INTEGER)
+                ) AS response_count,
+                coalesce(
+                    try_cast(fecha_de_publicacion_del AS TIMESTAMP),
+                    try_cast(fecha_de_publicacion_fase_3 AS TIMESTAMP),
+                    try_cast(fecha_de_ultima_publicaci AS TIMESTAMP),
+                    try_cast(fecha_de_apertura_efectiva AS TIMESTAMP),
+                    try_cast(fecha_de_apertura_de_respuesta AS TIMESTAMP),
+                    try_cast(fecha_de_recepcion_de AS TIMESTAMP)
+                ) AS process_at
+            FROM src_secop_ii_processes
+            WHERE coacc_document_key(nit_entidad, 'NIT') IS NOT NULL
+        ),
+        eligible AS (
+            SELECT *
+            FROM process_rows
+            WHERE process_id IS NOT NULL
+                AND process_at IS NOT NULL
+                AND response_count IS NOT NULL
+                AND estimated_value IS NOT NULL
+                AND estimated_value >= 10000000
+        ),
+        ranked AS (
+            SELECT
+                *,
+                row_number() OVER (
+                    PARTITION BY buyer_document_key
+                    ORDER BY process_at DESC NULLS LAST, process_id DESC
+                ) AS recency_rank
+            FROM eligible
+        ),
+        evidence_ranked AS (
+            SELECT
+                buyer_document_key,
+                coalesce(process_url, 'secop_ii_processes:' || process_id)
+                    AS evidence_ref,
+                process_at,
+                estimated_value,
+                row_number() OVER (
+                    PARTITION BY buyer_document_key
+                    ORDER BY process_at DESC NULLS LAST, estimated_value DESC NULLS LAST,
+                        process_id DESC
+                ) AS evidence_rank
+            FROM ranked
+            WHERE recency_rank <= 20
+                AND response_count <= 2
+        ),
+        evidence AS (
+            SELECT
+                buyer_document_key,
+                list(evidence_ref ORDER BY process_at DESC, estimated_value DESC)
+                    AS evidence_refs
+            FROM evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY buyer_document_key
+        ),
+        rollup AS (
+            SELECT
+                buyer_document_key AS entity_key,
+                'doc:' || buyer_document_key AS entity_id,
+                any_value(buyer_document_id) AS buyer_document_id,
+                any_value(buyer_name) AS buyer_name,
+                any_value(department) AS department,
+                any_value(city) AS city,
+                count(*) AS process_count,
+                count(*) FILTER (WHERE recency_rank <= 20) AS recent_process_count,
+                count(*) FILTER (WHERE recency_rank > 20) AS prior_process_count,
+                avg(response_count) FILTER (WHERE recency_rank <= 20)
+                    AS recent_avg_response_count,
+                avg(response_count) FILTER (WHERE recency_rank > 20)
+                    AS prior_avg_response_count,
+                avg(CASE WHEN response_count <= 2 THEN 1.0 ELSE 0.0 END)
+                    FILTER (WHERE recency_rank <= 20) AS recent_low_response_share,
+                avg(CASE WHEN response_count <= 2 THEN 1.0 ELSE 0.0 END)
+                    FILTER (WHERE recency_rank > 20) AS prior_low_response_share,
+                sum(estimated_value) FILTER (WHERE recency_rank <= 20)
+                    AS recent_total_value,
+                min(process_at) AS first_process_at,
+                max(process_at) AS last_process_at
+            FROM ranked
+            GROUP BY buyer_document_key
+        )
+        SELECT
+            'procurement_offers_competition_drop' AS signal_id,
+            r.entity_id,
+            r.entity_key,
+            'Company' AS entity_label,
+            'buyer:' || r.entity_key AS scope_key,
+            'buyer' AS scope_type,
+            least(
+                1.0,
+                0.50
+                    + least(
+                        greatest(
+                            r.recent_low_response_share - r.prior_low_response_share,
+                            0.0
+                        ) / 0.50,
+                        0.25
+                    )
+                    + least(
+                        greatest(
+                            r.prior_avg_response_count - r.recent_avg_response_count,
+                            0.0
+                        ) / 10.0,
+                        0.15
+                    )
+                    + least(log10(greatest(r.recent_total_value, 1)) / 100.0, 0.10)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            r.buyer_document_id,
+            r.buyer_name,
+            r.department,
+            r.city,
+            r.process_count,
+            r.recent_process_count,
+            r.prior_process_count,
+            r.recent_avg_response_count,
+            r.prior_avg_response_count,
+            r.recent_low_response_share,
+            r.prior_low_response_share,
+            r.recent_total_value,
+            r.first_process_at,
+            r.last_process_at,
+            e.evidence_refs
+        FROM rollup r
+        JOIN evidence e
+            ON e.buyer_document_key = r.entity_key
+        WHERE r.process_count >= 25
+            AND r.recent_process_count >= 10
+            AND r.prior_process_count >= 10
+            AND r.recent_low_response_share >= 0.65
+            AND r.recent_low_response_share >= r.prior_low_response_share + 0.20
+            AND r.recent_avg_response_count <= greatest(
+                2.5,
+                r.prior_avg_response_count * 0.75
+            )
+    """)
+
+
+def _create_cobidding_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not ({"secop_offers", "secop_ii_processes"} <= set(required_sources)):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_cartel_risk_cobidding AS
+        WITH process_metadata AS (
+            SELECT
+                coalesce(
+                    nullif(trim(id_del_portafolio), ''),
+                    nullif(trim(id_del_proceso), ''),
+                    nullif(trim(referencia_del_proceso), ''),
+                    nullif(trim(id_adjudicacion), '')
+                ) AS process_key,
+                any_value(nullif(trim(referencia_del_proceso), '')) AS process_reference,
+                any_value(coacc_reference_url(urlproceso)) AS process_url,
+                any_value(coacc_document_key(nit_entidad, 'NIT')) AS buyer_document_key,
+                any_value(nullif(trim(nit_entidad), '')) AS buyer_document_id,
+                any_value(nullif(trim(entidad), '')) AS buyer_name,
+                any_value(nullif(trim(departamento_entidad), '')) AS department,
+                any_value(nullif(trim(ciudad_entidad), '')) AS city,
+                any_value(nullif(trim(modalidad_de_contratacion), ''))
+                    AS procurement_modality,
+                max(coalesce(
+                    try_cast(fecha_de_publicacion_del AS TIMESTAMP),
+                    try_cast(fecha_de_publicacion_fase_3 AS TIMESTAMP),
+                    try_cast(fecha_de_ultima_publicaci AS TIMESTAMP),
+                    try_cast(fecha_de_apertura_efectiva AS TIMESTAMP),
+                    try_cast(fecha_de_apertura_de_respuesta AS TIMESTAMP),
+                    try_cast(fecha_de_recepcion_de AS TIMESTAMP)
+                )) AS process_at
+            FROM src_secop_ii_processes
+            WHERE coalesce(
+                    nullif(trim(id_del_portafolio), ''),
+                    nullif(trim(id_del_proceso), ''),
+                    nullif(trim(referencia_del_proceso), ''),
+                    nullif(trim(id_adjudicacion), '')
+                ) IS NOT NULL
+            GROUP BY 1
+        ),
+        process_supplier AS (
+            SELECT
+                coalesce(
+                    nullif(trim(id_del_proceso_de_compra), ''),
+                    nullif(trim(referencia_del_proceso), '')
+                ) AS process_key,
+                coacc_document_key(nit_del_proveedor, 'NIT') AS supplier_document_key,
+                any_value(coacc_nit_canonical(nit_del_proveedor, 'NIT'))
+                    AS supplier_nit_canonical,
+                any_value(nullif(trim(nit_del_proveedor), '')) AS supplier_document_id,
+                any_value(nullif(trim(nombre_proveedor), '')) AS supplier_name,
+                any_value(coacc_document_key(nit_entidad_compradora, 'NIT'))
+                    AS buyer_document_key,
+                any_value(nullif(trim(nit_entidad_compradora), '')) AS buyer_document_id,
+                any_value(nullif(trim(entidad_compradora), '')) AS buyer_name,
+                any_value(nullif(trim(modalidad), '')) AS procurement_modality,
+                max(coacc_money(valor_de_la_oferta)) AS supplier_offer_value,
+                min(try_cast(fecha_de_registro AS TIMESTAMP)) AS first_offer_at,
+                max(try_cast(fecha_de_registro AS TIMESTAMP)) AS last_offer_at,
+                count(DISTINCT coalesce(
+                    nullif(trim(identificador_de_la_oferta), ''),
+                    nullif(trim(referencia_de_la_oferta), ''),
+                    nullif(trim(cast(":id" AS VARCHAR)), '')
+                )) AS offer_record_count
+            FROM src_secop_offers
+            WHERE coacc_nit_canonical(nit_del_proveedor, 'NIT') IS NOT NULL
+                AND NOT regexp_matches(
+                    coacc_document_key(nit_del_proveedor, 'NIT'),
+                    '^0+$'
+                )
+                AND coalesce(
+                    nullif(trim(id_del_proceso_de_compra), ''),
+                    nullif(trim(referencia_del_proceso), '')
+                ) IS NOT NULL
+            GROUP BY 1, 2
+        ),
+        process_stats AS (
+            SELECT
+                process_key,
+                count(*) AS supplier_count,
+                sum(coalesce(supplier_offer_value, 0.0)) AS process_offer_value
+            FROM process_supplier
+            GROUP BY process_key
+        ),
+        bounded_process_supplier AS (
+            SELECT
+                ps.*,
+                st.supplier_count,
+                st.process_offer_value
+            FROM process_supplier ps
+            JOIN process_stats st
+                ON st.process_key = ps.process_key
+            WHERE st.supplier_count BETWEEN 2 AND 8
+        ),
+        supplier_totals AS (
+            SELECT
+                supplier_document_key,
+                count(DISTINCT process_key) AS bounded_process_count,
+                count(DISTINCT buyer_document_key)
+                    FILTER (WHERE buyer_document_key IS NOT NULL)
+                    AS bounded_buyer_count,
+                sum(coalesce(supplier_offer_value, 0.0)) AS total_offer_value
+            FROM bounded_process_supplier
+            GROUP BY supplier_document_key
+        ),
+        pair_processes AS (
+            SELECT
+                a.supplier_document_key AS supplier_a_key,
+                b.supplier_document_key AS supplier_b_key,
+                a.supplier_name AS supplier_a_name,
+                b.supplier_name AS supplier_b_name,
+                a.supplier_document_id AS supplier_a_document_id,
+                b.supplier_document_id AS supplier_b_document_id,
+                a.process_key,
+                coalesce(a.buyer_document_key, pm.buyer_document_key) AS buyer_document_key,
+                coalesce(a.buyer_document_id, pm.buyer_document_id) AS buyer_document_id,
+                coalesce(a.buyer_name, pm.buyer_name) AS buyer_name,
+                pm.department,
+                pm.city,
+                coalesce(a.procurement_modality, pm.procurement_modality)
+                    AS procurement_modality,
+                a.supplier_count AS process_supplier_count,
+                coalesce(a.supplier_offer_value, 0.0)
+                    + coalesce(b.supplier_offer_value, 0.0) AS pair_process_offer_value,
+                least(a.first_offer_at, b.first_offer_at) AS first_offer_at,
+                greatest(a.last_offer_at, b.last_offer_at) AS last_offer_at,
+                coalesce(pm.process_at, greatest(a.last_offer_at, b.last_offer_at))
+                    AS evidence_at,
+                coalesce(pm.process_url, 'secop_offers:' || a.process_key)
+                    AS evidence_ref
+            FROM bounded_process_supplier a
+            JOIN bounded_process_supplier b
+                ON b.process_key = a.process_key
+                AND b.supplier_document_key > a.supplier_document_key
+            LEFT JOIN process_metadata pm
+                ON pm.process_key = a.process_key
+        ),
+        pair_rollup AS (
+            SELECT
+                supplier_a_key,
+                supplier_b_key,
+                any_value(supplier_a_name) AS supplier_a_name,
+                any_value(supplier_b_name) AS supplier_b_name,
+                any_value(supplier_a_document_id) AS supplier_a_document_id,
+                any_value(supplier_b_document_id) AS supplier_b_document_id,
+                count(DISTINCT process_key) AS shared_process_count,
+                count(DISTINCT buyer_document_key)
+                    FILTER (WHERE buyer_document_key IS NOT NULL) AS shared_buyer_count,
+                avg(process_supplier_count) AS avg_process_supplier_count,
+                sum(pair_process_offer_value) AS pair_offer_value,
+                min(first_offer_at) AS first_offer_at,
+                max(last_offer_at) AS last_offer_at
+            FROM pair_processes
+            GROUP BY supplier_a_key, supplier_b_key
+        ),
+        evidence_ranked AS (
+            SELECT
+                supplier_a_key,
+                supplier_b_key,
+                evidence_ref,
+                evidence_at,
+                process_key,
+                row_number() OVER (
+                    PARTITION BY supplier_a_key, supplier_b_key
+                    ORDER BY evidence_at DESC NULLS LAST, process_key DESC
+                ) AS evidence_rank
+            FROM pair_processes
+            WHERE evidence_ref IS NOT NULL
+        ),
+        evidence AS (
+            SELECT
+                supplier_a_key,
+                supplier_b_key,
+                list(evidence_ref ORDER BY evidence_at DESC, process_key DESC)
+                    AS evidence_refs
+            FROM evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY supplier_a_key, supplier_b_key
+        ),
+        scored AS (
+            SELECT
+                p.*,
+                sa.bounded_process_count AS supplier_a_process_count,
+                sb.bounded_process_count AS supplier_b_process_count,
+                sa.bounded_buyer_count AS supplier_a_buyer_count,
+                sb.bounded_buyer_count AS supplier_b_buyer_count,
+                p.shared_process_count::DOUBLE
+                    / greatest(sa.bounded_process_count, sb.bounded_process_count)
+                    AS max_side_share,
+                p.shared_process_count::DOUBLE
+                    / least(sa.bounded_process_count, sb.bounded_process_count)
+                    AS min_side_share,
+                e.evidence_refs
+            FROM pair_rollup p
+            JOIN supplier_totals sa
+                ON sa.supplier_document_key = p.supplier_a_key
+            JOIN supplier_totals sb
+                ON sb.supplier_document_key = p.supplier_b_key
+            JOIN evidence e
+                ON e.supplier_a_key = p.supplier_a_key
+                AND e.supplier_b_key = p.supplier_b_key
+        ),
+        flagged_pairs AS (
+            SELECT
+                *,
+                least(
+                    1.0,
+                    0.65
+                        + least(shared_process_count / 200.0, 0.15)
+                        + least(shared_buyer_count / 100.0, 0.10)
+                        + least(max_side_share * 0.08, 0.08)
+                        + least(min_side_share * 0.02, 0.02)
+                ) AS risk_signal,
+                'cobid_pair:' || supplier_a_key || ':' || supplier_b_key AS scope_key
+            FROM scored
+            WHERE shared_process_count >= 20
+                AND shared_buyer_count >= 5
+                AND max_side_share >= 0.10
+                AND min_side_share >= 0.35
+        )
+        SELECT
+            'procurement_cartel_risk_cobidding' AS signal_id,
+            'doc:' || supplier_a_key AS entity_id,
+            supplier_a_key AS entity_key,
+            'Company' AS entity_label,
+            scope_key,
+            'cobid_cluster' AS scope_type,
+            'high' AS severity,
+            risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            supplier_a_name AS supplier_name,
+            supplier_b_key AS counterpart_entity_key,
+            supplier_b_name AS counterpart_name,
+            shared_process_count,
+            shared_buyer_count,
+            supplier_a_process_count AS supplier_process_count,
+            supplier_b_process_count AS counterpart_process_count,
+            supplier_a_buyer_count AS supplier_buyer_count,
+            supplier_b_buyer_count AS counterpart_buyer_count,
+            max_side_share,
+            min_side_share,
+            avg_process_supplier_count,
+            pair_offer_value,
+            first_offer_at,
+            last_offer_at,
+            evidence_refs
+        FROM flagged_pairs
+        UNION ALL
+        SELECT
+            'procurement_cartel_risk_cobidding' AS signal_id,
+            'doc:' || supplier_b_key AS entity_id,
+            supplier_b_key AS entity_key,
+            'Company' AS entity_label,
+            scope_key,
+            'cobid_cluster' AS scope_type,
+            'high' AS severity,
+            risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            supplier_b_name AS supplier_name,
+            supplier_a_key AS counterpart_entity_key,
+            supplier_a_name AS counterpart_name,
+            shared_process_count,
+            shared_buyer_count,
+            supplier_b_process_count AS supplier_process_count,
+            supplier_a_process_count AS counterpart_process_count,
+            supplier_b_buyer_count AS supplier_buyer_count,
+            supplier_a_buyer_count AS counterpart_buyer_count,
+            max_side_share,
+            min_side_share,
+            avg_process_supplier_count,
+            pair_offer_value,
+            first_offer_at,
+            last_offer_at,
+            evidence_refs
+        FROM flagged_pairs
+    """)
+
+
+def _create_company_registry_overlap_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not ({"secop_ii_contracts", "company_registry_c82u"} <= set(required_sources)):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_related_companies_shared_officer AS
+        WITH supplier_exposure AS (
+            SELECT
+                supplier_document_key AS company_document_key,
+                any_value(supplier_name) AS supplier_name,
+                count(DISTINCT contract_id) AS contract_count,
+                count(DISTINCT buyer_document_id) AS distinct_buyer_count,
+                sum(coalesce(contract_value, 0.0)) AS total_contract_value,
+                min(signing_date) AS first_signing_date,
+                max(signing_date) AS last_signing_date
+            FROM curated_contract_awards
+            WHERE supplier_document_key IS NOT NULL
+                AND contract_id IS NOT NULL
+                AND contract_value IS NOT NULL
+                AND contract_value > 0
+            GROUP BY supplier_document_key
+        ),
+        contract_evidence_ranked AS (
+            SELECT
+                supplier_document_key AS company_document_key,
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id)
+                    AS evidence_ref,
+                contract_value,
+                signing_date,
+                row_number() OVER (
+                    PARTITION BY supplier_document_key
+                    ORDER BY contract_value DESC NULLS LAST,
+                        signing_date DESC NULLS LAST,
+                        contract_id
+                ) AS evidence_rank
+            FROM curated_contract_awards
+            WHERE supplier_document_key IS NOT NULL
+                AND contract_id IS NOT NULL
+        ),
+        contract_evidence AS (
+            SELECT
+                company_document_key,
+                list(evidence_ref ORDER BY contract_value DESC, signing_date DESC)
+                    AS contract_evidence_refs
+            FROM contract_evidence_ranked
+            WHERE evidence_rank <= 3
+            GROUP BY company_document_key
+        ),
+        raw_company_officers AS (
+            SELECT
+                coacc_document_key(document_id, identification_class)
+                    AS company_document_key,
+                coacc_nit_canonical(document_id, identification_class)
+                    AS company_nit_canonical,
+                nullif(trim(document_id), '') AS company_document_id,
+                nullif(trim(business_name), '') AS company_name,
+                nullif(trim(matricula), '') AS matricula,
+                nullif(trim(chamber_of_commerce), '') AS chamber_of_commerce,
+                nullif(trim(matricula_status), '') AS matricula_status,
+                coacc_cedula_key(
+                    num_identificacion_representante_legal,
+                    clase_identificacion_rl
+                ) AS representative_document_key,
+                nullif(trim(num_identificacion_representante_legal), '')
+                    AS representative_document_id,
+                nullif(trim(representante_legal), '') AS representative_name,
+                nullif(trim(clase_identificacion_rl), '') AS representative_doc_type,
+                coalesce(
+                    nullif(trim(cast(":id" AS VARCHAR)), ''),
+                    nullif(trim(matricula), ''),
+                    nullif(trim(document_id), '')
+                ) AS company_record_id
+            FROM src_company_registry_c82u
+            WHERE coacc_document_key(document_id, identification_class) IS NOT NULL
+                AND coacc_cedula_key(
+                    num_identificacion_representante_legal,
+                    clase_identificacion_rl
+                ) IS NOT NULL
+        ),
+        company_officers AS (
+            SELECT *
+            FROM raw_company_officers
+            QUALIFY row_number() OVER (
+                PARTITION BY company_document_key, representative_document_key
+                ORDER BY company_record_id
+            ) = 1
+        ),
+        exposed_companies AS (
+            SELECT
+                c.company_document_key,
+                c.company_nit_canonical,
+                c.company_document_id,
+                c.company_name,
+                c.matricula,
+                c.chamber_of_commerce,
+                c.matricula_status,
+                c.representative_document_key,
+                c.representative_document_id,
+                c.representative_name,
+                c.representative_doc_type,
+                c.company_record_id,
+                e.supplier_name,
+                e.contract_count,
+                e.distinct_buyer_count,
+                e.total_contract_value,
+                e.first_signing_date,
+                e.last_signing_date,
+                ce.contract_evidence_refs
+            FROM company_officers c
+            JOIN supplier_exposure e
+                ON c.company_document_key = e.company_document_key
+            JOIN contract_evidence ce
+                ON c.company_document_key = ce.company_document_key
+            WHERE length(c.company_document_key) >= 5
+                AND NOT regexp_matches(c.company_document_key, '^0+$')
+                AND length(c.representative_document_key) >= 5
+                AND NOT regexp_matches(c.representative_document_key, '^0+$')
+                AND c.company_record_id IS NOT NULL
+                AND e.contract_count >= 3
+                AND e.total_contract_value >= 100000000
+        ),
+        officer_clusters AS (
+            SELECT
+                representative_document_key,
+                count(DISTINCT company_document_key) AS linked_company_count,
+                sum(contract_count) AS cluster_contract_count,
+                sum(distinct_buyer_count) AS cluster_distinct_buyer_count,
+                sum(total_contract_value) AS cluster_total_contract_value,
+                min(first_signing_date) AS cluster_first_signing_date,
+                max(last_signing_date) AS cluster_last_signing_date
+            FROM exposed_companies
+            GROUP BY representative_document_key
+            HAVING count(DISTINCT company_document_key) >= 2
+        ),
+        registry_evidence_ranked AS (
+            SELECT
+                representative_document_key,
+                'company_registry_c82u:' || company_record_id AS evidence_ref,
+                total_contract_value,
+                company_document_key,
+                row_number() OVER (
+                    PARTITION BY representative_document_key
+                    ORDER BY total_contract_value DESC NULLS LAST, company_document_key
+                ) AS evidence_rank
+            FROM exposed_companies
+        ),
+        registry_evidence AS (
+            SELECT
+                representative_document_key,
+                list(evidence_ref ORDER BY total_contract_value DESC, evidence_ref)
+                    AS registry_evidence_refs
+            FROM registry_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY representative_document_key
+        ),
+        company_samples_ranked AS (
+            SELECT
+                representative_document_key,
+                coalesce(company_name, company_document_key) AS company_sample,
+                total_contract_value,
+                row_number() OVER (
+                    PARTITION BY representative_document_key
+                    ORDER BY total_contract_value DESC NULLS LAST, company_document_key
+                ) AS sample_rank
+            FROM exposed_companies
+        ),
+        company_samples AS (
+            SELECT
+                representative_document_key,
+                list(company_sample ORDER BY total_contract_value DESC, company_sample)
+                    AS linked_company_sample
+            FROM company_samples_ranked
+            WHERE sample_rank <= 10
+            GROUP BY representative_document_key
+        )
+        SELECT
+            'procurement_related_companies_shared_officer' AS signal_id,
+            'doc:' || e.company_document_key AS entity_id,
+            e.company_document_key AS entity_key,
+            'Company' AS entity_label,
+            'officer_cluster:' || e.representative_document_key AS scope_key,
+            'officer_cluster' AS scope_type,
+            least(
+                1.0,
+                0.65
+                    + least(c.linked_company_count / 10.0, 0.15)
+                    + least(e.contract_count / 100.0, 0.10)
+                    + least(log10(greatest(c.cluster_total_contract_value, 1)) / 120.0, 0.10)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            e.company_nit_canonical,
+            e.company_document_id,
+            e.company_name,
+            e.matricula,
+            e.chamber_of_commerce,
+            e.matricula_status,
+            e.representative_document_key,
+            e.representative_document_id,
+            e.representative_name,
+            e.representative_doc_type,
+            e.supplier_name,
+            e.contract_count,
+            e.distinct_buyer_count,
+            e.total_contract_value,
+            e.first_signing_date,
+            e.last_signing_date,
+            c.linked_company_count,
+            c.cluster_contract_count,
+            c.cluster_distinct_buyer_count,
+            c.cluster_total_contract_value,
+            c.cluster_first_signing_date,
+            c.cluster_last_signing_date,
+            s.linked_company_sample,
+            list_concat(r.registry_evidence_refs, e.contract_evidence_refs) AS evidence_refs
+        FROM exposed_companies e
+        JOIN officer_clusters c
+            ON c.representative_document_key = e.representative_document_key
+        JOIN registry_evidence r
+            ON r.representative_document_key = e.representative_document_key
+        LEFT JOIN company_samples s
+            ON s.representative_document_key = e.representative_document_key
+    """)
+
+    if "sigep_sensitive_positions" not in set(required_sources):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_politically_exposed_supplier_overlap AS
+        WITH supplier_exposure AS (
+            SELECT
+                supplier_document_key AS company_document_key,
+                any_value(supplier_name) AS supplier_name,
+                count(DISTINCT contract_id) AS contract_count,
+                sum(coalesce(contract_value, 0.0)) AS total_contract_value,
+                min(signing_date) AS first_signing_date,
+                max(signing_date) AS last_signing_date
+            FROM curated_contract_awards
+            WHERE supplier_document_key IS NOT NULL
+                AND contract_id IS NOT NULL
+                AND contract_value IS NOT NULL
+                AND contract_value > 0
+            GROUP BY supplier_document_key
+        ),
+        contract_evidence_ranked AS (
+            SELECT
+                supplier_document_key AS company_document_key,
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id)
+                    AS evidence_ref,
+                contract_value,
+                signing_date,
+                row_number() OVER (
+                    PARTITION BY supplier_document_key
+                    ORDER BY contract_value DESC NULLS LAST,
+                        signing_date DESC NULLS LAST,
+                        contract_id
+                ) AS evidence_rank
+            FROM curated_contract_awards
+            WHERE supplier_document_key IS NOT NULL
+                AND contract_id IS NOT NULL
+        ),
+        contract_evidence AS (
+            SELECT
+                company_document_key,
+                list(evidence_ref ORDER BY contract_value DESC, signing_date DESC)
+                    AS contract_evidence_refs
+            FROM contract_evidence_ranked
+            WHERE evidence_rank <= 3
+            GROUP BY company_document_key
+        ),
+        raw_company_officers AS (
+            SELECT
+                coacc_document_key(document_id, identification_class)
+                    AS company_document_key,
+                coacc_nit_canonical(document_id, identification_class)
+                    AS company_nit_canonical,
+                nullif(trim(document_id), '') AS company_document_id,
+                nullif(trim(business_name), '') AS company_name,
+                nullif(trim(matricula), '') AS matricula,
+                nullif(trim(chamber_of_commerce), '') AS chamber_of_commerce,
+                nullif(trim(matricula_status), '') AS matricula_status,
+                coacc_cedula_key(
+                    num_identificacion_representante_legal,
+                    clase_identificacion_rl
+                ) AS representative_document_key,
+                nullif(trim(num_identificacion_representante_legal), '')
+                    AS representative_document_id,
+                nullif(trim(representante_legal), '') AS representative_name,
+                nullif(trim(clase_identificacion_rl), '') AS representative_doc_type,
+                coalesce(
+                    nullif(trim(cast(":id" AS VARCHAR)), ''),
+                    nullif(trim(matricula), ''),
+                    nullif(trim(document_id), '')
+                ) AS company_record_id
+            FROM src_company_registry_c82u
+            WHERE coacc_document_key(document_id, identification_class) IS NOT NULL
+                AND coacc_cedula_key(
+                    num_identificacion_representante_legal,
+                    clase_identificacion_rl
+                ) IS NOT NULL
+        ),
+        company_officers AS (
+            SELECT *
+            FROM raw_company_officers
+            QUALIFY row_number() OVER (
+                PARTITION BY company_document_key, representative_document_key
+                ORDER BY company_record_id
+            ) = 1
+        ),
+        sensitive_positions AS (
+            SELECT
+                coacc_cedula_key(funcionario_id, document_type) AS person_document_key,
+                nullif(trim(funcionario_id), '') AS person_document_id,
+                nullif(trim(full_name), '') AS person_name,
+                nullif(trim(document_type), '') AS person_doc_type,
+                nullif(trim(institution_id), '') AS institution_id,
+                nullif(trim(institution_name), '') AS institution_name,
+                nullif(trim(institution_department), '') AS institution_department,
+                nullif(trim(institution_municipality), '') AS institution_municipality,
+                nullif(trim(administrative_sector), '') AS administrative_sector,
+                nullif(trim(job_hierarchy_level), '') AS job_hierarchy_level,
+                nullif(trim(appointment_type), '') AS appointment_type,
+                nullif(trim(current_job_title), '') AS current_job_title,
+                try_cast(start_date AS TIMESTAMP) AS position_start_at
+            FROM src_sigep_sensitive_positions
+            WHERE coacc_cedula_key(funcionario_id, document_type) IS NOT NULL
+        ),
+        matched AS (
+            SELECT
+                c.company_document_key,
+                c.company_nit_canonical,
+                c.company_document_id,
+                c.company_name,
+                c.matricula,
+                c.chamber_of_commerce,
+                c.matricula_status,
+                c.representative_document_key,
+                c.representative_document_id,
+                c.representative_name,
+                c.representative_doc_type,
+                c.company_record_id,
+                p.person_document_key,
+                p.person_document_id,
+                p.person_name,
+                p.person_doc_type,
+                p.institution_id,
+                p.institution_name,
+                p.institution_department,
+                p.institution_municipality,
+                p.administrative_sector,
+                p.job_hierarchy_level,
+                p.appointment_type,
+                p.current_job_title,
+                p.position_start_at,
+                e.supplier_name,
+                e.contract_count,
+                e.total_contract_value,
+                e.first_signing_date,
+                e.last_signing_date,
+                ce.contract_evidence_refs
+            FROM company_officers c
+            JOIN sensitive_positions p
+                ON c.representative_document_key = p.person_document_key
+            JOIN supplier_exposure e
+                ON c.company_document_key = e.company_document_key
+            JOIN contract_evidence ce
+                ON c.company_document_key = ce.company_document_key
+            WHERE length(c.company_document_key) >= 5
+                AND NOT regexp_matches(c.company_document_key, '^0+$')
+        )
+        SELECT
+            'procurement_politically_exposed_position_supplier_overlap' AS signal_id,
+            'doc:' || company_document_key AS entity_id,
+            company_document_key AS entity_key,
+            'Company' AS entity_label,
+            concat_ws(
+                ':',
+                'sensitive_position',
+                representative_document_key,
+                coalesce(institution_id, 'unknown'),
+                company_document_key
+            ) AS scope_key,
+            'sensitive_position' AS scope_type,
+            least(
+                1.0,
+                0.70
+                    + least(contract_count / 200.0, 0.15)
+                    + least(log10(greatest(total_contract_value, 1)) / 120.0, 0.15)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            company_nit_canonical,
+            company_document_id,
+            company_name,
+            matricula,
+            chamber_of_commerce,
+            matricula_status,
+            representative_document_key,
+            representative_document_id,
+            representative_name,
+            representative_doc_type,
+            person_name,
+            person_doc_type,
+            institution_id,
+            institution_name,
+            institution_department,
+            institution_municipality,
+            administrative_sector,
+            job_hierarchy_level,
+            appointment_type,
+            current_job_title,
+            position_start_at,
+            supplier_name,
+            contract_count,
+            total_contract_value,
+            first_signing_date,
+            last_signing_date,
+            list_concat(
+                [
+                    'company_registry_c82u:' || company_record_id,
+                    'sigep_sensitive_positions:' || representative_document_key
+                ],
+                contract_evidence_refs
+            ) AS evidence_refs
+        FROM matched
+        WHERE representative_document_key IS NOT NULL
+            AND company_record_id IS NOT NULL
+    """)
+
+
+def _create_contract_suspension_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if not ({"secop_contract_suspensions", "secop_ii_contracts"} <= set(required_sources)):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_contract_suspensions AS
+        WITH raw_events AS (
+            SELECT DISTINCT
+                nullif(trim(id_contrato), '') AS contract_id,
+                lower(nullif(trim(tipo), '')) AS event_type_norm,
+                nullif(trim(tipo), '') AS event_type,
+                coalesce(
+                    try_cast(fecha_de_aprobacion AS TIMESTAMP),
+                    try_cast(fecha_de_creacion AS TIMESTAMP)
+                ) AS event_at,
+                try_cast(fecha_de_inicio_del_contrato AS DATE) AS event_start_date,
+                try_cast(fecha_de_fin_del_contrato AS DATE) AS event_end_date,
+                nullif(trim(proposito_de_la_modificacion), '') AS event_purpose
+            FROM src_secop_contract_suspensions
+            WHERE nullif(trim(id_contrato), '') IS NOT NULL
+        ),
+        event_rollup AS (
+            SELECT
+                contract_id,
+                count(*) FILTER (
+                    WHERE event_type_norm LIKE '%suspension%'
+                ) AS suspension_event_count,
+                count(*) FILTER (
+                    WHERE event_type_norm LIKE '%reanudacion%'
+                ) AS resumption_event_count,
+                count(DISTINCT event_at) FILTER (
+                    WHERE event_type_norm LIKE '%suspension%'
+                        AND event_at IS NOT NULL
+                ) AS distinct_suspension_dates,
+                min(event_at) FILTER (
+                    WHERE event_type_norm LIKE '%suspension%'
+                ) AS first_suspension_at,
+                max(event_at) FILTER (
+                    WHERE event_type_norm LIKE '%suspension%'
+                ) AS last_suspension_at
+            FROM raw_events
+            GROUP BY contract_id
+        ),
+        ranked_suspension_events AS (
+            SELECT
+                contract_id,
+                concat_ws(
+                    ':',
+                    'secop_contract_suspensions',
+                    contract_id,
+                    coalesce(strftime(event_at, '%Y-%m-%d'), 'unknown')
+                ) AS evidence_ref,
+                event_at,
+                event_purpose,
+                row_number() OVER (
+                    PARTITION BY contract_id
+                    ORDER BY event_at DESC NULLS LAST, event_purpose DESC NULLS LAST
+                ) AS evidence_rank
+            FROM raw_events
+            WHERE event_type_norm LIKE '%suspension%'
+        ),
+        event_evidence AS (
+            SELECT
+                contract_id,
+                list(evidence_ref ORDER BY event_at DESC, evidence_ref)
+                    AS suspension_evidence_refs,
+                list(event_purpose ORDER BY event_at DESC, event_purpose)
+                    FILTER (WHERE event_purpose IS NOT NULL) AS suspension_purpose_sample
+            FROM ranked_suspension_events
+            WHERE evidence_rank <= 4
+            GROUP BY contract_id
+        ),
+        eligible AS (
+            SELECT
+                a.supplier_entity_id,
+                a.supplier_document_key,
+                a.supplier_name,
+                a.supplier_doc_type,
+                a.buyer_document_id,
+                a.buyer_name,
+                a.department,
+                a.city,
+                a.sector,
+                a.procurement_modality,
+                a.contract_type,
+                a.contract_id,
+                a.contract_reference,
+                a.process_id,
+                a.process_url,
+                a.contract_value,
+                a.signing_date,
+                a.contract_start_date,
+                a.contract_end_date,
+                nullif(trim(c.contract_status), '') AS contract_status,
+                try_cast(c.added_days AS INTEGER) AS added_days,
+                r.suspension_event_count,
+                r.resumption_event_count,
+                r.distinct_suspension_dates,
+                r.first_suspension_at,
+                r.last_suspension_at,
+                date_diff('day', r.first_suspension_at, r.last_suspension_at)
+                    AS suspension_span_days,
+                e.suspension_purpose_sample,
+                list_concat(
+                    [
+                        coalesce(a.process_url, 'secop_ii_contracts:' || a.contract_id)
+                    ],
+                    e.suspension_evidence_refs
+                ) AS evidence_refs
+            FROM event_rollup r
+            JOIN curated_contract_awards a
+                ON a.contract_id = r.contract_id
+            JOIN src_secop_ii_contracts c
+                ON c.contract_id = r.contract_id
+            JOIN event_evidence e
+                ON e.contract_id = r.contract_id
+            WHERE a.supplier_nit_canonical IS NOT NULL
+                AND NOT regexp_matches(a.supplier_document_key, '^0+$')
+                AND a.contract_value >= 100000000
+                AND r.suspension_event_count >= 2
+                AND r.distinct_suspension_dates >= 2
+                AND a.process_url IS NOT NULL
+        )
+        SELECT
+            'procurement_contract_suspensions' AS signal_id,
+            supplier_entity_id AS entity_id,
+            supplier_document_key AS entity_key,
+            'Company' AS entity_label,
+            contract_id AS scope_key,
+            'contract' AS scope_type,
+            'medium' AS severity,
+            least(
+                1.0,
+                0.55
+                    + least(distinct_suspension_dates / 20.0, 0.25)
+                    + least(coalesce(suspension_span_days, 0) / 1000.0, 0.10)
+                    + least(log10(greatest(contract_value, 1)) / 120.0, 0.10)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            supplier_name,
+            supplier_doc_type,
+            buyer_document_id,
+            buyer_name,
+            department,
+            city,
+            sector,
+            procurement_modality,
+            contract_type,
+            contract_id,
+            contract_reference,
+            process_id,
+            process_url,
+            contract_status,
+            contract_value,
+            signing_date,
+            contract_start_date,
+            contract_end_date,
+            added_days,
+            suspension_event_count,
+            resumption_event_count,
+            distinct_suspension_dates,
+            first_suspension_at,
+            last_suspension_at,
+            suspension_span_days,
+            suspension_purpose_sample,
+            evidence_refs
+        FROM eligible
+    """)
+
+
+def _create_large_modification_views(
+    con: duckdb.DuckDBPyConnection,
+    required_sources: Sequence[str],
+) -> None:
+    if "secop_contract_modifications" not in set(required_sources):
+        return
+
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_large_modifications AS
+        WITH raw_modifications AS (
+            SELECT
+                nullif(trim(id_contrato), '') AS contract_id,
+                coalesce(
+                    nullif(trim(identificador_modificacion), ''),
+                    nullif(trim(identificador), ''),
+                    nullif(trim(identificador_requerimiento), ''),
+                    nullif(trim(id_contrato), '') || ':' || cast(row_number() OVER () AS VARCHAR)
+                ) AS modification_id,
+                coacc_money(valor_modificacion) AS modification_value,
+                try_cast(dias_extendidos AS INTEGER) AS extended_days,
+                nullif(trim(estado_modificacion), '') AS modification_status,
+                nullif(trim(proposito_modificacion), '') AS modification_purpose,
+                nullif(trim(descripcion), '') AS modification_description,
+                nullif(trim(codigo_bpin), '') AS bpin_code,
+                coalesce(
+                    try_cast(fecha_de_aprobacion AS TIMESTAMP),
+                    try_cast(fecha_version AS TIMESTAMP),
+                    try_cast(fecha_de_carga AS TIMESTAMP),
+                    try_cast(fecha_creacion AS TIMESTAMP)
+                ) AS modification_at
+            FROM src_secop_contract_modifications
+            WHERE nullif(trim(id_contrato), '') IS NOT NULL
+        ),
+        eligible_modifications AS (
+            SELECT *
+            FROM raw_modifications
+            WHERE modification_value IS NOT NULL
+                AND modification_value > 0
+        ),
+        modification_rollup AS (
+            SELECT
+                contract_id,
+                count(*) AS modification_event_count,
+                sum(modification_value) AS total_modification_value,
+                max(modification_value) AS max_modification_value,
+                sum(coalesce(extended_days, 0)) AS total_extended_days,
+                max(extended_days) AS max_extended_days,
+                min(modification_at) AS first_modification_at,
+                max(modification_at) AS last_modification_at
+            FROM eligible_modifications
+            GROUP BY contract_id
+        ),
+        modification_evidence_ranked AS (
+            SELECT
+                contract_id,
+                'secop_contract_modifications:' || modification_id AS evidence_ref,
+                modification_value,
+                modification_at,
+                modification_purpose,
+                row_number() OVER (
+                    PARTITION BY contract_id
+                    ORDER BY modification_value DESC NULLS LAST,
+                        modification_at DESC NULLS LAST,
+                        modification_id
+                ) AS evidence_rank
+            FROM eligible_modifications
+        ),
+        modification_evidence AS (
+            SELECT
+                contract_id,
+                list(evidence_ref ORDER BY modification_value DESC, modification_at DESC)
+                    AS modification_evidence_refs,
+                list(modification_purpose ORDER BY modification_value DESC, modification_at DESC)
+                    FILTER (WHERE modification_purpose IS NOT NULL)
+                    AS modification_purpose_sample
+            FROM modification_evidence_ranked
+            WHERE evidence_rank <= 5
+            GROUP BY contract_id
+        ),
+        eligible AS (
+            SELECT
+                a.supplier_entity_id,
+                a.supplier_document_key,
+                a.supplier_name,
+                a.supplier_doc_type,
+                a.buyer_document_id,
+                a.buyer_name,
+                a.department,
+                a.city,
+                a.sector,
+                a.procurement_modality,
+                a.contract_type,
+                a.contract_id,
+                a.contract_reference,
+                a.process_id,
+                a.process_url,
+                a.contract_value,
+                a.signing_date,
+                a.contract_start_date,
+                a.contract_end_date,
+                r.modification_event_count,
+                r.total_modification_value,
+                r.max_modification_value,
+                r.total_extended_days,
+                r.max_extended_days,
+                r.first_modification_at,
+                r.last_modification_at,
+                r.total_modification_value / nullif(a.contract_value, 0)
+                    AS modification_value_share,
+                e.modification_purpose_sample,
+                list_concat(
+                    [
+                        coalesce(a.process_url, 'secop_ii_contracts:' || a.contract_id)
+                    ],
+                    e.modification_evidence_refs
+                ) AS evidence_refs
+            FROM modification_rollup r
+            JOIN curated_contract_awards a
+                ON a.contract_id = r.contract_id
+            JOIN modification_evidence e
+                ON e.contract_id = r.contract_id
+            WHERE a.supplier_nit_canonical IS NOT NULL
+                AND NOT regexp_matches(a.supplier_document_key, '^0+$')
+                AND a.contract_value IS NOT NULL
+                AND a.contract_value >= 100000000
+                AND a.process_url IS NOT NULL
+        )
+        SELECT
+            'procurement_large_modifications' AS signal_id,
+            supplier_entity_id AS entity_id,
+            supplier_document_key AS entity_key,
+            'Company' AS entity_label,
+            contract_id AS scope_key,
+            'contract' AS scope_type,
+            'high' AS severity,
+            least(
+                1.0,
+                0.62
+                    + least(coalesce(modification_value_share, 0.0) / 2.0, 0.22)
+                    + least(log10(greatest(total_modification_value, 1)) / 140.0, 0.10)
+                    + least(modification_event_count / 20.0, 0.06)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            supplier_name,
+            supplier_doc_type,
+            buyer_document_id,
+            buyer_name,
+            department,
+            city,
+            sector,
+            procurement_modality,
+            contract_type,
+            contract_id,
+            contract_reference,
+            process_id,
+            process_url,
+            contract_value,
+            signing_date,
+            contract_start_date,
+            contract_end_date,
+            modification_event_count,
+            total_modification_value,
+            max_modification_value,
+            modification_value_share,
+            total_extended_days,
+            max_extended_days,
+            first_modification_at,
+            last_modification_at,
+            modification_purpose_sample,
+            evidence_refs
+        FROM eligible
+        WHERE total_modification_value >= 100000000
+            OR modification_value_share >= 0.50
+    """)
+
+
 def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str]) -> None:
     if not ({"secop_ii_contracts", "paco_sanctions"} & set(required_sources)):
         _create_person_views(con, required_sources)
+        _create_process_views(con, required_sources)
+        _create_cobidding_views(con, required_sources)
+        _create_company_registry_overlap_views(con, required_sources)
+        _create_contract_suspension_views(con, required_sources)
+        _create_large_modification_views(con, required_sources)
         return
 
     con.execute("""
@@ -507,6 +1920,77 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
     """)
     _create_person_views(con, required_sources)
     con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_single_bidder_high_value AS
+        WITH eligible AS (
+            SELECT
+                supplier_entity_id,
+                supplier_document_key,
+                supplier_name,
+                buyer_document_id,
+                buyer_name,
+                department,
+                city,
+                sector,
+                procurement_modality,
+                contract_type,
+                contract_id,
+                contract_reference,
+                process_id,
+                process_url,
+                contract_value,
+                signing_date
+            FROM curated_contract_awards
+            WHERE supplier_document_key IS NOT NULL
+                AND contract_id IS NOT NULL
+                AND contract_value IS NOT NULL
+                AND contract_value >= 1000000000
+                AND (
+                    lower(procurement_modality) LIKE '%contrataci%n directa%'
+                    OR lower(procurement_modality) LIKE '%r%gimen especial%'
+                    OR lower(procurement_modality) LIKE '%m%nima cuant%a%'
+                )
+        )
+        SELECT
+            'procurement_single_bidder_high_value' AS signal_id,
+            supplier_entity_id AS entity_id,
+            supplier_document_key AS entity_key,
+            'Company' AS entity_label,
+            coalesce(process_id, contract_id) AS scope_key,
+            'procurement_process' AS scope_type,
+            'medium' AS severity,
+            least(
+                1.0,
+                0.55
+                    + least(log10(greatest(contract_value, 1)) / 40.0, 0.35)
+                    + CASE
+                        WHEN lower(procurement_modality) LIKE '%con ofertas%' THEN 0.0
+                        ELSE 0.10
+                    END
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            supplier_name,
+            buyer_document_id,
+            buyer_name,
+            department,
+            city,
+            sector,
+            procurement_modality,
+            contract_type,
+            contract_id,
+            contract_reference,
+            process_id,
+            process_url,
+            contract_value,
+            signing_date,
+            [
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id)
+            ] AS evidence_refs
+        FROM eligible
+        WHERE coalesce(process_id, contract_id) IS NOT NULL
+    """)
+    con.execute("""
         CREATE OR REPLACE TEMP VIEW curated_sanctioned_awards AS
         SELECT
             'procurement_sanctioned_supplier_awarded' AS signal_id,
@@ -685,6 +2169,330 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
             AND r.total_contract_value >= 1000000000
     """)
     con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_contract_value_outlier_by_category AS
+        WITH eligible AS (
+            SELECT
+                supplier_entity_id,
+                supplier_document_key,
+                supplier_name,
+                buyer_document_id,
+                buyer_name,
+                department,
+                city,
+                sector,
+                procurement_modality,
+                contract_type,
+                contract_id,
+                contract_reference,
+                process_id,
+                process_url,
+                contract_value,
+                signing_date,
+                coalesce(nullif(trim(department), ''), 'unknown')
+                    AS category_department,
+                coalesce(cast(date_part('year', signing_date) AS VARCHAR), 'unknown')
+                    AS category_year,
+                coalesce(nullif(trim(sector), ''), 'unknown')
+                    AS category_sector,
+                coalesce(nullif(trim(procurement_modality), ''), 'unknown')
+                    AS category_modality,
+                coalesce(nullif(trim(contract_type), ''), 'unknown')
+                    AS category_contract_type
+            FROM curated_contract_awards
+            WHERE contract_id IS NOT NULL
+                AND contract_value IS NOT NULL
+                AND contract_value > 0
+                AND signing_date IS NOT NULL
+        ),
+        category_stats AS (
+            SELECT
+                category_department,
+                category_year,
+                category_sector,
+                category_modality,
+                category_contract_type,
+                count(*) AS category_contract_count,
+                avg(contract_value) AS category_avg_value,
+                stddev_samp(contract_value) AS category_stddev_value,
+                quantile_cont(contract_value, 0.5) AS category_median_value,
+                quantile_cont(contract_value, 0.25) AS category_q1_value,
+                quantile_cont(contract_value, 0.75) AS category_q3_value
+            FROM eligible
+            GROUP BY
+                category_department,
+                category_year,
+                category_sector,
+                category_modality,
+                category_contract_type
+            HAVING count(*) >= 100
+        ),
+        scored AS (
+            SELECT
+                e.*,
+                s.category_contract_count,
+                s.category_avg_value,
+                s.category_stddev_value,
+                s.category_median_value,
+                s.category_q1_value,
+                s.category_q3_value,
+                s.category_q3_value - s.category_q1_value AS category_iqr_value,
+                (e.contract_value - s.category_avg_value)
+                    / nullif(s.category_stddev_value, 0) AS category_z_score,
+                e.contract_value / nullif(s.category_median_value, 0)
+                    AS median_multiple,
+                row_number() OVER (
+                    PARTITION BY
+                        e.category_department,
+                        e.category_year,
+                        e.category_sector,
+                        e.category_modality,
+                        e.category_contract_type
+                    ORDER BY e.contract_value DESC NULLS LAST, e.contract_id
+                ) AS category_value_rank
+            FROM eligible e
+            JOIN category_stats s
+                USING (
+                    category_department,
+                    category_year,
+                    category_sector,
+                    category_modality,
+                    category_contract_type
+                )
+        )
+        SELECT
+            'procurement_contract_value_outlier_by_category' AS signal_id,
+            'contract:' || contract_id AS entity_id,
+            contract_id AS entity_key,
+            'Contract' AS entity_label,
+            contract_id AS scope_key,
+            'contract' AS scope_type,
+            least(
+                1.0,
+                0.45
+                    + least(coalesce(category_z_score, 0) / 30.0, 0.30)
+                    + least(coalesce(median_multiple, 0) / 200.0, 0.25)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_CONTRACT_KEY' AS identity_match_type,
+            'exact' AS identity_quality,
+            contract_id,
+            contract_reference,
+            process_id,
+            process_url,
+            supplier_document_key,
+            supplier_name,
+            buyer_document_id,
+            buyer_name,
+            department,
+            city,
+            sector,
+            procurement_modality,
+            contract_type,
+            contract_value,
+            signing_date,
+            category_department,
+            category_year,
+            category_sector,
+            category_modality,
+            category_contract_type,
+            category_contract_count,
+            category_avg_value,
+            category_stddev_value,
+            category_median_value,
+            category_q1_value,
+            category_q3_value,
+            category_iqr_value,
+            category_z_score,
+            median_multiple,
+            category_value_rank,
+            [
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id)
+            ] AS evidence_refs
+        FROM scored
+        WHERE category_value_rank <= 3
+            AND contract_value >= 5000000000
+            AND contract_value >= category_median_value * 20
+            AND (
+                (
+                    category_stddev_value > 0
+                    AND contract_value >= category_avg_value + 5 * category_stddev_value
+                )
+                OR (
+                    category_iqr_value > 0
+                    AND contract_value >= category_q3_value + 8 * category_iqr_value
+                )
+            )
+    """)
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_payment_plan_anomalies AS
+        WITH eligible AS (
+            SELECT
+                nullif(trim(contract_id), '') AS contract_id,
+                nullif(trim(contract_reference), '') AS contract_reference,
+                nullif(trim(procurement_process), '') AS process_id,
+                coacc_reference_url(process_url) AS process_url,
+                coacc_document_key(supplier_document, supplier_doc_type)
+                    AS supplier_document_key,
+                coacc_nit_canonical(supplier_document, supplier_doc_type)
+                    AS supplier_nit_canonical,
+                'doc:' || coacc_document_key(supplier_document, supplier_doc_type)
+                    AS supplier_entity_id,
+                nullif(trim(supplier_document), '') AS supplier_document_id,
+                nullif(trim(awarded_supplier), '') AS supplier_name,
+                nullif(trim(entity_nit), '') AS buyer_document_id,
+                nullif(trim(entity_name), '') AS buyer_name,
+                nullif(trim(department), '') AS department,
+                nullif(trim(city), '') AS city,
+                nullif(trim(sector), '') AS sector,
+                nullif(trim(procurement_modality), '') AS procurement_modality,
+                nullif(trim(contract_type), '') AS contract_type,
+                nullif(trim(contract_status), '') AS contract_status,
+                nullif(trim(enables_advance_payment), '') AS enables_advance_payment,
+                nullif(trim(liquidation), '') AS liquidation,
+                coacc_money(contract_value) AS contract_value,
+                coacc_money(advance_payment_value) AS advance_payment_value,
+                coacc_money(invoiced_value) AS invoiced_value,
+                coacc_money(pending_payment_value) AS pending_payment_value,
+                coacc_money(paid_value) AS paid_value,
+                coacc_money(amortized_value) AS amortized_value,
+                coacc_money(pending_value) AS pending_value,
+                coacc_money(pending_execution_value) AS pending_execution_value,
+                try_cast(signing_date AS DATE) AS signing_date
+            FROM src_secop_ii_contracts
+            WHERE nullif(trim(contract_id), '') IS NOT NULL
+                AND coacc_nit_canonical(supplier_document, supplier_doc_type) IS NOT NULL
+                AND NOT regexp_matches(
+                    coacc_document_key(supplier_document, supplier_doc_type),
+                    '^0+$'
+                )
+        ),
+        scored AS (
+            SELECT
+                *,
+                advance_payment_value / nullif(contract_value, 0)
+                    AS advance_payment_share,
+                paid_value / nullif(contract_value, 0) AS paid_value_share,
+                invoiced_value / nullif(contract_value, 0) AS invoiced_value_share,
+                CASE
+                    WHEN contract_value >= 500000000
+                        AND advance_payment_value >= 100000000
+                        AND advance_payment_value / nullif(contract_value, 0) >= 0.50
+                        THEN 'high_advance_payment_share'
+                    WHEN contract_value >= 100000000
+                        AND paid_value - contract_value >= 100000000
+                        AND paid_value / nullif(contract_value, 0) >= 1.25
+                        THEN 'paid_value_exceeds_contract'
+                    WHEN contract_value >= 100000000
+                        AND invoiced_value - contract_value >= 100000000
+                        AND invoiced_value / nullif(contract_value, 0) >= 1.25
+                        THEN 'invoiced_value_exceeds_contract'
+                    ELSE NULL
+                END AS anomaly_type,
+                (
+                    contract_value >= 500000000
+                    AND advance_payment_value >= 100000000
+                    AND advance_payment_value / nullif(contract_value, 0) >= 0.50
+                ) AS high_advance_payment_flag,
+                (
+                    contract_value >= 100000000
+                    AND paid_value - contract_value >= 100000000
+                    AND paid_value / nullif(contract_value, 0) >= 1.25
+                ) AS paid_over_contract_flag,
+                (
+                    contract_value >= 100000000
+                    AND invoiced_value - contract_value >= 100000000
+                    AND invoiced_value / nullif(contract_value, 0) >= 1.25
+                ) AS invoiced_over_contract_flag
+            FROM eligible
+            WHERE contract_value IS NOT NULL
+                AND contract_value > 0
+        )
+        SELECT
+            'procurement_payment_plan_anomalies' AS signal_id,
+            supplier_entity_id AS entity_id,
+            supplier_document_key AS entity_key,
+            'Company' AS entity_label,
+            contract_id AS scope_key,
+            'contract' AS scope_type,
+            'medium' AS severity,
+            least(
+                1.0,
+                greatest(
+                    CASE
+                        WHEN high_advance_payment_flag THEN
+                            0.62
+                                + least(advance_payment_share - 0.50, 0.20)
+                                + least(log10(greatest(contract_value, 1)) / 120.0, 0.08)
+                        ELSE 0.0
+                    END,
+                    CASE
+                        WHEN paid_over_contract_flag THEN
+                            0.72
+                                + least(paid_value_share - 1.25, 0.18)
+                                + least(
+                                    log10(greatest(paid_value - contract_value, 1))
+                                        / 120.0,
+                                    0.10
+                                )
+                        ELSE 0.0
+                    END,
+                    CASE
+                        WHEN invoiced_over_contract_flag THEN
+                            0.70
+                                + least(invoiced_value_share - 1.25, 0.18)
+                                + least(
+                                    log10(greatest(invoiced_value - contract_value, 1))
+                                        / 120.0,
+                                    0.10
+                                )
+                        ELSE 0.0
+                    END
+                )
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            anomaly_type,
+            high_advance_payment_flag,
+            paid_over_contract_flag,
+            invoiced_over_contract_flag,
+            contract_id,
+            contract_reference,
+            process_id,
+            process_url,
+            supplier_document_id,
+            supplier_name,
+            buyer_document_id,
+            buyer_name,
+            department,
+            city,
+            sector,
+            procurement_modality,
+            contract_type,
+            contract_status,
+            enables_advance_payment,
+            liquidation,
+            contract_value,
+            advance_payment_value,
+            advance_payment_share,
+            invoiced_value,
+            invoiced_value_share,
+            pending_payment_value,
+            paid_value,
+            paid_value_share,
+            amortized_value,
+            pending_value,
+            pending_execution_value,
+            signing_date,
+            [
+                coalesce(process_url, 'secop_ii_contracts:' || contract_id)
+            ] AS evidence_refs
+        FROM scored
+        WHERE anomaly_type IS NOT NULL
+    """)
+    _create_contract_suspension_views(con, required_sources)
+    _create_large_modification_views(con, required_sources)
+    con.execute("""
         CREATE OR REPLACE TEMP VIEW curated_repeat_awards_same_supplier AS
         WITH eligible AS (
             SELECT
@@ -775,6 +2583,185 @@ def _create_views(con: duckdb.DuckDBPyConnection, required_sources: Sequence[str
         WHERE r.contract_count >= 10
             AND r.total_contract_value >= 1000000000
     """)
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW curated_buyer_supplier_network_density AS
+        WITH eligible AS (
+            SELECT
+                supplier_entity_id,
+                supplier_document_key,
+                supplier_nit_canonical,
+                supplier_name,
+                buyer_document_id,
+                buyer_name,
+                department,
+                contract_id,
+                process_url,
+                contract_value,
+                signing_date
+            FROM curated_contract_awards
+            WHERE supplier_document_key IS NOT NULL
+                AND supplier_nit_canonical IS NOT NULL
+                AND buyer_document_id IS NOT NULL
+                AND contract_id IS NOT NULL
+                AND contract_value IS NOT NULL
+                AND contract_value > 0
+        ),
+        pair_rollup AS (
+            SELECT
+                supplier_document_key,
+                buyer_document_id,
+                any_value(supplier_entity_id) AS supplier_entity_id,
+                any_value(supplier_name) AS supplier_name,
+                any_value(buyer_name) AS buyer_name,
+                count(DISTINCT contract_id) AS pair_contract_count,
+                count(DISTINCT department) AS pair_department_count,
+                sum(contract_value) AS pair_total_value,
+                avg(contract_value) AS pair_avg_value,
+                min(signing_date) AS pair_first_signing_date,
+                max(signing_date) AS pair_last_signing_date
+            FROM eligible
+            GROUP BY supplier_document_key, buyer_document_id
+        ),
+        supplier_rollup AS (
+            SELECT
+                any_value(p.supplier_entity_id) AS entity_id,
+                p.supplier_document_key AS entity_key,
+                any_value(p.supplier_name) AS supplier_name,
+                count(DISTINCT p.buyer_document_id) AS distinct_buyer_count,
+                cast(sum(p.pair_contract_count) AS BIGINT) AS contract_count,
+                cast(sum(p.pair_total_value) AS DOUBLE) AS total_contract_value,
+                cast(
+                    sum(CASE WHEN p.pair_contract_count >= 5 THEN 1 ELSE 0 END)
+                    AS BIGINT
+                ) AS repeated_buyer_count,
+                cast(
+                    sum(
+                        CASE
+                            WHEN p.pair_contract_count >= 5 THEN p.pair_contract_count
+                            ELSE 0
+                        END
+                    )
+                    AS BIGINT
+                ) AS repeated_contract_count,
+                cast(
+                    sum(
+                        CASE
+                            WHEN p.pair_contract_count >= 5
+                                AND p.pair_total_value >= 500000000
+                                THEN 1
+                            ELSE 0
+                        END
+                    )
+                    AS BIGINT
+                ) AS high_value_repeated_buyer_count,
+                max(p.pair_contract_count) AS max_pair_contract_count,
+                min(p.pair_first_signing_date) AS first_signing_date,
+                max(p.pair_last_signing_date) AS last_signing_date
+            FROM pair_rollup p
+            GROUP BY p.supplier_document_key
+        ),
+        scored AS (
+            SELECT
+                *,
+                cast(repeated_contract_count AS DOUBLE)
+                    / nullif(cast(contract_count AS DOUBLE), 0)
+                    AS repeated_contract_share
+            FROM supplier_rollup
+        ),
+        ranked_evidence AS (
+            SELECT
+                e.supplier_document_key,
+                coalesce(e.process_url, 'secop_ii_contracts:' || e.contract_id)
+                    AS evidence_ref,
+                e.contract_value,
+                e.signing_date,
+                row_number() OVER (
+                    PARTITION BY e.supplier_document_key
+                    ORDER BY e.contract_value DESC NULLS LAST,
+                        e.signing_date DESC NULLS LAST,
+                        e.contract_id
+                ) AS evidence_rank
+            FROM eligible e
+            JOIN pair_rollup p
+                ON p.supplier_document_key = e.supplier_document_key
+                AND p.buyer_document_id = e.buyer_document_id
+            WHERE p.pair_contract_count >= 5
+        ),
+        evidence AS (
+            SELECT
+                supplier_document_key,
+                list(evidence_ref ORDER BY contract_value DESC, signing_date DESC)
+                    AS evidence_refs
+            FROM ranked_evidence
+            WHERE evidence_rank <= 5
+            GROUP BY supplier_document_key
+        ),
+        buyer_sample_ranked AS (
+            SELECT
+                supplier_document_key,
+                coalesce(buyer_name, buyer_document_id) AS buyer_sample,
+                pair_total_value,
+                row_number() OVER (
+                    PARTITION BY supplier_document_key
+                    ORDER BY pair_total_value DESC NULLS LAST, buyer_document_id
+                ) AS sample_rank
+            FROM pair_rollup
+            WHERE pair_contract_count >= 5
+        ),
+        buyer_samples AS (
+            SELECT
+                supplier_document_key,
+                list(buyer_sample ORDER BY pair_total_value DESC, buyer_sample)
+                    AS repeated_buyer_sample
+            FROM buyer_sample_ranked
+            WHERE sample_rank <= 10
+            GROUP BY supplier_document_key
+        )
+        SELECT
+            'procurement_buyer_supplier_network_density' AS signal_id,
+            entity_id,
+            entity_key,
+            'Company' AS entity_label,
+            'supplier_network:' || entity_key AS scope_key,
+            'supplier_network' AS scope_type,
+            least(
+                1.0,
+                0.45
+                    + least(repeated_contract_share, 1.0) * 0.25
+                    + least(repeated_buyer_count / 50.0, 0.15)
+                    + least(log10(greatest(total_contract_value, 1)) / 120.0, 0.15)
+            ) AS risk_signal,
+            1.0 AS identity_confidence,
+            'EXACT_COMPANY_NIT' AS identity_match_type,
+            'exact' AS identity_quality,
+            supplier_name,
+            distinct_buyer_count,
+            contract_count,
+            total_contract_value,
+            repeated_buyer_count,
+            repeated_contract_count,
+            high_value_repeated_buyer_count,
+            repeated_contract_share,
+            max_pair_contract_count,
+            first_signing_date,
+            last_signing_date,
+            b.repeated_buyer_sample,
+            e.evidence_refs
+        FROM scored s
+        JOIN evidence e
+            ON e.supplier_document_key = s.entity_key
+        LEFT JOIN buyer_samples b
+            ON b.supplier_document_key = s.entity_key
+        WHERE contract_count >= 50
+            AND distinct_buyer_count >= 10
+            AND repeated_buyer_count >= 8
+            AND high_value_repeated_buyer_count >= 2
+            AND repeated_contract_share >= 0.55
+            AND total_contract_value >= 2000000000
+    """)
+    _create_process_views(con, required_sources)
+    _create_cobidding_views(con, required_sources)
+    _create_company_registry_overlap_views(con, required_sources)
 
 
 def _table_sql(table: str) -> str:
@@ -788,12 +2775,34 @@ def _table_sql(table: str) -> str:
         return "SELECT * FROM curated_dim_person"
     if table == "fct_procurement_contract_awards":
         return "SELECT * FROM curated_contract_awards"
+    if table == "signal_feature_procurement_single_bidder_high_value":
+        return "SELECT * FROM curated_single_bidder_high_value"
+    if table == "signal_feature_procurement_large_modifications":
+        return "SELECT * FROM curated_large_modifications"
     if table == "signal_feature_procurement_sanctioned_supplier_awarded":
         return "SELECT * FROM curated_sanctioned_awards"
     if table == "signal_feature_procurement_supplier_concentration_across_entities":
         return "SELECT * FROM curated_supplier_concentration"
+    if table == "signal_feature_procurement_contract_value_outlier_by_category":
+        return "SELECT * FROM curated_contract_value_outlier_by_category"
     if table == "signal_feature_procurement_repeat_awards_same_supplier":
         return "SELECT * FROM curated_repeat_awards_same_supplier"
+    if table == "signal_feature_procurement_buyer_supplier_network_density":
+        return "SELECT * FROM curated_buyer_supplier_network_density"
+    if table == "signal_feature_procurement_cartel_risk_cobidding":
+        return "SELECT * FROM curated_cartel_risk_cobidding"
+    if table == "signal_feature_procurement_payment_plan_anomalies":
+        return "SELECT * FROM curated_payment_plan_anomalies"
+    if table == "signal_feature_procurement_contract_suspensions":
+        return "SELECT * FROM curated_contract_suspensions"
+    if table == "signal_feature_procurement_short_bidding_window":
+        return "SELECT * FROM curated_short_bidding_window"
+    if table == "signal_feature_procurement_offers_competition_drop":
+        return "SELECT * FROM curated_offers_competition_drop"
+    if table == "signal_feature_procurement_politically_exposed_position_supplier_overlap":
+        return "SELECT * FROM curated_politically_exposed_supplier_overlap"
+    if table == "signal_feature_procurement_related_companies_shared_officer":
+        return "SELECT * FROM curated_related_companies_shared_officer"
     raise CuratedBuildError(f"unknown curated table: {table}")
 
 

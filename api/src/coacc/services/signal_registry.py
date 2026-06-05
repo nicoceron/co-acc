@@ -1,20 +1,27 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 
 import yaml  # type: ignore[import-untyped]
 
 from coacc.models.signal import SignalDefinition, SignalRegistry
 from coacc.services.runtime_paths import config_file
 
-_REGISTRY_PATH = config_file("signal_registry.yml")
+
+def registry_path() -> str:
+    return str(config_file("signal_registry.yml"))
 
 
-@lru_cache(maxsize=1)
-def load_signal_registry() -> SignalRegistry:
-    raw = _REGISTRY_PATH.read_text(encoding="utf-8")
+@lru_cache(maxsize=8)
+def _load_signal_registry(path: str) -> SignalRegistry:
+    raw = Path(path).read_text(encoding="utf-8")
     payload = yaml.safe_load(raw)
     return SignalRegistry.model_validate(payload)
+
+
+def load_signal_registry() -> SignalRegistry:
+    return _load_signal_registry(registry_path())
 
 
 def validate_signal_registry() -> SignalRegistry:
@@ -23,7 +30,7 @@ def validate_signal_registry() -> SignalRegistry:
 
 
 def clear_signal_registry_cache() -> None:
-    load_signal_registry.cache_clear()
+    _load_signal_registry.cache_clear()
 
 
 def list_signal_definitions() -> list[SignalDefinition]:

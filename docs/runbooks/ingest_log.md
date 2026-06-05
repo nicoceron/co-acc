@@ -105,3 +105,4 @@ Resource evidence:
 - During `wi7w-2nvm`, resident memory stayed roughly in the 240-432 MB range while staging grew to about 1.0 GB before promotion.
 - Free disk stayed above 212 GiB, well above the `--min-free-gb 80` guard.
 - After promotion, `lake/meta/ingest_staging` returned to `0B`, `lake/raw` measured 8.7 GB, and source parquet counts were: `qddk-cgux` 1,173 files, `p6dx-8zbt` 1,453 files, `c82u-588k` 1,052 files, `rpmr-utcd` 3,481 files, `wi7w-2nvm` 4,646 files.
+| 2026-06-05T01:01:20.098255+00:00 | `u8cx-r425` | smoke | ok | 63000 | pass | 2026-06-03T00:00:00+00:00 | smoke: seeded watermark 2026-06-02T00:00:00+00:00 from max(fecha_de_carga) |

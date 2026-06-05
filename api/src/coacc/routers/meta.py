@@ -23,6 +23,7 @@ from coacc.models.dashboard import (
     ValidationCaseResult,
     ValidationCasesResponse,
 )
+from coacc.services.lake_ops_status import latest_lake_ops_report
 from coacc.services.neo4j_service import execute_query, execute_query_single
 from coacc.services.public_guard import should_hide_person_entities
 from coacc.services.source_registry import load_source_registry, source_registry_summary
@@ -2191,6 +2192,13 @@ async def neo4j_health(
     if record and record["ok"] == 1:
         return {"neo4j": "connected"}
     return {"neo4j": "error"}
+
+
+@router.get("/operations")
+async def operations_status() -> dict[str, Any]:
+    return latest_lake_ops_report(
+        max_age_hours=settings.coacc_ready_max_lake_ops_age_hours,
+    )
 
 
 @router.get("/stats")

@@ -227,9 +227,12 @@ export interface PrioritizedTerritoriesResponse {
 export interface EntityDetail {
   id: string;
   type: string;
+  entity_label?: string | null;
+  identity_quality?: string | null;
   properties: Record<string, string | number | boolean | null>;
   sources: SourceAttribution[];
   is_pep: boolean;
+  exposure_tier?: string;
 }
 
 export interface GraphNode {
@@ -403,6 +406,8 @@ export interface SignalDefinition {
 export interface SignalListItem extends SignalDefinition {
   hit_count: number;
   last_seen_at?: string | null;
+  materialized: boolean;
+  materialization_state: "materialized" | "registered_only";
 }
 
 export interface SignalEvidenceItem {
@@ -565,6 +570,40 @@ export interface BaselineResponse {
 
 export function getBaseline(entityId: string): Promise<BaselineResponse> {
   return apiFetch<BaselineResponse>(`/api/v1/baseline/${encodeURIComponent(entityId)}`);
+}
+
+// --- Source registry ---
+
+export interface SourceRegistryItem {
+  id: string;
+  name: string;
+  category: string;
+  tier: string;
+  status: string;
+  implementation_state: string;
+  load_state: string;
+  signal_promotion_state: string;
+  frequency: string;
+  in_universe_v1: boolean;
+  primary_url: string;
+  pipeline_id: string;
+  owner_agent: string;
+  access_mode: string;
+  public_access_mode: string;
+  discovery_status: string;
+  last_seen_url: string;
+  cadence_expected: string;
+  cadence_observed: string;
+  quality_status: string;
+  notes: string;
+}
+
+export interface SourceRegistryResponse {
+  sources: SourceRegistryItem[];
+}
+
+export function listSources(): Promise<SourceRegistryResponse> {
+  return apiFetch<SourceRegistryResponse>("/api/v1/meta/sources");
 }
 
 // --- Investigations ---

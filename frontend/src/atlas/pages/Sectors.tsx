@@ -2,12 +2,13 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
 
 import { AtlasMap, BarChart } from "../components/visuals";
-import { Eyebrow, Frame, MiniBar, Rule } from "../components/ui";
+import { EmptyState, Eyebrow, Frame, MiniBar, Rule } from "../components/ui";
 import { formatNumber } from "../lib/format";
 import { useAtlasOverview } from "../lib/useAtlasData";
 
 export function Sectors() {
   const { data } = useAtlasOverview();
+  const maxSectorHits = Math.max(1, ...data.sectors.map((item) => item.hits));
   const bars = data.sectors
     .map((sector) => ({
       label: sector.label,
@@ -42,11 +43,14 @@ export function Sectors() {
               <Eyebrow>{sector.id}</Eyebrow>
               <h2>{sector.label}</h2>
               <p>{formatNumber(sector.hits)} hits · {sector.contracts} contratos</p>
-              <MiniBar value={sector.hits / Math.max(...data.sectors.map((item) => item.hits))} color={sector.accent} />
+              <MiniBar value={sector.hits / maxSectorHits} color={sector.accent} />
             </div>
             <ArrowRight size={16} />
           </Link>
         ))}
+        {!data.sectors.length ? (
+          <EmptyState title="Sin sectores materializados" body="No hay agregados de senales por categoria para esta vista." />
+        ) : null}
       </section>
     </main>
   );

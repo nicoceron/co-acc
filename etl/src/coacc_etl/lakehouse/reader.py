@@ -10,10 +10,9 @@ if TYPE_CHECKING:
     import duckdb
 
 from coacc_etl.lakehouse.paths import raw_source_path
+from coacc_etl.runtime_paths import docs_dataset_file
 
 _SAFE_IDENTIFIER = re.compile(r"[^A-Za-z0-9_]+")
-_REPO_ROOT = Path(__file__).resolve().parents[4]
-_CATALOG_PATH = _REPO_ROOT / "docs" / "datasets" / "catalog.proven.csv"
 
 
 def source_view_name(source: str) -> str:
@@ -21,13 +20,18 @@ def source_view_name(source: str) -> str:
     return f"src_{cleaned or 'unknown'}"
 
 
-@lru_cache(maxsize=1)
-def _source_aliases() -> dict[str, tuple[str, ...]]:
+def _catalog_path() -> Path:
+    return docs_dataset_file("catalog.proven.csv")
+
+
+@lru_cache(maxsize=8)
+def _source_aliases_for(path_key: str) -> dict[str, tuple[str, ...]]:
     """Map semantic source ids from registries to raw dataset ids."""
-    if not _CATALOG_PATH.exists():
+    catalog_path = Path(path_key)
+    if not catalog_path.exists():
         return {}
     aliases: dict[str, list[str]] = {}
-    with _CATALOG_PATH.open(newline="", encoding="utf-8") as fh:
+    with catalog_path.open(newline="", encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
             dataset_id = (row.get("dataset_id") or "").strip()
             source_refs = (row.get("source_refs") or "").strip()
@@ -41,6 +45,10 @@ def _source_aliases() -> dict[str, tuple[str, ...]]:
                 if dataset_id not in aliases[source_ref]:
                     aliases[source_ref].append(dataset_id)
     return {key: tuple(value) for key, value in aliases.items()}
+
+
+def _source_aliases() -> dict[str, tuple[str, ...]]:
+    return _source_aliases_for(str(_catalog_path()))
 
 
 def resolve_source_ids(source: str) -> tuple[str, ...]:

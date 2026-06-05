@@ -11,8 +11,8 @@ signals:
     optional: []
   procurement_large_modifications:
     sources: [secop_contract_modifications, secop_contract_additions, secop_ii_contracts]
-    required: [secop_ii_contracts]
-    optional: [secop_contract_modifications, secop_contract_additions]
+    required: [secop_ii_contracts, secop_contract_modifications]
+    optional: [secop_contract_additions]
     severity_on_partial: medium
   procurement_sanctioned_supplier_awarded:
     sources: [paco_sanctions, fiscal_findings, fiscal_responsibility, secop_ii_contracts]
