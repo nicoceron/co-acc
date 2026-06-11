@@ -36,4 +36,16 @@ describe("App", () => {
       expect(screen.getByRole("heading", { name: /buscar en el grafo/i })).toBeInTheDocument();
     });
   });
+
+  it("renders the workspace patterns route", async () => {
+    render(
+      <MemoryRouter initialEntries={["/app/patterns"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: /patrones/i })).toBeInTheDocument();
+    });
+  });
 });

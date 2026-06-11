@@ -1,6 +1,26 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from coacc.models.entity import SourceAttribution
+
+
+class PatternInfo(BaseModel):
+    id: str
+    name_es: str
+    name_en: str
+    description_es: str
+    description_en: str
+    hit_count: int = 0
+    last_seen_at: str | None = None
+    severity: str | None = None
+    category: str | None = None
+    materialized: bool = False
+    materialization_state: str = "registered_only"
+    signal_ids: list[str] = Field(default_factory=list)
+    sources_required: list[str] = Field(default_factory=list)
+
+
+class PatternListResponse(BaseModel):
+    patterns: list[PatternInfo]
 
 
 class PatternResult(BaseModel):

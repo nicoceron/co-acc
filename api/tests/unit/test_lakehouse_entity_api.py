@@ -496,6 +496,28 @@ def test_materialized_signal_counts_deduplicate_lake_rows(
 
 
 @pytest.mark.anyio
+async def test_pattern_list_exposes_materialized_lake_counts(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    monkeypatch.setattr(settings, "patterns_enabled", True)
+    app.state.neo4j_driver = None
+    _write_signal_run(tmp_path)
+
+    response = await client.get("/api/v1/patterns/")
+
+    assert response.status_code == 200
+    patterns = {row["id"]: row for row in response.json()["patterns"]}
+    sanctioned = patterns["sanctioned_supplier_record"]
+    assert sanctioned["hit_count"] == 1
+    assert sanctioned["materialized"] is True
+    assert sanctioned["severity"] == "critical"
+    assert sanctioned["signal_ids"] == ["procurement_sanctioned_supplier_awarded"]
+
+
+@pytest.mark.anyio
 async def test_patterns_read_materialized_lake_hits_without_neo4j(
     client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,

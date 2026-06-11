@@ -96,6 +96,55 @@ signals:
       node_ref_field: node_ref
     dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
 
+  - id: procurement_contract_modification_ladder_review_only
+    version: 1
+    engine: duckdb
+    title: Repeated contract modification ladder
+    description: Reviewer-only exact-contract queue for repeated SECOP modification sequences with value, delay, payment-term, scope, suspension, execution, budget, invoice, payment, competition, or same-buyer role support; modification legality and corrupt intent are not treated as proven.
+    category: procurement
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources:
+      [
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_contract_execution,
+        secop_guarantees,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_invoices,
+        secop_payment_plans,
+        secop_ii_contracts,
+      ]
+    sources_required:
+      [
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_contract_execution,
+        secop_ii_contracts,
+      ]
+    scope_type: contract_modification_ladder
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: procurement_contract_modification_ladder_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    caveats:
+      - Repeated SECOP modifications and support-signal convergence do not prove illegal modifications, unlawful avoidance of competition, fiscal harm, delivery failure, or corrupt intent without source-file and legal review.
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
   - id: procurement_sanctioned_supplier_awarded
     version: 1
     title: Award to supplier with official sanctions or findings
@@ -120,6 +169,117 @@ signals:
       allow_person_entities: false
     evidence_mapping:
       item_type: sanctions_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_secop_sanction_later_awards_review_only
+    version: 1
+    engine: duckdb
+    title: SECOP-sanctioned supplier later receives awards
+    description: Reviewer-only exact SECOP II sanction-contract to supplier match followed by later exact supplier awards; platform sanction status and legal ineligibility are not treated as proven.
+    category: sanctions
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources: [secop_sanctions, secop_ii_contracts]
+    sources_required: [secop_sanctions, secop_ii_contracts]
+    scope_type: secop_sanction_later_awards
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: procurement_secop_sanction_later_awards_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: fiscal_procurement_chronology_review_only
+    version: 1
+    engine: duckdb
+    title: Fiscal finding or responsibility followed by procurement exposure
+    description: Reviewer-only exact-NIT chronology from Contraloria fiscal findings or fiscal-responsibility records to later SECOP supplier exposure; legal finality, current disability, public-entity role semantics, and corrupt intent are not treated as proven.
+    category: sanctions
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources:
+      [
+        fiscal_findings,
+        fiscal_responsibility,
+        secop_ii_contracts,
+      ]
+    sources_required:
+      [
+        fiscal_findings,
+        fiscal_responsibility,
+        secop_ii_contracts,
+      ]
+    scope_type: fiscal_procurement_chronology
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: fiscal_procurement_chronology_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    caveats:
+      - Fiscal findings and fiscal-responsibility rows are official evidence, but this queue does not prove current legal ineligibility, contract illegality, public-entity role misuse, or corrupt intent.
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: siri_antecedent_procurement_chronology_review_only
+    version: 1
+    engine: duckdb
+    title: SIRI antecedent procurement chronology
+    description: Reviewer-only exact-document chronology from SIRI antecedents to supplier awards, SECOP contract roles, or legal-representative supplier exposure; active status is inferred only from effect-date and duration fields.
+    category: sanctions
+    severity: high
+    entity_types: [Person, Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_PERSON_DOCUMENT, EXACT_COMPANY_NIT]
+    sources:
+      [
+        siri_antecedents,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_suppliers,
+      ]
+    sources_required:
+      [
+        siri_antecedents,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_suppliers,
+      ]
+    scope_type: siri_procurement_chronology
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: siri_antecedent_procurement_chronology_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_PERSON_DOCUMENT, EXACT_COMPANY_NIT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
       node_ref_field: node_ref
     dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
 
@@ -172,6 +332,93 @@ signals:
       require_exact_identity: true
       allowed_identity_match_types: [EXACT_COMPANY_NIT]
       allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: rues_supplier_capacity_status_review_only
+    version: 1
+    engine: duckdb
+    title: RUES supplier capacity and status review
+    description: Reviewer-only exact NIT supplier queue for RUES status, renewal, registration-age, or multiple-registration red flags combined with procurement exposure.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources: [company_registry_c82u, secop_ii_contracts]
+    sources_required: [company_registry_c82u, secop_ii_contracts]
+    scope_type: rues_supplier_capacity_status
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: rues_supplier_capacity_status_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_role_supplier_same_buyer_review_only
+    version: 1
+    engine: duckdb
+    title: Contract role holder also supplies the same buyer
+    description: Reviewer-only exact person-document overlap where a SECOP II supervisor, spending orderer, or payment orderer also appears as a supplier to the same buyer.
+    category: conflict
+    severity: high
+    entity_types: [Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_PERSON_DOCUMENT]
+    sources: [secop_ii_contracts]
+    sources_required: [secop_ii_contracts]
+    scope_type: buyer_role_supplier
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: procurement_role_supplier_same_buyer_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: public_declaration_supplier_chronology_review_only
+    version: 1
+    engine: duckdb
+    title: Public declarant later appears as supplier
+    description: Reviewer-only exact person-document chronology where asset/conflict declarants or sensitive-position holders later appear as SECOP suppliers.
+    category: conflict
+    severity: high
+    entity_types: [Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_PERSON_DOCUMENT]
+    sources: [asset_disclosures, conflict_disclosures, sigep_sensitive_positions, secop_ii_contracts]
+    sources_required: [asset_disclosures, conflict_disclosures, sigep_sensitive_positions, secop_ii_contracts]
+    scope_type: declaration_supplier
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: public_declaration_supplier_chronology_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
     evidence_mapping:
       item_type: reviewer_reference
       node_ref_field: node_ref
@@ -230,6 +477,533 @@ signals:
     evidence_mapping:
       item_type: project_reference
       node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: sgr_ocad_executor_capacity_gap
+    version: 1
+    engine: duckdb
+    title: OCAD/SGR executor capacity and delivery gap review
+    description: Reviewer-only project queue linking SGR execution, BPIN procurement, SECOP execution failures, and RUES supplier-capacity flags where low physical/financial progress coexists with high procurement exposure.
+    category: projects
+    severity: high
+    entity_types: [Project]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_BPIN]
+    sources:
+      [
+        sgr_expense_execution,
+        sgr_projects,
+        secop_process_bpin,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_contract_execution,
+        secop_guarantees,
+        secop_sanctions,
+      ]
+    sources_required:
+      [
+        sgr_expense_execution,
+        sgr_projects,
+        secop_process_bpin,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_contract_execution,
+        secop_guarantees,
+        secop_sanctions,
+      ]
+    scope_type: sgr_ocad_project
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: sgr_ocad_executor_capacity_gap
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_BPIN]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: project_reference
+      node_ref_field: node_ref
+    caveats:
+      - BPIN/SGR/SECOP/RUES linkage does not prove non-delivery, legal breach, executor capacity failure, or corrupt intent; it prioritizes document review.
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: dnp_sgr_beneficiary_delivery_gap_review_only
+    version: 1
+    engine: duckdb
+    title: DNP beneficiary context with SGR delivery gap
+    description: Reviewer-only exact-BPIN queue where DNP executor, project-location, beneficiary-location, or beneficiary-demographic context is layered on SGR low execution and high SECOP procurement exposure.
+    category: projects
+    severity: high
+    entity_types: [Project]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_BPIN]
+    sources:
+      [
+        sgr_expense_execution,
+        sgr_projects,
+        secop_process_bpin,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_contract_execution,
+        secop_guarantees,
+        secop_sanctions,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+      ]
+    sources_required:
+      [
+        sgr_expense_execution,
+        sgr_projects,
+        secop_process_bpin,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_contract_execution,
+        secop_guarantees,
+        secop_sanctions,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+      ]
+    scope_type: dnp_sgr_beneficiary_delivery_gap
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: dnp_sgr_beneficiary_delivery_gap_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_BPIN]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: project_reference
+      node_ref_field: node_ref
+    caveats:
+      - DNP beneficiary, demographic, executor, and location context does not prove beneficiary harm, non-delivery, incorrect targeting, legal breach, or corrupt intent; it prioritizes BPIN document review.
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: cross_signal_compound_risk_review_only
+    version: 1
+    engine: duckdb
+    title: Cross-signal compound risk review
+    description: Reviewer-only queue for exact company/person/project identities appearing across multiple independent signal families such as campaign finance, conflicts, sanctions, corporate capacity, execution failure, and procurement competition.
+    category: cross_detector
+    severity: high
+    entity_types: [Company, Person, Project]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT, EXACT_BPIN]
+    sources:
+      [
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    sources_required:
+      [
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    scope_type: cross_signal_entity
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: cross_signal_compound_risk_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types:
+        [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT, EXACT_BPIN]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: cross_signal_reference
+      node_ref_field: node_ref
+    caveats:
+      - Multiple exact-identity risk queues converging does not prove corrupt intent, legal disability, conflict of interest, or nonperformance without source-document review.
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: secop_i_legacy_supplier_current_risk_review_only
+    version: 1
+    engine: duckdb
+    title: SECOP I legacy supplier with current compound risk
+    description: Reviewer-only queue for exact-NIT suppliers with material SECOP I historical procurement exposure that now appear in current multi-family compound-risk queues.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources:
+      [
+        secop_i_historical_processes,
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    sources_required:
+      [
+        secop_i_historical_processes,
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    scope_type: secop_i_legacy_supplier_current_risk
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: secop_i_legacy_supplier_current_risk_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    caveats:
+      - SECOP I historical exposure plus current exact-NIT compound risk does not prove continuity of management, legal disability, legacy irregularity, current irregularity, contract breach, nonperformance, or corrupt intent without source-document and corporate-history review.
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: secop_i_legacy_representative_current_risk_review_only
+    version: 1
+    engine: duckdb
+    title: SECOP I legacy representative bridge to current compound risk
+    description: Reviewer-only queue where a SECOP I historical legal representative is the current RUES legal representative of an exact-NIT company already in multi-family compound-risk queues.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources:
+      [
+        secop_i_historical_processes,
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    sources_required:
+      [
+        secop_i_historical_processes,
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    scope_type: secop_i_legacy_representative_current_risk
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: secop_i_legacy_representative_current_risk_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    caveats:
+      - SECOP I historical legal-representative exposure plus a current RUES representative bridge into a compound-risk company does not prove ownership, beneficial control, legal disability, legacy irregularity, current irregularity, contract breach, nonperformance, or corrupt intent without source-document, corporate-file, and role-date review.
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: public_declaration_company_bridge_current_risk_review_only
+    version: 1
+    engine: duckdb
+    title: Public declaration company bridge with current compound risk
+    description: Reviewer-only queue where a public declarant or sensitive-position person is linked through RUES legal-representative identity to an exact-NIT company that already appears in current compound-risk evidence.
+    category: conflict
+    severity: high
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources:
+      [
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    sources_required:
+      [
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    scope_type: declaration_company_bridge_current_risk
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: public_declaration_company_bridge_current_risk_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    caveats:
+      - Public declaration or sensitive-position identity plus RUES company-representative bridge and current compound-risk evidence does not prove ownership, beneficial control, undeclared interest, conflict of interest, legal disability, contract irregularity, nonperformance, or corrupt intent without source-document, role-date, and corporate-file review.
     dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
 
   - id: judicial_case_contract_overlap
@@ -367,6 +1141,35 @@ signals:
       node_ref_field: node_ref
     dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
 
+  - id: tvec_item_price_dispersion_review_only
+    version: 1
+    engine: duckdb
+    title: TVEC item line materially above comparable prices
+    description: Reviewer-only item/unit/quantity/year comparator where a TVEC order line is at or above p95 and at least twice the median unit price.
+    category: procurement
+    severity: high
+    entity_types: [Company, ProcurementItem]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources: [tvec_orders_consolidated]
+    sources_required: [tvec_orders_consolidated]
+    scope_type: tvec_price
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: tvec_item_price_dispersion_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
   - id: procurement_contract_suspensions
     version: 1
     title: Contract with multiple suspensions
@@ -410,6 +1213,426 @@ signals:
     runner:
       kind: cypher
       ref: procurement_payment_plan_anomalies
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_guarantee_advance_execution_chain
+    version: 1
+    engine: duckdb
+    title: Advance payment with execution failure chain
+    description: "Reviewer-only guarantee/advance/execution chain: high advance or ended pending execution plus suspension, modification, execution delay, or SECOP sanction, with SECOP guarantee policy status/date/value evidence."
+    category: procurement
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources:
+      [
+        secop_ii_contracts,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    sources_required:
+      [
+        secop_ii_contracts,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    scope_type: contract_execution_chain
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: procurement_guarantee_advance_execution_chain
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_guarantee_policy_reuse_review_only
+    version: 1
+    engine: duckdb
+    title: SECOP guarantee policy reuse across suppliers
+    description: "Reviewer-only SECOP guarantee cluster: same normalized insurer and policy number appears on accepted or expired guarantee records for different suppliers and different buyers, with high aggregate contract exposure."
+    category: procurement
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources: [secop_ii_contracts, secop_guarantees]
+    sources_required: [secop_ii_contracts, secop_guarantees]
+    scope_type: guarantee_policy_cluster
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: procurement_guarantee_policy_reuse_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_budget_chain_reconciliation_review_only
+    version: 1
+    engine: duckdb
+    title: Budget chain reconciliation with execution/guarantee support
+    description: Reviewer-only exact-contract queue for high-value contracts where CDP, commitment, and budget-item support is missing, weak in SIIF/integration status, or materially mismatched, especially when guarantee/advance/execution chain evidence is present.
+    category: procurement
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources:
+      [
+        secop_ii_contracts,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    sources_required:
+      [
+        secop_ii_contracts,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    scope_type: contract_budget_chain
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: procurement_budget_chain_reconciliation_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_invoice_budget_reconciliation_review_only
+    version: 1
+    engine: duckdb
+    title: Invoice and budget-chain reconciliation
+    description: Reviewer-only exact-contract queue for SECOP invoice rows whose source totals, confirmed-payment flags, end-date timing, or contract-summary reconciliation conflict with contract value, especially where budget-chain or guarantee/advance/execution evidence is already present.
+    category: procurement
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources:
+      [
+        secop_ii_contracts,
+        secop_invoices,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    sources_required:
+      [
+        secop_ii_contracts,
+        secop_invoices,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    scope_type: contract_invoice_budget_reconciliation
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: procurement_invoice_budget_reconciliation_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_payment_plan_reconciliation_review_only
+    version: 1
+    engine: duckdb
+    title: SECOP payment-plan and budget reconciliation review
+    description: Reviewer-only exact-contract queue for real payment-plan rows whose paid values, CUFE, provider document, or payment dates conflict with contract, invoice, budget, or guarantee/execution context.
+    category: procurement
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources:
+      [
+        secop_ii_contracts,
+        secop_payment_plans,
+        secop_invoices,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    sources_required:
+      [
+        secop_ii_contracts,
+        secop_payment_plans,
+        secop_invoices,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    scope_type: contract_payment_plan_reconciliation
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: procurement_payment_plan_reconciliation_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: health_pae_service_delivery_gap_review_only
+    version: 1
+    engine: duckdb
+    title: Health and PAE service-delivery risk review
+    description: Reviewer-only exact-contract queue for health-provider, health-service, or PAE contracts where independent payment, budget, execution, modification, suspension, guarantee, or competition signals converge.
+    category: services
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources:
+      [
+        health_providers,
+        secop_ii_contracts,
+        secop_invoices,
+        secop_payment_plans,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    sources_required:
+      [
+        health_providers,
+        secop_ii_contracts,
+        secop_invoices,
+        secop_payment_plans,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    scope_type: health_pae_service_delivery
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: health_pae_service_delivery_gap_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: pae_beneficiary_territory_delivery_gap_review_only
+    version: 1
+    engine: duckdb
+    title: PAE beneficiary territory delivery-risk review
+    description: Reviewer-only queue for PAE-keyword contracts already in the health/PAE service-delivery risk queue where MEN municipal beneficiary counts add official service-population context for the buyer territory.
+    category: services
+    severity: high
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources:
+      [
+        health_providers,
+        pae_indicators,
+        secop_ii_contracts,
+        secop_invoices,
+        secop_payment_plans,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    sources_required:
+      [
+        health_providers,
+        pae_indicators,
+        secop_ii_contracts,
+        secop_invoices,
+        secop_payment_plans,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    scope_type: pae_beneficiary_territory_delivery_gap
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: pae_beneficiary_territory_delivery_gap_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    caveats:
+      - MEN PAE beneficiary territory context plus SECOP delivery-risk evidence does not prove beneficiary mismatch, non-delivery, ration quality failure, overbilling, service failure, legal breach, or corrupt intent without MEN microdata and contract-file review.
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: secop_interadmin_executor_network_review_only
+    version: 1
+    engine: duckdb
+    title: Interadministrative executor with independent risk evidence
+    description: Reviewer-only queue for high-value SECOP interadministrative agreement recipients whose exact NIT also appears in independent procurement competition, corporate-capacity, execution-failure, service-delivery, or sanction queues.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources:
+      [
+        secop_interadmin_agreements,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_offers,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_guarantees,
+        secop_invoices,
+        secop_payment_plans,
+        health_providers,
+        secop_sanctions,
+        company_registry_c82u,
+        secop_suppliers,
+      ]
+    sources_required:
+      [
+        secop_interadmin_agreements,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_offers,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_guarantees,
+        secop_invoices,
+        secop_payment_plans,
+        health_providers,
+        secop_sanctions,
+        company_registry_c82u,
+        secop_suppliers,
+      ]
+    scope_type: interadmin_executor_chain
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: secop_interadmin_executor_network_review_only
     public_policy:
       allow_public: false
       require_public_evidence: true
@@ -610,6 +1833,66 @@ signals:
       node_ref_field: node_ref
     dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
 
+  - id: procurement_related_bidders_same_process_review_only
+    version: 1
+    engine: duckdb
+    title: Related bidders in the same SECOP process
+    description: Reviewer-only queue for high-value SECOP II awards where the winning supplier and a competing offerer in the same process share an exact RUES representative.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT]
+    sources: [secop_offers, secop_ii_contracts, company_registry_c82u]
+    sources_required: [secop_offers, secop_ii_contracts, company_registry_c82u]
+    scope_type: related_bidders_process
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: procurement_related_bidders_same_process_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: procurement_shared_representative_same_buyer_cluster_review_only
+    version: 1
+    engine: duckdb
+    title: Shared representative same-buyer supplier cluster
+    description: Reviewer-only queue for same-buyer, same-year supplier clusters where multiple exact-NIT companies share an exact RUES legal representative and receive high-value awards.
+    category: procurement
+    severity: high
+    entity_types: [Company]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources: [secop_ii_contracts, company_registry_c82u]
+    sources_required: [secop_ii_contracts, company_registry_c82u]
+    scope_type: shared_representative_same_buyer_cluster
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: procurement_shared_representative_same_buyer_cluster_review_only
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT]
+      allow_person_entities: false
+    evidence_mapping:
+      item_type: reviewer_reference
+      node_ref_field: node_ref
+    caveats:
+      - Exact RUES legal-representative overlap among same-buyer supplier companies does not prove beneficial ownership, control, collusion, simulated competition, contract splitting, legal disability, breach, nonperformance, or corrupt intent without buyer-year procurement-file and corporate-history review.
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
   - id: procurement_politically_exposed_position_supplier_overlap
     version: 1
     title: Supplier overlap with sensitive public positions
@@ -771,6 +2054,35 @@ signals:
       allow_person_entities: false
     evidence_mapping:
       item_type: campaign_reference
+      node_ref_field: node_ref
+    dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
+
+  - id: cuentas_claras_donor_ineligibility_review
+    version: 1
+    engine: duckdb
+    title: Campaign donor contracts in same elected jurisdiction
+    description: Reviewer-only queue for exact Cuentas Claras donor-to-supplier matches where a 2019 local mayor/governor campaign donor later contracts in the same inferred jurisdiction during the 2020-2023 term; campaign cap and election-result inputs are marked missing.
+    category: election
+    severity: medium
+    entity_types: [Company, Person]
+    public_safe: false
+    reviewer_only: true
+    requires_identity: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+    sources: [cuentas_claras_income_2019, secop_ii_contracts]
+    sources_required: [cuentas_claras_income_2019, secop_ii_contracts]
+    scope_type: donor_contract_ineligibility_review
+    dedup_fields: [scope_key]
+    runner:
+      kind: duckdb
+      ref: cuentas_claras_donor_ineligibility_review
+    public_policy:
+      allow_public: false
+      require_public_evidence: true
+      require_exact_identity: true
+      allowed_identity_match_types: [EXACT_COMPANY_NIT, EXACT_PERSON_DOCUMENT]
+      allow_person_entities: true
+    evidence_mapping:
+      item_type: reviewer_reference
       node_ref_field: node_ref
     dedup_key_template: signal:{id}:entity:{entity_key}:scope:{scope_key}
 

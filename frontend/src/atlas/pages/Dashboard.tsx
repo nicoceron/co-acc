@@ -1,4 +1,4 @@
-import { Database, Search } from "lucide-react";
+import { Database, GitBranch, Search } from "lucide-react";
 import { Link } from "react-router";
 
 import { AtlasMap } from "../components/visuals";
@@ -9,6 +9,7 @@ import { useAtlasOverview } from "../lib/useAtlasData";
 export function Dashboard() {
   const { data, status } = useAtlasOverview();
   const signalsWithHits = data.signals.filter((signal) => signal.hits > 0).length;
+  const topPatterns = data.patterns.filter((pattern) => pattern.hits > 0).slice(0, 6);
 
   return (
     <main className="co-container co-container--wide co-dashboard">
@@ -23,6 +24,10 @@ export function Dashboard() {
           <Link className="co-button" to="/app/search">
             <Search size={16} />
             Buscar
+          </Link>
+          <Link className="co-button" to="/app/patterns">
+            <GitBranch size={16} />
+            Patrones
           </Link>
           <Link className="co-button co-button--primary" to="/app/signals">Catalogo de senales</Link>
         </div>
@@ -82,6 +87,47 @@ export function Dashboard() {
           </Panel>
         </aside>
       </div>
+
+      <section className="co-dashboard__sources">
+        <Rule>Patrones materializados</Rule>
+        <div className="co-table-wrap">
+          <table className="co-table">
+            <thead>
+              <tr>
+                <th>patron</th>
+                <th>severidad</th>
+                <th>categoria</th>
+                <th>hits</th>
+                <th>senal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topPatterns.map((pattern) => {
+                const primarySignal = pattern.signalIds[0];
+                return (
+                  <tr key={pattern.id}>
+                    <td>
+                      {primarySignal ? (
+                        <Link to={`/app/signals/${primarySignal}`}>{pattern.title}</Link>
+                      ) : (
+                        <span>{pattern.title}</span>
+                      )}
+                      <span className="co-row-sub">{pattern.id}</span>
+                    </td>
+                    <td><SeverityBadge severity={pattern.severity} /></td>
+                    <td className="co-mono">{pattern.category}</td>
+                    <td className="co-num">{formatNumber(pattern.hits)}</td>
+                    <td className="co-mono">{primarySignal || "registry"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {!topPatterns.length ? (
+            <EmptyState title="Sin patrones materializados" body="La API no entrego patrones con hits para esta vista." />
+          ) : null}
+        </div>
+      </section>
 
       <section className="co-dashboard__sources">
         <Rule>Salud de fuentes</Rule>

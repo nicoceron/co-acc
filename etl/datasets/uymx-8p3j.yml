@@ -22,7 +22,11 @@ columns_map:
   documento_proveedor: documento_proveedor
   documento_supervisor: documento_supervisor
   estado: estado
+  fecha_de_emision: fecha_de_emision
+  fecha_de_recepcion: fecha_de_recepcion
+  fecha_estimada_de_pago: fecha_estimada_de_pago
   fecha_inicio_contrato: fecha_inicio_contrato
+  fecha_real_de_pago: fecha_real_de_pago
   id_de_pago: id_de_pago
   id_del_contrato: id_del_contrato
   n_mero_de_radicaci_n: n_mero_de_radicaci_n
@@ -42,7 +46,24 @@ columns_map:
   valor_total: valor_total
   valor_total_de_la_factura: valor_total_de_la_factura
 required_coverage:
-  fecha_inicio_contrato: 0.95
+  compromiso_presupuestal: 0.99
+  cufe: 0.99
+  documento_proveedor: 0.99
+  documento_supervisor: 0.99
+  estado: 0.99
+  fecha_de_emision: 0.95
+  fecha_de_recepcion: 0.85
+  fecha_estimada_de_pago: 0.7
+  fecha_inicio_contrato: 0.99
+  fecha_real_de_pago: 0.7
+  id_de_pago: 0.99
+  id_del_contrato: 0.99
+  numero_de_factura: 0.99
+  valor_a_pagar: 0.99
+  valor_neto: 0.99
+  valor_neto_de_la_factura: 0.99
+  valor_total: 0.99
+  valor_total_de_la_factura: 0.99
 freq: weekly
 url: https://www.datos.gov.co/d/uymx-8p3j
 notes: 'Colombia: SECOP Payment Plans (17.5M rows). One row per payment plan line

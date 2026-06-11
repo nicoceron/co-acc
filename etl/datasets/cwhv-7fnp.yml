@@ -18,7 +18,16 @@ columns_map:
   nombre: nombre
   referencia_contrato: referencia_contrato
   valor_actual: valor_actual
-required_coverage: {}
+required_coverage:
+  identificador_unico: 0.99
+  identificador_item_compromiso: 0.99
+  identificador_compromiso: 0.99
+  id_contrato: 0.99
+  referencia_contrato: 0.99
+  codigo: 0.99
+  nombre: 0.99
+  valor_actual: 0.99
+  anno: 0.99
 freq: weekly
 url: https://www.datos.gov.co/d/cwhv-7fnp
 notes: 'Colombia: SECOP Budget Items (5.9M rows). Snapshot — line items inside a commitment.

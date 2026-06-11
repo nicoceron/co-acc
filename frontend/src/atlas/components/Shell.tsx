@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { label: "Casos", to: "/casos" },
   { label: "Sectores", to: "/sectores" },
   { label: "Workspace", to: "/app" },
+  { label: "Patrones", to: "/app/patterns" },
 ];
 
 function isActive(pathname: string, target: string): boolean {

@@ -5,6 +5,7 @@ import { CaseDetail, Cases } from "./pages/Cases";
 import { Dashboard } from "./pages/Dashboard";
 import { EntityPage } from "./pages/Entity";
 import { Landing } from "./pages/Landing";
+import { PatternsPage } from "./pages/Patterns";
 import { SearchPage } from "./pages/Search";
 import { Sectors } from "./pages/Sectors";
 import { SignalsPage } from "./pages/Signals";
@@ -21,6 +22,7 @@ export function AtlasApp() {
         <Route path="app/search" element={<SearchPage />} />
         <Route path="app/entity" element={<EntityPage />} />
         <Route path="app/entity/:entityId" element={<EntityPage />} />
+        <Route path="app/patterns" element={<PatternsPage />} />
         <Route path="app/signals" element={<SignalsPage />} />
         <Route path="app/signals/:signalId" element={<SignalsPage />} />
 

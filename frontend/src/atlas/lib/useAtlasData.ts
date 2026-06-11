@@ -9,11 +9,13 @@ import {
   getStats,
   listSources,
   listCases,
+  listPatterns,
   listSignals,
   searchEntities,
   type CaseSummary,
   type EntityDetail,
   type EvidenceTrailBundle,
+  type PatternInfo,
   type SearchResult,
   type SignalHit,
   type SignalListItem,
@@ -27,6 +29,7 @@ import {
   type CaseStory,
   type Departamento,
   type FeedItem,
+  type Severity,
   type SectorItem,
   type SignalSummary,
   type SourceItem,
@@ -48,6 +51,7 @@ export interface AtlasOverview {
   sources: SourceItem[];
   sectors: SectorItem[];
   departamentos: Departamento[];
+  patterns: PatternSummary[];
   signals: SignalSummary[];
   cases: CaseStory[];
   seriesHits: number[];
@@ -66,6 +70,20 @@ export interface AtlasSearchResult {
   doc: string;
   score: number;
   source: string;
+}
+
+export interface PatternSummary {
+  id: string;
+  title: string;
+  desc: string;
+  severity: Severity;
+  category: string;
+  hits: number;
+  materialized: boolean;
+  materializationState: "materialized" | "registered_only";
+  signalIds: string[];
+  sourcesRequired: string[];
+  lastSeen?: string | null;
 }
 
 export interface AtlasEntityState {
@@ -153,6 +171,7 @@ function buildFixtureOverview(): AtlasOverview {
     sources: atlasFixture.sources,
     sectors: atlasFixture.sectors,
     departamentos: atlasFixture.departamentos,
+    patterns: patternsFromSignals(atlasFixture.signals),
     signals: atlasFixture.signals,
     cases: atlasFixture.cases,
     seriesHits: atlasFixture.seriesHits,
@@ -167,6 +186,7 @@ function buildEmptyOverview(): AtlasOverview {
     sources: [],
     sectors: [],
     departamentos: [],
+    patterns: [],
     signals: [],
     cases: [],
     seriesHits: [0, 0],
@@ -207,6 +227,38 @@ function mapSignal(item: SignalListItem): SignalSummary {
     materialized: item.materialized,
     materializationState: item.materialization_state,
   };
+}
+
+function mapPattern(item: PatternInfo): PatternSummary {
+  return {
+    id: item.id,
+    title: item.name_es || item.name_en || item.id,
+    desc: item.description_es || item.description_en || "",
+    severity: item.severity || "low",
+    category: item.category || "pattern",
+    hits: item.hit_count,
+    materialized: item.materialized,
+    materializationState: item.materialization_state,
+    signalIds: item.signal_ids,
+    sourcesRequired: item.sources_required,
+    lastSeen: item.last_seen_at,
+  };
+}
+
+function patternsFromSignals(signals: SignalSummary[]): PatternSummary[] {
+  return signals.map((signal) => ({
+    id: signal.id,
+    title: signal.title,
+    desc: signal.desc,
+    severity: signal.severity,
+    category: signal.category,
+    hits: signal.hits,
+    materialized: Boolean(signal.materialized),
+    materializationState: signal.materializationState ?? "registered_only",
+    signalIds: [signal.id],
+    sourcesRequired: [],
+    lastSeen: signal.lastSeen,
+  }));
 }
 
 function mapSource(item: SourceRegistryItem): SourceItem {
@@ -325,13 +377,14 @@ export function useAtlasOverview(): OverviewState {
       };
     }
 
-    void Promise.allSettled([getStats(), listSignals(), listCases(1, 8), listSources()]).then((results) => {
+    void Promise.allSettled([getStats(), listSignals(), listCases(1, 8), listSources(), listPatterns()]).then((results) => {
       if (!active) return;
 
       const statsResult = results[0];
       const signalsResult = results[1];
       const casesResult = results[2];
       const sourcesResult = results[3];
+      const patternsResult = results[4];
       const stats = statsResult.status === "fulfilled" ? statsResult.value : undefined;
       const signals = signalsResult.status === "fulfilled"
         ? signalsResult.value.signals.map(mapSignal)
@@ -342,6 +395,9 @@ export function useAtlasOverview(): OverviewState {
       const sources = sourcesResult.status === "fulfilled"
         ? sourcesResult.value.sources.map(mapSource)
         : fixturesAllowed ? atlasFixture.sources : [];
+      const patterns = patternsResult.status === "fulfilled"
+        ? patternsResult.value.patterns.map(mapPattern)
+        : fixturesAllowed ? patternsFromSignals(atlasFixture.signals) : [];
       const liveCount = results.filter((result) => result.status === "fulfilled").length;
       const feed = signalsResult.status === "fulfilled"
         ? feedFromSignals(signals)
@@ -357,6 +413,7 @@ export function useAtlasOverview(): OverviewState {
           sources,
           sectors,
           departamentos: fixturesAllowed ? atlasFixture.departamentos : [],
+          patterns,
           signals,
           cases,
           seriesHits: signalsResult.status === "fulfilled"

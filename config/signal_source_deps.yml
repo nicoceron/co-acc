@@ -14,11 +14,65 @@ signals:
     required: [secop_ii_contracts, secop_contract_modifications]
     optional: [secop_contract_additions]
     severity_on_partial: medium
+  procurement_contract_modification_ladder_review_only:
+    sources:
+      [
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_contract_execution,
+        secop_guarantees,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_invoices,
+        secop_payment_plans,
+        secop_ii_contracts,
+      ]
+    required:
+      [
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_contract_execution,
+        secop_ii_contracts,
+      ]
+    optional:
+      [
+        secop_guarantees,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_invoices,
+        secop_payment_plans,
+      ]
   procurement_sanctioned_supplier_awarded:
     sources: [paco_sanctions, fiscal_findings, fiscal_responsibility, secop_ii_contracts]
     required: [secop_ii_contracts]
     optional: [paco_sanctions, fiscal_findings, fiscal_responsibility]
     severity_on_partial: high
+  procurement_secop_sanction_later_awards_review_only:
+    sources: [secop_sanctions, secop_ii_contracts]
+    required: [secop_sanctions, secop_ii_contracts]
+    optional: []
+  fiscal_procurement_chronology_review_only:
+    sources: [fiscal_findings, fiscal_responsibility, secop_ii_contracts]
+    required: [fiscal_findings, fiscal_responsibility, secop_ii_contracts]
+    optional: []
+  siri_antecedent_procurement_chronology_review_only:
+    sources:
+      [
+        siri_antecedents,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_suppliers,
+      ]
+    required:
+      [
+        siri_antecedents,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_suppliers,
+      ]
+    optional: []
   procurement_public_servant_conflict_disclosure_overlap:
     sources: [conflict_disclosures, sigep_public_servants, secop_ii_contracts]
     required: [conflict_disclosures, secop_ii_contracts]
@@ -28,6 +82,18 @@ signals:
     sources: [company_registry_c82u, secop_ii_contracts]
     required: [company_registry_c82u, secop_ii_contracts]
     optional: []
+  rues_supplier_capacity_status_review_only:
+    sources: [company_registry_c82u, secop_ii_contracts]
+    required: [company_registry_c82u, secop_ii_contracts]
+    optional: []
+  procurement_role_supplier_same_buyer_review_only:
+    sources: [secop_ii_contracts]
+    required: [secop_ii_contracts]
+    optional: []
+  public_declaration_supplier_chronology_review_only:
+    sources: [asset_disclosures, conflict_disclosures, sigep_sensitive_positions, secop_ii_contracts]
+    required: [asset_disclosures, conflict_disclosures, sigep_sensitive_positions, secop_ii_contracts]
+    optional: []
   project_bpin_procurement_overlap:
     sources: [dnp_project_contract_links, dnp_project_locations, secop_process_bpin, secop_ii_contracts]
     required: [secop_process_bpin, secop_ii_contracts]
@@ -36,6 +102,376 @@ signals:
   project_regalias_execution_procurement_overlap:
     sources: [sgr_expense_execution, sgr_projects, secop_process_bpin]
     required: [sgr_expense_execution, sgr_projects, secop_process_bpin]
+    optional: []
+    severity_on_partial: medium
+  sgr_ocad_executor_capacity_gap:
+    sources:
+      [
+        sgr_expense_execution,
+        sgr_projects,
+        secop_process_bpin,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_contract_execution,
+        secop_guarantees,
+        secop_sanctions,
+      ]
+    required:
+      [
+        sgr_expense_execution,
+        sgr_projects,
+        secop_process_bpin,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_contract_execution,
+        secop_guarantees,
+        secop_sanctions,
+      ]
+    optional: []
+    severity_on_partial: medium
+  dnp_sgr_beneficiary_delivery_gap_review_only:
+    sources:
+      [
+        sgr_expense_execution,
+        sgr_projects,
+        secop_process_bpin,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_contract_execution,
+        secop_guarantees,
+        secop_sanctions,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+      ]
+    required:
+      [
+        sgr_expense_execution,
+        sgr_projects,
+        secop_process_bpin,
+        secop_ii_contracts,
+        company_registry_c82u,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_contract_execution,
+        secop_guarantees,
+        secop_sanctions,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+      ]
+    optional: []
+    severity_on_partial: medium
+  cross_signal_compound_risk_review_only:
+    sources:
+      [
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    required:
+      [
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    optional: []
+    severity_on_partial: medium
+  secop_i_legacy_supplier_current_risk_review_only:
+    sources:
+      [
+        secop_i_historical_processes,
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    required:
+      [
+        secop_i_historical_processes,
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    optional: []
+    severity_on_partial: medium
+  secop_i_legacy_representative_current_risk_review_only:
+    sources:
+      [
+        secop_i_historical_processes,
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    required:
+      [
+        secop_i_historical_processes,
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    optional: []
+    severity_on_partial: medium
+  public_declaration_company_bridge_current_risk_review_only:
+    sources:
+      [
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
+    required:
+      [
+        asset_disclosures,
+        company_registry_c82u,
+        conflict_disclosures,
+        cuentas_claras_income_2019,
+        fiscal_findings,
+        fiscal_responsibility,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_modifications,
+        secop_contract_suspensions,
+        secop_guarantees,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_invoices,
+        secop_integrado,
+        secop_offers,
+        secop_payment_plans,
+        health_providers,
+        pae_indicators,
+        secop_process_bpin,
+        secop_sanctions,
+        secop_suppliers,
+        sgr_expense_execution,
+        sgr_projects,
+        dnp_project_executors,
+        dnp_project_locations,
+        dnp_project_beneficiary_locations,
+        dnp_project_beneficiary_characterization,
+        sigep_sensitive_positions,
+        tvec_orders_consolidated,
+      ]
     optional: []
     severity_on_partial: medium
   judicial_case_contract_overlap:
@@ -63,6 +499,10 @@ signals:
     required: [tvec_orders_consolidated, secop_ii_contracts]
     optional: []
     severity_on_partial: medium
+  tvec_item_price_dispersion_review_only:
+    sources: [tvec_orders_consolidated]
+    required: [tvec_orders_consolidated]
+    optional: []
   procurement_contract_suspensions:
     sources: [secop_contract_suspensions, secop_ii_contracts]
     required: [secop_ii_contracts]
@@ -73,6 +513,224 @@ signals:
     required: [secop_ii_contracts]
     optional: [secop_payment_plans]
     severity_on_partial: medium
+  procurement_guarantee_advance_execution_chain:
+    sources:
+      [
+        secop_ii_contracts,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    required:
+      [
+        secop_ii_contracts,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    optional: []
+  procurement_guarantee_policy_reuse_review_only:
+    sources: [secop_ii_contracts, secop_guarantees]
+    required: [secop_ii_contracts, secop_guarantees]
+    optional: []
+  procurement_budget_chain_reconciliation_review_only:
+    sources:
+      [
+        secop_ii_contracts,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    required:
+      [
+        secop_ii_contracts,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    optional: []
+  procurement_invoice_budget_reconciliation_review_only:
+    sources:
+      [
+        secop_ii_contracts,
+        secop_invoices,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    required:
+      [
+        secop_ii_contracts,
+        secop_invoices,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    optional: []
+  procurement_payment_plan_reconciliation_review_only:
+    sources:
+      [
+        secop_ii_contracts,
+        secop_payment_plans,
+        secop_invoices,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    required:
+      [
+        secop_ii_contracts,
+        secop_payment_plans,
+        secop_invoices,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    optional: []
+  health_pae_service_delivery_gap_review_only:
+    sources:
+      [
+        health_providers,
+        secop_ii_contracts,
+        secop_invoices,
+        secop_payment_plans,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    required:
+      [
+        health_providers,
+        secop_ii_contracts,
+        secop_invoices,
+        secop_payment_plans,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    optional: []
+  pae_beneficiary_territory_delivery_gap_review_only:
+    sources:
+      [
+        health_providers,
+        pae_indicators,
+        secop_ii_contracts,
+        secop_invoices,
+        secop_payment_plans,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    required:
+      [
+        health_providers,
+        pae_indicators,
+        secop_ii_contracts,
+        secop_invoices,
+        secop_payment_plans,
+        secop_cdp_requests,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_guarantees,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_sanctions,
+      ]
+    optional: []
+  secop_interadmin_executor_network_review_only:
+    sources:
+      [
+        secop_interadmin_agreements,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_offers,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_guarantees,
+        secop_invoices,
+        secop_payment_plans,
+        health_providers,
+        secop_sanctions,
+        company_registry_c82u,
+        secop_suppliers,
+      ]
+    required:
+      [
+        secop_interadmin_agreements,
+        secop_ii_contracts,
+        secop_ii_processes,
+        secop_offers,
+        paco_sanctions,
+        secop_budget_commitments,
+        secop_budget_items,
+        secop_cdp_requests,
+        secop_contract_execution,
+        secop_contract_suspensions,
+        secop_contract_modifications,
+        secop_guarantees,
+        secop_invoices,
+        secop_payment_plans,
+        health_providers,
+        secop_sanctions,
+        company_registry_c82u,
+        secop_suppliers,
+      ]
+    optional: []
   procurement_offers_competition_drop:
     sources: [secop_ii_processes]
     required: [secop_ii_processes]
@@ -104,6 +762,14 @@ signals:
     required: [secop_ii_processes]
     optional: [secop_offers]
     severity_on_partial: low
+  procurement_related_bidders_same_process_review_only:
+    sources: [secop_offers, secop_ii_contracts, company_registry_c82u]
+    required: [secop_offers, secop_ii_contracts, company_registry_c82u]
+    optional: []
+  procurement_shared_representative_same_buyer_cluster_review_only:
+    sources: [secop_ii_contracts, company_registry_c82u]
+    required: [secop_ii_contracts, company_registry_c82u]
+    optional: []
   procurement_politically_exposed_position_supplier_overlap:
     sources: [sigep_sensitive_positions, company_registry_c82u]
     required: [company_registry_c82u]
@@ -129,6 +795,10 @@ signals:
     optional: [igac_property_transactions]
     severity_on_partial: low
   cuentas_claras_donor_supplier_overlap:
+    sources: [cuentas_claras_income_2019, secop_ii_contracts]
+    required: [cuentas_claras_income_2019, secop_ii_contracts]
+    optional: []
+  cuentas_claras_donor_ineligibility_review:
     sources: [cuentas_claras_income_2019, secop_ii_contracts]
     required: [cuentas_claras_income_2019, secop_ii_contracts]
     optional: []
