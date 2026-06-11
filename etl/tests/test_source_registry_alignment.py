@@ -9,7 +9,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 _DEFERRED_SOURCE_REFS = {
     "higher_ed_directors",
-    "siri_antecedents",
 }
 
 

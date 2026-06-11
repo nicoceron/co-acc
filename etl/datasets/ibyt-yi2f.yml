@@ -13,7 +13,7 @@ columns_map:
   codigo_entidad: codigo_entidad
   estado: estado
   fecha_de_entrega: fecha_de_entrega
-  fecha_estiamda_de_pago: fecha_estiamda_de_pago
+  fecha_estimada_de_pago: fecha_estiamda_de_pago
   fecha_factura: fecha_factura
   id_contrato: id_contrato
   id_pago: id_pago
@@ -26,7 +26,18 @@ columns_map:
   valor_neto: valor_neto
   valor_total: valor_total
 required_coverage:
-  fecha_factura: 0.85
+  codigo_entidad: 0.99
+  estado: 0.99
+  fecha_de_entrega: 0.95
+  fecha_estiamda_de_pago: 0.7
+  fecha_factura: 0.95
+  id_contrato: 0.99
+  id_pago: 0.99
+  numero_de_factura: 0.99
+  pago_confirmado: 0.99
+  valor_a_pagar: 0.99
+  valor_neto: 0.99
+  valor_total: 0.99
 freq: weekly
 url: https://www.datos.gov.co/d/ibyt-yi2f
 notes: 'Colombia: SECOP Invoices (20.3M rows). One invoice per row, joined to contracts

@@ -23,7 +23,9 @@ from coacc.models.dashboard import (
     ValidationCaseResult,
     ValidationCasesResponse,
 )
+from coacc.services import lakehouse_query
 from coacc.services.lake_ops_status import latest_lake_ops_report
+from coacc.services.lakehouse_signal_service import materialized_signal_counts
 from coacc.services.neo4j_service import execute_query, execute_query_single
 from coacc.services.public_guard import should_hide_person_entities
 from coacc.services.source_registry import load_source_registry, source_registry_summary
@@ -323,6 +325,89 @@ _KNOWN_VALIDATION_CASES: tuple[dict[str, Any], ...] = (
         ],
     },
 )
+
+
+def _latest_coverage_rows_by_source() -> dict[str, int]:
+    coverage_root = lakehouse_query.lake_root() / "meta" / "coverage"
+    if not coverage_root.exists():
+        return {}
+    rows_by_source: dict[str, int] = {}
+    for source_dir in coverage_root.iterdir():
+        if not source_dir.is_dir():
+            continue
+        manifests = sorted(path for path in source_dir.glob("*.json") if path.is_file())
+        if not manifests:
+            continue
+        latest = manifests[-1]
+        try:
+            payload = json.loads(latest.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            logger.warning("Skipping unreadable coverage manifest: %s", latest)
+            continue
+        try:
+            rows_by_source[source_dir.name] = int(payload.get("rows") or 0)
+        except (TypeError, ValueError):
+            logger.warning("Skipping coverage manifest with invalid row count: %s", latest)
+    return rows_by_source
+
+
+def _curated_table_count(table: str) -> int:
+    table_dir = lakehouse_query.lake_root() / "curated" / f"table={table}"
+    if not table_dir.exists() or not any(table_dir.glob("*.parquet")):
+        return 0
+    con = lakehouse_query.connect(read_only=True)
+    try:
+        row = con.execute(
+            "SELECT count(*) FROM read_parquet(?)",
+            [str(table_dir / "*.parquet")],
+        ).fetchone()
+    finally:
+        con.close()
+    return int(row[0]) if row is not None else 0
+
+
+def _lake_stats_fallback() -> dict[str, int]:
+    coverage_rows = _latest_coverage_rows_by_source()
+    company_count = _curated_table_count("dim_company")
+    person_count = _curated_table_count("dim_person")
+    contract_count = _curated_table_count("fct_procurement_contract_awards")
+    sanction_count = sum(
+        coverage_rows.get(source, 0)
+        for source in ("paco_sanctions", "it5q-hg94", "8qxx-ubmq", "jr8e-e8tu")
+    )
+    signal_hit_count = sum(count for count, _observed_at in materialized_signal_counts().values())
+    total_nodes = company_count + person_count + contract_count + sanction_count
+    return {
+        "total_nodes": total_nodes,
+        "total_relationships": signal_hit_count,
+        "person_count": person_count,
+        "company_count": company_count,
+        "contract_count": contract_count,
+        "sanction_count": sanction_count,
+        "bid_count": coverage_rows.get("wi7w-2nvm", 0),
+        "source_document_count": sum(coverage_rows.values()),
+        "ingestion_run_count": sum(
+            1
+            for source_dir in (lakehouse_query.lake_root() / "meta" / "coverage").glob("*")
+            if source_dir.is_dir()
+            for _path in source_dir.glob("*.json")
+        ),
+    }
+
+
+def _record_or_lake(
+    record: dict[str, Any] | None,
+    lake_stats: dict[str, int],
+    key: str,
+) -> int:
+    if record is not None:
+        try:
+            value = int(record.get(key) or 0)
+        except (TypeError, ValueError):
+            value = 0
+        if value:
+            return value
+    return lake_stats.get(key, 0)
 
 
 def _compact_float(value: float | int | None) -> str:
@@ -2222,24 +2307,31 @@ async def database_stats(
     )
     source_entries = await _load_registry_with_runtime_status(session)
     source_summary = source_registry_summary(source_entries)
+    lake_stats = _lake_stats_fallback()
 
     result = {
-        "total_nodes": record["total_nodes"] if record else 0,
-        "total_relationships": record["total_relationships"] if record else 0,
+        "total_nodes": _record_or_lake(record, lake_stats, "total_nodes"),
+        "total_relationships": _record_or_lake(record, lake_stats, "total_relationships"),
         "person_count": (
-            0 if should_hide_person_entities() else (record["person_count"] if record else 0)
+            0
+            if should_hide_person_entities()
+            else _record_or_lake(record, lake_stats, "person_count")
         ),
-        "company_count": record["company_count"] if record else 0,
+        "company_count": _record_or_lake(record, lake_stats, "company_count"),
         "health_count": record["health_count"] if record else 0,
         "finance_count": record["finance_count"] if record else 0,
-        "contract_count": record["contract_count"] if record else 0,
-        "sanction_count": record["sanction_count"] if record else 0,
+        "contract_count": _record_or_lake(record, lake_stats, "contract_count"),
+        "sanction_count": _record_or_lake(record, lake_stats, "sanction_count"),
         "election_count": record["election_count"] if record else 0,
         "amendment_count": record["amendment_count"] if record else 0,
         "education_count": record["education_count"] if record else 0,
-        "bid_count": record["bid_count"] if record else 0,
-        "source_document_count": record.get("source_document_count", 0) if record else 0,
-        "ingestion_run_count": record.get("ingestion_run_count", 0) if record else 0,
+        "bid_count": _record_or_lake(record, lake_stats, "bid_count"),
+        "source_document_count": _record_or_lake(
+            record,
+            lake_stats,
+            "source_document_count",
+        ),
+        "ingestion_run_count": _record_or_lake(record, lake_stats, "ingestion_run_count"),
         "data_sources": source_summary["universe_v1_sources"],
         "implemented_sources": source_summary["implemented_sources"],
         "loaded_sources": source_summary["loaded_sources"],

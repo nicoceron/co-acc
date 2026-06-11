@@ -252,7 +252,10 @@ async def test_meta_stats(client: AsyncClient) -> None:
 
 
 @pytest.mark.anyio
-async def test_meta_stats_uses_catalog_when_graph_unavailable(client: AsyncClient) -> None:
+async def test_meta_stats_uses_lake_when_graph_unavailable(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     import coacc.routers.meta as meta_module
     from coacc.main import app
 
@@ -260,17 +263,36 @@ async def test_meta_stats_uses_catalog_when_graph_unavailable(client: AsyncClien
     meta_module._stats_cache_scope = None
     meta_module._stats_cache_time = 0.0
     app.state.neo4j_driver = None
+    monkeypatch.setattr(
+        meta_module,
+        "_lake_stats_fallback",
+        lambda: {
+            "total_nodes": 123,
+            "total_relationships": 45,
+            "person_count": 12,
+            "company_count": 34,
+            "contract_count": 56,
+            "sanction_count": 7,
+            "bid_count": 89,
+            "source_document_count": 999,
+            "ingestion_run_count": 5,
+        },
+    )
 
     response = await client.get("/api/v1/meta/stats")
 
     assert response.status_code == 200
     data = response.json()
     summary = source_registry_summary(load_source_registry())
-    assert data["total_nodes"] == 0
-    assert data["total_relationships"] == 0
-    assert data["person_count"] == 0
-    assert data["company_count"] == 0
-    assert data["contract_count"] == 0
+    assert data["total_nodes"] == 123
+    assert data["total_relationships"] == 45
+    assert data["person_count"] == 12
+    assert data["company_count"] == 34
+    assert data["contract_count"] == 56
+    assert data["sanction_count"] == 7
+    assert data["bid_count"] == 89
+    assert data["source_document_count"] == 999
+    assert data["ingestion_run_count"] == 5
     assert data["data_sources"] == summary["universe_v1_sources"]
     assert data["implemented_sources"] == summary["implemented_sources"]
     assert data["loaded_sources"] == summary["loaded_sources"]

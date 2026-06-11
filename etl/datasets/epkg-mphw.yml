@@ -8,8 +8,23 @@ join_keys:
   - codigo_municipio
 watermark_column: null
 partition_column: null
-columns_map: {}
+columns_map:
+  cantidad_beneficiarios_pae: cantidad_beneficiarios_pae
+  codigo_departamento: codigo_departamento
+  codigo_municipio: codigo_municipio
+  departamento: departamento
+  fecha: fecha
+  fecha_corte: fecha_corte
+  grupo_poblacional: grupo_poblacional
+  jornada: jornada
+  municipio: municipio
+  zona_sede: zona_sede
 required_coverage: {}
-freq: null
+freq: monthly
 url: https://www.datos.gov.co/d/epkg-mphw
-notes: ''
+notes: 'Colombia: MEN PAE indicators by municipality, zone, school day, and population
+  group (121k rows as of 2026-06-06). Snapshot context source for PAE beneficiary-territory
+  overlays; each run lands under lake/raw/source=epkg-mphw/snapshot=<iso>/.
+  This is beneficiary context, not direct proof of delivery, ration quality, or
+  school-level service fulfillment.'
+full_refresh_only: true

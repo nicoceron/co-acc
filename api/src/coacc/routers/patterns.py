@@ -7,9 +7,13 @@ from starlette.requests import Request
 from coacc.config import settings
 from coacc.dependencies import get_intelligence_provider, get_optional_session
 from coacc.middleware.rate_limit import limiter
-from coacc.models.pattern import PatternResponse, PatternResult
+from coacc.models.pattern import PatternListResponse, PatternResponse, PatternResult
 from coacc.services.intelligence_provider import IntelligenceProvider
-from coacc.services.lakehouse_pattern_service import lake_patterns_for_entity
+from coacc.services.lakehouse_pattern_service import (
+    lake_pattern_summaries,
+    lake_patterns_for_entity,
+    materialized_pattern_ids,
+)
 from coacc.services.public_guard import enforce_entity_lookup_enabled
 
 router = APIRouter(prefix="/api/v1/patterns", tags=["patterns"])
@@ -108,13 +112,15 @@ async def get_specific_pattern(
     _enforce_patterns_enabled()
     if settings.public_mode:
         enforce_entity_lookup_enabled()
-    available = [row["id"] for row in provider.list_patterns()]
-    if pattern_name not in set(available):
+    provider_available = {row["id"] for row in provider.list_patterns()}
+    lake_available = materialized_pattern_ids()
+    available = provider_available | lake_available
+    if pattern_name not in available:
         app_env = settings.app_env.strip().lower()
         detail = (
             "Pattern not found"
             if app_env in ("prod", "production")
-            else f"Pattern not found: {pattern_name}. Available: {available}"
+            else f"Pattern not found: {pattern_name}. Available: {sorted(available)}"
         )
         raise HTTPException(status_code=404, detail=detail)
     lake_results = lake_patterns_for_entity(
@@ -123,9 +129,11 @@ async def get_specific_pattern(
         pattern_id=pattern_name,
         public_only=True,
     )
-    if lake_results is not None and (lake_results or session is None):
+    if lake_results is not None and (
+        lake_results or session is None or pattern_name not in provider_available
+    ):
         results = lake_results
-    elif session is None:
+    elif session is None or pattern_name not in provider_available:
         if lake_results is None:
             raise HTTPException(status_code=404, detail="Entity not found")
         results = []
@@ -145,9 +153,9 @@ async def get_specific_pattern(
     )
 
 
-@router.get("/", response_model=dict[str, list[dict[str, str]]])
+@router.get("/", response_model=PatternListResponse)
 async def list_patterns(
     provider: Annotated[IntelligenceProvider, Depends(get_intelligence_provider)],
-) -> dict[str, list[dict[str, str]]]:
+) -> PatternListResponse:
     _enforce_patterns_enabled()
-    return {"patterns": provider.list_patterns()}
+    return PatternListResponse(patterns=lake_pattern_summaries(provider.list_patterns()))

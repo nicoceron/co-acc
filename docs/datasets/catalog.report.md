@@ -48,24 +48,24 @@ Metadata-only pass found a core join key; needs row count/freshness before promo
 | `7fix-nd37` | -1 | process | process:id_adjudicacion | — | SECOP I - Adiciones |
 | `7jfv-7spn` | -1 | entity | entity:codigo_entidad | — | Montos y número de créditos aprobados o desembolsados por cosechas |
 | `8cnh-7asj` | -1 | divipola|entity | divipola:codigo_departamento|divipola:codigo_municipio|entity:codigo_centro|entity:codigo_regional | — | Georeferenciación Centros de Aprendizaje SENA |
-| `8qxx-ubmq` | -1 | nit | nit:nit | — | Hallazgos Fiscales |
+| `8qxx-ubmq` | 73 | nit | nit:nit | fiscal_findings | Hallazgos Fiscales |
 | `8tz7-h3eu` | -1 | nit | nit:numero_documento | — | Declaración de activos - patrimonial servidores públicos |
 | `9sue-ezhx` | -1 | entity|nit | entity:codigo_entidad|entity:nit_entidad|nit:nit_entidad | — | SECOPII - Plan Anual De Adquisiciones Detalle |
 | `9xdg-hm6t` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas |
 | `a65q-6den` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas |
-| `a86w-fh92` | -1 | bpin|contract|entity|nit|process | bpin:entidad_bpin|bpin:bpin_codigo|contract:id_contrato|contract:referencia_contrato|entity:codigo_unidad_ejecutora|nit:nit|nit:nit_proveedor|process:id_proceso | — | SECOP II - Solicitudes CDPs |
+| `a86w-fh92` | 9,572,873 | bpin|contract|entity|nit|process | bpin:entidad_bpin|bpin:bpin_codigo|contract:id_contrato|contract:referencia_contrato|entity:codigo_unidad_ejecutora|nit:nit|nit:nit_proveedor|process:id_proceso | — | SECOP II - Solicitudes CDPs |
 | `ahbx-upcu` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas |
 | `b6m4-qgqv` | -1 | entity | entity:codigo_entidad | — | SECOP II - PAA - Encabezado |
 | `bpij-5vy9` | -1 | entity | entity:codigoentidad | — | Ejecución Presupuestal del Presupuesto General de la Nación detallada por Rubro Presupuestal |
 | `br9a-gygu` | -1 | bpin|divipola|entity | bpin:codigobpin|divipola:codigodanedepartamento|divipola:codigodaneentidad|entity:codigodaneentidad | — | Ejecución Financiera de Regalías |
-| `c36g-9fc2` | -1 | nit | nit:numeroidentificacion | — | Registro Especial de Prestadores y Sedes de Servicios de Salud |
+| `c36g-9fc2` | 76,821 | nit | nit:numeroidentificacion | health_providers | Registro Especial de Prestadores y Sedes de Servicios de Salud |
 | `c82u-588k` | -1 | nit | nit:numero_identificacion|nit:nit|nit:num_identificacion_representante_legal | — | Personas Naturales Personas Jurídicas y Entidades Sin Ánimo de Lucro |
 | `cb9c-h8sn` | -1 | contract | contract:id_contrato | — | SECOP II - Adiciones |
 | `ceth-n4bn` | -1 | nit | nit:codigo_grupo|nit:nit_grupo|nit:codigo_participante|nit:nit_participante | — | Grupos de Proveedores - SECOP II |
 | `cf9k-55fw` | -1 | bpin|entity | bpin:bpin|entity:codigoentidadresponsable | — | DNP-proyectos_datos_basicos |
 | `cmgp-8z8t` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas |
 | `ctcp-462n` | -1 | nit | nit:nit | — | Estados Financieros NIIF- Estado de Flujo Efectivo |
-| `cwhv-7fnp` | -1 | contract | contract:id_contrato|contract:referencia_contrato | — | SECOP II - Rubros Presupuestales |
+| `cwhv-7fnp` | 5,891,594 | contract | contract:id_contrato|contract:referencia_contrato | — | SECOP II - Rubros Presupuestales |
 | `d9na-abhe` | -1 | bpin|process | bpin:codigo_bpin|process:id_proceso | — | SECOP II - BPIN por Proceso |
 | `dd55-74ss` | -1 | nit | nit:nit | — | SUJETOS OBLIGADOS |
 | `dmgg-8hin` | -1 | entity|nit | entity:nit_entidad|nit:nit_entidad | — | SECOP II - Archivos Descarga Desde 2025 |
@@ -73,12 +73,12 @@ Metadata-only pass found a core join key; needs row count/freshness before promo
 | `e88h-vxzi` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas Organizaciones Solidarias |
 | `e8s8-v85a` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas |
 | `e967-4a8r` | -1 | entity | entity:codigo_entidad | — | Información estadística y financiera por ramos de seguros Formato 290 |
-| `epzv-8ck4` | -1 | bpin|entity | bpin:bpin|entity:codigoentidadejecutora | — | DNP - ejecutores de proyectos |
+| `epzv-8ck4` | 315,191 | bpin|entity | bpin:bpin|entity:codigoentidadejecutora | `dnp_project_executors` | DNP - ejecutores de proyectos |
 | `f789-7hwg` | -1 | bpin|contract|divipola|entity|nit|process | bpin:codigo_bpin|contract:numero_de_contrato|divipola:c_digo_de_la_entidad|entity:nit_de_la_entidad|entity:c_digo_de_la_entidad|nit:nit_de_la_entidad|nit:identificacion_del_contratista|nit:identific_representante_legal|process:id_adjudicacion | — | SECOP I - Procesos de Compra Pública |
 | `fr8e-58py` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas SIIA |
 | `fwf9-c4xb` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas |
 | `gbry-rnq4` | -1 | nit | nit:numero_documento | — | Declaraciones conflictos de interés |
-| `gjp9-cutm` | -1 | contract | contract:id_contrato | — | SECOP II - Garantias |
+| `gjp9-cutm` | 6,705,690 | contract | contract:id_contrato | `secop_guarantees` | SECOP II - Garantias |
 | `gra4-pcp2` | -1 | contract|entity|nit | contract:id_contrato|entity:codigo_entidad|entity:nit_entidad|entity:codigo_proveedor|nit:nit_entidad|nit:documento_proveedor | — | SECOP II - Ubicaciones ejecucion contratos |
 | `h7zv-k39x` | -1 | divipola|entity|nit | divipola:idmunicipio|divipola:iddepartamento|entity:dm_institucion_cod_institucion|nit:ccb_nit_inst | — | Universo de entidades |
 | `hb3d-dyp7` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas SIIA |
@@ -86,12 +86,12 @@ Metadata-only pass found a core join key; needs row count/freshness before promo
 | `hgi6-6wh3` | -1 | entity|nit|process | entity:nit_entidad|entity:codigo_entidad|entity:codigo_proveedor|nit:nit_entidad|nit:nit_proveedor|process:id_procedimiento | — | Proponentes por Proceso SECOP II |
 | `htue-emaw` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas SIIA |
 | `iaeu-rcn6` | -1 | nit|process | nit:numero_identificacion|process:numero_proceso | — | Antecedentes de SIRI |
-| `ibyt-yi2f` | -1 | contract|entity | contract:id_contrato|entity:codigo_entidad | — | SECOP II - Facturas |
+| `ibyt-yi2f` | 21,002,798 | contract|entity | contract:id_contrato|entity:codigo_entidad | `secop_invoices` | SECOP II - Facturas |
 | `it5q-hg94` | -1 | contract|entity|process | contract:id_contrato|entity:codigo_entidad_creadora|process:id_proceso | — | SECOPII - Multas y Sanciones |
 | `ityv-bxct` | -1 | contract|entity|process | contract:id_contrato|contract:numero_de_contrato|entity:id_entidad|process:id_proceso | — | SECOP - Convenios Interadministrativos |
 | `jbjy-vk9h` | -1 | contract|entity|nit | contract:id_contrato|entity:nit_entidad|entity:codigo_entidad|entity:codigo_proveedor|nit:nit_entidad|nit:documento_proveedor | — | SECOP II - Contratos Electrónicos |
 | `jgra-rz2t` | -1 | nit | nit:can_identificacion|nit:ing_identificacion | — | Base ingresos cuentas claras 2019 |
-| `jr8e-e8tu` | -1 | nit | nit:identificaci_n|nit:n_mero_de_identificaci_n | — | Responsabilidad Fiscal |
+| `jr8e-e8tu` | 60 | nit | nit:identificaci_n|nit:n_mero_de_identificaci_n | fiscal_responsibility | Responsabilidad Fiscal |
 | `jzzx-knyw` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas SIIA |
 | `k67a-zkz9` | -1 | divipola|entity | divipola:estu_cod_reside_depto|divipola:estu_coddane_cole_termino|entity:inst_cod_institucion|divipola:estu_prgm_codmunicipio|divipola:estu_inst_codmunicipio|divipola:estu_cod_depto_presentacion | — | Resultados Saber TyT Genéricas 2020-1 |
 | `kg2d-yfyg` | -1 | entity|nit | entity:codentidad|nit:nit | — | Listado de Entidades del Sector Solidario |
@@ -107,7 +107,7 @@ Metadata-only pass found a core join key; needs row count/freshness before promo
 | `prdx-nxyp` | -1 | divipola|entity|nit | divipola:codigo_municipio|entity:codigo_entidad|entity:nit_entidad|nit:nit_entidad | — | SECOP I - PAA Encabezado |
 | `prwj-nzxa` | -1 | nit | nit:nit | — | Estados Financieros NIIF- Estado de Resultado Integral |
 | `ps88-5e3v` | -1 | entity | entity:codigo_entidad | — | SECOP I - Archivos Descarga |
-| `qddk-cgux` | -1 | bpin|contract|divipola|entity|nit|process | bpin:codigo_bpin|contract:numero_de_contrato|divipola:c_digo_de_la_entidad|entity:nit_de_la_entidad|entity:c_digo_de_la_entidad|nit:nit_de_la_entidad|nit:identificacion_del_contratista|nit:identific_representante_legal|process:id_adjudicacion | — | SECOP I - Procesos de Compra Pública Histórico |
+| `qddk-cgux` | 6,123,394 | bpin|contract|divipola|entity|nit|process | bpin:codigo_bpin|contract:numero_de_contrato|divipola:c_digo_de_la_entidad|entity:nit_de_la_entidad|entity:c_digo_de_la_entidad|nit:nit_de_la_entidad|nit:identificacion_del_contratista|nit:identific_representante_legal|process:id_adjudicacion | `secop_i_historical_processes` | SECOP I - Procesos de Compra Pública Histórico |
 | `qhpu-8ixx` | -1 | entity | entity:codigo_entidad | — | Rentabilidades de los Fondos de Inversión Colectiva (FIC) |
 | `qkv4-ek54` | -1 | bpin|entity | bpin:bpin|entity:codigo_entidad | — | OVCF - SGR - Ejecución de Gastos |
 | `qmzu-gj57` | -1 | nit | nit:nit | — | SECOP II - Proveedores Registrados |
@@ -119,7 +119,7 @@ Metadata-only pass found a core join key; needs row count/freshness before promo
 | `s484-c9k3` | -1 | contract|entity|process | contract:id_contrato|contract:numero_de_contrato|entity:id_entidad|process:id_proceso | — | SECOP - Convenios Interadministrativos |
 | `s97v-q3tx` | -1 | divipola|entity|nit | divipola:car_t1556_codigodane|entity:identificador_empresa|nit:nit | — | Superservicios - Inf. Comercial Usuarios NO Regulados |
 | `sasi-u68b` | -1 | nit | nit:numero_nit|nit:n_mero_c_dula_representante | — | Entidades Acreditadas Octubre 2023 |
-| `skc9-met7` | -1 | contract | contract:id_contrato|contract:referencia_contrato | — | SECOP II - Compromisos Presupuestales |
+| `skc9-met7` | 5,866,580 | contract | contract:id_contrato|contract:referencia_contrato | — | SECOP II - Compromisos Presupuestales |
 | `sr9n-792w` | -1 | entity|nit | entity:cod_entidad|nit:numeroidentificacion | — | Entidades  vigiladas por la Superfinanciera |
 | `st4x-g6gz` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas |
 | `tauh-5jvn` | -1 | contract|nit|process | contract:numero_contrato|nit:num_doc_proponente|process:id_proceso|process:id_adjudicacion | — | SECOP I - Proponentes |
@@ -135,12 +135,12 @@ Metadata-only pass found a core join key; needs row count/freshness before promo
 | `uawh-cjvi` | -1 | entity | entity:codigo_entidad|entity:codigo_patrimonio | — | Fondo de Pensiones Obligatorias y Cesantías C.P L.P |
 | `upr9-nkiz` | -1 | divipola|entity | divipola:codigomunicipioinstitucion|divipola:codigomunicipioprograma|entity:codigoinstitucion | — | MEN_PROGRAMAS_DE_EDUCACIÓN_SUPERIOR |
 | `usqp-5nsn` | -1 | entity | entity:id_entidad | — | TVEC - Items |
-| `uymx-8p3j` | -1 | contract|entity|nit | contract:id_del_contrato|contract:referencia_contrato|entity:codigo_entidad|entity:nit_entidad|nit:nit_entidad|nit:documento_proveedor | — | SECOP II - Plan de pagos |
+| `uymx-8p3j` | 17480966 | contract|entity|nit | contract:id_del_contrato|contract:referencia_contrato|entity:codigo_entidad|entity:nit_entidad|nit:nit_entidad|nit:documento_proveedor | `secop_payment_plans` | SECOP II - Plan de pagos |
 | `vbr4-v5x7` | -1 | nit | nit:n_mero_nit | — | Entidades Acreditadas |
 | `vv8g-8u9u` | -1 | divipola|entity | divipola:codigo_departamento_curso|divipola:codigo_municipio_curso|entity:codigo_regional|entity:codigo_centro | — | PROGRAMACIÓN ESPECÍFICA DE CURSOS LARGOS, ESPECIALES Y EVENTOS POR REGIONAL Y CENTRO |
 | `wi7w-2nvm` | -1 | entity|nit|process | entity:nit_entidad_compradora|entity:c_digo_entidad|entity:c_digo_proveedor|nit:nit_entidad_compradora|nit:nit_del_proveedor|process:id_del_proceso_de_compra | — | SECOPII - Ofertas Por Proceso |
 | `wwhe-4sq8` | -1 | contract|entity|nit | contract:id_contrato|contract:referencia_contrato|entity:nit_entidad|entity:codigo_entidad|nit:nit_entidad | — | SECOP II - Ubicaciones Adicionales |
-| `xikz-44ja` | -1 | bpin|divipola|entity | bpin:bpin|divipola:codigomunicipio|entity:codigoentidadresponsable | — | DNP - localización de proyectos |
+| `xikz-44ja` | 735,326 | bpin|divipola|entity | bpin:bpin|divipola:codigomunicipio|entity:codigoentidadresponsable | `dnp_project_locations` | DNP - localización de proyectos |
 | `xjxk-qhsc` | -1 | entity | entity:codigo_entidad | — | Ejecución Presupuestal del Presupuesto General de la Nación |
 | `xyy7-rn7p` | -1 | entity | entity:codigo_entidad | — | Quejas interpuestas por los consumidores financieros en contra de las entidades vigiladas en la plataforma Smartsupervision |
 | `y3gh-x5g7` | -1 | nit | nit:nit | — | Estados Financieros NIIF- Otro Resultado Integral |
@@ -161,11 +161,11 @@ Metadata-only pass found only BPIN/divipola context keys; needs explicit signal 
 | `acs4-3wgp` | -1 | divipola | divipola:coddepto|divipola:codmpio | — | Detección de Cultivos de Coca (hectáreas) |
 | `cfw5-qzt5` | -1 | divipola | divipola:cod_dane_departamento|divipola:cod_dane_municipio|divipola:codigo_dane | — | MEN_ESTABLECIMIENTOS_EDUCATIVOS_PREESCOLAR_BÁSICA_Y_MEDIA |
 | `cm2t-qreq` | -1 | divipola | divipola:ik_divipola | — | Encuesta territorial de comportamiento en seguridad vial |
-| `epkg-mphw` | -1 | divipola | divipola:codigo_departamento|divipola:codigo_municipio | — | MEN_INDICADORES_PAE |
+| `epkg-mphw` | 121,379 | divipola | divipola:codigo_departamento|divipola:codigo_municipio | `pae_indicators` | MEN_INDICADORES_PAE |
 | `ff7q-jcdw` | -1 | divipola | divipola:codigo_municipio | — | Comercialización Materiales de Referencia - Instituto Nacional de Metrología |
 | `gaic-b8aw` | -1 | divipola | divipola:cod_depto | — | Exportaciones agrícolas no tradicionales y tradicionales |
 | `h2yr-zfb2` | -1 | divipola | divipola:c_digo_divipola_departamento|divipola:c_digo_divipola_municipio | — | Subsidios De Vivienda Asignados |
-| `iuc2-3r6h` | -1 | bpin | bpin:bpin | — | DNP - localización de beneficiarios |
+| `iuc2-3r6h` | 649,442 | bpin | bpin:bpin | `dnp_project_beneficiary_locations` | DNP - localización de beneficiarios |
 | `j9sd-zau5` | -1 | divipola | divipola:cod_dane_departamento|divipola:cod_dane_municipio|divipola:codigo_dane|divipola:codigo_dane_sede | — | MEN_SEDES_EDUCATIVAS_PREESCOLAR_BÁSICA_Y_MEDIA |
 | `ji8i-4anb` | -1 | divipola | divipola:c_digo_departamento | — | MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR, BÁSICA Y MEDIA_POR_DEPARTAMENTO |
 | `nudc-7mev` | -1 | divipola | divipola:c_digo_municipio|divipola:c_digo_departamento | — | MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR, BÁSICA Y MEDIA_POR_MUNICIPIO |
@@ -173,7 +173,7 @@ Metadata-only pass found only BPIN/divipola context keys; needs explicit signal 
 | `rs3u-8r4q` | -1 | divipola | divipola:divipola | — | SECTORES CRITICOS DE SINIESTRALIDAD VIAL |
 | `rtxu-twjm` | -1 | divipola | divipola:cod_dane_depto|divipola:cod_dane_municipio | — | Distritos de Riego activos |
 | `s87b-tjcc` | -1 | divipola | divipola:codigodanemunicipiopredio | — | Estadísticas Solicitudes Restitución Discriminadas Municipios |
-| `tmmn-mpqc` | -1 | bpin | bpin:bpin | — | DNP - caracterización demográfica de beneficiarios |
+| `tmmn-mpqc` | 1,683,923 | bpin | bpin:bpin | `dnp_project_beneficiary_characterization` | DNP - caracterización demográfica de beneficiarios |
 | `upd7-iccu` | -1 | divipola | divipola:codigo_municipio | — | Oferta Formativa en Metrología - Instituto Nacional de Metrología |
 | `ux6v-gpit` | -1 | divipola | divipola:codigo_municipio|divipola:codigo_departamento | — | Población Intramural a Cargo del INPEC por Códigos DIVIPOLA |
 | `v488-qa3u` | -1 | divipola | divipola:cod_dane_depto | — | MEN_INDICADORES_EDUCACION_MEDIA |

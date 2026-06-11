@@ -9,8 +9,38 @@ join_keys:
   - numero_proceso
 watermark_column: null
 partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+full_refresh_only: true
+columns_map:
+  siri_number: numero_siri
+  ineligibility_type: tipo_inhabilidad
+  person_quality: calidad_persona
+  identification_type_code: tipo_identificacion
+  identification_type_name: nombre_tipo_identificacion
+  document_id: numero_identificacion
+  first_last_name: primer_apellido
+  second_last_name: segundo_apellido
+  first_name: primer_nombre
+  second_name: segundo_nombre
+  role_or_position: cargo
+  facts_department: lugar_hechos_departamento
+  facts_municipality: lugar_hechos_municipio
+  sanctions: sanciones
+  duration_years: duracion_anos
+  duration_months: duracion_mes
+  duration_days: duracion_dias
+  decision_instance: providencia
+  authority: autoridad
+  legal_effects_date: fecha_efectos_juridicos
+  process_number: numero_proceso
+  sanctioned_entity: entidad_sancionado
+  sanctioned_entity_department: entidad_departamento
+  sanctioned_entity_municipality: entidad_municipio
+required_coverage:
+  numero_siri: 0.99
+  numero_identificacion: 0.99
+  sanciones: 0.95
+freq: snapshot
 url: https://www.datos.gov.co/d/iaeu-rcn6
-notes: ''
+notes: 'Snapshot-mode SIRI antecedents. Dates are dd/mm/yyyy text; detector code
+  must treat active legal disability as reviewer-only unless duration and
+  effect-date parsing support an inferred active period.'

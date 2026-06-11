@@ -7,8 +7,32 @@ join_keys:
   - id_contrato
 watermark_column: null
 partition_column: null
-columns_map: {}
-required_coverage: {}
-freq: null
+full_refresh_only: true
+columns_map:
+  contract_id: id_contrato
+  insurer: aseguradora
+  policy_number: numeropoliza
+  insured: asegurado
+  beneficiary: beneficiario
+  policy_created_at: fechadecreacionpoliza
+  policy_sent_at: fechaenviopoliza
+  policy_end_at: fechafinpoliza
+  policy_side: ladopoliza
+  status: estado
+  policy_type: tipopoliza
+  policy_subtype: subtipopoliza
+  policy_value: valor
+  created_at: fecha_de_creacion
+required_coverage:
+  id_contrato: 0.99
+  numeropoliza: 0.99
+  estado: 0.99
+  fechadecreacionpoliza: 0.99
+  fechafinpoliza: 0.99
+  valor: 0.99
+freq: snapshot
 url: https://www.datos.gov.co/d/gjp9-cutm
-notes: ''
+notes: 'Snapshot-mode SECOP II guarantee/policy rows. The source has no row-level
+  watermark; `fecha_de_creacion` and policy date fields are text timestamps with
+  timezone suffixes. Used to upgrade the guarantee/advance/execution review
+  queue from missing-source status to policy/status/date evidence.'

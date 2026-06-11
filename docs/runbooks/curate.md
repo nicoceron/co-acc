@@ -18,22 +18,47 @@ Build one table:
 
 ```bash
 make curate TABLE=signal_feature_procurement_sanctioned_supplier_awarded
+make curate TABLE=signal_feature_procurement_secop_sanction_later_awards_review_only
+make curate TABLE=signal_feature_fiscal_procurement_chronology_review_only
+make curate TABLE=signal_feature_siri_antecedent_procurement_chronology_review_only
 make curate TABLE=signal_feature_procurement_large_modifications
+make curate TABLE=signal_feature_procurement_contract_modification_ladder_review_only
 make curate TABLE=signal_feature_procurement_supplier_concentration_across_entities
 make curate TABLE=signal_feature_procurement_contract_value_outlier_by_category
 make curate TABLE=signal_feature_procurement_repeat_awards_same_supplier
 make curate TABLE=signal_feature_procurement_buyer_supplier_network_density
 make curate TABLE=signal_feature_procurement_cartel_risk_cobidding
+make curate TABLE=signal_feature_procurement_related_bidders_same_process_review_only
+make curate TABLE=signal_feature_procurement_shared_representative_same_buyer_cluster_review_only
 make curate TABLE=signal_feature_procurement_payment_plan_anomalies
+make curate TABLE=signal_feature_procurement_guarantee_advance_execution_chain
+make curate TABLE=signal_feature_procurement_guarantee_policy_reuse_review_only
+make curate TABLE=signal_feature_procurement_budget_chain_reconciliation_review_only
+make curate TABLE=signal_feature_procurement_invoice_budget_reconciliation_review_only
+make curate TABLE=signal_feature_procurement_payment_plan_reconciliation_review_only
+make curate TABLE=signal_feature_health_pae_service_delivery_gap_review_only
+make curate TABLE=signal_feature_pae_beneficiary_territory_delivery_gap_review_only
 make curate TABLE=signal_feature_procurement_contract_suspensions
 make curate TABLE=signal_feature_procurement_public_servant_conflict_disclosure_overlap
+make curate TABLE=signal_feature_procurement_role_supplier_same_buyer_review_only
+make curate TABLE=signal_feature_public_declaration_supplier_chronology_review_only
+make curate TABLE=signal_feature_public_declaration_company_bridge_current_risk_review_only
+make curate TABLE=signal_feature_cuentas_claras_donor_ineligibility_review
 make curate TABLE=signal_feature_pida_full30_meta
 make curate TABLE=signal_feature_pida5_pida27_pida4_chain
 make curate TABLE=signal_feature_project_bpin_procurement_overlap
 make curate TABLE=signal_feature_project_regalias_execution_procurement_overlap
+make curate TABLE=signal_feature_sgr_ocad_executor_capacity_gap
+make curate TABLE=signal_feature_dnp_sgr_beneficiary_delivery_gap_review_only
 make curate TABLE=signal_feature_bpin_dnp_vs_pida27_obras_prioritarias
 make curate TABLE=signal_feature_tvec_multi_entity_capture
+make curate TABLE=signal_feature_tvec_item_price_dispersion_review_only
 make curate TABLE=signal_feature_procurement_related_companies_shared_officer
+make curate TABLE=signal_feature_rues_supplier_capacity_status_review_only
+make curate TABLE=signal_feature_cross_signal_compound_risk_review_only
+make curate TABLE=signal_feature_secop_i_legacy_supplier_current_risk_review_only
+make curate TABLE=signal_feature_secop_i_legacy_representative_current_risk_review_only
+make curate TABLE=signal_feature_secop_interadmin_executor_network_review_only
 make curate TABLE=dim_company
 make curate TABLE=dim_buyer
 make curate TABLE=dim_person
@@ -62,27 +87,52 @@ make curate LAKE_ROOT=/path/to/lake
 - `lake/curated/table=fct_procurement_contract_awards/`
 - `lake/curated/table=signal_feature_procurement_single_bidder_high_value/`
 - `lake/curated/table=signal_feature_procurement_large_modifications/`
+- `lake/curated/table=signal_feature_procurement_contract_modification_ladder_review_only/`
 - `lake/curated/table=signal_feature_procurement_sanctioned_supplier_awarded/`
+- `lake/curated/table=signal_feature_procurement_secop_sanction_later_awards_review_only/`
+- `lake/curated/table=signal_feature_fiscal_procurement_chronology_review_only/`
+- `lake/curated/table=signal_feature_siri_antecedent_procurement_chronology_review_only/`
 - `lake/curated/table=signal_feature_procurement_supplier_concentration_across_entities/`
 - `lake/curated/table=signal_feature_procurement_contract_value_outlier_by_category/`
 - `lake/curated/table=signal_feature_procurement_repeat_awards_same_supplier/`
 - `lake/curated/table=signal_feature_procurement_buyer_supplier_network_density/`
 - `lake/curated/table=signal_feature_procurement_cartel_risk_cobidding/`
+- `lake/curated/table=signal_feature_procurement_related_bidders_same_process_review_only/`
+- `lake/curated/table=signal_feature_procurement_shared_representative_same_buyer_cluster_review_only/`
 - `lake/curated/table=signal_feature_procurement_payment_plan_anomalies/`
+- `lake/curated/table=signal_feature_procurement_guarantee_advance_execution_chain/`
+- `lake/curated/table=signal_feature_procurement_guarantee_policy_reuse_review_only/`
+- `lake/curated/table=signal_feature_procurement_budget_chain_reconciliation_review_only/`
+- `lake/curated/table=signal_feature_procurement_invoice_budget_reconciliation_review_only/`
+- `lake/curated/table=signal_feature_procurement_payment_plan_reconciliation_review_only/`
+- `lake/curated/table=signal_feature_health_pae_service_delivery_gap_review_only/`
+- `lake/curated/table=signal_feature_pae_beneficiary_territory_delivery_gap_review_only/`
 - `lake/curated/table=signal_feature_procurement_contract_suspensions/`
 - `lake/curated/table=signal_feature_procurement_short_bidding_window/`
 - `lake/curated/table=signal_feature_procurement_offers_competition_drop/`
 - `lake/curated/table=signal_feature_procurement_public_servant_conflict_disclosure_overlap/`
+- `lake/curated/table=signal_feature_procurement_role_supplier_same_buyer_review_only/`
+- `lake/curated/table=signal_feature_public_declaration_supplier_chronology_review_only/`
+- `lake/curated/table=signal_feature_public_declaration_company_bridge_current_risk_review_only/`
 - `lake/curated/table=signal_feature_cuentas_claras_donor_supplier_overlap/`
+- `lake/curated/table=signal_feature_cuentas_claras_donor_ineligibility_review/`
 - `lake/curated/table=signal_feature_pida_full30_meta/`
 - `lake/curated/table=signal_feature_pida5_pida27_pida4_chain/`
 - `lake/curated/table=signal_feature_project_bpin_procurement_overlap/`
 - `lake/curated/table=signal_feature_project_regalias_execution_procurement_overlap/`
+- `lake/curated/table=signal_feature_sgr_ocad_executor_capacity_gap/`
+- `lake/curated/table=signal_feature_dnp_sgr_beneficiary_delivery_gap_review_only/`
 - `lake/curated/table=signal_feature_bpin_dnp_vs_pida27_obras_prioritarias/`
 - `lake/curated/table=signal_feature_tvec_multi_entity_capture/`
+- `lake/curated/table=signal_feature_tvec_item_price_dispersion_review_only/`
 - `lake/curated/table=signal_feature_procurement_politically_exposed_position_supplier_overlap/`
 - `lake/curated/table=signal_feature_procurement_related_companies_shared_officer/`
 - `lake/curated/table=signal_feature_procurement_cross_source_identity_inconsistency/`
+- `lake/curated/table=signal_feature_rues_supplier_capacity_status_review_only/`
+- `lake/curated/table=signal_feature_cross_signal_compound_risk_review_only/`
+- `lake/curated/table=signal_feature_secop_i_legacy_supplier_current_risk_review_only/`
+- `lake/curated/table=signal_feature_secop_i_legacy_representative_current_risk_review_only/`
+- `lake/curated/table=signal_feature_secop_interadmin_executor_network_review_only/`
 - `lake/meta/curated/<timestamp>.json`
 
 The full default builder requires:
@@ -93,14 +143,31 @@ The full default builder requires:
 - `secop_contract_modifications`, resolved from raw source `u8cx-r425`
 - `secop_contract_suspensions`, resolved from raw source `u99c-7mfm`
 - `secop_contract_execution`, resolved from raw source `mfmm-jqmq`
+- `secop_guarantees`, resolved from raw source `gjp9-cutm`
+- `secop_invoices`, resolved from raw source `ibyt-yi2f`
+- `secop_payment_plans`, resolved from raw source `uymx-8p3j`
+- `secop_cdp_requests`, resolved from raw source `a86w-fh92`
+- `secop_budget_commitments`, resolved from raw source `skc9-met7`
+- `secop_budget_items`, resolved from raw source `cwhv-7fnp`
 - `secop_suppliers`, resolved from raw source `qmzu-gj57`
 - `conflict_disclosures`, resolved from raw source `gbry-rnq4`
 - `cuentas_claras_income_2019`, resolved from raw source `jgra-rz2t`
+- `siri_antecedents`, resolved from raw source `iaeu-rcn6`
 - `secop_integrado`, resolved from raw source `rpmr-utcd`
+- `secop_i_historical_processes`, resolved from raw source `qddk-cgux`
+- `secop_interadmin_agreements`, resolved from raw source `s484-c9k3`
 - `secop_sanctions`, resolved from raw source `it5q-hg94`
+- `fiscal_findings`, resolved from raw source `8qxx-ubmq`
+- `fiscal_responsibility`, resolved from raw source `jr8e-e8tu`
+- `health_providers`, resolved from raw source `c36g-9fc2`
+- `pae_indicators`, resolved from raw source `epkg-mphw`
 - `secop_process_bpin`, resolved from raw source `d9na-abhe`
 - `sgr_expense_execution`, resolved from raw source `qkv4-ek54`
 - `sgr_projects`, resolved from raw source `mzgh-shtp`
+- `dnp_project_executors`, resolved from raw source `epzv-8ck4`
+- `dnp_project_locations`, resolved from raw source `xikz-44ja`
+- `dnp_project_beneficiary_locations`, resolved from raw source `iuc2-3r6h`
+- `dnp_project_beneficiary_characterization`, resolved from raw source `tmmn-mpqc`
 - `tvec_orders_consolidated`, resolved from raw source `3hdv-smhz`
 - `paco_sanctions`
 - `company_registry_c82u`, resolved from raw source `c82u-588k`
@@ -114,11 +181,59 @@ Table-specific builds only require their declared source inputs. For example,
 `signal_feature_procurement_buyer_supplier_network_density` require only
 `secop_ii_contracts`; `signal_feature_procurement_payment_plan_anomalies`
 requires only `secop_ii_contracts` for the current contract-field partial;
+`signal_feature_procurement_payment_plan_reconciliation_review_only`
+requires `secop_payment_plans`, `secop_ii_contracts`, and invoice, budget,
+and guarantee reviewer feature tables when context is available;
+`signal_feature_fiscal_procurement_chronology_review_only` requires
+`fiscal_findings`, `fiscal_responsibility`, and `secop_ii_contracts`; it
+aggregates exact-NIT Contraloria fiscal finding/responsibility records to later
+SECOP supplier exposure. The output is reviewer-only and does not prove current
+legal disability, final fiscal liability for finding rows, contract illegality,
+public-entity role misuse, or corrupt intent;
+`signal_feature_health_pae_service_delivery_gap_review_only` requires
+`health_providers`, `secop_ii_contracts`, and payment, budget, invoice,
+guarantee, execution, suspension, modification, and sanction context. It uses
+existing upstream reviewer feature parquet when present and temp views in fresh
+full builds. The output is reviewer-only and does not prove false service,
+overbilling, delivery failure, provider ineligibility, or corrupt intent;
+`signal_feature_pae_beneficiary_territory_delivery_gap_review_only` requires
+the health/PAE service-delivery queue plus `pae_indicators` (`epkg-mphw`). It
+adds MEN municipal beneficiary, population-group, and rural/urban context to
+PAE-keyword contracts. The output is reviewer-only and does not prove
+beneficiary mismatch, non-delivery, ration quality failure, overbilling, legal
+breach, or corrupt intent;
 `signal_feature_procurement_large_modifications` requires
 `secop_contract_modifications` and `secop_ii_contracts`;
+`signal_feature_procurement_contract_modification_ladder_review_only` requires
+`secop_contract_modifications`, `secop_contract_suspensions`,
+`secop_contract_execution`, and `secop_ii_contracts`. It detects repeated
+modification sequences with value, delay, payment-term, scope, suspension,
+execution, budget, invoice, payment, competition, or same-buyer role support.
+The output is reviewer-only and does not prove illegal modification, unlawful
+avoidance of competition, fiscal harm, delivery failure, or corrupt intent;
 `signal_feature_procurement_contract_suspensions` requires
 `secop_contract_suspensions` and `secop_ii_contracts`;
 `signal_feature_procurement_cartel_risk_cobidding` requires only `secop_offers` and `secop_ii_processes`;
+`signal_feature_procurement_related_bidders_same_process_review_only`
+requires `secop_offers`, `secop_ii_contracts`, and `company_registry_c82u`.
+It flags high-value SECOP II processes where the winner and a competing
+offerer share an exact RUES representative. The output is reviewer-only and
+does not prove collusion, beneficial ownership, control, simulated
+competition, bid suppression, legal ineligibility, breach, or corrupt intent;
+`signal_feature_procurement_shared_representative_same_buyer_cluster_review_only`
+requires `secop_ii_contracts` and `company_registry_c82u`. It flags exact RUES
+legal representatives connected to two to six supplier companies awarded by the
+same buyer in the same year, with COP 5B+ cluster exposure and direct,
+high-value, or high-volume support. The output is reviewer-only and does not
+prove collusion, beneficial ownership, control, simulated competition, legal
+ineligibility, breach, or corrupt intent;
+`signal_feature_procurement_guarantee_policy_reuse_review_only` requires
+`secop_guarantees` and `secop_ii_contracts`. It flags small accepted/expired
+guarantee clusters where the same normalized insurer and policy number appears
+across different suppliers and different buyers with at least COP 1B aggregate
+contract exposure. The output is reviewer-only and does not prove a false,
+invalid, insurer-denied, unauthorized, or legally defective policy without
+insurer confirmation and SECOP contract-file review;
 `signal_feature_procurement_public_servant_conflict_disclosure_overlap`
 requires `conflict_disclosures` and `secop_ii_contracts`;
 `signal_feature_pida_full30_meta` requires `secop_integrado`;
@@ -129,12 +244,40 @@ requires `conflict_disclosures` and `secop_ii_contracts`;
 `signal_feature_project_regalias_execution_procurement_overlap` requires
 `sgr_expense_execution`, `sgr_projects`, `secop_process_bpin`, and
 `secop_ii_contracts`;
+`signal_feature_dnp_sgr_beneficiary_delivery_gap_review_only` requires the
+SGR/SECOP/RUES/execution chain plus DNP executor, project-location,
+beneficiary-location, and beneficiary-characterization sources. It reuses the
+exact-BPIN SGR capacity-gap queue and adds DNP delivery/beneficiary context.
+The output is reviewer-only and does not prove beneficiary harm, non-delivery,
+incorrect targeting, legal breach, or corrupt intent;
 `signal_feature_bpin_dnp_vs_pida27_obras_prioritarias` requires
 `secop_process_bpin` and `secop_integrado`;
 `signal_feature_tvec_multi_entity_capture` requires
 `tvec_orders_consolidated` and `secop_ii_contracts`;
 `signal_feature_procurement_related_companies_shared_officer`
-requires only `secop_ii_contracts` and `company_registry_c82u`.
+requires only `secop_ii_contracts` and `company_registry_c82u`;
+`signal_feature_secop_i_legacy_supplier_current_risk_review_only` requires
+`secop_i_historical_processes` plus the cross-signal compound-risk source
+families. It aggregates exact-NIT SECOP I historical suppliers with COP 1B+
+legacy exposure and joins them to current exact-NIT compound-risk entities. The
+output is reviewer-only and does not prove management continuity, legacy/current
+irregularity, legal disability, breach, nonperformance, or corrupt intent;
+`signal_feature_secop_i_legacy_representative_current_risk_review_only`
+requires `secop_i_historical_processes`, `company_registry_c82u`, and the
+cross-signal compound-risk source families. It links exact SECOP I legal
+representative documents to current RUES legal representatives of exact-NIT
+compound-risk companies, requires COP 5B+ historical exposure and material
+additions/direct or repeated exposure, and excludes same-NIT legacy/current
+contractors. The output is reviewer-only and does not prove ownership,
+beneficial control, legal disability, legacy/current irregularity, breach,
+nonperformance, or corrupt intent;
+`signal_feature_public_declaration_company_bridge_current_risk_review_only`
+requires the declaration, SIGEP, RUES, and cross-signal source families. It
+joins exact person documents from declarations or sensitive positions to exact
+RUES legal-representative company NITs that already appear in current
+compound-risk evidence. The output is reviewer-only and does not prove
+ownership, beneficial control, undeclared interest, conflict of interest, legal
+disability, contract irregularity, nonperformance, or corrupt intent.
 
 `dim_company` and `dim_buyer` canonicalize Colombian NITs with the DIAN
 MOD-11 verification-digit algorithm. `dim_person` uses cedula-style document
@@ -175,6 +318,9 @@ thresholds. Co-bidding cartel risk is computed from SECOP offer process/supplier
 rollups, bounded to 2-8 valid company-NIT suppliers per process before
 self-joining supplier pairs. Payment-plan anomalies are computed from SECOP
 contract payment fields and avoid broad joins over pending-payment sources.
+Payment-plan reconciliation is computed from exact contract ID joins between
+SECOP contracts and SECOP payment-plan rows, then enriched with invoice, budget,
+and guarantee feature refs without materializing joins in Python.
 Large modification rows are computed from SECOP modification-event values
 joined back to exact-NIT SECOP II contracts and require either a large absolute
 modification value or a large value-share increase.
@@ -215,10 +361,22 @@ values parsed directly from the source decimal fields.
 Shared-officer clusters are deduplicated by company document and
 representative document before DuckDB groups exposed suppliers into reviewer-only
 clusters.
+Shared-representative same-buyer clusters reuse the same exact RUES
+legal-representative identity, but group by representative, buyer, and award
+year so reviewers can see multiple supplier companies awarded by one buyer in a
+bounded period.
+SECOP I legacy/current-risk rows are computed by aggregating exact-NIT SECOP I
+historical supplier exposure before joining to the current cross-signal
+compound-risk queue; evidence refs are capped to ranked legacy records plus the
+current compound-risk feature refs.
+Declaration-company bridge rows are computed from exact person-document
+declaration/SIGEP profiles, deduplicated RUES legal-representative records, and
+the current cross-signal compound-risk queue.
 
 ## Reality Notes
 
-On the local lake after the 2026-06-05 BPIN priority-work materialization work:
+On the local lake after the 2026-06-06 shared-representative same-buyer
+materialization work:
 
 - `dim_subject_document`: 1,215,832 rows
 - `dim_company`: 101,916 rows
@@ -227,13 +385,17 @@ On the local lake after the 2026-06-05 BPIN priority-work materialization work:
 - `fct_procurement_contract_awards`: 5,442,058 rows
 - `signal_feature_procurement_single_bidder_high_value`: 61,542 rows
 - `signal_feature_procurement_large_modifications`: 582 rows
+- `signal_feature_procurement_contract_modification_ladder_review_only`: 320 rows
 - `signal_feature_procurement_sanctioned_supplier_awarded`: 20,184 rows
 - `signal_feature_procurement_supplier_concentration_across_entities`: 497 rows
 - `signal_feature_procurement_contract_value_outlier_by_category`: 2,022 rows
 - `signal_feature_procurement_repeat_awards_same_supplier`: 9,716 rows
 - `signal_feature_procurement_buyer_supplier_network_density`: 364 rows
 - `signal_feature_procurement_cartel_risk_cobidding`: 866 rows
+- `signal_feature_procurement_related_bidders_same_process_review_only`: 16 rows
+- `signal_feature_procurement_shared_representative_same_buyer_cluster_review_only`: 166 rows
 - `signal_feature_procurement_payment_plan_anomalies`: 375 rows
+- `signal_feature_procurement_guarantee_policy_reuse_review_only`: 723 rows
 - `signal_feature_procurement_contract_suspensions`: 10,460 rows
 - `signal_feature_procurement_contract_execution_delay`: 48 rows
 - `signal_feature_procurement_short_bidding_window`: 90,592 rows
@@ -249,6 +411,50 @@ On the local lake after the 2026-06-05 BPIN priority-work materialization work:
 - `signal_feature_procurement_politically_exposed_position_supplier_overlap`: 284 rows
 - `signal_feature_procurement_related_companies_shared_officer`: 1,482 rows
 - `signal_feature_procurement_cross_source_identity_inconsistency`: 50 rows
+
+Additional 2026-06-05 missing-pattern feature-table builds produced:
+
+- `signal_feature_procurement_role_supplier_same_buyer_review_only`: 11,311 rows
+- `signal_feature_public_declaration_supplier_chronology_review_only`: 25,000 rows
+- `signal_feature_public_declaration_company_bridge_current_risk_review_only`: 56 rows
+- `signal_feature_tvec_item_price_dispersion_review_only`: 4,601 rows
+- `signal_feature_cuentas_claras_donor_ineligibility_review`: 322 rows
+- `signal_feature_procurement_secop_sanction_later_awards_review_only`: 127 rows
+- `signal_feature_fiscal_procurement_chronology_review_only`: 80 rows
+- `signal_feature_siri_antecedent_procurement_chronology_review_only`: 1,120 rows
+- `signal_feature_procurement_guarantee_advance_execution_chain`: 257 rows
+- `signal_feature_procurement_budget_chain_reconciliation_review_only`: 1,000 rows
+- `signal_feature_procurement_invoice_budget_reconciliation_review_only`: 376 rows
+- `signal_feature_procurement_payment_plan_reconciliation_review_only`: 1,000 rows
+- `signal_feature_health_pae_service_delivery_gap_review_only`: 639 rows
+- `signal_feature_pae_beneficiary_territory_delivery_gap_review_only`: 64 rows
+- `signal_feature_rues_supplier_capacity_status_review_only`: 1,044 rows
+- `signal_feature_sgr_ocad_executor_capacity_gap`: 60 rows
+- `signal_feature_dnp_sgr_beneficiary_delivery_gap_review_only`: 60 rows
+- `signal_feature_cross_signal_compound_risk_review_only`: 1,000 rows
+- `signal_feature_secop_i_legacy_supplier_current_risk_review_only`: 556 rows
+- `signal_feature_secop_i_legacy_representative_current_risk_review_only`: 14 rows;
+  selected run
+  `phase-missing-patterns-secop-i-representative-current-risk-20260606`
+  produced 13 hits and 338 evidence rows; after shared-representative
+  same-buyer support refresh the current table/full run emits 14 hits.
+- `signal_feature_procurement_contract_modification_ladder_review_only`: 320 rows
+- `signal_feature_secop_interadmin_executor_network_review_only`: 702 rows
+- `signal_feature_procurement_related_bidders_same_process_review_only`: 16 rows;
+  selected run `phase-missing-patterns-related-bidders-20260605` produced
+  16 hits and 226 evidence rows.
+- `signal_feature_procurement_guarantee_policy_reuse_review_only`: 723 rows;
+  selected run `phase-missing-patterns-guarantee-policy-reuse-20260605`
+  produced 723 hits and 3,110 evidence rows. After refreshing bridge queues,
+  43 cross-signal rows, 64 interadministrative rows, 11 SECOP I legacy/current
+  rows, and 3 declaration-company bridge rows carry guarantee-policy-reuse
+  support.
+- `signal_feature_procurement_shared_representative_same_buyer_cluster_review_only`:
+  selected run `phase-missing-patterns-shared-representative-same-buyer-20260606`
+  produced 166 hits and 1,706 evidence rows. After refreshing bridge queues,
+  26 cross-signal rows, 10 SECOP I legacy/current supplier rows, and 4 SECOP I
+  legal-representative/current-risk rows carry shared-representative same-buyer
+  support.
 
 The first signal feature table joined 13,423 distinct SECOP contracts, 664
 distinct supplier document keys, and PACO evidence from `multas_secop`,

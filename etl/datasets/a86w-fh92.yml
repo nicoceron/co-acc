@@ -58,7 +58,17 @@ columns_map:
   tipo_vigencias_futuras: tipo_vigencias_futuras
   ultima_consulta_siif: ultima_consulta_siif
   valor_utilizado: valor_utilizado
-required_coverage: {}
+required_coverage:
+  id_contrato: 0.99
+  id_proceso: 0.99
+  nit_proveedor: 0.99
+  estado_siif: 0.99
+  registrado_en_siif: 0.99
+  c_digo_cdp: 0.99
+  saldo_cdp: 0.99
+  saldo_total_a_comprometer: 0.99
+  valor_utilizado: 0.99
+  ultima_consulta_siif: 0.99
 freq: weekly
 url: https://www.datos.gov.co/d/a86w-fh92
 notes: 'Colombia: SECOP CDP Requests (9.5M rows). Snapshot — Certificados de Disponibilidad

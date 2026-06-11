@@ -306,6 +306,14 @@ export interface PatternInfo {
   name_en: string;
   description_es: string;
   description_en: string;
+  hit_count: number;
+  last_seen_at?: string | null;
+  severity?: "low" | "medium" | "high" | "critical" | null;
+  category?: string | null;
+  materialized: boolean;
+  materialization_state: "materialized" | "registered_only";
+  signal_ids: string[];
+  sources_required: string[];
 }
 
 export interface PatternListResponse {

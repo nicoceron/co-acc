@@ -21,7 +21,18 @@ columns_map:
   tipo_de_compromiso: tipo_de_compromiso
   valor_a_liberar: valor_a_liberar
   valor_item: valor_item
-required_coverage: {}
+required_coverage:
+  identificador_nico: 0.99
+  id_contrato: 0.99
+  referencia_contrato: 0.99
+  estado_integraci_n: 0.99
+  estado_integraci_n_item: 0.99
+  identificador_item: 0.99
+  tipo_de_compromiso: 0.99
+  valor_item: 0.99
+  valor_a_liberar: 0.99
+  balance_compromiso: 0.99
+  balance_vigencia_futura: 0.99
 freq: weekly
 url: https://www.datos.gov.co/d/skc9-met7
 notes: 'Colombia: SECOP Budget Commitments (5.9M rows). Snapshot — one row per budget
