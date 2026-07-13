@@ -9987,7 +9987,7 @@ def _create_guarantee_advance_execution_chain_views(
                     THEN 'accepted_guarantee_present_but_sent_after_start'
                 ELSE 'accepted_or_expired_guarantee_present'
             END AS guarantee_source_status,
-            'high advance or ended pending execution plus execution/suspension/modification/sanction chain; guarantee status/date/value evidence is reviewer-only and does not prove guarantee validity, delivery failure causality, legal breach, or corrupt intent'
+            'high advance or ended pending execution plus execution/suspension/modification/sanction chain; confidence-indexed guarantee status/date/value evidence does not prove guarantee validity, delivery failure causality, legal breach, or corrupt intent'
                 AS what_is_unproven,
             evidence_refs
         FROM eligible
@@ -10377,7 +10377,7 @@ def _create_guarantee_policy_reuse_views(
                     THEN 'same_policy_two_contracts_different_supplier_buyer'
                 ELSE 'same_policy_small_cluster_different_supplier_buyer'
             END AS policy_reuse_status,
-            'exact insurer and normalized policy number reuse across different suppliers and buyers; reviewer-only queue does not prove the policy is false, invalid, insurer-denied, unauthorized, a legal breach, or corrupt intent without insurer confirmation and SECOP contract-file review'
+            'exact insurer and normalized policy number reuse across different suppliers and buyers; this confidence-indexed signal does not prove the policy is false, invalid, insurer-denied, unauthorized, a legal breach, or corrupt intent without insurer confirmation and SECOP contract-file review'
                 AS what_is_unproven,
             list_concat(
                 [contract_evidence_ref, guarantee_evidence_ref],

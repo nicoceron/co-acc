@@ -339,7 +339,7 @@ def _compute_public_safe(
     evidence_items: list[EvidenceItemResponse],
 ) -> bool:
     policy = definition.public_policy
-    if definition.reviewer_only or not policy.allow_public:
+    if not policy.allow_public:
         return False
     if entity_label in _PERSON_LABELS and not policy.allow_person_entities:
         return False
@@ -425,7 +425,6 @@ def _build_hit(
         category=definition.category,
         severity=definition.severity,
         public_safe=public_safe,
-        reviewer_only=definition.reviewer_only,
         entity_id=str(entity_context["entity_id"] or ""),
         entity_key=str(entity_context["entity_key"] or entity_context["entity_id"] or ""),
         entity_label=entity_context["entity_label"],
@@ -466,7 +465,6 @@ async def _persist_hit(session: AsyncSession, hit: SignalHitResponse, *, engine:
             "category": hit.category,
             "severity": hit.severity,
             "public_safe": hit.public_safe,
-            "reviewer_only": hit.reviewer_only,
             "scope_key": hit.scope_key,
             "scope_type": hit.scope_type,
             "dedup_key": hit.dedup_key,
@@ -992,7 +990,6 @@ def _record_to_signal_hit(record: Record) -> SignalHitResponse:
         category=str(record["category"]),
         severity=str(record["severity"]),
         public_safe=bool(record["public_safe"]),
-        reviewer_only=bool(record["reviewer_only"]),
         entity_id=str(record["entity_id"]),
         entity_key=str(record["entity_key"]),
         entity_label=record.get("entity_label"),
@@ -1080,7 +1077,21 @@ async def list_signal_summaries(session: AsyncSession | None) -> list[SignalList
             meta["last_seen_at"] = row_last_seen
     lake_counts = lakehouse_signal_service.materialized_signal_counts()
     lake_severities = lakehouse_signal_service.materialized_signal_severities()
+    lake_confidence = lakehouse_signal_service.materialized_signal_confidence_indices()
     fallback_counts = _curated_signal_counts() if not lake_counts else {}
+    fallback_confidence: dict[str, float] = {}
+    if fallback_counts:
+        for signal_id in fallback_counts:
+            sample_indices = [
+                hit.confidence_index
+                for hit in _curated_signal_samples(signal_id, 25)
+                if hit.confidence_index is not None
+            ]
+            if sample_indices:
+                fallback_confidence[signal_id] = round(
+                    sum(sample_indices) / len(sample_indices),
+                    1,
+                )
     for signal_id, (hit_count, observed_at) in (lake_counts or fallback_counts).items():
         meta = counts_by_id.setdefault(signal_id, {"hit_count": 0, "last_seen_at": None})
         meta["hit_count"] = max(int(meta["hit_count"] or 0), hit_count)
@@ -1093,7 +1104,7 @@ async def list_signal_summaries(session: AsyncSession | None) -> list[SignalList
     items: list[SignalListItem] = []
     for definition in list_signal_definitions():
         count_meta = counts_by_id.get(definition.id, {})
-        payload = definition.model_dump()
+        payload = definition.model_dump(context={"canonical_signal_ids": True})
         if count_meta.get("severity"):
             payload["severity"] = count_meta["severity"]
         items.append(
@@ -1104,6 +1115,10 @@ async def list_signal_summaries(session: AsyncSession | None) -> list[SignalList
                 materialized=definition.id in counts_by_id,
                 materialization_state=(
                     "materialized" if definition.id in counts_by_id else "registered_only"
+                ),
+                confidence_index=lake_confidence.get(
+                    definition.id,
+                    fallback_confidence.get(definition.id),
                 ),
             )
         )
@@ -1172,16 +1187,6 @@ async def get_signal_samples(
                 hits.append(hit)
                 existing_hit_ids.add(hit.hit_id)
     return hits[:limit]
-
-
-def filter_signal_hits_for_viewer(
-    hits: list[SignalHitResponse],
-    *,
-    can_view_reviewer: bool,
-) -> list[SignalHitResponse]:
-    if can_view_reviewer:
-        return hits
-    return [hit for hit in hits if not hit.reviewer_only]
 
 
 async def _run_cli(args: argparse.Namespace) -> None:

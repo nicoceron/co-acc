@@ -22,7 +22,6 @@ class MaterializableSignalDefinition:
     category: str
     severity: SignalSeverity
     public_safe: bool
-    reviewer_only: bool
     scope_type: str
     sources: tuple[str, ...]
 
@@ -78,7 +77,14 @@ def _aliases_for(path_key: str) -> dict[str, str]:
 
 
 def resolve_signal_id(signal_id: str) -> str:
-    return _aliases_for(str(_registry_path())).get(signal_id, signal_id)
+    aliased = _aliases_for(str(_registry_path())).get(signal_id, signal_id)
+    if aliased != signal_id:
+        return aliased
+    for row in _signal_rows():
+        candidate = str(row.get("id") or "").strip()
+        if candidate.removesuffix("_review_only") == signal_id:
+            return candidate
+    return signal_id
 
 
 @lru_cache(maxsize=8)
@@ -97,7 +103,6 @@ def _definitions_for(path_key: str) -> dict[str, MaterializableSignalDefinition]
             category=str(row.get("category") or "unknown"),
             severity=_severity(row.get("severity")),
             public_safe=_as_bool(row.get("public_safe")),
-            reviewer_only=_as_bool(row.get("reviewer_only")),
             scope_type=str(row.get("scope_type") or "entity"),
             sources=sources,
         )

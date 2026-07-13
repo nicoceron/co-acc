@@ -515,6 +515,7 @@ async def test_pattern_list_exposes_materialized_lake_counts(
     assert sanctioned["materialized"] is True
     assert sanctioned["severity"] == "critical"
     assert sanctioned["signal_ids"] == ["procurement_sanctioned_supplier_awarded"]
+    assert sanctioned["confidence_index"] == 91.3
 
 
 @pytest.mark.anyio
@@ -539,6 +540,13 @@ async def test_patterns_read_materialized_lake_hits_without_neo4j(
     assert payload["total"] == 1
     assert payload["patterns"][0]["pattern_id"] == "sanctioned_supplier_record"
     assert payload["patterns"][0]["data"]["hit_id"] == "hit-entity-1"
+    assert payload["patterns"][0]["confidence_index"] == 91.3
+    assert payload["patterns"][0]["confidence_components"] == {
+        "identity": 1.0,
+        "evidence_traceability": 0.65,
+        "source_corroboration": 1.0,
+    }
+    assert payload["patterns"][0]["exposure_tier"] == "confidence_indexed"
     assert specific_response.status_code == 200
     assert specific_response.json()["total"] == 1
 
@@ -585,7 +593,13 @@ async def test_public_patterns_read_lake_company_without_neo4j(
     payload = response.json()
     assert payload["entity_id"] == "company:9001234568"
     assert payload["total"] == 1
-    assert payload["patterns"][0]["sources"][0]["database"] == "secop_ii_contracts"
+    source_ids = {row["database"] for row in payload["patterns"][0]["sources"]}
+    assert source_ids == {
+        "paco_sanctions",
+        "fiscal_findings",
+        "fiscal_responsibility",
+        "secop_ii_contracts",
+    }
     assert "document_id" not in str(payload).lower()
 
 

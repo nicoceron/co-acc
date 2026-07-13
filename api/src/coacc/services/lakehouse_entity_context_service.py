@@ -93,7 +93,7 @@ def _documents_from_refs(hit: SignalHitResponse) -> list[EvidenceTrailDocument]:
 def lake_evidence_trail(entity_id: str, *, limit: int = 12) -> EntityEvidenceTrailResponse | None:
     entity = get_lake_entity(entity_id, include_person=not should_hide_person_entities())
     context_entity_id = _context_entity_id(entity_id, entity.id if entity else None)
-    signals = materialized_entity_signals(context_entity_id, public_only=True, limit=limit)
+    signals = materialized_entity_signals(context_entity_id, public_only=False, limit=limit)
     if signals.total == 0:
         return None
 
@@ -228,7 +228,7 @@ def lake_graph(entity_id: str, *, depth: int = 1) -> GraphResponse | None:
     if center is None:
         return None
 
-    signals = materialized_entity_signals(center.id, public_only=True, limit=25)
+    signals = materialized_entity_signals(center.id, public_only=False, limit=25)
     anomaly_scores, _ = entity_anomaly_scores(center.id, limit=5)
     if signals.total == 0 and not anomaly_scores:
         return None
@@ -288,7 +288,7 @@ def lake_graph(entity_id: str, *, depth: int = 1) -> GraphResponse | None:
 def lake_exposure(entity_id: str) -> ExposureResponse | None:
     entity = get_lake_entity(entity_id, include_person=not should_hide_person_entities())
     context_entity_id = _context_entity_id(entity_id, entity.id if entity else None)
-    signals = materialized_entity_signals(context_entity_id, public_only=True, limit=100)
+    signals = materialized_entity_signals(context_entity_id, public_only=False, limit=100)
     anomaly_scores, anomaly_total = entity_anomaly_scores(context_entity_id, limit=25)
     if signals.total == 0 and anomaly_total == 0:
         return None
@@ -357,7 +357,7 @@ def lake_timeline(
 ) -> TimelineResponse | None:
     entity = get_lake_entity(entity_id, include_person=not should_hide_person_entities())
     context_entity_id = _context_entity_id(entity_id, entity.id if entity else None)
-    signals = materialized_entity_signals(context_entity_id, public_only=True, limit=100)
+    signals = materialized_entity_signals(context_entity_id, public_only=False, limit=100)
     anomaly_scores, _ = entity_anomaly_scores(context_entity_id, limit=50)
     if signals.total == 0 and not anomaly_scores:
         return None

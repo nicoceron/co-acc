@@ -1,0 +1,134 @@
+{
+  "generated_at": "2026-07-13T16:00:00-05:00",
+  "source_snapshot": "checked-in curated lake and signal registry",
+  "materialized_signal_tables": 49,
+  "family_support": [
+    {
+      "pattern_family": "Competition suppression",
+      "materialized_signal_rows": 153029,
+      "signal_count": 5,
+      "tier": "A",
+      "interpretation": "Overlapping signal rows; implementation scale only"
+    },
+    {
+      "pattern_family": "Conflict and insider links",
+      "materialized_signal_rows": 37573,
+      "signal_count": 7,
+      "tier": "B",
+      "interpretation": "Overlapping signal rows; implementation scale only"
+    },
+    {
+      "pattern_family": "Sanction chronology",
+      "materialized_signal_rows": 21511,
+      "signal_count": 4,
+      "tier": "A",
+      "interpretation": "Overlapping signal rows; implementation scale only"
+    },
+    {
+      "pattern_family": "Post-award and payment chain",
+      "materialized_signal_rows": 15141,
+      "signal_count": 10,
+      "tier": "A next",
+      "interpretation": "Overlapping signal rows; implementation scale only"
+    },
+    {
+      "pattern_family": "Repeat awards and concentration",
+      "materialized_signal_rows": 12599,
+      "signal_count": 4,
+      "tier": "A",
+      "interpretation": "Overlapping signal rows; implementation scale only"
+    },
+    {
+      "pattern_family": "TVEC price and capture",
+      "materialized_signal_rows": 4688,
+      "signal_count": 2,
+      "tier": "B",
+      "interpretation": "Overlapping signal rows; implementation scale only"
+    },
+    {
+      "pattern_family": "Corporate network and identity",
+      "materialized_signal_rows": 3312,
+      "signal_count": 6,
+      "tier": "B",
+      "interpretation": "Overlapping signal rows; implementation scale only"
+    },
+    {
+      "pattern_family": "Project delivery gap",
+      "materialized_signal_rows": 815,
+      "signal_count": 4,
+      "tier": "B",
+      "interpretation": "Overlapping signal rows; implementation scale only"
+    }
+  ],
+  "pattern_ranking": [
+    {
+      "priority": 1,
+      "tier": "A — MVP core",
+      "pattern": "Competition suppression",
+      "dataset_bundle": "SECOP II contracts + processes; offers optional",
+      "mvp_decision": "Keep process aggregates; do not require offers",
+      "main_caveat": "Short-window timestamps cover only 8.06% of the 2023+ cohort"
+    },
+    {
+      "priority": 2,
+      "tier": "A — public signal",
+      "pattern": "Sanctioned supplier receives procurement exposure",
+      "dataset_bundle": "SECOP II contracts + PACO",
+      "mvp_decision": "Keep as the one public deterministic signal",
+      "main_caveat": "Overlap does not prove ineligibility, illegality, or corrupt intent"
+    },
+    {
+      "priority": 3,
+      "tier": "A — supporting context",
+      "pattern": "Repeat awards and supplier concentration",
+      "dataset_bundle": "SECOP II contracts",
+      "mvp_decision": "Keep as model/explanation context",
+      "main_caveat": "Specialized and thin markets can legitimately concentrate awards"
+    },
+    {
+      "priority": 4,
+      "tier": "A — best next",
+      "pattern": "Post-award manipulation or execution failure chain",
+      "dataset_bundle": "Contracts + suspensions + modifications + execution",
+      "mvp_decision": "Stretch only; backfill before promotion",
+      "main_caveat": "Modification/execution history is incomplete and requires legal review"
+    },
+    {
+      "priority": 5,
+      "tier": "B — reviewer only",
+      "pattern": "Corporate network and related bidders",
+      "dataset_bundle": "Contracts + offers + RUES",
+      "mvp_decision": "Post-MVP reviewer queue",
+      "main_caveat": "Representative relationships and business groups can be legitimate"
+    },
+    {
+      "priority": 6,
+      "tier": "B — reviewer only",
+      "pattern": "Conflict, insider, or political connection",
+      "dataset_bundle": "Contracts + declarations/SIGEP or Cuentas Claras",
+      "mvp_decision": "Post-MVP reviewer queue",
+      "main_caveat": "Privacy, stale windows, and missing legal thresholds"
+    },
+    {
+      "priority": 7,
+      "tier": "B — reviewer only",
+      "pattern": "Framework-agreement price dispersion",
+      "dataset_bundle": "TVEC item purchases; contract context optional",
+      "mvp_decision": "Post-MVP reviewer queue",
+      "main_caveat": "Item quality, geography, and delivery terms affect comparability"
+    },
+    {
+      "priority": 8,
+      "tier": "B — reviewer only",
+      "pattern": "Project spending versus delivery gap",
+      "dataset_bundle": "Contracts + BPIN + SGR projects/execution",
+      "mvp_decision": "Post-MVP subset review",
+      "main_caveat": "Sparse whole-contract coverage and project-timing differences"
+    }
+  ],
+  "validation": {
+    "public_mvp_required_signal": "procurement_sanctioned_supplier_awarded",
+    "highest_value_next_source": "SECOP contract modifications after complete 2023+ backfill",
+    "row_count_warning": "Signal rows overlap and may be capped; they are not unique cases or prevalence."
+  }
+}

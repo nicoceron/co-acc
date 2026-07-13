@@ -43,6 +43,7 @@ export interface SignalSummary {
   category: string;
   hits: number;
   public: boolean;
+  confidence?: number | null;
   lastSeen?: string | null;
   materialized?: boolean;
   materializationState?: "materialized" | "registered_only";
@@ -54,7 +55,6 @@ export interface SignalDetail {
   runner: string;
   policy: {
     public: boolean;
-    reviewer: boolean;
     identity: string[];
     dedup: string[];
   };
@@ -65,6 +65,9 @@ export interface SignalDetail {
     conf: number;
     ev: number;
     score: number;
+    identity: number;
+    traceability: number;
+    corroboration: number;
   }[];
 }
 
@@ -220,15 +223,15 @@ export const atlasFixture: AtlasFixture = {
       version: "3.2.1",
       scope: "process_oferente",
       runner: "sql:signals/co_licitation_with_siri.sql",
-      policy: { public: true, reviewer: false, identity: ["nit", "cc"], dedup: ["proceso_id", "oferente_id"] },
+      policy: { public: true, identity: ["nit", "cc"], dedup: ["proceso_id", "oferente_id"] },
       sourcesRequired: ["SECOP-II", "SECOP-I", "SIRI", "RUES"],
       entityTypes: ["empresa", "persona", "contrato"],
       sampleHits: [
-        { label: "Vertice Andina S.A.S. · proceso CO1.PCCNTR.4421", conf: 0.94, ev: 12, score: 0.91 },
-        { label: "Sanidad Pacifico S.A. · proceso CO1.PCCNTR.5102", conf: 0.88, ev: 8, score: 0.84 },
-        { label: "Logistica Tropico S.A. · proceso CO1.PCCNTR.6612", conf: 0.92, ev: 11, score: 0.81 },
-        { label: "Constructora Llanura Ltda. · proceso CO1.PCCNTR.5588", conf: 0.79, ev: 6, score: 0.76 },
-        { label: "Pavimentos del Norte S.A.S. · proceso CO1.PCCNTR.7012", conf: 0.86, ev: 9, score: 0.72 },
+        { label: "Vertice Andina S.A.S. · proceso CO1.PCCNTR.4421", conf: 94, identity: 1, traceability: 1, corroboration: 0.9, ev: 12, score: 0.91 },
+        { label: "Sanidad Pacifico S.A. · proceso CO1.PCCNTR.5102", conf: 88, identity: 0.9, traceability: 1, corroboration: 0.7, ev: 8, score: 0.84 },
+        { label: "Logistica Tropico S.A. · proceso CO1.PCCNTR.6612", conf: 92, identity: 1, traceability: 1, corroboration: 0.7, ev: 11, score: 0.81 },
+        { label: "Constructora Llanura Ltda. · proceso CO1.PCCNTR.5588", conf: 79, identity: 0.75, traceability: 1, corroboration: 0.7, ev: 6, score: 0.76 },
+        { label: "Pavimentos del Norte S.A.S. · proceso CO1.PCCNTR.7012", conf: 86, identity: 0.9, traceability: 1, corroboration: 0.7, ev: 9, score: 0.72 },
       ],
     },
   },

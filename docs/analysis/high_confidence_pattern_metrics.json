@@ -1,0 +1,86 @@
+{
+  "generated_at": "2026-07-13T17:30:00-05:00",
+  "decision": {
+    "recommended_public_pattern": "procurement_sic_collusion_sanction_later_awards",
+    "mvp_dataset_change": "none",
+    "mvp_model_change": "none",
+    "claim_boundary": "A final official finding can establish historical conduct. It does not establish that a later award was corrupt, illegal, or collusive."
+  },
+  "sic_collusion": {
+    "source_url": "https://paco7public7info7prod.blob.core.windows.net/paco-pulic-info/colusiones_en_contratacion_SIC.csv",
+    "source_last_modified": "2022-06-28",
+    "raw_rows": 103,
+    "distinct_subject_documents": 103,
+    "juridical_subjects": 42,
+    "strict_later_award_filter": {
+      "paco_feed": "colusiones_en_contratacion",
+      "subject_type": "Persona juridica",
+      "join_rule": "nit_base_to_subject",
+      "minimum_signing_date": "2020-01-01",
+      "reason": "The checked historical PACO extract contains sanction resolutions no later than 2019; 2020 is a conservative chronology boundary until the adapter parses the resolution date."
+    },
+    "matched_companies": 3,
+    "later_contracts": 14,
+    "later_buyers": 11,
+    "later_contract_value_cop": 2375422881
+  },
+  "unfinished_works": {
+    "source_url": "https://paco7public7info7prod.blob.core.windows.net/paco-pulic-info/MD-2000-2011.xls",
+    "source_last_modified": "2021-08-13",
+    "raw_rows": 6095,
+    "distinct_works": 1067,
+    "unfinished_works": 642,
+    "finished_not_operating_works": 283,
+    "works_with_secop_code": 806,
+    "code_only_contract_reference_matches": 377,
+    "strict_buyer_nit_and_contract_reference_matches": 5,
+    "quality_note": "Code-only matches are not decision-safe because many values are short or generic contract tokens. The composite buyer-NIT plus contract-reference join is the conservative local measure."
+  },
+  "evidence_ladder": [
+    {
+      "rank": 1,
+      "evidence_class": "Final official decision tied to the same procurement event",
+      "example": "Final SIC, fiscal, disciplinary, or judicial finding naming the process or contract",
+      "what_it_supports": "Confirmed historical finding for that event",
+      "public_wording": "Official finding; reproduce the authority's scope and finality",
+      "mvp_use": "Best evidence, but sparse"
+    },
+    {
+      "rank": 2,
+      "evidence_class": "Final official sanction plus a later exact-NIT award",
+      "example": "SIC public-procurement collusion sanction followed by a later SECOP award",
+      "what_it_supports": "Confirmed historical conduct and later procurement exposure",
+      "public_wording": "Documentary chronology; the later award is not thereby corrupt",
+      "mvp_use": "Recommended public pattern"
+    },
+    {
+      "rank": 3,
+      "evidence_class": "Official failed-project status plus a compound contract chain",
+      "example": "Registered unfinished or unusable work plus high payment, low progress, suspensions, or sanctions",
+      "what_it_supports": "Confirmed delivery failure and a strong review lead",
+      "public_wording": "Failed or unusable work; cause remains unproven",
+      "mvp_use": "Post-MVP or historical showcase until a fresh extract and strict joins exist"
+    },
+    {
+      "rank": 4,
+      "evidence_class": "Behavioral anomaly",
+      "example": "Single bidder, low competition, repeated awards, price outlier, or concentration",
+      "what_it_supports": "Prioritization only",
+      "public_wording": "Unusual pattern; requires review",
+      "mvp_use": "Model and explanation context"
+    }
+  ],
+  "validation": {
+    "status": "share_with_caveats",
+    "blockers": [
+      "The PACO SIC collusion extract is historical and stale.",
+      "The adapter currently maps filing date, not sanction-resolution date, into sanction_date.",
+      "The PACO unfinished-works extract is stale and its SECOP code alone is not a safe unique join."
+    ],
+    "safe_now": [
+      "Use aggregate counts for scoping.",
+      "Use the strict SIC company-NIT subtype as a contest demonstration after verifying resolution finality.",
+      "Describe all later awards as exposure, never as confirmed corruption."
+    ]
+  }
+}

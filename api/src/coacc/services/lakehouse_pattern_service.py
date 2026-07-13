@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from coacc.config import settings
 from coacc.models.pattern import PATTERN_METADATA, PatternInfo, PatternResult
+from coacc.models.signal import SignalConfidenceComponents, visible_signal_id
 from coacc.services.lakehouse_entity_service import get_lake_entity
 from coacc.services.lakehouse_signal_service import materialized_entity_signals
 from coacc.services.signal_registry import (
@@ -49,7 +50,7 @@ def signal_to_pattern_id(signal_id: str) -> str:
             return alias
     if canonical_signal_id in PATTERN_METADATA:
         return canonical_signal_id
-    return canonical_signal_id
+    return visible_signal_id(canonical_signal_id)
 
 
 def _pattern_row_from_meta(pattern_id: str) -> PatternInfo:
@@ -102,11 +103,10 @@ def lake_pattern_summaries(
     definitions = {definition.id: definition for definition in list_signal_definitions()}
     lake_counts = lakehouse_signal_service.materialized_signal_counts()
     lake_severities = lakehouse_signal_service.materialized_signal_severities()
+    lake_confidence = lakehouse_signal_service.materialized_signal_confidence_indices()
 
     for signal_id, definition in definitions.items():
         pattern_id = signal_to_pattern_id(signal_id)
-        if pattern_id not in rows and signal_id not in lake_counts:
-            continue
         row = rows.get(pattern_id) or _pattern_row_from_meta(pattern_id)
         if row.name_es == pattern_id:
             row.name_es = definition.title
@@ -121,7 +121,7 @@ def lake_pattern_summaries(
             row.severity,
             lake_severities.get(signal_id) or definition.severity,
         )
-        row.signal_ids = _merge_unique(row.signal_ids, [signal_id])
+        row.signal_ids = _merge_unique(row.signal_ids, [visible_signal_id(signal_id)])
         row.sources_required = _merge_unique(
             row.sources_required,
             definition.sources or definition.sources_required,
@@ -147,6 +147,20 @@ def lake_pattern_summaries(
                 row.sources_required,
                 definition.sources or definition.sources_required,
             )
+        previous_hit_count = row.hit_count
+        candidate_confidence = lake_confidence.get(canonical_signal_id)
+        if candidate_confidence is not None:
+            if row.confidence_index is None or previous_hit_count <= 0:
+                row.confidence_index = candidate_confidence
+            else:
+                row.confidence_index = round(
+                    (
+                        row.confidence_index * previous_hit_count
+                        + candidate_confidence * hit_count
+                    )
+                    / (previous_hit_count + hit_count),
+                    1,
+                )
         row.hit_count += hit_count
         row.last_seen_at = max(
             [value for value in [row.last_seen_at, observed_at] if value],
@@ -159,7 +173,10 @@ def lake_pattern_summaries(
         )
         row.materialized = True
         row.materialization_state = "materialized"
-        row.signal_ids = _merge_unique(row.signal_ids, [canonical_signal_id])
+        row.signal_ids = _merge_unique(
+            row.signal_ids,
+            [visible_signal_id(canonical_signal_id)],
+        )
         rows[pattern_id] = row
 
     return sorted(
@@ -213,26 +230,32 @@ def lake_patterns_for_entity(
                 for item in hit.evidence_items[: settings.pattern_max_evidence_refs]
                 if item.url or item.record_id or item.label or item.item_id
             ]
-        if not evidence_refs:
-            continue
         results.append(PatternResult(
             pattern_id=mapped_pattern_id,
             pattern_name=_localized(meta, "name", lang, hit.title),
             description=_localized(meta, "desc", lang, hit.description),
             data={
-                "signal_id": hit.signal_id,
+                "signal_id": visible_signal_id(hit.signal_id),
                 "hit_id": hit.hit_id,
                 "severity": hit.severity,
                 "scope_key": hit.scope_key,
                 "scope_type": hit.scope_type,
                 "risk_signal": hit.score,
+                "confidence_index": hit.confidence_index,
                 "evidence_count": hit.evidence_count,
                 "evidence_refs": evidence_refs,
                 "identity_quality": hit.identity_quality,
             },
             entity_ids=[entity.id],
             sources=hit.sources,
-            exposure_tier="public_safe",
+            confidence_index=hit.confidence_index or 0.0,
+            confidence_components=hit.confidence_components
+            or SignalConfidenceComponents(
+                identity=0.0,
+                evidence_traceability=0.0,
+                source_corroboration=0.0,
+            ),
+            exposure_tier="confidence_indexed",
             intelligence_tier="community",
         ))
     return results

@@ -1,4 +1,4 @@
-import { GitBranch, ShieldCheck } from "lucide-react";
+import { Gauge, GitBranch } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 
@@ -9,10 +9,14 @@ import { useAtlasOverview } from "../lib/useAtlasData";
 
 const SEVERITY_FILTERS: ("all" | Severity)[] = ["all", "low", "medium", "high", "critical"];
 
+function displaySignalId(signalId: string): string {
+  return signalId.replace(/_review_only$/, "");
+}
+
 export function PatternsPage() {
   const { data, status } = useAtlasOverview();
   const [severity, setSeverity] = useState<"all" | Severity>("all");
-  const [materializedOnly, setMaterializedOnly] = useState(true);
+  const [materializedOnly, setMaterializedOnly] = useState(false);
 
   const filtered = useMemo(() => {
     return data.patterns
@@ -35,8 +39,8 @@ export function PatternsPage() {
         <div className="co-action-row">
           <DataStatus status={status} />
           <Pill tone="accent">
-            <ShieldCheck size={13} />
-            public_safe
+            <Gauge size={13} />
+            todos · confidence_index
           </Pill>
         </div>
       </header>
@@ -61,6 +65,7 @@ export function PatternsPage() {
               <th>severidad</th>
               <th>categoria</th>
               <th>hits</th>
+              <th>confianza</th>
               <th>senales</th>
               <th>fuentes</th>
               <th>estado</th>
@@ -73,7 +78,7 @@ export function PatternsPage() {
                 <tr key={pattern.id}>
                   <td>
                     {primarySignal ? (
-                      <Link to={`/app/signals/${primarySignal}`}>{pattern.title}</Link>
+                      <Link to={`/app/signals/${displaySignalId(primarySignal)}`}>{pattern.title}</Link>
                     ) : (
                       <span>{pattern.title}</span>
                     )}
@@ -83,8 +88,9 @@ export function PatternsPage() {
                   <td><SeverityBadge severity={pattern.severity} /></td>
                   <td className="co-mono">{pattern.category}</td>
                   <td className="co-num">{formatNumber(pattern.hits)}</td>
+                  <td className="co-num">{pattern.confidence == null ? "—" : `${pattern.confidence.toFixed(1)}%`}</td>
                   <td>
-                    <span className="co-mono">{pattern.signalIds.slice(0, 2).join(" · ") || "registry"}</span>
+                    <span className="co-mono">{pattern.signalIds.slice(0, 2).map(displaySignalId).join(" · ") || "registry"}</span>
                   </td>
                   <td>
                     <span className="co-mono">{pattern.sourcesRequired.slice(0, 3).join(" · ") || "fuente"}</span>

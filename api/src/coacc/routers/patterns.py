@@ -76,7 +76,7 @@ async def get_patterns_for_entity(
     if settings.public_mode:
         enforce_entity_lookup_enabled()
     driver: AsyncDriver | None = getattr(request.app.state, "neo4j_driver", None)
-    lake_results = lake_patterns_for_entity(entity_id, lang=lang, public_only=True)
+    lake_results = lake_patterns_for_entity(entity_id, lang=lang, public_only=False)
     if lake_results is not None and (lake_results or session is None or driver is None):
         results = lake_results
     elif session is None or driver is None:
@@ -127,7 +127,7 @@ async def get_specific_pattern(
         entity_id,
         lang=lang,
         pattern_id=pattern_name,
-        public_only=True,
+        public_only=False,
     )
     if lake_results is not None and (
         lake_results or session is None or pattern_name not in provider_available

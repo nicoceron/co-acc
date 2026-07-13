@@ -24,8 +24,11 @@ class SignalHitRow(BaseModel):
     title: str
     description: str
     public_safe: bool
-    reviewer_only: bool
     identity_confidence: float = Field(ge=0.0, le=1.0)
+    confidence_identity: float = Field(ge=0.0, le=1.0)
+    confidence_evidence_traceability: float = Field(ge=0.0, le=1.0)
+    confidence_source_corroboration: float = Field(ge=0.0, le=1.0)
+    confidence_index: float = Field(ge=0.0, le=100.0)
     identity_match_type: str | None = None
     identity_quality: str | None = None
     evidence_count: int = Field(ge=0)

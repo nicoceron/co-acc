@@ -197,6 +197,27 @@ def _identity_confidence_sql() -> str:
     """
 
 
+def _evidence_confidence_sql(evidence_count_sql: str) -> str:
+    return f"""
+        CASE
+            WHEN {evidence_count_sql} <= 0 THEN 0.0
+            WHEN {evidence_count_sql} = 1 THEN 0.65
+            WHEN {evidence_count_sql} = 2 THEN 0.85
+            ELSE 1.0
+        END
+    """
+
+
+def _source_corroboration_sql(source_count: int) -> str:
+    if source_count <= 0:
+        return "0.0"
+    if source_count == 1:
+        return "0.70"
+    if source_count == 2:
+        return "0.90"
+    return "1.0"
+
+
 def _hit_select(
     *,
     run_id: str,
@@ -213,6 +234,19 @@ def _hit_select(
         if "severity" in feature_columns
         else _sql_string(definition.severity)
     )
+    evidence_count_sql = "list_count(evidence_refs)"
+    evidence_confidence_sql = _evidence_confidence_sql(evidence_count_sql)
+    corroboration_sql = _source_corroboration_sql(len(set(definition.sources)))
+    confidence_index_sql = f"""
+        round(
+            100.0 * (
+                0.55 * identity_confidence
+                + 0.25 * ({evidence_confidence_sql})
+                + 0.20 * ({corroboration_sql})
+            ),
+            1
+        )
+    """
     return f"""
         WITH normalized AS (
             SELECT
@@ -231,7 +265,6 @@ def _hit_select(
                 {_sql_string(definition.title)} AS title,
                 {_sql_string(definition.description)} AS description,
                 {_sql_bool(definition.public_safe)} AS public_safe,
-                {_sql_bool(definition.reviewer_only)} AS reviewer_only,
                 {_identity_confidence_sql()} AS identity_confidence,
                 nullif(trim(identity_match_type), '') AS identity_match_type,
                 nullif(trim(identity_quality), '') AS identity_quality,
@@ -286,11 +319,14 @@ def _hit_select(
             title,
             description,
             public_safe,
-            reviewer_only,
             identity_confidence,
+            identity_confidence AS confidence_identity,
+            {evidence_confidence_sql} AS confidence_evidence_traceability,
+            {corroboration_sql} AS confidence_source_corroboration,
+            {confidence_index_sql} AS confidence_index,
             identity_match_type,
             identity_quality,
-            list_count(evidence_refs) AS evidence_count,
+            {evidence_count_sql} AS evidence_count,
             'bundle:' || hit_id AS evidence_bundle_id,
             evidence_refs,
             created_at,

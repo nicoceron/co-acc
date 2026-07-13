@@ -14,7 +14,6 @@ RETURN hit.hit_id AS hit_id,
        hit.category AS category,
        hit.severity AS severity,
        hit.public_safe AS public_safe,
-       hit.reviewer_only AS reviewer_only,
        hit.entity_id AS entity_id,
        hit.entity_key AS entity_key,
        hit.entity_label AS entity_label,
@@ -46,4 +45,3 @@ RETURN hit.hit_id AS hit_id,
          identity_match_type: entry.identity_match_type,
          identity_quality: entry.identity_quality
        }] AS evidence_items
-

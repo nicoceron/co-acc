@@ -1,4 +1,4 @@
-import { ArrowLeft, GitBranch, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Gauge, GitBranch } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 
@@ -11,12 +11,16 @@ import { allowAtlasFixtures, useAtlasOverview } from "../lib/useAtlasData";
 
 const SEVERITY_FILTERS: ("all" | Severity)[] = ["all", "low", "medium", "high", "critical"];
 
+function displaySignalId(signalId: string): string {
+  return signalId.replace(/_review_only$/, "");
+}
+
 function fallbackDetail(signalId: string): SignalDetail {
   return {
     version: "registry",
     scope: "entity",
     runner: `registry:${signalId}`,
-    policy: { public: true, reviewer: false, identity: ["nit"], dedup: ["entity_id", "source_id"] },
+    policy: { public: true, identity: ["nit"], dedup: ["entity_id", "source_id"] },
     sourcesRequired: ["SECOP-II", "RUES"],
     entityTypes: ["empresa", "contrato"],
     sampleHits: atlasFixture.signalDetail["S-014"]?.sampleHits ?? [],
@@ -31,7 +35,6 @@ function apiDetailToViewModel(response: SignalDetailResponse): SignalDetail {
     runner: definition.runner ? `${definition.runner.kind}:${definition.runner.ref}` : `registry:${definition.id}`,
     policy: {
       public: definition.public_safe,
-      reviewer: definition.reviewer_only,
       identity: definition.requires_identity,
       dedup: definition.dedup_fields,
     },
@@ -39,9 +42,12 @@ function apiDetailToViewModel(response: SignalDetailResponse): SignalDetail {
     entityTypes: definition.entity_types,
     sampleHits: response.sample_hits.map((hit) => ({
       label: [hit.entity_key, hit.scope_key].filter(Boolean).join(" · "),
-      conf: hit.identity_confidence,
+      conf: hit.confidence_index,
       ev: hit.evidence_count,
       score: hit.score,
+      identity: hit.confidence_components.identity,
+      traceability: hit.confidence_components.evidence_traceability,
+      corroboration: hit.confidence_components.source_corroboration,
     })),
   };
 }
@@ -51,7 +57,6 @@ export function SignalsPage() {
   const { data } = useAtlasOverview();
   const fixturesAllowed = allowAtlasFixtures();
   const [severity, setSeverity] = useState<"all" | Severity>("all");
-  const [publicOnly, setPublicOnly] = useState(false);
   const [apiDetail, setApiDetail] = useState<SignalDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
@@ -82,12 +87,11 @@ export function SignalsPage() {
 
   const filtered = useMemo(() => {
     return data.signals
-      .filter((signal) => severity === "all" || signal.severity === severity)
-      .filter((signal) => !publicOnly || signal.public);
-  }, [data.signals, publicOnly, severity]);
+      .filter((signal) => severity === "all" || signal.severity === severity);
+  }, [data.signals, severity]);
 
   if (signalId) {
-    const signal = data.signals.find((item) => item.id === signalId)
+    const signal = data.signals.find((item) => displaySignalId(item.id) === signalId || item.id === signalId)
       ?? (fixturesAllowed ? atlasFixture.signals.find((item) => item.id === signalId) : undefined)
       ?? (fixturesAllowed ? atlasFixture.signals[0] : undefined);
 
@@ -113,18 +117,18 @@ export function SignalsPage() {
           Senales
         </Link>
         <header className="co-page-head">
-          <Rule accent>{signal.id} · v{detail.version}</Rule>
+          <Rule accent>{displaySignalId(signal.id)} · v{detail.version}</Rule>
           <h1>{signal.title}</h1>
           <p>{signal.desc}</p>
           <div className="co-action-row">
             <SeverityBadge severity={signal.severity} />
-            <Pill tone={signal.public ? "moss" : "neutral"}>{signal.public ? "public" : "reviewer"}</Pill>
+            <Pill tone="accent"><Gauge size={13} /> confianza {signal.confidence?.toFixed(1) ?? "—"}%</Pill>
             <Pill>{formatNumber(signal.hits)} hits</Pill>
           </div>
         </header>
 
         <div className="co-signal-detail__grid">
-          <Frame coord="POLITICA · P-01">
+          <Frame coord="METODO · P-01">
             <div className="co-spec-list">
               <span><strong>scope</strong>{detail.scope}</span>
               <span><strong>runner</strong>{detail.runner}</span>
@@ -146,7 +150,7 @@ export function SignalsPage() {
           <div className="co-frame-title">
             <div>
               <h2>Hits de muestra</h2>
-              <span>confianza, evidencia y score</span>
+              <span>calidad de evidencia separada del score de riesgo</span>
             </div>
             <GitBranch size={16} />
           </div>
@@ -155,16 +159,22 @@ export function SignalsPage() {
               <thead>
                 <tr>
                   <th>entidad / proceso</th>
-                  <th>confianza</th>
+                  <th>indice</th>
+                  <th>identidad</th>
+                  <th>trazabilidad</th>
+                  <th>corroboracion</th>
                   <th>evidencia</th>
-                  <th>score</th>
+                  <th>riesgo</th>
                 </tr>
               </thead>
               <tbody>
                 {detail.sampleHits.map((hit) => (
                   <tr key={hit.label}>
                     <td>{hit.label}</td>
-                    <td className="co-num">{hit.conf.toFixed(2)}</td>
+                    <td className="co-num">{hit.conf.toFixed(1)}%</td>
+                    <td className="co-num">{(hit.identity * 100).toFixed(0)}%</td>
+                    <td className="co-num">{(hit.traceability * 100).toFixed(0)}%</td>
+                    <td className="co-num">{(hit.corroboration * 100).toFixed(0)}%</td>
                     <td className="co-num">{hit.ev}</td>
                     <td className="co-num">{hit.score.toFixed(2)}</td>
                   </tr>
@@ -188,11 +198,11 @@ export function SignalsPage() {
         <div>
           <Rule accent>Workspace · Catalogo</Rule>
           <h1>Senales</h1>
-          <p>Patrones documentales versionados, materializados y enlazables.</p>
+          <p>Todos los patrones documentales, con confianza trazable y evidencia enlazada.</p>
         </div>
         <Pill tone="accent">
-          <ShieldCheck size={13} />
-          public_safe
+          <Gauge size={13} />
+          confidence_index
         </Pill>
       </header>
 
@@ -202,9 +212,6 @@ export function SignalsPage() {
             {item === "all" ? "todas" : item}
           </button>
         ))}
-        <button className={publicOnly ? "active" : ""} type="button" onClick={() => setPublicOnly((value) => !value)}>
-          solo publicas
-        </button>
         <span>{filtered.length} de {data.signals.length}</span>
       </div>
 
@@ -218,18 +225,18 @@ export function SignalsPage() {
               <th>categoria</th>
               <th>hits</th>
               <th>estado</th>
-              <th>publico</th>
+              <th>confianza</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((signal) => (
               <tr key={signal.id}>
                 <td>
-                  <Link className="co-mono" to={`/app/signals/${signal.id}`}>{signal.id}</Link>
+                  <Link className="co-mono" to={`/app/signals/${displaySignalId(signal.id)}`}>{displaySignalId(signal.id)}</Link>
                 </td>
                 <td><SeverityBadge severity={signal.severity} /></td>
                 <td>
-                  <Link to={`/app/signals/${signal.id}`}>{signal.title}</Link>
+                  <Link to={`/app/signals/${displaySignalId(signal.id)}`}>{signal.title}</Link>
                   <span className="co-row-sub">{signal.desc}</span>
                 </td>
                 <td className="co-mono">{signal.category}</td>
@@ -239,7 +246,7 @@ export function SignalsPage() {
                     {signal.materialized ? "materialized" : "registry"}
                   </Pill>
                 </td>
-                <td>{signal.public ? <Pill tone="moss">public</Pill> : <Pill>reviewer</Pill>}</td>
+                <td className="co-num">{signal.confidence == null ? "—" : `${signal.confidence.toFixed(1)}%`}</td>
               </tr>
             ))}
           </tbody>

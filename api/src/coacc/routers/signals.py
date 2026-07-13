@@ -3,17 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from neo4j import AsyncSession
 
-from coacc.config import settings
-from coacc.dependencies import (
-    can_access_reviewer_content,
-    get_optional_session,
-    get_optional_user_without_database_required,
-)
+from coacc.dependencies import get_optional_session
 from coacc.models.signal import SignalDetailResponse, SignalListResponse
-from coacc.models.user import UserResponse
 from coacc.services import lakehouse_signal_service
 from coacc.services.signal_materializer import (
-    filter_signal_hits_for_viewer,
     get_latest_materializer_run,
     get_signal_samples,
     list_signal_summaries,
@@ -26,18 +19,10 @@ router = APIRouter(prefix="/api/v1/signals", tags=["signals"])
 @router.get("/", response_model=SignalListResponse)
 async def list_signals(
     session: Annotated[AsyncSession | None, Depends(get_optional_session)],
-    user: Annotated[
-        UserResponse | None,
-        Depends(get_optional_user_without_database_required),
-    ],
 ) -> SignalListResponse:
     registry = load_signal_registry()
     signals = await list_signal_summaries(session)
     last_run_id, last_refreshed_at = await get_latest_materializer_run(session)
-    if not can_access_reviewer_content(user):
-        signals = [signal for signal in signals if not signal.reviewer_only]
-    if settings.coacc_signals_require_materialized and not can_access_reviewer_content(user):
-        signals = [signal for signal in signals if signal.materialized]
     return SignalListResponse(
         registry_version=registry.registry_version,
         last_run_id=last_run_id,
@@ -50,22 +35,12 @@ async def list_signals(
 async def get_signal(
     signal_id: str,
     session: Annotated[AsyncSession | None, Depends(get_optional_session)],
-    user: Annotated[
-        UserResponse | None,
-        Depends(get_optional_user_without_database_required),
-    ],
     limit: Annotated[int, Query(ge=1, le=25)] = 10,
 ) -> SignalDetailResponse:
     definition = get_signal_definition(signal_id)
     if definition is None:
         raise HTTPException(status_code=404, detail="Signal not found")
-    if definition.reviewer_only and not can_access_reviewer_content(user):
-        raise HTTPException(status_code=404, detail="Signal not found")
     sample_hits = await get_signal_samples(session, signal_id, limit)
-    sample_hits = filter_signal_hits_for_viewer(
-        sample_hits,
-        can_view_reviewer=can_access_reviewer_content(user),
-    )
     materialized_severity = lakehouse_signal_service.materialized_signal_severities().get(
         definition.id
     )

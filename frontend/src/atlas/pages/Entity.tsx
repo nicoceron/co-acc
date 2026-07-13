@@ -201,7 +201,7 @@ export function EntityPage() {
         <p>
           <span>{documentId}</span>
           <span>{entity.identity_quality || "identidad"}</span>
-          <span>{entity.exposure_tier || "public_safe"}</span>
+          <span>{entity.exposure_tier || "confidence_indexed"}</span>
           <span>{sourceLabel(entity)}</span>
         </p>
       </header>

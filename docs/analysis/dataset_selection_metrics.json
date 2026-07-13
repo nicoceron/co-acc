@@ -1,0 +1,171 @@
+{
+  "snapshot_date": "2026-06-05",
+  "award_base": {
+    "row_count": 5442058,
+    "contracts": 5441243,
+    "processes": 4878185
+  },
+  "join_quality": [
+    {
+      "source": "process",
+      "denominator_contracts": 5441243,
+      "matched_contracts": 5437369,
+      "key_match_rate": 0.9992880303268941
+    },
+    {
+      "source": "modifications",
+      "denominator_contracts": 6407,
+      "matched_contracts": 6109,
+      "key_match_rate": 0.9534883720930233
+    },
+    {
+      "source": "suspensions",
+      "denominator_contracts": 83494,
+      "matched_contracts": 79168,
+      "key_match_rate": 0.9481878937408676
+    },
+    {
+      "source": "execution",
+      "denominator_contracts": 7198,
+      "matched_contracts": 7069,
+      "key_match_rate": 0.9820783550986385
+    }
+  ],
+  "recent_process_feature_completeness": [
+    {
+      "feature_group": "Process record match",
+      "available_contracts": 3265784,
+      "total_contracts": 3269620,
+      "availability_rate": 0.9988267749769086
+    },
+    {
+      "feature_group": "Response count",
+      "available_contracts": 3265784,
+      "total_contracts": 3269620,
+      "availability_rate": 0.9988267749769086
+    },
+    {
+      "feature_group": "Invited supplier count",
+      "available_contracts": 3265784,
+      "total_contracts": 3269620,
+      "availability_rate": 0.9988267749769086
+    },
+    {
+      "feature_group": "Award/base price pair",
+      "available_contracts": 3265784,
+      "total_contracts": 3269620,
+      "availability_rate": 0.9988267749769086
+    },
+    {
+      "feature_group": "Bidding window timestamps",
+      "available_contracts": 263552,
+      "total_contracts": 3269620,
+      "availability_rate": 0.08060630899003554
+    }
+  ],
+  "decision": [
+    {
+      "priority": 1,
+      "dataset_id": "jbjy-vk9h",
+      "decision": "Launch",
+      "reason": "Contract spine and nine established behavior variables"
+    },
+    {
+      "priority": 2,
+      "dataset_id": "p6dx-8zbt",
+      "decision": "Launch",
+      "reason": "99.93% contract join; four near-complete competition/price variables"
+    },
+    {
+      "priority": 3,
+      "dataset_id": "u99c-7mfm",
+      "decision": "Launch",
+      "reason": "Full 2016-2026 window; two interpretable disruption variables"
+    },
+    {
+      "priority": 4,
+      "dataset_id": "paco_sanctions",
+      "decision": "Launch",
+      "reason": "Exact-NIT evidence and weak evaluation labels; never a model input"
+    },
+    {
+      "priority": 5,
+      "dataset_id": "u8cx-r425",
+      "decision": "After backfill",
+      "reason": "High-value signal, but local ingest is only a recent 63k-row slice"
+    },
+    {
+      "priority": 6,
+      "dataset_id": "mfmm-jqmq",
+      "decision": "After backfill",
+      "reason": "Only 9,535 local rows from a one-week creation window"
+    },
+    {
+      "priority": 7,
+      "dataset_id": "wi7w-2nvm",
+      "decision": "Defer",
+      "reason": "42.3m raw rows; process response counts cover the MVP need"
+    },
+    {
+      "priority": 8,
+      "dataset_id": "c82u-588k",
+      "decision": "Defer",
+      "reason": "Useful registry context, but adds 9.3m rows and new feature semantics"
+    },
+    {
+      "priority": 9,
+      "dataset_id": "it5q-hg94",
+      "decision": "Defer",
+      "reason": "Tiny local slice and a future-dated watermark require quality repair"
+    },
+    {
+      "priority": 10,
+      "dataset_id": "gbry-rnq4",
+      "decision": "Exclude",
+      "reason": "Person-level privacy scope and stale 2022 window"
+    },
+    {
+      "priority": 11,
+      "dataset_id": "jgra-rz2t",
+      "decision": "Exclude",
+      "reason": "2019-only scope and invalid date outliers"
+    }
+  ],
+  "extension_checks": [
+    {
+      "candidate": "Contract modifications",
+      "coverage_rate": 0.9534883720930233,
+      "denominator": "loaded modification-event contracts",
+      "decision": "Conditional fifth",
+      "blocker": "Local history covers only 2026-06-03"
+    },
+    {
+      "candidate": "RUES company registry",
+      "coverage_rate": 0.39885688669729913,
+      "denominator": "2023+ exact-NIT contract rows",
+      "decision": "Enrichment only",
+      "blocker": "60.1% of eligible contract rows unmatched"
+    },
+    {
+      "candidate": "TVEC supplier history",
+      "coverage_rate": 0.00948858754529493,
+      "denominator": "2023+ exact-NIT contract rows",
+      "decision": "Defer",
+      "blocker": "Under 1% contract-row coverage"
+    },
+    {
+      "candidate": "BPIN project link",
+      "coverage_rate": 0.5264724952746802,
+      "denominator": "all 2023+ contracts",
+      "decision": "Evidence only",
+      "blocker": "Project link is broad, but incremental risk value is unproven"
+    },
+    {
+      "candidate": "SGR expense execution",
+      "coverage_rate": 0.003949082768028089,
+      "denominator": "all 2023+ contracts",
+      "decision": "Defer",
+      "blocker": "Expense match reaches only 0.39%"
+    }
+  ]
+}

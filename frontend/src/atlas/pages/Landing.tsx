@@ -140,7 +140,7 @@ export function Landing() {
           <MetricTile
             label="Senales activas"
             value={data.metrics.signals}
-            sub="publicas + reviewer"
+            sub="todas · confianza indexada"
             spark={data.seriesHits.map((value, index) => value * 0.5 + index)}
           />
           <MetricTile label="Fuentes operativas" value={data.metrics.sources} sub="watermark y cobertura" spark={data.seriesSourcesOk} />

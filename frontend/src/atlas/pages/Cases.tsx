@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, FileText, Network, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Gauge, Network } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 import { EmptyState, Eyebrow, Frame, Pill, Rule, SeverityBadge } from "../components/ui";
@@ -133,7 +133,7 @@ export function CaseDetail() {
           </div>
           <div className="co-inline-metrics">
             <span><Network size={16} /> {story.entities} entidades</span>
-            <span><ShieldCheck size={16} /> public_safe</span>
+            <span><Gauge size={16} /> confianza indexada</span>
           </div>
           <SignalList story={story} />
         </Frame>

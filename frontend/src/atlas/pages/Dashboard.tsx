@@ -17,7 +17,7 @@ export function Dashboard() {
         <div>
           <Rule accent>Workspace · Observatorio en vivo</Rule>
           <h1>Estado del grafo</h1>
-          <p>Snapshot operativo · stream activo · datos public_safe por defecto</p>
+          <p>Snapshot operativo · todos los patrones visibles · confianza trazable</p>
         </div>
         <div className="co-action-row">
           <DataStatus status={status} />

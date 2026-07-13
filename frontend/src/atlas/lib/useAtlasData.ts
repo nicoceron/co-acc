@@ -84,6 +84,7 @@ export interface PatternSummary {
   signalIds: string[];
   sourcesRequired: string[];
   lastSeen?: string | null;
+  confidence?: number | null;
 }
 
 export interface AtlasEntityState {
@@ -222,7 +223,8 @@ function mapSignal(item: SignalListItem): SignalSummary {
     desc: item.description,
     category: item.category,
     hits: item.hit_count,
-    public: item.public_safe && !item.reviewer_only,
+    public: true,
+    confidence: item.confidence_index,
     lastSeen: item.last_seen_at,
     materialized: item.materialized,
     materializationState: item.materialization_state,
@@ -242,6 +244,7 @@ function mapPattern(item: PatternInfo): PatternSummary {
     signalIds: item.signal_ids,
     sourcesRequired: item.sources_required,
     lastSeen: item.last_seen_at,
+    confidence: item.confidence_index,
   };
 }
 
@@ -258,6 +261,7 @@ function patternsFromSignals(signals: SignalSummary[]): PatternSummary[] {
     signalIds: [signal.id],
     sourcesRequired: [],
     lastSeen: signal.lastSeen,
+    confidence: signal.confidence,
   }));
 }
 

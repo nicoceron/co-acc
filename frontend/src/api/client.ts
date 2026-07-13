@@ -314,6 +314,7 @@ export interface PatternInfo {
   materialization_state: "materialized" | "registered_only";
   signal_ids: string[];
   sources_required: string[];
+  confidence_index?: number | null;
 }
 
 export interface PatternListResponse {
@@ -327,6 +328,8 @@ export interface PatternResult {
   data: Record<string, unknown>;
   entity_ids: string[];
   sources: { database: string }[];
+  confidence_index: number;
+  confidence_components: SignalConfidenceComponents;
   intelligence_tier?: "community" | "full";
 }
 
@@ -385,7 +388,6 @@ export interface SignalDefinition {
   severity: "low" | "medium" | "high" | "critical";
   entity_types: string[];
   public_safe: boolean;
-  reviewer_only: boolean;
   requires_identity: string[];
   sources_required: string[];
   scope_type: string;
@@ -393,7 +395,7 @@ export interface SignalDefinition {
   pattern_id?: string | null;
   dedup_key_template?: string | null;
   runner?: {
-    kind: "pattern" | "cypher";
+    kind: "pattern" | "cypher" | "duckdb";
     ref: string;
   };
   public_policy?: {
@@ -416,6 +418,13 @@ export interface SignalListItem extends SignalDefinition {
   last_seen_at?: string | null;
   materialized: boolean;
   materialization_state: "materialized" | "registered_only";
+  confidence_index?: number | null;
+}
+
+export interface SignalConfidenceComponents {
+  identity: number;
+  evidence_traceability: number;
+  source_corroboration: number;
 }
 
 export interface SignalEvidenceItem {
@@ -442,7 +451,6 @@ export interface SignalHit {
   category: string;
   severity: "low" | "medium" | "high" | "critical";
   public_safe: boolean;
-  reviewer_only: boolean;
   entity_id: string;
   entity_key: string;
   entity_label?: string | null;
@@ -451,6 +459,8 @@ export interface SignalHit {
   dedup_key: string;
   score: number;
   identity_confidence: number;
+  confidence_index: number;
+  confidence_components: SignalConfidenceComponents;
   identity_match_type?: string | null;
   identity_quality?: string | null;
   evidence_count: number;

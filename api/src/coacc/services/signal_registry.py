@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml  # type: ignore[import-untyped]
 
-from coacc.models.signal import SignalDefinition, SignalRegistry
+from coacc.models.signal import SignalDefinition, SignalRegistry, visible_signal_id
 from coacc.services.runtime_paths import config_file
 
 
@@ -39,7 +39,13 @@ def list_signal_definitions() -> list[SignalDefinition]:
 
 def resolve_signal_id(signal_id: str) -> str:
     registry = load_signal_registry()
-    return registry.aliases.get(signal_id, signal_id)
+    aliased = registry.aliases.get(signal_id, signal_id)
+    if aliased != signal_id:
+        return aliased
+    for signal in registry.signals:
+        if visible_signal_id(signal.id) == signal_id:
+            return signal.id
+    return signal_id
 
 
 def get_signal_definition(signal_id: str) -> SignalDefinition | None:

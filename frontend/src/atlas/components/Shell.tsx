@@ -101,12 +101,12 @@ export function AtlasShell() {
             <a href="https://github.com/nicoceron/co-acc">GitHub</a>
             <a href="https://github.com/nicoceron/co-acc/issues">Issues</a>
             <span className="co-mono">AGPL-3.0</span>
-            <span className="co-mono">public_safe default</span>
+            <span className="co-mono">confidence indexed</span>
           </div>
         </div>
         <div className="co-container co-footer__bar">
           <span>2026 · co/acc</span>
-          <span>public_safe · AGPL-3.0 · atlas v3</span>
+          <span>confidence_index · AGPL-3.0 · atlas v3</span>
         </div>
       </footer>
     </>

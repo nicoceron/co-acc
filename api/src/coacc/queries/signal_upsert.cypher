@@ -12,7 +12,6 @@ SET
   hit.category = $category,
   hit.severity = $severity,
   hit.public_safe = $public_safe,
-  hit.reviewer_only = $reviewer_only,
   hit.entity_id = $entity_id,
   hit.entity_key = $entity_key,
   hit.entity_label = $entity_label,
@@ -38,7 +37,6 @@ SET definition.version = $signal_version,
     definition.category = $category,
     definition.severity = $severity,
     definition.public_safe = $public_safe,
-    definition.reviewer_only = $reviewer_only,
     definition.updated_at = datetime($last_seen_at)
 MERGE (hit)-[:DEFINIDO_POR]->(definition)
 MERGE (run)-[:EJECUTO_DEFINICION]->(definition)

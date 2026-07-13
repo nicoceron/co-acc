@@ -14,7 +14,14 @@ from coacc.models.case import (
     CaseSummary,
 )
 from coacc.models.entity import SourceAttribution
-from coacc.models.signal import EntitySignalsResponse, EvidenceItemResponse, SignalHitResponse
+from coacc.models.signal import (
+    EntitySignalsResponse,
+    EvidenceItemResponse,
+    SignalConfidenceComponents,
+    SignalHitResponse,
+    combine_confidence_components,
+    corroboration_confidence_component,
+)
 from coacc.services import lakehouse_query
 from coacc.services.lakehouse_anomaly_service import (
     anomaly_case_id,
@@ -217,6 +224,56 @@ def materialized_signal_severities() -> dict[str, str]:
     }
 
 
+def materialized_signal_confidence_indices() -> dict[str, float]:
+    """Return average evidence-quality confidence for every materialized signal."""
+    run = latest_signal_run()
+    if run is None or not _run_has_parquet(run):
+        return {}
+    con = lakehouse_query.connect(read_only=True)
+    try:
+        rows = con.execute(
+            f"""
+            WITH hits AS ({_deduped_hits_sql(run)}),
+            components AS (
+                SELECT
+                    hits.signal_id,
+                    least(1.0, greatest(0.0, coalesce(hits.identity_confidence, 0.5)))
+                        AS identity_component,
+                    CASE
+                        WHEN coalesce(hits.evidence_count, 0) <= 0 THEN 0.0
+                        WHEN hits.evidence_count = 1 THEN 0.65
+                        WHEN hits.evidence_count = 2 THEN 0.85
+                        ELSE 1.0
+                    END AS evidence_component
+                FROM hits
+            )
+            SELECT
+                signal_id,
+                avg(identity_component) AS identity_component,
+                avg(evidence_component) AS evidence_component
+            FROM components
+            GROUP BY signal_id
+            """
+        ).fetchall()
+    finally:
+        con.close()
+    indices: dict[str, float] = {}
+    for signal_id, identity_component, evidence_component in rows:
+        canonical_signal_id = resolve_signal_id(str(signal_id))
+        definition = get_signal_definition(canonical_signal_id)
+        source_count = (
+            len(set(definition.sources or definition.sources_required))
+            if definition
+            else 0
+        )
+        indices[canonical_signal_id] = combine_confidence_components(
+            identity=float(identity_component),
+            evidence=float(evidence_component),
+            corroboration=corroboration_confidence_component(source_count),
+        )
+    return indices
+
+
 def _normalize_list(value: object) -> list[str]:
     if value is None:
         return []
@@ -334,16 +391,28 @@ def _hit_from_row(
         if row.get("identity_quality") is not None
         else _identity_quality(identity_match_type)
     )
-    source_ids = []
+    source_ids = list(definition.sources or definition.sources_required)
     for item in evidence_items:
         if item.source_id and item.source_id not in source_ids:
             source_ids.append(item.source_id)
-    if not source_ids:
-        source_ids = definition.sources or definition.sources_required
     hit_id = str(row["hit_id"])
     entity_uid = str(row.get("entity_uid") or row.get("entity_id") or row.get("entity_key") or "")
     entity_key = str(row.get("entity_key") or entity_uid)
     scope_key = str(row.get("scope_key") or entity_key)
+    confidence_components = None
+    if all(
+        row.get(key) is not None
+        for key in (
+            "confidence_identity",
+            "confidence_evidence_traceability",
+            "confidence_source_corroboration",
+        )
+    ):
+        confidence_components = SignalConfidenceComponents(
+            identity=float(row["confidence_identity"]),
+            evidence_traceability=float(row["confidence_evidence_traceability"]),
+            source_corroboration=float(row["confidence_source_corroboration"]),
+        )
     return SignalHitResponse(
         hit_id=hit_id,
         run_id=str(row.get("run_id") or ""),
@@ -354,7 +423,6 @@ def _hit_from_row(
         category=definition.category,
         severity=str(row.get("severity") or definition.severity),
         public_safe=bool(row.get("public_safe", definition.public_safe)),
-        reviewer_only=bool(row.get("reviewer_only", definition.reviewer_only)),
         entity_id=entity_uid,
         entity_key=entity_key,
         entity_label=str(row["entity_label"]) if row.get("entity_label") is not None else None,
@@ -365,6 +433,12 @@ def _hit_from_row(
         identity_confidence=float(
             row.get("identity_confidence") or _identity_confidence(identity_quality)
         ),
+        confidence_index=(
+            float(row["confidence_index"])
+            if row.get("confidence_index") is not None
+            else None
+        ),
+        confidence_components=confidence_components,
         identity_match_type=identity_match_type,
         identity_quality=identity_quality,
         evidence_count=int(row.get("evidence_count") or len(evidence_refs)),
@@ -397,7 +471,7 @@ def _hit_rows(
         predicates.append("hit_id = ?")
         params.append(hit_id)
     if public_only:
-        predicates.append("public_safe = true AND reviewer_only = false")
+        predicates.append("public_safe = true")
     where_sql = "WHERE " + " AND ".join(predicates) if predicates else ""
     con = lakehouse_query.connect(read_only=True)
     try:
@@ -481,7 +555,7 @@ def materialized_entity_signals(
     predicates = ["(entity_uid IN (SELECT unnest(?)) OR entity_key IN (SELECT unnest(?)))"]
     params: list[object] = [uid_candidates, key_candidates]
     if public_only:
-        predicates.append("public_safe = true AND reviewer_only = false")
+        predicates.append("public_safe = true")
     con = lakehouse_query.connect(read_only=True)
     try:
         cursor = con.execute(
@@ -529,7 +603,7 @@ def list_lake_cases(page: int = 1, size: int = 20) -> CaseListResponse:
         run = latest_signal_run()
         signal_rows_by_contract: dict[str, dict[str, Any]] = {}
         if run is not None and _run_has_parquet(run):
-            signal_rows_by_contract = _public_signal_rows_for_contracts(
+            signal_rows_by_contract = _signal_rows_for_contracts(
                 run,
                 [score.contract_id for score in anomaly_scores],
             )
@@ -558,17 +632,16 @@ def list_lake_cases(page: int = 1, size: int = 20) -> CaseListResponse:
             WITH hits AS ({_deduped_hits_sql(run)})
             SELECT count(*)
             FROM hits
-            WHERE public_safe = true AND reviewer_only = false
             """
         ).fetchone()
     finally:
         con.close()
-    rows = _hit_rows(run, limit=size, offset=offset, public_only=True)
+    rows = _hit_rows(run, limit=size, offset=offset, public_only=False)
     cases = [_case_summary_from_row(row, run) for row in rows]
     return CaseListResponse(cases=cases, total=int(total_row[0]) if total_row else 0)
 
 
-def _public_signal_rows_for_contracts(
+def _signal_rows_for_contracts(
     run: LakeSignalRun,
     contract_ids: list[str],
 ) -> dict[str, dict[str, Any]]:
@@ -590,9 +663,7 @@ def _public_signal_rows_for_contracts(
                         ELSE split_part(coalesce(scope_key, ''), ':', 1)
                     END AS __contract_id
                 FROM hits
-                WHERE public_safe = true
-                    AND reviewer_only = false
-                    AND (
+                WHERE (
                         scope_key IN (SELECT unnest(?))
                         OR split_part(coalesce(scope_key, ''), ':', 1)
                             IN (SELECT unnest(?))
@@ -748,7 +819,7 @@ def get_lake_case(case_id: str) -> CaseResponse | None:
             return None
         return _anomaly_case_response(anomaly_score)
 
-    hit = materialized_hit(case_id, public_only=True)
+    hit = materialized_hit(case_id, public_only=False)
     if hit is None:
         return None
     anomaly_contract_id = _contract_id_from_scope(hit.scope_key)

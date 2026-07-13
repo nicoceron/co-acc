@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 
 from coacc.models.entity import SourceAttribution
+from coacc.models.signal import SignalConfidenceComponents
 
 
 class PatternInfo(BaseModel):
@@ -17,6 +18,7 @@ class PatternInfo(BaseModel):
     materialization_state: str = "registered_only"
     signal_ids: list[str] = Field(default_factory=list)
     sources_required: list[str] = Field(default_factory=list)
+    confidence_index: float | None = Field(default=None, ge=0.0, le=100.0)
 
 
 class PatternListResponse(BaseModel):
@@ -30,7 +32,15 @@ class PatternResult(BaseModel):
     data: dict[str, str | float | int | bool | list[str] | None]
     entity_ids: list[str]
     sources: list[SourceAttribution]
-    exposure_tier: str = "public_safe"
+    confidence_index: float = Field(default=0.0, ge=0.0, le=100.0)
+    confidence_components: SignalConfidenceComponents = Field(
+        default_factory=lambda: SignalConfidenceComponents(
+            identity=0.0,
+            evidence_traceability=0.0,
+            source_corroboration=0.0,
+        )
+    )
+    exposure_tier: str = "confidence_indexed"
     intelligence_tier: str = "community"
 
 

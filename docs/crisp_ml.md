@@ -25,6 +25,11 @@ watermarks, coverage metadata, and reality probes described in the
 feature tables are documented in the [curation runbook](runbooks/curate.md) and
 [signals runbook](runbooks/signals.md).
 
+The contest MVP uses four launch datasets: SECOP II contracts, SECOP II
+procurement processes, SECOP II contract suspensions, and PACO sanctions. The
+selection and local join/coverage checks are preserved in the
+[dataset-selection notebook](analysis/dataset_selection_analysis.ipynb).
+
 PACO sanctions are handled as a custom non-Socrata adapter with operational
 notes in the [custom adapters runbook](runbooks/custom_adapters.md).
 
@@ -47,7 +52,11 @@ Anomaly evaluation is written to `lake/models/anomaly/<run>/metrics.json` by
 `coacc-etl model train anomaly` and `coacc-etl model evaluate anomaly`. The
 current local smoke cited in the [anomaly model card](ai/anomaly_model.md)
 records both overall `precision_at_100` and deterministic holdout
-`holdout_precision_at_100` against PACO-backed weak labels.
+`holdout_precision_at_100` against PACO-backed weak labels. That historical
+holdout is split by contract id and is not suitable as final evidence of
+generalization to unseen suppliers. The contest MVP requires a canonical-NIT
+supplier-disjoint holdout, random-ranking baseline, enrichment metrics, and a
+fresh reproducible run before model promotion.
 
 Narrator quality gates are deterministic verifier checks plus recorded
 provider-response fixtures, summarized in the

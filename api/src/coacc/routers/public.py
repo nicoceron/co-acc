@@ -172,7 +172,7 @@ async def public_patterns_for_company(
         )
     entity = get_lake_entity(company_ref, include_person=False)
     if entity is not None and entity.type == "company":
-        lake_patterns = lake_patterns_for_entity(entity.id, lang=lang, public_only=True)
+        lake_patterns = lake_patterns_for_entity(entity.id, lang=lang, public_only=False)
         if lake_patterns:
             return PatternResponse(
                 entity_id=entity.id,

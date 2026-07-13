@@ -2,12 +2,67 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, SerializationInfo, field_serializer, model_validator
 
 from coacc.models.entity import SourceAttribution  # noqa: TC001
 
 SignalSeverity = Literal["low", "medium", "high", "critical"]
 SignalRunnerKind = Literal["pattern", "cypher", "duckdb"]
+
+CONFIDENCE_IDENTITY_WEIGHT = 0.55
+CONFIDENCE_EVIDENCE_WEIGHT = 0.25
+CONFIDENCE_CORROBORATION_WEIGHT = 0.20
+
+
+def visible_signal_id(signal_id: str) -> str:
+    """Hide the legacy visibility suffix without breaking lake table identifiers."""
+    return signal_id.removesuffix("_review_only")
+
+
+def evidence_confidence_component(evidence_count: int) -> float:
+    if evidence_count <= 0:
+        return 0.0
+    if evidence_count == 1:
+        return 0.65
+    if evidence_count == 2:
+        return 0.85
+    return 1.0
+
+
+def corroboration_confidence_component(source_count: int) -> float:
+    if source_count <= 0:
+        return 0.0
+    if source_count == 1:
+        return 0.70
+    if source_count == 2:
+        return 0.90
+    return 1.0
+
+
+def combine_confidence_components(
+    *,
+    identity: float,
+    evidence: float,
+    corroboration: float,
+) -> float:
+    bounded_identity = min(1.0, max(0.0, identity))
+    bounded_evidence = min(1.0, max(0.0, evidence))
+    bounded_corroboration = min(1.0, max(0.0, corroboration))
+    return round(
+        100
+        * (
+            CONFIDENCE_IDENTITY_WEIGHT * bounded_identity
+            + CONFIDENCE_EVIDENCE_WEIGHT * bounded_evidence
+            + CONFIDENCE_CORROBORATION_WEIGHT * bounded_corroboration
+        ),
+        1,
+    )
+
+
+class SignalConfidenceComponents(BaseModel):
+    identity: float = Field(ge=0.0, le=1.0)
+    evidence_traceability: float = Field(ge=0.0, le=1.0)
+    source_corroboration: float = Field(ge=0.0, le=1.0)
 
 
 class SignalRunner(BaseModel):
@@ -39,7 +94,6 @@ class SignalDefinition(BaseModel):
     severity: SignalSeverity
     entity_types: list[str] = Field(default_factory=list)
     public_safe: bool = False
-    reviewer_only: bool = False
     engine: SignalRunnerKind | None = None
     sources: list[str] = Field(default_factory=list)
     public_presentation: str | None = None
@@ -53,6 +107,16 @@ class SignalDefinition(BaseModel):
     evidence_mapping: SignalEvidenceMapping = Field(default_factory=SignalEvidenceMapping)
     pattern_id: str | None = None
     dedup_key_template: str | None = None
+
+    @property
+    def display_id(self) -> str:
+        return visible_signal_id(self.id)
+
+    @field_serializer("id")
+    def _serialize_visible_id(self, value: str, info: SerializationInfo) -> str:
+        if info.context and info.context.get("canonical_signal_ids"):
+            return value
+        return visible_signal_id(value)
 
     @model_validator(mode="before")
     @classmethod
@@ -137,7 +201,6 @@ class SignalHitResponse(BaseModel):
     category: str
     severity: SignalSeverity
     public_safe: bool
-    reviewer_only: bool
     entity_id: str
     entity_key: str
     entity_label: str | None = None
@@ -146,6 +209,8 @@ class SignalHitResponse(BaseModel):
     dedup_key: str
     score: float
     identity_confidence: float
+    confidence_index: float | None = Field(default=None, ge=0.0, le=100.0)
+    confidence_components: SignalConfidenceComponents | None = None
     identity_match_type: str | None = None
     identity_quality: str | None = None
     evidence_count: int
@@ -158,12 +223,48 @@ class SignalHitResponse(BaseModel):
     first_seen_at: str | None = None
     last_seen_at: str | None = None
 
+    @field_serializer("signal_id")
+    def _serialize_visible_signal_id(self, value: str) -> str:
+        return visible_signal_id(value)
+
+    @model_validator(mode="after")
+    def _derive_confidence_index(self) -> SignalHitResponse:
+        source_ids = {
+            source.database.strip()
+            for source in self.sources
+            if source.database.strip()
+        }
+        source_ids.update(
+            item.source_id.strip()
+            for item in self.evidence_items
+            if item.source_id and item.source_id.strip()
+        )
+        evidence_count = max(
+            self.evidence_count,
+            len(self.evidence_refs),
+            len(self.evidence_items),
+        )
+        components = self.confidence_components or SignalConfidenceComponents(
+            identity=min(1.0, max(0.0, self.identity_confidence)),
+            evidence_traceability=evidence_confidence_component(evidence_count),
+            source_corroboration=corroboration_confidence_component(len(source_ids)),
+        )
+        self.confidence_components = components
+        if self.confidence_index is None:
+            self.confidence_index = combine_confidence_components(
+                identity=components.identity,
+                evidence=components.evidence_traceability,
+                corroboration=components.source_corroboration,
+            )
+        return self
+
 
 class SignalListItem(SignalDefinition):
     hit_count: int = 0
     last_seen_at: str | None = None
     materialized: bool = False
     materialization_state: Literal["materialized", "registered_only"] = "registered_only"
+    confidence_index: float | None = Field(default=None, ge=0.0, le=100.0)
 
 
 class SignalListResponse(BaseModel):

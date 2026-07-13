@@ -15,7 +15,14 @@
 
 Colombian public data is transparent but **fragmented**. A contractor might appear in SECOP II, their campaign donations in Cuentas Claras, their public-office history in SIGEP, and their fiscal sanctions in PACO. `co/acc` pulls all of those into a single parquet lake under one canonical catalog so investigators (and downstream signal queries) can join them.
 
+The strict contest launch boundary is defined in **[docs/mvp_requirements.md](docs/mvp_requirements.md)**. The MVP freezes the working lake instead of expanding it: all registered patterns are visible, materialized hits carry a transparent confidence index, and one existing Isolation Forest supplies the minimum AI prioritization surface without Neo4j.
+
 Sample patterns the lake makes joinable:
+
+Every materialized pattern is visible with a transparent 0–100 evidence-quality
+confidence index. The index is kept separate from detector risk scores; see
+**[docs/confidence_index.md](docs/confidence_index.md)** for the formula and
+component definitions.
 
 - **Donor → official → vendor loops** — campaign donor in `cuentas_claras_income_2019` appears as a public servant in `sigep_public_servants` and wins contracts in `secop_ii_contracts`.
 - **Sanctioned-supplier-still-winning** — supplier in `paco_sanctions` / `secop_sanctions` continues to receive new awards in `secop_ii_contracts`.

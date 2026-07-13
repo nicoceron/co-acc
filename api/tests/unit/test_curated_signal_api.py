@@ -362,6 +362,12 @@ async def test_signal_detail_reads_curated_samples_without_neo4j(
         "https://secop.example/C-1",
         "https://paco.example/paco-1",
     ]
+    assert data["sample_hits"][0]["confidence_index"] == 96.3
+    assert data["sample_hits"][0]["confidence_components"] == {
+        "identity": 1.0,
+        "evidence_traceability": 0.85,
+        "source_corroboration": 1.0,
+    }
 
 
 @pytest.mark.anyio
@@ -423,7 +429,7 @@ async def test_signal_list_uses_materialized_lake_severity(
 
 
 @pytest.mark.anyio
-async def test_signal_list_can_require_materialized_public_scope(
+async def test_signal_list_shows_all_when_legacy_materialized_scope_is_enabled(
     client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -436,10 +442,16 @@ async def test_signal_list_can_require_materialized_public_scope(
     _write_curated_signal(tmp_path)
 
     response = await client.get("/api/v1/signals/")
+    detail_response = await client.get("/api/v1/signals/fiscal_procurement_chronology")
 
     assert response.status_code == 200
-    signal_ids = {row["id"] for row in response.json()["signals"]}
-    assert signal_ids == {"procurement_sanctioned_supplier_awarded"}
+    signals = {row["id"]: row for row in response.json()["signals"]}
+    assert signals["procurement_sanctioned_supplier_awarded"]["materialized"] is True
+    assert signals["procurement_single_bidder_high_value"]["materialized"] is False
+    assert "fiscal_procurement_chronology" in signals
+    assert "reviewer_only" not in signals["fiscal_procurement_chronology"]
+    assert detail_response.status_code == 200
+    assert detail_response.json()["definition"]["id"] == "fiscal_procurement_chronology"
 
 
 @pytest.mark.anyio

@@ -7,10 +7,8 @@ from neo4j import AsyncSession
 from coacc.constants import PEP_ROLES
 from coacc.dependencies import (
     CurrentUser,
-    can_access_reviewer_content,
     get_intelligence_provider,
     get_optional_session,
-    get_optional_user_without_database_required,
     get_session,
 )
 from coacc.models.anomaly import EntityAnomalyScoresResponse
@@ -28,7 +26,6 @@ from coacc.models.entity import (
     TimelineResponse,
 )
 from coacc.models.signal import EntitySignalsResponse
-from coacc.models.user import UserResponse
 from coacc.services.entity_types import entity_type_for_label
 from coacc.services.intelligence_provider import IntelligenceProvider
 from coacc.services.lakehouse_anomaly_service import entity_anomaly_scores
@@ -252,15 +249,11 @@ async def get_entity_timeline(
 async def get_entity_signals(
     entity_id: str,
     session: Annotated[AsyncSession | None, Depends(get_optional_session)],
-    user: Annotated[
-        UserResponse | None,
-        Depends(get_optional_user_without_database_required),
-    ],
 ) -> EntitySignalsResponse:
     enforce_entity_lookup_enabled()
     response = materialized_entity_signals(
         entity_id,
-        public_only=not can_access_reviewer_content(user),
+        public_only=False,
     )
     lake_entity = get_lake_entity(entity_id, include_person=not should_hide_person_entities())
     if response.total > 0 or lake_entity is not None:
@@ -277,14 +270,7 @@ async def get_entity_signals(
         raise HTTPException(status_code=404, detail="Entity not found")
     enforce_person_access_policy(record["entity_labels"])
     response = await get_stored_entity_signals(session, entity_id)
-    if can_access_reviewer_content(user):
-        return response
-    return response.model_copy(
-        update={
-            "signals": [signal for signal in response.signals if not signal.reviewer_only],
-            "total": len([signal for signal in response.signals if not signal.reviewer_only]),
-        }
-    )
+    return response
 
 
 @router.get("/{entity_id}/anomaly-scores", response_model=EntityAnomalyScoresResponse)
@@ -330,7 +316,7 @@ async def refresh_signals_for_entity(
         enforce_person_access_policy(labels)
         return materialized_entity_signals(
             lake_entity.id,
-            public_only=not can_access_reviewer_content(user),
+            public_only=False,
         )
     enforce_person_access_policy(record["entity_labels"])
     return await refresh_entity_signals(

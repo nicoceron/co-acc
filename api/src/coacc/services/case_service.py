@@ -76,7 +76,7 @@ def _merge_lake_hits_for_entities(
 
 
 def _public_signal_count(hits: list[SignalHitResponse]) -> int:
-    return sum(1 for hit in hits if hit.public_safe and not hit.reviewer_only)
+    return len(hits)
 
 
 def _case_evidence_bundles(hits: list[SignalHitResponse]) -> list[CaseEvidenceBundle]:
