@@ -154,18 +154,23 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
         assert isinstance(signal_items, list)
         _require(bool(signals.get("last_run_id")), "signals response has no last_run_id")
 
-        cases = _json_request(f"{base_url}/api/v1/cases/?page=1&size=1")
-        case_items = cases.get("cases")
-        _require(isinstance(case_items, list) and len(case_items) == 1, "no case returned")
-        assert isinstance(case_items, list)
-        case_id = str(case_items[0].get("id") or "")
-        _require(bool(case_id), "case response did not include an id")
-        case_entity_ids = case_items[0].get("entity_ids")
-        _require(
-            isinstance(case_entity_ids, list) and bool(case_entity_ids),
-            "case response did not include entity ids",
+        materialized = next(
+            (item for item in signal_items if int(item.get("hit_count") or 0) > 0),
+            None,
         )
-        entity_id = str(case_entity_ids[0])
+        _require(materialized is not None, "signal catalog has no materialized definition")
+        assert materialized is not None
+        signal_id = urllib.parse.quote(str(materialized.get("id") or ""), safe="")
+        signal_detail = _json_request(f"{base_url}/api/v1/signals/{signal_id}")
+        sample_hits = signal_detail.get("sample_hits")
+        _require(
+            isinstance(sample_hits, list) and bool(sample_hits),
+            "materialized signal returned no sample hit",
+        )
+        assert isinstance(sample_hits, list)
+        case_id = str(sample_hits[0].get("hit_id") or "")
+        entity_id = str(sample_hits[0].get("entity_key") or "")
+        _require(bool(case_id) and bool(entity_id), "sample hit lacks case or entity id")
         encoded_entity_id = urllib.parse.quote(entity_id, safe="")
 
         entity = _json_request(f"{base_url}/api/v1/entity/{encoded_entity_id}")
@@ -237,6 +242,19 @@ def run_smoke(*, lake_root: Path, timeout: float) -> dict[str, Any]:
             bool(case_detail.get("signals")) or bool(case_detail.get("anomaly_score")),
             "case detail has neither signals nor anomaly_score",
         )
+
+        anomaly_cases = _json_request(f"{base_url}/api/v1/cases/?page=1&size=1")
+        anomaly_items = anomaly_cases.get("cases")
+        _require(
+            isinstance(anomaly_items, list) and bool(anomaly_items),
+            "no prioritized contract returned",
+        )
+        assert isinstance(anomaly_items, list)
+        anomaly = anomaly_items[0].get("anomaly_score")
+        _require(isinstance(anomaly, dict), "prioritized contract lacks anomaly score")
+        assert isinstance(anomaly, dict)
+        _require(len(anomaly.get("top_features") or []) == 3, "anomaly lacks three drivers")
+        _require(bool(anomaly.get("process_url")), "anomaly lacks official SECOP evidence")
 
         agent = _json_request(
             f"{base_url}/api/v1/agent/query",

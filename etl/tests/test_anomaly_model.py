@@ -257,10 +257,10 @@ def test_train_anomaly_model_writes_model_scores_and_manifest(
         batch_size=3,
     )
 
-    assert result.training_rows == 8
+    assert 0 < result.training_rows < 8
     assert result.scored_rows == 8
     assert (tmp_path / "models" / "anomaly" / "model-test" / "iforest.joblib").exists()
-    assert (
+    assert not (
         tmp_path / "models" / "anomaly" / "model-test" / "supervised_hgb.joblib"
     ).exists()
     assert (tmp_path / "models" / "anomaly" / "model-test" / "metrics.json").exists()
@@ -277,15 +277,19 @@ def test_train_anomaly_model_writes_model_scores_and_manifest(
             encoding="utf-8"
         )
     )
-    assert metrics["model_kind"] == "iforest+hgb"
-    assert metrics["supervised_topup"]["enabled"] is True
-    assert metrics["supervised_topup"]["positive_labels"] >= 2
+    assert metrics["model_kind"] == "iforest"
+    assert metrics["random_state"] == 42
+    assert "supervised_topup" not in metrics
+    assert metrics["metrics"]["holdout_unit"] == "supplier_entity_uid"
+    assert metrics["metrics"]["base_rate"] is not None
+    assert metrics["metrics"]["average_precision"] is not None
+    assert metrics["metrics"]["roc_auc"] is not None
     assert "prior_sanction_supplier" not in FEATURE_NAMES
     con = duckdb.connect()
     try:
         row = con.execute(
             """
-            SELECT score, iforest_score, supervised_score, top_features
+            SELECT score, iforest_score, top_features
             FROM read_parquet(?)
             ORDER BY score DESC
             LIMIT 1
@@ -303,8 +307,8 @@ def test_train_anomaly_model_writes_model_scores_and_manifest(
     finally:
         con.close()
     assert row is not None
-    assert isinstance(row[2], float)
-    assert "prior_sanction_supplier" not in row[3]
+    assert row[0] == row[1]
+    assert "prior_sanction_supplier" not in row[2]
 
 
 def test_anomaly_model_cli_train(
@@ -331,5 +335,5 @@ def test_anomaly_model_cli_train(
 
     assert result.exit_code == 0, result.output
     assert "anomaly model cli-model" in result.output
-    assert "supervised top-up:" in result.output
+    assert "Isolation Forest only" in result.output
     assert (tmp_path / "models" / "anomaly" / "current.json").exists()

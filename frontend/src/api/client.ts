@@ -347,6 +347,10 @@ export interface EvidenceTrailDocument {
   extension?: string | null;
   uploaded_at?: string | null;
   source?: string | null;
+  record_id?: string | null;
+  identity_match_type?: string | null;
+  row_selector?: string | null;
+  file_selector?: string | null;
 }
 
 export interface EvidenceTrailParty {
@@ -435,6 +439,8 @@ export interface SignalEvidenceItem {
   label?: string | null;
   item_type: string;
   node_ref?: string | null;
+  row_selector?: string | null;
+  file_selector?: string | null;
   observed_at?: string | null;
   public_safe: boolean;
   identity_match_type?: string | null;
@@ -658,7 +664,15 @@ export interface CaseEvidenceBundle {
 
 export interface CaseAnomalyScore {
   contract_id: string;
+  contract_reference?: string | null;
   entity_uid: string;
+  supplier_name?: string | null;
+  supplier_document_id?: string | null;
+  buyer_name?: string | null;
+  buyer_document_id?: string | null;
+  contract_value?: number | null;
+  signing_date?: string | null;
+  source_id?: string | null;
   score: number;
   score_confidence: string;
   top_features: string[];
@@ -955,8 +969,21 @@ export interface StatsResponse {
   data_sources: number;
 }
 
+export interface OperationsStatusResponse {
+  run_id?: string | null;
+  status: string;
+  healthy?: boolean | null;
+  fresh?: boolean | null;
+  finished_at?: string | null;
+  age_seconds?: number | null;
+}
+
 export function getStats(): Promise<StatsResponse> {
   return apiFetch<StatsResponse>("/api/v1/meta/stats");
+}
+
+export function getOperationsStatus(): Promise<OperationsStatusResponse> {
+  return apiFetch<OperationsStatusResponse>("/api/v1/meta/operations");
 }
 
 // --- Exposure & Timeline ---

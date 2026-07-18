@@ -1,120 +1,95 @@
-# CO-ACC Anomaly Model Card
+# co/acc Isolation Forest Model Card
 
 ## Purpose
 
-The anomaly model scores SECOP procurement contracts from 0 to 1 so reviewers
-can prioritize public-record patterns for inspection. A high score means the
-contract is unusual relative to observed procurement behavior; it is not an
-assertion of illegality or misconduct.
+The model ranks SECOP procurement contracts from 0 to 1 so a reviewer can
+inspect unusual public-record activity first. A high score means unusual in the
+observed feature space. It is not a probability of corruption, an accusation,
+or a legal conclusion.
 
-## Current Model
+## MVP model
 
-- Model kind: Isolation Forest + supervised histogram-gradient-boosting top-up
-- Runtime: batch ETL, not request path
-- Training source: `lake/curated/anomaly_features/run_id=<run>/`
-- Output: `lake/curated/anomaly_scores/run_id=<run>/`
+- Model: one scikit-learn `IsolationForest`
+- Runtime: deterministic batch ETL; never trained in the request path
+- Random seed: recorded in `metrics.json` (default `42`)
+- Training: bounded deterministic sample excluding the supplier holdout
+- Inputs: `lake/curated/anomaly_features/run_id=<run>/`
+- Outputs: `lake/curated/anomaly_scores/run_id=<run>/`
 - Promotion pointer: `lake/models/anomaly/current.json`
-- API surface: `/api/v1/cases/`, `/api/v1/cases/{case_id}`, and
+- API: `/api/v1/cases/`, `/api/v1/cases/{case_id}`, and
   `/api/v1/entity/{entity_id}/anomaly-scores`
 
-The current slice trains an unsupervised Isolation Forest baseline and, when
-both positive and negative labels exist, a supervised scikit-learn
-`HistGradientBoostingClassifier` top-up. PACO-backed sanctioned-supplier
-overlaps are weak supervision labels and evaluation labels; they are not part
-of `FEATURE_NAMES`, so the model does not consume the target label as an input.
+No supervised top-up, ensemble, LLM classifier, or second anomaly model is part
+of the MVP path.
 
-Local smoke run `phase13-supervised-smoke-20260601` scored 5,442,058 contracts.
-It reported `precision_at_100=0.68` overall and
-`holdout_precision_at_100=0.67` on the deterministic sanctioned-supplier
-holdout split, clearing the Phase 13 `precision@100 >= 0.4` target.
+## Frozen MVP run
 
-### Evaluation caution (2026-07-13)
+Run `mvp-iforest-20260713` used seed 42, trained on 5,000 bounded rows after
+excluding the supplier holdout, and scored 5,442,058 contract rows.
 
-The Phase 13 holdout is deterministic by contract-id hash, not by supplier.
-Contracts for the same supplier can occur in both training and evaluation.
-The reported `holdout_precision_at_100=0.67` therefore measures contract-row
-separation for suppliers the model may already observe; it does **not** prove
-generalization to unseen suppliers and must not be used as the contest's final
-model-quality claim.
+Against 12,376 PACO/sanction weak-label positives (0.227% base rate), it
+reported precision@100 of 0.000, precision@1,000 of 0.026, average precision of
+0.0165, and ROC AUC of 0.8463. Random ranking has expected precision 0.00227.
 
-A read-only supplier-disjoint diagnostic against the existing feature parquet
-held out entire canonical supplier ids. On 1,013,629 holdout contracts with
-1,247 PACO-positive rows (0.123% base rate):
-
-- the current supervised top-up produced `precision_at_100=0.00`;
-- the current unsupervised component produced `precision_at_100=0.02` and
-  `precision_at_1000=0.017`;
-- a newly fitted nine-feature Isolation Forest that excluded the optional
-  offers-derived `single_bidder` variable produced `precision_at_100=0.01`,
-  `precision_at_1000=0.026`, and ROC AUC `0.735`.
-
-The nine-feature result is about 21 times the base rate at 1,000, but it remains
-a diagnostic until the supplier-disjoint split is implemented as a reproducible
-repository evaluation and rerun on fresh data. The current promoted hybrid
-model is not contest-release-ready.
-
-### Contest MVP target
-
-The contest target defined in `docs/mvp_requirements.md` keeps one Isolation
-Forest but expands the input matrix to 15 variables: the nine contract-only
-variables above, four near-complete process variables joined through
-`id_del_portafolio`, and two deduplicated suspension-history variables. It
-replaces the raw offers dependency and disables the supervised top-up. The
-target is a requirement, not the current promoted implementation; fresh
-supplier-disjoint results must be recorded before claiming that the added
-sources improve prioritization.
-
-Contract modifications are the only approved stretch input. After a complete
-2023+ backfill, exact-key coverage validation, and supplier-disjoint ablation,
-three modification variables may expand the target from 15 to 18. Until all
-gates in `docs/mvp_requirements.md` pass, modifications remain signal/evidence
-context and are not part of `FEATURE_NAMES`.
+The complete-supplier holdout contained 1,021,589 rows and 5,080 weak-label
+positives (0.497% base rate). It reported precision@100 of 0.040,
+precision@1,000 of 0.121, average precision of 0.0720, and ROC AUC of 0.9203.
+These values assess ranking against weak labels; they do not validate corruption
+detection. The weak overall precision@100 limits model claims but does not
+prevent showing unsupervised anomaly distance with that limitation.
 
 ## Features
 
-The feature builder uses curated lake tables and, when present, the raw
-`secop_offers` source for offer-count features:
+The smallest working contract schema contains:
 
-- log contract value
-- buyer-relative value z-score
-- modality-relative value z-score
-- prior 12-month buyer/supplier concentration
-- prior 12-month buyer contract count
-- prior 12-month supplier contract count
-- share of prior buyer spend
-- buyer signing-day timing anomaly score
-- modality value mismatch flag
-- single-bidder flag derived from SECOP offer counts by process
+- log contract value;
+- buyer-relative and modality-relative value z-scores;
+- buyer-supplier concentration;
+- prior 12-month buyer and supplier contract counts;
+- share of the buyer's prior 12-month spend;
+- buyer signing-day timing anomaly;
+- modality/value mismatch; and
+- single-bidder status when the offers source is available.
 
-`prior_sanction_supplier` remains in the feature parquet and score parquet as
-the weak label/evaluation field. It is excluded from the model input feature
-tuple to avoid leakage.
+The score parquet retains `prior_sanction_supplier` only as a weak evaluation
+label. It is excluded from `FEATURE_NAMES` and therefore is not a model input.
+
+## Evaluation contract
+
+`metrics.json` records:
+
+- evaluated rows and weak-label positives;
+- weak-label base rate;
+- precision at 100 and 1,000;
+- average precision and ROC AUC;
+- random-ranking expected precision (the base rate); and
+- the same metrics for a deterministic complete-supplier holdout based on
+  canonical `entity_uid` when available.
+
+PACO and sanction matches are weak labels, not ground truth. Evaluation quality
+limits the claims that can be made; it does not convert anomaly distance into a
+finding of misconduct.
+
+## Result explanations
+
+Each score carries the three feature names with the largest standardized
+deviation from the training median. The public UI translates those names into
+plain Spanish and shows contract, supplier, buyer, amount, signing date, run
+identifiers, scoring date, and the official SECOP link when present.
 
 ## Limitations
 
-- `single_bidder` is populated only when SECOP offers are present in the lake;
-  runs without that source keep the flag false rather than fabricating offer
-  evidence.
-- PACO-backed sanction overlaps are proxy labels for prioritization quality,
-  not ground truth findings of wrongdoing.
-- The current contract-hash holdout is not entity-disjoint and overstates
-  generalization to suppliers absent from training.
-- Cold-start suppliers have lower confidence because there is little prior
-  behavior to compare against.
-- Scores are prioritization signals. They must be presented with evidence and
-  pattern language, not criminality language, per `ETHICS.md`.
+- Cold-start suppliers have little history and receive a lower score-confidence
+  label.
+- `single_bidder` remains false when the offers source is unavailable; the model
+  does not invent offer evidence.
+- Public datasets can be incomplete, corrected, or published late.
+- A useful ranking can still have weak precision against PACO because unusual
+  procurement and prior sanctions are different concepts.
+- Scores must always be reviewed with underlying evidence.
 
-## Operational Contract
+## Reproduction
 
-Use `docs/runbooks/anomaly_model.md` for commands. A valid promoted run must
-contain:
-
-- `lake/models/anomaly/<run>/iforest.joblib`
-- `lake/models/anomaly/<run>/supervised_hgb.joblib` when labels permit
-- `lake/models/anomaly/<run>/metrics.json`
-- `lake/models/anomaly/current.json`
-- `lake/curated/anomaly_scores/run_id=<run>/*.parquet`
-
-The API response embeds scores as `anomaly_score` with `contract_id`,
-`entity_uid`, `score`, `score_confidence`, `top_features`, `process_url`,
-`score_run_id`, `model_run_id`, `feature_run_id`, and `scored_at`.
+See [the anomaly runbook](../runbooks/anomaly_model.md). A release run must
+contain the model artifact, feature and score parquet, metrics manifest, code
+commit, and promoted `current.json` pointer.

@@ -6,6 +6,7 @@ import {
   getEntityEvidenceTrail,
   getEntitySignals,
   getEntityTimeline,
+  getOperationsStatus,
   getStats,
   listSources,
   listCases,
@@ -56,6 +57,11 @@ export interface AtlasOverview {
   cases: CaseStory[];
   seriesHits: number[];
   seriesSourcesOk: number[];
+  refreshes: {
+    data?: string | null;
+    signals?: string | null;
+    model?: string | null;
+  };
 }
 
 export interface OverviewState {
@@ -177,6 +183,7 @@ function buildFixtureOverview(): AtlasOverview {
     cases: atlasFixture.cases,
     seriesHits: atlasFixture.seriesHits,
     seriesSourcesOk: atlasFixture.seriesSourcesOk,
+    refreshes: {},
   };
 }
 
@@ -192,6 +199,7 @@ function buildEmptyOverview(): AtlasOverview {
     cases: [],
     seriesHits: [0, 0],
     seriesSourcesOk: [0, 0],
+    refreshes: {},
   };
 }
 
@@ -228,6 +236,7 @@ function mapSignal(item: SignalListItem): SignalSummary {
     lastSeen: item.last_seen_at,
     materialized: item.materialized,
     materializationState: item.materialization_state,
+    sourcesRequired: item.sources_required,
   };
 }
 
@@ -249,20 +258,23 @@ function mapPattern(item: PatternInfo): PatternSummary {
 }
 
 function patternsFromSignals(signals: SignalSummary[]): PatternSummary[] {
-  return signals.map((signal) => ({
-    id: signal.id,
-    title: signal.title,
-    desc: signal.desc,
-    severity: signal.severity,
-    category: signal.category,
-    hits: signal.hits,
-    materialized: Boolean(signal.materialized),
-    materializationState: signal.materializationState ?? "registered_only",
-    signalIds: [signal.id],
-    sourcesRequired: [],
-    lastSeen: signal.lastSeen,
-    confidence: signal.confidence,
-  }));
+  return signals.map((signal) => {
+    const materialized = signal.materialized ?? signal.hits > 0;
+    return {
+      id: signal.id,
+      title: signal.title,
+      desc: signal.desc,
+      severity: signal.severity,
+      category: signal.category,
+      hits: signal.hits,
+      materialized,
+      materializationState: signal.materializationState ?? (materialized ? "materialized" : "registered_only"),
+      signalIds: [signal.id],
+      sourcesRequired: signal.sourcesRequired ?? [],
+      lastSeen: signal.lastSeen,
+      confidence: signal.confidence,
+    };
+  });
 }
 
 function mapSource(item: SourceRegistryItem): SourceItem {
@@ -352,9 +364,15 @@ function fixtureSearch(query: string, type: string): AtlasSearchResult[] {
 }
 
 function mapSearchResult(item: SearchResult): AtlasSearchResult {
+  const displayTypes: Record<string, string> = {
+    company: "empresa",
+    person: "persona",
+    contract: "contrato",
+    sanction: "sancion",
+  };
   return {
     id: item.id,
-    type: item.type || "entidad",
+    type: displayTypes[item.type] || item.type || "entidad",
     name: item.name,
     doc: item.document || "sin documento",
     score: item.score,
@@ -381,7 +399,14 @@ export function useAtlasOverview(): OverviewState {
       };
     }
 
-    void Promise.allSettled([getStats(), listSignals(), listCases(1, 8), listSources(), listPatterns()]).then((results) => {
+    void Promise.allSettled([
+      getStats(),
+      listSignals(),
+      listCases(1, 8),
+      listSources(),
+      listPatterns(),
+      getOperationsStatus(),
+    ]).then((results) => {
       if (!active) return;
 
       const statsResult = results[0];
@@ -389,6 +414,7 @@ export function useAtlasOverview(): OverviewState {
       const casesResult = results[2];
       const sourcesResult = results[3];
       const patternsResult = results[4];
+      const operationsResult = results[5];
       const stats = statsResult.status === "fulfilled" ? statsResult.value : undefined;
       const signals = signalsResult.status === "fulfilled"
         ? signalsResult.value.signals.map(mapSignal)
@@ -426,6 +452,17 @@ export function useAtlasOverview(): OverviewState {
           seriesSourcesOk: sourcesResult.status === "fulfilled"
             ? seriesFromValues(sources.map((source) => Math.round(source.cov * 100)))
             : fixturesAllowed ? atlasFixture.seriesSourcesOk : [0, 0],
+          refreshes: {
+            data: operationsResult.status === "fulfilled"
+              ? operationsResult.value.finished_at
+              : null,
+            signals: signalsResult.status === "fulfilled"
+              ? signalsResult.value.last_refreshed_at
+              : null,
+            model: casesResult.status === "fulfilled"
+              ? casesResult.value.cases.find((item) => item.anomaly_score)?.anomaly_score?.scored_at
+              : null,
+          },
         },
         status: liveCount === results.length
           ? "live"
@@ -497,7 +534,8 @@ export function useAtlasSearch(initialQuery?: string) {
     }
 
     try {
-      const response = await searchEntities(trimmed, nextType, 1, 12);
+      const apiType = nextType === "empresa" ? "company" : undefined;
+      const response = await searchEntities(trimmed, apiType, 1, 12);
       setResults(response.results.map(mapSearchResult));
       setStatus("live");
     } catch {

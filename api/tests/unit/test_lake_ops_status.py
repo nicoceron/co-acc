@@ -27,13 +27,14 @@ def _manifest(
     status: str = "succeeded",
     finished_at: datetime | None = None,
 ) -> dict[str, object]:
-    finished = finished_at or datetime(2026, 6, 4, 10, 0, tzinfo=UTC)
+    finished = finished_at or datetime.now(tz=UTC)
+    started = finished - timedelta(minutes=5)
     return {
         "schema_version": 1,
         "run_id": "prod-20260604T100000Z",
         "mode": "refresh",
         "status": status,
-        "started_at": "2026-06-04T09:55:00Z",
+        "started_at": started.isoformat().replace("+00:00", "Z"),
         "finished_at": finished.isoformat().replace("+00:00", "Z"),
         "duration_seconds": 300.0,
         "exit_code": 0 if status == "succeeded" else 1,
@@ -60,7 +61,7 @@ def test_lake_ops_report_accepts_recent_success(
 ) -> None:
     now = datetime(2026, 6, 4, 12, 0, tzinfo=UTC)
     monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
-    _write_latest(tmp_path, _manifest())
+    _write_latest(tmp_path, _manifest(finished_at=now - timedelta(hours=2)))
 
     report = latest_lake_ops_report(max_age_hours=48, now=now)
 

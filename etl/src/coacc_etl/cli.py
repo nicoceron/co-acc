@@ -439,15 +439,10 @@ def model_train_cmd(
         f"anomaly model {result.run_id}: trained on {result.training_rows:,} rows; "
         f"scored {result.scored_rows:,} contracts"
     )
-    holdout_p100 = (
-        result.holdout_precision_at_100
-        if result.holdout_precision_at_100 is not None
-        else "-"
-    )
     click.echo(
-        f"  supervised top-up: {result.supervised_positive_labels:,} positives "
-        f"in {result.supervised_training_rows:,} rows; "
-        f"holdout p@100={holdout_p100}"
+        "  model: Isolation Forest only; "
+        f"seed={result.random_state}; "
+        "PACO matches are weak evaluation labels"
     )
     click.echo(f"  model: {result.model_dir}")
     click.echo(f"  scores: {result.score_path}")

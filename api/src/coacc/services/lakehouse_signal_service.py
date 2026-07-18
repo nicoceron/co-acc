@@ -359,6 +359,12 @@ def _evidence_items_for_hits(
             label=str(row["label"]) if row.get("label") is not None else None,
             item_type=item_type,
             node_ref=str(row["row_selector"]) if row.get("row_selector") is not None else None,
+            row_selector=(
+                str(row["row_selector"]) if row.get("row_selector") is not None else None
+            ),
+            file_selector=(
+                str(row["parquet_path"]) if row.get("parquet_path") is not None else None
+            ),
             observed_at=str(row["observed_at"]) if row.get("observed_at") is not None else None,
             public_safe=bool(row.get("public_safe", True)),
             identity_match_type=(
@@ -398,6 +404,7 @@ def _hit_from_row(
     hit_id = str(row["hit_id"])
     entity_uid = str(row.get("entity_uid") or row.get("entity_id") or row.get("entity_key") or "")
     entity_key = str(row.get("entity_key") or entity_uid)
+    display_entity_id = entity_uid.split(":", 1)[1] if ":" in entity_uid else entity_uid
     scope_key = str(row.get("scope_key") or entity_key)
     confidence_components = None
     if all(
@@ -423,7 +430,7 @@ def _hit_from_row(
         category=definition.category,
         severity=str(row.get("severity") or definition.severity),
         public_safe=bool(row.get("public_safe", definition.public_safe)),
-        entity_id=entity_uid,
+        entity_id=display_entity_id,
         entity_key=entity_key,
         entity_label=str(row["entity_label"]) if row.get("entity_label") is not None else None,
         scope_key=scope_key,
@@ -532,6 +539,7 @@ def materialized_entity_signals(
 ) -> EntitySignalsResponse:
     run = latest_signal_run()
     clean = "".join(ch for ch in entity_id if ch.isdigit())
+    display_entity_id = entity_id.split(":", 1)[1] if ":" in entity_id else entity_id
     numeric_candidates = [candidate for candidate in [clean, clean[:9]] if candidate]
     key_candidates = list(dict.fromkeys([entity_id, *numeric_candidates]))
     uid_candidates = list(dict.fromkeys([
@@ -544,7 +552,7 @@ def materialized_entity_signals(
     ]))
     if run is None or not _run_has_parquet(run):
         return EntitySignalsResponse(
-            entity_id=entity_id,
+            entity_id=display_entity_id,
             entity_key=clean or entity_id,
             total=0,
             last_run_id=None,
@@ -586,7 +594,7 @@ def materialized_entity_signals(
     evidence_by_hit = _evidence_items_for_hits(run, [str(row["hit_id"]) for row in rows])
     hits = [_hit_from_row(row, evidence_by_hit.get(str(row["hit_id"]), [])) for row in rows]
     return EntitySignalsResponse(
-        entity_id=entity_id,
+        entity_id=display_entity_id,
         entity_key=clean or entity_id,
         total=len(hits),
         last_run_id=run.run_id,
@@ -750,18 +758,27 @@ def _case_summary_from_row(
 
 def _anomaly_case_summary(score: CaseAnomalyScore) -> CaseSummary:
     scored_at = score.scored_at or datetime.now(UTC).isoformat()
-    features = ", ".join(score.top_features) if score.top_features else "no dominant features"
+    features = ", ".join(score.top_features) if score.top_features else "sin variables dominantes"
+    reference = score.contract_reference or score.contract_id
+    public_entity_id = score.supplier_document_id or (
+        score.entity_uid.split(":", 1)[1]
+        if ":" in score.entity_uid
+        else score.entity_uid
+    )
+    parties = " · ".join(
+        value for value in (score.supplier_name, score.buyer_name) if value
+    )
     return CaseSummary(
         id=anomaly_case_id(score.contract_id),
-        title=f"Anomalous contract {score.contract_id}",
+        title=f"Contrato priorizado {reference}",
         description=(
-            f"Model score {score.score:.3f} with {score.score_confidence} confidence; "
-            f"drivers: {features}."
+            f"Puntaje de anomalia {score.score:.3f}; variables destacadas: {features}."
+            + (f" {parties}." if parties else "")
         ),
         status="new",
         created_at=scored_at,
         updated_at=scored_at,
-        entity_ids=[score.entity_uid] if score.entity_uid else [],
+        entity_ids=[public_entity_id] if public_entity_id else [],
         signal_count=0,
         public_signal_count=0,
         last_refreshed_at=scored_at,
@@ -777,7 +794,7 @@ def _anomaly_case_response(score: CaseAnomalyScore) -> CaseResponse:
     bundle_id = f"{summary.id}:evidence"
     evidence_item = EvidenceItemResponse(
         item_id=f"{summary.id}:contract",
-        source_id="secop_ii_contracts",
+        source_id=score.source_id or "secop_ii_contracts",
         record_id=score.contract_id,
         url=score.process_url,
         label=score.process_url or score.contract_id,
@@ -788,15 +805,15 @@ def _anomaly_case_response(score: CaseAnomalyScore) -> CaseResponse:
     bundle = CaseEvidenceBundle(
         bundle_id=bundle_id,
         headline=summary.title,
-        source_list=["secop_ii_contracts"],
+        source_list=[score.source_id or "secop_ii_contracts"],
         evidence_items=[evidence_item],
     )
     event = CaseEventResponse(
         id=f"{summary.id}:anomaly_score",
         type="anomaly_score",
-        label=f"Anomaly score {score.score:.3f}",
+        label=f"Puntaje de anomalia {score.score:.3f}",
         date=score.scored_at or summary.updated_at,
-        entity_id=score.entity_uid,
+        entity_id=summary.entity_ids[0] if summary.entity_ids else None,
         signal_hit_id=None,
         evidence_bundle_id=bundle_id,
         bundle_document_count=1,

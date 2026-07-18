@@ -59,6 +59,9 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "A", "SIM", "TCH"]
 
+[tool.ruff.lint.per-file-ignores]
+"src/coacc_etl/curated/procurement.py" = ["E501"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true

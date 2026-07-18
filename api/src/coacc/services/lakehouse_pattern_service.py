@@ -130,22 +130,22 @@ def lake_pattern_summaries(
 
     for signal_id, (hit_count, observed_at) in lake_counts.items():
         canonical_signal_id = resolve_signal_id(signal_id)
-        definition = definitions.get(canonical_signal_id)
+        materialized_definition = definitions.get(canonical_signal_id)
         pattern_id = signal_to_pattern_id(canonical_signal_id)
         row = rows.get(pattern_id) or _pattern_row_from_meta(pattern_id)
-        if definition is not None:
+        if materialized_definition is not None:
             if row.name_es == pattern_id:
-                row.name_es = definition.title
+                row.name_es = materialized_definition.title
             if row.name_en == pattern_id:
-                row.name_en = definition.title
+                row.name_en = materialized_definition.title
             if not row.description_es:
-                row.description_es = definition.description
+                row.description_es = materialized_definition.description
             if not row.description_en:
-                row.description_en = definition.description
-            row.category = row.category or definition.category
+                row.description_en = materialized_definition.description
+            row.category = row.category or materialized_definition.category
             row.sources_required = _merge_unique(
                 row.sources_required,
-                definition.sources or definition.sources_required,
+                materialized_definition.sources or materialized_definition.sources_required,
             )
         previous_hit_count = row.hit_count
         candidate_confidence = lake_confidence.get(canonical_signal_id)

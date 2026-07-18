@@ -35,32 +35,20 @@ notes in the [custom adapters runbook](runbooks/custom_adapters.md).
 
 ## 3. Model Engineering
 
-The Phase 13 model is documented in the [anomaly model card](ai/anomaly_model.md)
+The MVP model is documented in the [anomaly model card](ai/anomaly_model.md)
 and operated through the [anomaly model runbook](runbooks/anomaly_model.md). It
-builds contract-level features from curated parquet, trains an Isolation Forest
-baseline, trains a supervised histogram-gradient-boosting top-up when weak
-labels permit, and writes promoted score parquet for the API.
-
-The Phase 14 generative narrator is documented in the
-[narrator model card](ai/generative_narrator.md) and
-[narrator runbook](runbooks/narrator.md). It precomputes citation-bound
-Markdown narratives from lake-backed case subgraphs and verifier checks.
+builds contract-level features from curated parquet, trains one deterministic
+Isolation Forest, and writes promoted score parquet for the API. Generative
+narration and supervised top-ups are outside the MVP launch path.
 
 ## 4. Model Evaluation
 
 Anomaly evaluation is written to `lake/models/anomaly/<run>/metrics.json` by
 `coacc-etl model train anomaly` and `coacc-etl model evaluate anomaly`. The
-current local smoke cited in the [anomaly model card](ai/anomaly_model.md)
-records both overall `precision_at_100` and deterministic holdout
-`holdout_precision_at_100` against PACO-backed weak labels. That historical
-holdout is split by contract id and is not suitable as final evidence of
-generalization to unseen suppliers. The contest MVP requires a canonical-NIT
-supplier-disjoint holdout, random-ranking baseline, enrichment metrics, and a
-fresh reproducible run before model promotion.
-
-Narrator quality gates are deterministic verifier checks plus recorded
-provider-response fixtures, summarized in the
-[narrator runbook](runbooks/narrator.md).
+current metrics record evaluated rows, weak-label positives, base rate,
+precision at 100 and 1,000, average precision, ROC AUC, random-ranking
+expectation, and a supplier-disjoint holdout based on canonical entity identity.
+PACO matches are weak evaluation labels rather than ground truth.
 
 ## 5. Deployment
 
@@ -71,9 +59,8 @@ variables, including the optional Neo4j setting, are documented in the
 [docs/contracts/api.openapi.yaml](contracts/api.openapi.yaml) and checked by
 `frontend/scripts/api-contract-test.mjs`.
 
-Neo4j is optional and treated as a derived exploration cache. Signal truth,
-anomaly scores, narratives, and agent answers read from curated parquet and
-promoted lake artifacts.
+Signal truth and anomaly scores read from curated parquet and promoted lake
+artifacts. Neo4j is disabled in the production MVP Compose path.
 
 ## 6. Monitoring And Maintenance
 

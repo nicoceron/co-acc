@@ -185,6 +185,8 @@ class EvidenceItemResponse(BaseModel):
     label: str | None = None
     item_type: str = "reference"
     node_ref: str | None = None
+    row_selector: str | None = None
+    file_selector: str | None = None
     observed_at: str | None = None
     public_safe: bool = True
     identity_match_type: str | None = None

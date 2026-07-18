@@ -1,21 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import duckdb
 import joblib  # type: ignore[import-untyped]
-import pandas as pd
-from sklearn.ensemble import (  # type: ignore[import-untyped]
-    HistGradientBoostingClassifier,
-    IsolationForest,
-)
+from sklearn.ensemble import IsolationForest  # type: ignore[import-untyped]
 
 from coacc_etl.models.anomaly.common import (
     FEATURE_NAMES,
-    LABEL_COLUMN,
+    SUPPLIER_HOLDOUT_PREFIXES,
     AnomalyModelError,
     clean_run_id,
+    code_state,
     current_manifest_path,
     feature_schema_hash,
     model_run_dir,
@@ -27,9 +24,6 @@ from coacc_etl.models.anomaly.common import (
 from coacc_etl.models.anomaly.evaluate import evaluate_scores
 from coacc_etl.models.anomaly.features import build_anomaly_features
 from coacc_etl.models.anomaly.predict import predict_anomaly_scores
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -46,21 +40,21 @@ class AnomalyTrainingResult:
     scored_rows: int
     precision_at_100: float | None
     holdout_precision_at_100: float | None
-    supervised_training_rows: int
-    supervised_positive_labels: int
-
-
-SUPERVISED_HOLDOUT_PREFIXES = ("0", "1", "2")
-SUPERVISED_SCORE_WEIGHT = 0.85
+    random_state: int
 
 
 def _load_training_sample(feature_path: str, max_training_rows: int) -> Any:
+    holdout_prefixes = ", ".join(
+        sql_string(prefix) for prefix in SUPPLIER_HOLDOUT_PREFIXES
+    )
     con = duckdb.connect(database=":memory:")
     try:
         return con.execute(
             f"""
             SELECT {", ".join(FEATURE_NAMES)}
             FROM read_parquet({sql_string(feature_path)})
+            WHERE substr(sha256(coalesce(nullif(entity_uid, ''), contract_id)), 1, 1)
+                NOT IN ({holdout_prefixes})
             ORDER BY sha256(contract_id)
             LIMIT {int(max_training_rows)}
             """
@@ -70,6 +64,9 @@ def _load_training_sample(feature_path: str, max_training_rows: int) -> Any:
 
 
 def _sample_label_counts(feature_path: str, max_training_rows: int) -> tuple[int, int]:
+    holdout_prefixes = ", ".join(
+        sql_string(prefix) for prefix in SUPPLIER_HOLDOUT_PREFIXES
+    )
     con = duckdb.connect(database=":memory:")
     try:
         row = con.execute(
@@ -80,6 +77,8 @@ def _sample_label_counts(feature_path: str, max_training_rows: int) -> tuple[int
             FROM (
                 SELECT prior_sanction_supplier
                 FROM read_parquet({sql_string(feature_path)})
+                WHERE substr(sha256(coalesce(nullif(entity_uid, ''), contract_id)), 1, 1)
+                    NOT IN ({holdout_prefixes})
                 ORDER BY sha256(contract_id)
                 LIMIT {int(max_training_rows)}
             )
@@ -90,134 +89,6 @@ def _sample_label_counts(feature_path: str, max_training_rows: int) -> tuple[int
         return int(row[0] or 0), int(row[1] or 0)
     finally:
         con.close()
-
-
-def _count_labels(feature_path: str) -> tuple[int, int]:
-    con = duckdb.connect(database=":memory:")
-    try:
-        row = con.execute(
-            f"""
-            SELECT
-                sum(CASE WHEN {LABEL_COLUMN} THEN 1 ELSE 0 END) AS positives,
-                sum(CASE WHEN NOT {LABEL_COLUMN} THEN 1 ELSE 0 END) AS negatives
-            FROM read_parquet({sql_string(feature_path)})
-            WHERE substr(sha256(contract_id), 1, 1) NOT IN (
-                {", ".join(sql_string(prefix) for prefix in SUPERVISED_HOLDOUT_PREFIXES)}
-            )
-            """
-        ).fetchone()
-        if row is None:
-            return 0, 0
-        return int(row[0] or 0), int(row[1] or 0)
-    finally:
-        con.close()
-
-
-def _load_supervised_training_sample(feature_path: str, max_training_rows: int) -> Any:
-    if max_training_rows < 4:
-        return pd.DataFrame()
-    positive_count, negative_count = _count_labels(feature_path)
-    if positive_count < 2 or negative_count < 2:
-        return pd.DataFrame()
-    positive_limit = min(positive_count, max(2, max_training_rows // 2))
-    negative_limit = min(negative_count, max_training_rows - positive_limit)
-    if negative_limit < 2:
-        positive_limit = max(2, max_training_rows - 2)
-        negative_limit = 2
-    selected_columns = ", ".join((*FEATURE_NAMES, LABEL_COLUMN))
-    holdout_prefixes = ", ".join(
-        sql_string(prefix) for prefix in SUPERVISED_HOLDOUT_PREFIXES
-    )
-    con = duckdb.connect(database=":memory:")
-    try:
-        return con.execute(
-            f"""
-            SELECT {selected_columns}
-            FROM (
-                SELECT contract_id, {selected_columns}
-                FROM read_parquet({sql_string(feature_path)})
-                WHERE {LABEL_COLUMN}
-                    AND substr(sha256(contract_id), 1, 1) NOT IN ({holdout_prefixes})
-                ORDER BY sha256(contract_id)
-                LIMIT {int(positive_limit)}
-            )
-            UNION ALL
-            SELECT {selected_columns}
-            FROM (
-                SELECT contract_id, {selected_columns}
-                FROM read_parquet({sql_string(feature_path)})
-                WHERE NOT {LABEL_COLUMN}
-                    AND substr(sha256(contract_id), 1, 1) NOT IN ({holdout_prefixes})
-                ORDER BY sha256(contract_id)
-                LIMIT {int(negative_limit)}
-            )
-            """
-        ).fetchdf()
-    finally:
-        con.close()
-
-
-def _precision_at_k(labels: Any, scores: Any, k: int) -> float | None:
-    if len(labels) == 0:
-        return None
-    frame = pd.DataFrame({"label": labels, "score": scores})
-    top = frame.sort_values("score", ascending=False).head(k)
-    if top.empty:
-        return None
-    return float(top["label"].astype(int).sum()) / float(len(top))
-
-
-def _train_supervised_topup(
-    *,
-    feature_path: str,
-    max_training_rows: int,
-    random_state: int,
-    out_dir: Path,
-) -> dict[str, Any]:
-    frame = _load_supervised_training_sample(feature_path, max_training_rows)
-    if frame.empty:
-        return {
-            "enabled": False,
-            "training_rows": 0,
-            "positive_labels": 0,
-            "negative_labels": 0,
-            "reason": "insufficient positive and negative labels outside holdout split",
-        }
-    positives = int(frame[LABEL_COLUMN].astype(bool).sum())
-    negatives = int(len(frame) - positives)
-    if positives < 2 or negatives < 2:
-        return {
-            "enabled": False,
-            "training_rows": int(len(frame)),
-            "positive_labels": positives,
-            "negative_labels": negatives,
-            "reason": "insufficient class diversity outside holdout split",
-        }
-    model = HistGradientBoostingClassifier(
-        max_iter=120,
-        learning_rate=0.08,
-        max_leaf_nodes=31,
-        l2_regularization=0.05,
-        random_state=random_state,
-    )
-    x_train = frame[list(FEATURE_NAMES)]
-    y_train = frame[LABEL_COLUMN].astype(int)
-    model.fit(x_train, y_train)
-    joblib.dump(model, out_dir / "supervised_hgb.joblib")
-    classes = [int(value) for value in model.classes_.tolist()]
-    positive_index = classes.index(1)
-    training_scores = model.predict_proba(x_train)[:, positive_index]
-    return {
-        "enabled": True,
-        "model_kind": "hist_gradient_boosting_classifier",
-        "artifact": "supervised_hgb.joblib",
-        "score_weight": SUPERVISED_SCORE_WEIGHT,
-        "holdout_prefixes": list(SUPERVISED_HOLDOUT_PREFIXES),
-        "training_rows": int(len(frame)),
-        "positive_labels": positives,
-        "negative_labels": negatives,
-        "training_precision_at_100": _precision_at_k(y_train, training_scores, 100),
-    }
 
 
 def _feature_stats(frame: Any) -> tuple[dict[str, float], dict[str, float]]:
@@ -275,33 +146,32 @@ def train_anomaly_model(
         max_training_rows,
     )
     trained_at = now_iso()
+    code_commit, working_tree_dirty = code_state()
     out = model_run_dir(safe_run_id)
     out.mkdir(parents=True, exist_ok=True)
     joblib.dump(model, out / "iforest.joblib")
-    supervised_metrics = _train_supervised_topup(
-        feature_path=feature_result.feature_path,
-        max_training_rows=max_training_rows,
-        random_state=random_state,
-        out_dir=out,
-    )
     metrics_path = out / "metrics.json"
     base_metrics: dict[str, Any] = {
         "run_id": safe_run_id,
-        "model_kind": "iforest+hgb" if supervised_metrics["enabled"] else "iforest",
+        "model_kind": "iforest",
         "trained_at": trained_at,
         "feature_run_id": safe_run_id,
         "score_run_id": safe_run_id,
         "feature_schema_hash": feature_schema_hash(),
+        "data_snapshot_hash": feature_result.snapshot_hash,
+        "code_commit": code_commit,
+        "working_tree_dirty": working_tree_dirty,
+        "random_state": random_state,
         "training_rows": training_rows,
         "positive_labels": positive_labels,
         "iforest_decision_min": decision_min,
         "iforest_decision_max": decision_max,
         "feature_centers": centers,
         "feature_spreads": spreads,
-        "supervised_topup": supervised_metrics,
         "metrics": {},
         "limitations": [
-            "Supervised top-up uses PACO-backed sanctioned-supplier overlaps as weak labels.",
+            "PACO-backed sanctioned-supplier overlaps are weak evaluation labels, "
+            "not ground truth.",
             "single_bidder is populated only when SECOP offers are present in the lake.",
             "precision_at_k metrics are prioritization checks, not findings of misconduct.",
         ],
@@ -320,9 +190,18 @@ def train_anomaly_model(
             "precision_at_10": evaluation.precision_at_10,
             "precision_at_100": evaluation.precision_at_100,
             "precision_at_1000": evaluation.precision_at_1000,
+            "base_rate": evaluation.base_rate,
+            "average_precision": evaluation.average_precision,
+            "roc_auc": evaluation.roc_auc,
+            "random_precision_at_100": evaluation.random_precision_at_100,
+            "random_precision_at_1000": evaluation.random_precision_at_1000,
             "holdout_precision_at_10": evaluation.holdout_precision_at_10,
             "holdout_precision_at_100": evaluation.holdout_precision_at_100,
             "holdout_precision_at_1000": evaluation.holdout_precision_at_1000,
+            "holdout_base_rate": evaluation.holdout_base_rate,
+            "holdout_average_precision": evaluation.holdout_average_precision,
+            "holdout_roc_auc": evaluation.holdout_roc_auc,
+            "holdout_unit": "supplier_entity_uid",
             "holdout_positive_labels": evaluation.holdout_positive_labels,
             "holdout_scored_rows": evaluation.holdout_scored_rows,
             "positive_labels": evaluation.positive_labels,
@@ -346,8 +225,7 @@ def train_anomaly_model(
         scored_rows=prediction.rows,
         precision_at_100=evaluation.precision_at_100,
         holdout_precision_at_100=evaluation.holdout_precision_at_100,
-        supervised_training_rows=int(supervised_metrics["training_rows"]),
-        supervised_positive_labels=int(supervised_metrics["positive_labels"]),
+        random_state=random_state,
     )
 
 

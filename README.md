@@ -110,6 +110,7 @@ make lake-init lake-reality lake-compact
 make backend-ready
 make test  test-etl  test-api  test-frontend
 make lint  type-check  format
+make mvp-check                         # complete local MVP release gate
 ```
 
 `make backend-ready` is the local non-frontend readiness gate. It validates

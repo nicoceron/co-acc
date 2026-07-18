@@ -139,7 +139,9 @@ def _write_signal_run(root: Path) -> None:
 def _write_anomaly_run(root: Path) -> None:
     run_id = "anomaly-run"
     scores_out = root / "curated" / "anomaly_scores" / f"run_id={run_id}"
+    features_out = root / "curated" / "anomaly_features" / "run_id=feature-run"
     scores_out.mkdir(parents=True)
+    features_out.mkdir(parents=True)
     pq.write_table(
         pa.Table.from_pylist([
             {
@@ -170,6 +172,25 @@ def _write_anomaly_run(root: Path) -> None:
             },
         ]),
         scores_out / "part-00000.parquet",
+    )
+    pq.write_table(
+        pa.Table.from_pylist([
+            {
+                "run_id": "feature-run",
+                "built_at": "2026-06-01T01:50:00+00:00",
+                "contract_id": "C-1",
+                "contract_reference": "REF-1",
+                "supplier_name": "Proveedor Sancionado SAS",
+                "supplier_nit_base": "900123456",
+                "buyer_name": "Entidad Uno",
+                "buyer_document_id": "800123456",
+                "contract_value": 1_250_000_000.0,
+                "signing_date": "2026-06-01",
+                "source_id": "secop_ii_contracts",
+                "process_url": "https://secop.example/C-1",
+            }
+        ]),
+        features_out / "part-00000.parquet",
     )
     current_out = root / "models" / "anomaly"
     current_out.mkdir(parents=True)
@@ -206,7 +227,7 @@ async def test_entity_lookup_reads_curated_dimension_without_neo4j(
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["id"] == "company:9001234568"
+    assert payload["id"] == "9001234568"
     assert payload["type"] == "company"
     assert payload["properties"]["nit"] == "9001234568"
     assert payload["properties"]["razon_social"] == "Proveedor Sancionado SAS"
@@ -225,7 +246,7 @@ async def test_entity_lookup_prefers_curated_dimension_when_neo4j_is_connected(
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["id"] == "company:9001234568"
+    assert payload["id"] == "9001234568"
     assert payload["properties"]["razon_social"] == "Proveedor Sancionado SAS"
 
 
@@ -244,7 +265,7 @@ async def test_search_reads_curated_dimensions_without_neo4j(
     assert response.status_code == 200
     payload = response.json()
     assert payload["total"] == 1
-    assert payload["results"][0]["id"] == "company:9001234568"
+    assert payload["results"][0]["id"] == "9001234568"
     assert payload["results"][0]["name"] == "Proveedor Sancionado SAS"
 
 
@@ -262,7 +283,7 @@ async def test_search_prefers_curated_dimensions_when_neo4j_is_connected(
     assert response.status_code == 200
     payload = response.json()
     assert payload["total"] == 1
-    assert payload["results"][0]["id"] == "company:9001234568"
+    assert payload["results"][0]["id"] == "9001234568"
 
 
 @pytest.mark.anyio
@@ -280,6 +301,28 @@ async def test_search_matches_nit_root_against_curated_dimensions(
     payload = response.json()
     assert payload["total"] == 1
     assert payload["results"][0]["document"] == "9001234568"
+
+
+@pytest.mark.anyio
+async def test_signal_samples_use_clean_resolvable_company_ids(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("COACC_LAKE_ROOT", str(tmp_path))
+    app.state.neo4j_driver = None
+    _write_dim_tables(tmp_path)
+    _write_signal_run(tmp_path)
+
+    response = await client.get(
+        "/api/v1/signals/procurement_sanctioned_supplier_awarded"
+    )
+
+    assert response.status_code == 200
+    samples = response.json()["sample_hits"]
+    assert len(samples) == 1
+    assert samples[0]["entity_id"] == "900123456"
+    assert samples[0]["entity_key"] == "900123456"
 
 
 @pytest.mark.anyio
@@ -402,7 +445,7 @@ async def test_graph_reads_lake_context_when_neo4j_is_connected(
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["center_id"] == "company:9001234568"
+    assert payload["center_id"] == "9001234568"
     assert any(node["type"] == "signal" for node in payload["nodes"])
     assert any(edge["type"] == "HAS_SIGNAL" for edge in payload["edges"])
 
@@ -425,6 +468,12 @@ async def test_lake_case_routes_expose_anomaly_scores_without_neo4j(
     assert payload["total"] == 2
     assert payload["cases"][0]["anomaly_score"]["contract_id"] == "C-1"
     assert payload["cases"][0]["anomaly_score"]["score_confidence"] == "low"
+    assert payload["cases"][0]["anomaly_score"]["supplier_name"] == (
+        "Proveedor Sancionado SAS"
+    )
+    assert payload["cases"][0]["anomaly_score"]["buyer_name"] == "Entidad Uno"
+    assert payload["cases"][0]["anomaly_score"]["contract_value"] == 1_250_000_000.0
+    assert payload["cases"][0]["entity_ids"] == ["900123456"]
 
     detail_response = await client.get(f"/api/v1/cases/{payload['cases'][0]['id']}")
 
@@ -478,7 +527,7 @@ async def test_entity_anomaly_scores_read_lake_without_neo4j(
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["entity_id"] == "company:9001234568"
+    assert payload["entity_id"] == "9001234568"
     assert payload["total"] == 1
     assert payload["scores"][0]["contract_id"] == "C-1"
 
@@ -591,7 +640,7 @@ async def test_public_patterns_read_lake_company_without_neo4j(
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["entity_id"] == "company:9001234568"
+    assert payload["entity_id"] == "9001234568"
     assert payload["total"] == 1
     source_ids = {row["database"] for row in payload["patterns"][0]["sources"]}
     assert source_ids == {
@@ -619,7 +668,7 @@ async def test_public_patterns_prefer_lake_company_when_neo4j_is_connected(
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["entity_id"] == "company:9001234568"
+    assert payload["entity_id"] == "9001234568"
     assert payload["total"] == 1
     neo_lookup.assert_not_called()
 
@@ -640,7 +689,7 @@ async def test_public_graph_reads_lake_company_without_neo4j(
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["center_id"] == "company:9001234568"
+    assert payload["center_id"] == "9001234568"
     assert any(node["type"] == "signal" for node in payload["nodes"])
     assert any(edge["type"] == "HAS_SIGNAL" for edge in payload["edges"])
     assert not any(node["type"] == "person" for node in payload["nodes"])
@@ -661,7 +710,7 @@ async def test_public_graph_prefers_lake_company_when_neo4j_is_connected(
         response = await client.get("/api/v1/public/graph/company/9001234568?depth=2")
 
     assert response.status_code == 200
-    assert response.json()["center_id"] == "company:9001234568"
+    assert response.json()["center_id"] == "9001234568"
     neo_lookup.assert_not_called()
 
 

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
-from neo4j import AsyncSession
+from neo4j import AsyncSession, Record
 
 from coacc.config import settings
 from coacc.dependencies import get_optional_session, get_session
@@ -396,7 +396,7 @@ def _lake_stats_fallback() -> dict[str, int]:
 
 
 def _record_or_lake(
-    record: dict[str, Any] | None,
+    record: Record | dict[str, Any] | None,
     lake_stats: dict[str, int],
     key: str,
 ) -> int:
@@ -2281,9 +2281,12 @@ async def neo4j_health(
 
 @router.get("/operations")
 async def operations_status() -> dict[str, Any]:
-    return latest_lake_ops_report(
+    report = latest_lake_ops_report(
         max_age_hours=settings.coacc_ready_max_lake_ops_age_hours,
     )
+    for key in ("path", "lake_root", "manifest_path"):
+        report.pop(key, None)
+    return report
 
 
 @router.get("/stats")

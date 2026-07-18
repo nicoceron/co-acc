@@ -1,4 +1,4 @@
-import { ArrowLeft, Gauge, GitBranch } from "lucide-react";
+import { ArrowLeft, ExternalLink, Gauge, GitBranch } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 
@@ -21,9 +21,9 @@ function fallbackDetail(signalId: string): SignalDetail {
     scope: "entity",
     runner: `registry:${signalId}`,
     policy: { public: true, identity: ["nit"], dedup: ["entity_id", "source_id"] },
-    sourcesRequired: ["SECOP-II", "RUES"],
-    entityTypes: ["empresa", "contrato"],
-    sampleHits: atlasFixture.signalDetail["S-014"]?.sampleHits ?? [],
+    sourcesRequired: [],
+    entityTypes: [],
+    sampleHits: [],
   };
 }
 
@@ -48,6 +48,20 @@ function apiDetailToViewModel(response: SignalDetailResponse): SignalDetail {
       identity: hit.confidence_components.identity,
       traceability: hit.confidence_components.evidence_traceability,
       corroboration: hit.confidence_components.source_corroboration,
+      entityId: hit.entity_id,
+      entityKey: hit.entity_key,
+      scopeKey: hit.scope_key,
+      observedAt: hit.last_seen_at || hit.first_seen_at || hit.created_at,
+      evidenceItems: hit.evidence_items.map((item) => ({
+        itemId: item.item_id,
+        sourceId: item.source_id,
+        recordId: item.record_id,
+        url: item.url,
+        label: item.label,
+        observedAt: item.observed_at,
+        identityMatchType: item.identity_match_type,
+        selector: item.row_selector || item.node_ref || item.file_selector,
+      })),
     })),
   };
 }
@@ -122,8 +136,12 @@ export function SignalsPage() {
           <p>{signal.desc}</p>
           <div className="co-action-row">
             <SeverityBadge severity={signal.severity} />
-            <Pill tone="accent"><Gauge size={13} /> confianza {signal.confidence?.toFixed(1) ?? "—"}%</Pill>
+            <Pill tone={signal.materialized ? "accent" : "neutral"}>
+              <Gauge size={13} />
+              {signal.materialized ? `confianza ${signal.confidence?.toFixed(1) ?? "—"}%` : "no materializada"}
+            </Pill>
             <Pill>{formatNumber(signal.hits)} hits</Pill>
+            <Pill>{signal.category}</Pill>
           </div>
         </header>
 
@@ -170,7 +188,13 @@ export function SignalsPage() {
               <tbody>
                 {detail.sampleHits.map((hit) => (
                   <tr key={hit.label}>
-                    <td>{hit.label}</td>
+                    <td>
+                      {hit.entityId ? (
+                        <Link to={`/app/entity/${hit.entityId}`}>{hit.entityKey || hit.label}</Link>
+                      ) : hit.label}
+                      <span className="co-row-sub">{hit.scopeKey || "sin alcance"}</span>
+                      <span className="co-row-sub">{hit.observedAt?.slice(0, 10) || "fecha no disponible"}</span>
+                    </td>
                     <td className="co-num">{hit.conf.toFixed(1)}%</td>
                     <td className="co-num">{(hit.identity * 100).toFixed(0)}%</td>
                     <td className="co-num">{(hit.traceability * 100).toFixed(0)}%</td>
@@ -188,6 +212,40 @@ export function SignalsPage() {
             ) : null}
           </div>
         </Frame>
+
+        {detail.sampleHits.some((hit) => hit.evidenceItems?.length) ? (
+          <Frame coord="EVIDENCIA · H-04">
+            <div className="co-frame-title">
+              <div>
+                <h2>Evidencia oficial</h2>
+                <span>fuente, registro, fecha, enlace de identidad y selector reproducible</span>
+              </div>
+              <ExternalLink size={16} />
+            </div>
+            <div className="co-evidence-list">
+              {detail.sampleHits.flatMap((hit) => hit.evidenceItems ?? []).map((item) => (
+                <article key={item.itemId}>
+                  <ExternalLink size={17} />
+                  <div>
+                    {item.url ? (
+                      <a href={item.url} target="_blank" rel="noreferrer">
+                        {item.label || item.recordId || "Abrir fuente oficial"}
+                      </a>
+                    ) : <strong>{item.label || item.recordId || "Evidencia sin URL directa"}</strong>}
+                    <span>{item.sourceId || "fuente no atribuida"} · {item.recordId || "sin identificador"}</span>
+                    <span>{item.observedAt || "fecha no disponible"} · {item.identityMatchType || "enlace no especificado"}</span>
+                    <span className="co-mono">{item.selector || "selector no disponible"}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </Frame>
+        ) : null}
+
+        <p className="co-muted">
+          Este resultado organiza contexto documental para revisión. No prueba corrupción,
+          culpabilidad ni ilegalidad.
+        </p>
       </main>
     );
   }
@@ -226,6 +284,7 @@ export function SignalsPage() {
               <th>hits</th>
               <th>estado</th>
               <th>confianza</th>
+              <th>fuentes</th>
             </tr>
           </thead>
           <tbody>
@@ -243,10 +302,11 @@ export function SignalsPage() {
                 <td className="co-num">{formatNumber(signal.hits)}</td>
                 <td>
                   <Pill tone={signal.materialized ? "moss" : "neutral"}>
-                    {signal.materialized ? "materialized" : "registry"}
+                    {signal.materialized ? "materialized" : "registered_only"}
                   </Pill>
                 </td>
                 <td className="co-num">{signal.confidence == null ? "—" : `${signal.confidence.toFixed(1)}%`}</td>
+                <td className="co-mono">{signal.sourcesRequired?.join(" · ") || "no declarada"}</td>
               </tr>
             ))}
           </tbody>

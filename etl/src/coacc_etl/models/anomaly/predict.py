@@ -25,7 +25,6 @@ from coacc_etl.models.anomaly.common import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
     from pathlib import Path
 
 
@@ -67,28 +66,6 @@ def _normalize_scores(decisions: Any, minimum: float, maximum: float) -> list[fl
     return [max(0.0, min(1.0, (maximum - float(value)) / width)) for value in decisions]
 
 
-def _supervised_positive_scores(model: Any, features: Any) -> list[float]:
-    classes = [int(value) for value in model.classes_.tolist()]
-    if 1 not in classes:
-        return [0.0 for _ in range(len(features))]
-    positive_index = classes.index(1)
-    return [float(value) for value in model.predict_proba(features)[:, positive_index]]
-
-
-def _combine_scores(
-    iforest_scores: list[float],
-    supervised_scores: list[float] | None,
-    weight: float,
-) -> list[float]:
-    if not supervised_scores:
-        return iforest_scores
-    bounded_weight = max(0.0, min(1.0, weight))
-    return [
-        (bounded_weight * supervised_score) + ((1.0 - bounded_weight) * iforest_score)
-        for iforest_score, supervised_score in zip(iforest_scores, supervised_scores, strict=True)
-    ]
-
-
 def _top_features(
     rows: list[list[float]],
     centers: dict[str, float],
@@ -115,8 +92,6 @@ def _write_batch(
     scored_at: str,
     batch: Any,
     scores: list[float],
-    iforest_scores: Sequence[float],
-    supervised_scores: Sequence[float | None],
     top_features: list[list[str]],
 ) -> None:
     table = pa.Table.from_pydict({
@@ -127,8 +102,7 @@ def _write_batch(
         "contract_id": [str(value) for value in batch["contract_id"].tolist()],
         "entity_uid": [str(value) for value in batch["entity_uid"].tolist()],
         "score": scores,
-        "iforest_score": list(iforest_scores),
-        "supervised_score": list(supervised_scores),
+        "iforest_score": scores,
         "score_confidence": [str(value) for value in batch["score_confidence"].tolist()],
         "top_features": top_features,
         LABEL_COLUMN: [bool(value) for value in batch[LABEL_COLUMN].tolist()],
@@ -158,15 +132,6 @@ def predict_anomaly_scores(
     if not model_path.exists():
         raise AnomalyModelError(f"missing isolation forest model: {model_path}")
     model = joblib.load(model_path)
-    supervised_meta = cast("dict[str, Any]", metadata.get("supervised_topup") or {})
-    supervised_model: Any | None = None
-    if supervised_meta.get("enabled"):
-        supervised_artifact = str(supervised_meta.get("artifact") or "supervised_hgb.joblib")
-        supervised_path = model_run_dir(resolved_model_run_id) / supervised_artifact
-        if not supervised_path.exists():
-            raise AnomalyModelError(f"missing supervised anomaly model: {supervised_path}")
-        supervised_model = joblib.load(supervised_path)
-    supervised_weight = float(supervised_meta.get("score_weight", 0.85))
     centers = cast("dict[str, float]", metadata.get("feature_centers") or {})
     spreads = cast("dict[str, float]", metadata.get("feature_spreads") or {})
     minimum = float(metadata.get("iforest_decision_min", -1.0))
@@ -206,22 +171,11 @@ def predict_anomaly_scores(
                 continue
             feature_frame = batch[list(FEATURE_NAMES)]
             decisions = model.decision_function(feature_frame)
-            iforest_scores = _normalize_scores(decisions, minimum, maximum)
-            supervised_scores = (
-                _supervised_positive_scores(supervised_model, feature_frame)
-                if supervised_model is not None
-                else None
-            )
-            scores = _combine_scores(iforest_scores, supervised_scores, supervised_weight)
+            scores = _normalize_scores(decisions, minimum, maximum)
             feature_rows = [
                 [float(value) for value in row]
                 for row in feature_frame.itertuples(index=False, name=None)
             ]
-            batch_supervised_scores: list[float | None] = (
-                [float(value) for value in supervised_scores]
-                if supervised_scores is not None
-                else [None for _ in scores]
-            )
             _write_batch(
                 tmp,
                 part_index,
@@ -231,8 +185,6 @@ def predict_anomaly_scores(
                 scored_at=scored_at,
                 batch=batch,
                 scores=scores,
-                iforest_scores=iforest_scores,
-                supervised_scores=batch_supervised_scores,
                 top_features=_top_features(feature_rows, centers, spreads),
             )
             rows_written += len(scores)

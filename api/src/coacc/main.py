@@ -59,19 +59,23 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         msg = "Neo4j default password not allowed in production — set NEO4J_PASSWORD"
         _logger.critical(msg)
         raise RuntimeError(msg)
-    try:
-        driver = await init_driver()
-    except Exception as exc:
-        if settings.neo4j_required:
-            raise
-        _logger.warning(
-            "Neo4j unavailable; starting with graph-backed routes disabled: %s",
-            exc,
-        )
+    if not settings.neo4j_enabled:
         app.state.neo4j_driver = None
+        _logger.info("Neo4j disabled; starting with lake-backed routes only")
     else:
-        app.state.neo4j_driver = driver
-        await ensure_schema(driver)
+        try:
+            driver = await init_driver()
+        except Exception as exc:
+            if settings.neo4j_required:
+                raise
+            _logger.warning(
+                "Neo4j unavailable; starting with graph-backed routes disabled: %s",
+                exc,
+            )
+            app.state.neo4j_driver = None
+        else:
+            app.state.neo4j_driver = driver
+            await ensure_schema(driver)
     yield
     await close_driver()
 

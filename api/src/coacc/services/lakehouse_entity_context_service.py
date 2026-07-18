@@ -70,6 +70,10 @@ def _evidence_document(
         kind=item.item_type,
         uploaded_at=item.observed_at,
         source=item.source_id,
+        record_id=item.record_id,
+        identity_match_type=item.identity_match_type,
+        row_selector=item.row_selector or item.node_ref,
+        file_selector=item.file_selector,
     )
 
 

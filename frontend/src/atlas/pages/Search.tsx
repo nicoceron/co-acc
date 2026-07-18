@@ -8,16 +8,10 @@ import { allowAtlasFixtures, useAtlasSearch } from "../lib/useAtlasData";
 const TYPES = [
   ["all", "todos"],
   ["empresa", "empresas"],
-  ["persona", "personas"],
-  ["contrato", "contratos"],
-  ["sancion", "sanciones"],
 ] as const;
 
 const ENTITY_TYPES = [
   ["empresa", "empresas"],
-  ["persona", "personas"],
-  ["contrato", "contratos"],
-  ["sancion", "sanciones"],
 ] as const;
 
 export function SearchPage() {
@@ -39,8 +33,8 @@ export function SearchPage() {
       <header className="co-workspace-head">
         <div>
           <Rule accent>Workspace · Busqueda</Rule>
-          <h1>Buscar en el grafo</h1>
-          <p>NIT, cedula, razon social, nombre o referencia documental.</p>
+          <h1>Buscar empresas</h1>
+          <p>Razón social o NIT colombiano.</p>
         </div>
         <DataStatus status={search.status} />
       </header>

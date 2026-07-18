@@ -19,6 +19,15 @@ def _clean_identifier(raw: str) -> str:
     return re.sub(r"[.\-/]", "", raw or "")
 
 
+def _identifier_core(raw: str) -> str:
+    value = (raw or "").strip()
+    if ":" in value:
+        prefix, suffix = value.split(":", 1)
+        if prefix in {"doc", "company", "buyer", "person"}:
+            value = suffix
+    return _clean_identifier(value)
+
+
 def _sql_string(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
 
@@ -62,7 +71,7 @@ def _entity_from_row(row: dict[str, Any]) -> EntityResponse:
         else []
     )
     return EntityResponse(
-        id=str(row["entity_id"]),
+        id=str(row.get("document_id") or _identifier_core(str(row["entity_id"]))),
         type=entity_type,
         entity_label=label,
         identity_quality="exact",
@@ -146,7 +155,7 @@ def get_lake_entity(identifier: str, *, include_person: bool = True) -> EntityRe
     query = _dimension_query(include_person=include_person)
     if query is None:
         return None
-    clean = _clean_identifier(identifier)
+    clean = _identifier_core(identifier)
     con = lakehouse_query.connect(read_only=True)
     try:
         cursor = con.execute(
@@ -176,6 +185,57 @@ def get_lake_entity(identifier: str, *, include_person: bool = True) -> EntityRe
         return _entity_from_row(dict(zip(columns, row, strict=False)))
     finally:
         con.close()
+
+
+def resolvable_lake_company_identifiers(identifiers: list[str]) -> set[str] | None:
+    """Return input identifiers that resolve to a public company dimension row.
+
+    ``None`` means the company dimensions are unavailable, so callers can retain
+    their normal fallback behavior instead of treating every identifier as invalid.
+    """
+    query = _dimension_query(include_person=False)
+    if query is None:
+        return None
+    originals = list(dict.fromkeys(item for item in identifiers if item.strip()))
+    if not originals:
+        return set()
+    cores = list(dict.fromkeys(_identifier_core(item) for item in originals))
+    candidate_ids = list(dict.fromkeys([
+        *originals,
+        *(f"{prefix}:{core}" for core in cores for prefix in ("doc", "company", "buyer")),
+    ]))
+    con = lakehouse_query.connect(read_only=True)
+    try:
+        rows = con.execute(
+            f"""
+            WITH dims AS ({query})
+            SELECT entity_id, document_id, nit
+            FROM dims
+            WHERE entity_label = 'Company'
+              AND (
+                entity_id IN (SELECT unnest(?))
+                OR document_id IN (SELECT unnest(?))
+                OR (nit IS NOT NULL AND left(nit, 9) IN (SELECT unnest(?)))
+              )
+            """,
+            [candidate_ids, cores, cores],
+        ).fetchall()
+    finally:
+        con.close()
+    entity_ids = {str(row[0]) for row in rows if row[0] is not None}
+    document_ids = {str(row[1]) for row in rows if row[1] is not None}
+    nit_roots = {str(row[2])[:9] for row in rows if row[2] is not None}
+    return {
+        original
+        for original in originals
+        if original in entity_ids
+        or _identifier_core(original) in document_ids
+        or _identifier_core(original) in nit_roots
+        or any(
+            f"{prefix}:{_identifier_core(original)}" in entity_ids
+            for prefix in ("doc", "company", "buyer")
+        )
+    }
 
 
 def search_lake_entities(
@@ -242,7 +302,7 @@ def search_lake_entities(
 
     results = [
         SearchResult(
-            id=str(row["entity_id"]),
+            id=str(row.get("document_id") or _identifier_core(str(row["entity_id"]))),
             type="person" if row["entity_label"] == "Person" else "company",
             name=str(row.get("name") or row.get("document_id") or row["entity_id"]),
             score=float(row.get("search_score") or 1.0),

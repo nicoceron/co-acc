@@ -5,11 +5,11 @@ import { Link, Outlet, useLocation } from "react-router";
 import { Brand, Pill } from "./ui";
 
 const NAV_ITEMS = [
-  { label: "Atlas", to: "/" },
-  { label: "Casos", to: "/casos" },
-  { label: "Sectores", to: "/sectores" },
-  { label: "Workspace", to: "/app" },
   { label: "Patrones", to: "/app/patterns" },
+  { label: "Señales", to: "/app/signals" },
+  { label: "Buscar", to: "/app/search" },
+  { label: "Priorizados", to: "/priorizados" },
+  { label: "Metodología", to: "/metodologia" },
 ];
 
 function isActive(pathname: string, target: string): boolean {
@@ -80,17 +80,18 @@ export function AtlasShell() {
         <div className="co-container co-footer__grid">
           <div>
             <Brand />
-            <p>Atlas abierto de datos publicos de Colombia. Contexto documental, no acusacion.</p>
+            <p>Datos públicos de Colombia. Contexto documental, no acusación.</p>
           </div>
           <div>
             <strong>Producto</strong>
-            <Link to="/">Atlas</Link>
-            <Link to="/casos">Casos publicados</Link>
-            <Link to="/sectores">Sectores</Link>
-            <Link to="/app">Workspace</Link>
+            <Link to="/app/patterns">Patrones</Link>
+            <Link to="/app/signals">Señales</Link>
+            <Link to="/app/search">Buscar</Link>
+            <Link to="/priorizados">Contratos priorizados</Link>
           </div>
           <div>
             <strong>Metodologia</strong>
+            <Link to="/metodologia">Cómo funciona</Link>
             <a href="https://github.com/nicoceron/co-acc/blob/main/DISCLAIMER.md">Aviso legal</a>
             <a href="https://github.com/nicoceron/co-acc/blob/main/PRIVACY.md">Privacidad</a>
             <a href="https://github.com/nicoceron/co-acc/blob/main/ETHICS.md">Etica</a>

@@ -5,7 +5,9 @@ import { CaseDetail, Cases } from "./pages/Cases";
 import { Dashboard } from "./pages/Dashboard";
 import { EntityPage } from "./pages/Entity";
 import { Landing } from "./pages/Landing";
+import { MethodologyPage } from "./pages/Methodology";
 import { PatternsPage } from "./pages/Patterns";
+import { PrioritizedContractDetailPage, PrioritizedContractsPage } from "./pages/Prioritized";
 import { SearchPage } from "./pages/Search";
 import { Sectors } from "./pages/Sectors";
 import { SignalsPage } from "./pages/Signals";
@@ -25,6 +27,9 @@ export function AtlasApp() {
         <Route path="app/patterns" element={<PatternsPage />} />
         <Route path="app/signals" element={<SignalsPage />} />
         <Route path="app/signals/:signalId" element={<SignalsPage />} />
+        <Route path="priorizados" element={<PrioritizedContractsPage />} />
+        <Route path="priorizados/:caseId" element={<PrioritizedContractDetailPage />} />
+        <Route path="metodologia" element={<MethodologyPage />} />
 
         <Route path="results/*" element={<Navigate to="/casos" replace />} />
         <Route path="biblioteca/*" element={<Navigate to="/casos" replace />} />

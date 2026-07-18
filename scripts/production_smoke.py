@@ -106,23 +106,42 @@ def _wait_for_ready(
 def _case_and_entity_checks(
     base_url: str,
     *,
+    signal_items: list[dict[str, Any]],
     timeout: float,
     context: ssl.SSLContext | None,
 ) -> tuple[str, str]:
-    cases = _json_request(_url(base_url, "/api/v1/cases/?page=1&size=1"), timeout=timeout, context=context)
-    case_items = cases.get("cases")
-    _require(isinstance(case_items, list) and len(case_items) == 1, "no lake-backed case returned")
-    assert isinstance(case_items, list)
-    case_id = str(case_items[0].get("id") or "")
-    _require(bool(case_id), "case response did not include an id")
-    entity_ids = case_items[0].get("entity_ids")
-    _require(isinstance(entity_ids, list) and bool(entity_ids), "case response has no entity ids")
-    assert isinstance(entity_ids, list)
-    entity_id = str(entity_ids[0])
+    materialized = next(
+        (item for item in signal_items if int(item.get("hit_count") or 0) > 0),
+        None,
+    )
+    _require(materialized is not None, "signal catalog has no materialized definition")
+    assert materialized is not None
+    signal_id = urllib.parse.quote(str(materialized.get("id") or ""), safe="")
+    signal_detail = _json_request(
+        _url(base_url, f"/api/v1/signals/{signal_id}"),
+        timeout=timeout,
+        context=context,
+    )
+    sample_hits = signal_detail.get("sample_hits")
+    _require(
+        isinstance(sample_hits, list) and bool(sample_hits),
+        "materialized signal returned no sample hit",
+    )
+    assert isinstance(sample_hits, list)
+    case_id = str(sample_hits[0].get("hit_id") or "")
+    entity_id = str(sample_hits[0].get("entity_key") or "")
+    _require(bool(case_id) and bool(entity_id), "sample hit lacks case or entity id")
     encoded = urllib.parse.quote(entity_id, safe="")
 
-    entity = _json_request(_url(base_url, f"/api/v1/entity/{encoded}"), timeout=timeout, context=context)
-    _require(bool(entity.get("id") or entity.get("properties")), "entity lookup returned no entity")
+    entity = _json_request(
+        _url(base_url, f"/api/v1/entity/{encoded}"),
+        timeout=timeout,
+        context=context,
+    )
+    _require(
+        bool(entity.get("id") or entity.get("properties")),
+        "entity lookup returned no entity",
+    )
 
     entity_signals = _json_request(
         _url(base_url, f"/api/v1/entity/{encoded}/signals"),
@@ -131,10 +150,41 @@ def _case_and_entity_checks(
     )
     _require(int(entity_signals.get("total") or 0) > 0, "entity route returned no signals")
 
-    case_detail = _json_request(_url(base_url, f"/api/v1/cases/{case_id}"), timeout=timeout, context=context)
+    case_detail = _json_request(
+        _url(base_url, f"/api/v1/cases/{case_id}"),
+        timeout=timeout,
+        context=context,
+    )
     _require(case_detail.get("id") == case_id, "case detail id mismatch")
     _require(bool(case_detail.get("signals")), "case detail returned no materialized signals")
     return case_id, entity_id
+
+
+def _anomaly_checks(
+    base_url: str,
+    *,
+    timeout: float,
+    context: ssl.SSLContext | None,
+) -> str:
+    cases = _json_request(
+        _url(base_url, "/api/v1/cases/?page=1&size=1"),
+        timeout=timeout,
+        context=context,
+    )
+    case_items = cases.get("cases")
+    _require(
+        isinstance(case_items, list) and len(case_items) == 1,
+        "no prioritized contract returned",
+    )
+    assert isinstance(case_items, list)
+    case_id = str(case_items[0].get("id") or "")
+    anomaly = case_items[0].get("anomaly_score")
+    _require(bool(case_id), "prioritized contract did not include an id")
+    _require(isinstance(anomaly, dict), "prioritized contract lacks anomaly score")
+    assert isinstance(anomaly, dict)
+    _require(len(anomaly.get("top_features") or []) == 3, "anomaly lacks three drivers")
+    _require(bool(anomaly.get("process_url")), "anomaly lacks official SECOP evidence")
+    return case_id
 
 
 def run_smoke(
@@ -161,7 +211,11 @@ def run_smoke(
     ready = _json_request(_url(base_url, "/ready"), timeout=timeout, context=context)
     _require(ready.get("status") == "ready", "/ready status was not ready")
 
-    operations = _json_request(_url(base_url, "/api/v1/meta/operations"), timeout=timeout, context=context)
+    operations = _json_request(
+        _url(base_url, "/api/v1/meta/operations"),
+        timeout=timeout,
+        context=context,
+    )
     if require_ops:
         _require(operations.get("healthy") is True, "lake operations status is not healthy")
         _require(operations.get("status") == "succeeded", "latest lake ops did not succeed")
@@ -170,7 +224,11 @@ def run_smoke(
     _require(int(stats.get("data_sources") or 0) > 0, "meta stats has no data sources")
     _require(int(stats.get("loaded_sources") or 0) > 0, "meta stats has no loaded sources")
 
-    public_meta = _json_request(_url(base_url, "/api/v1/public/meta"), timeout=timeout, context=context)
+    public_meta = _json_request(
+        _url(base_url, "/api/v1/public/meta"),
+        timeout=timeout,
+        context=context,
+    )
     _require(public_meta.get("mode") == "public_safe", "public meta mode is not public_safe")
 
     signals = _json_request(_url(base_url, "/api/v1/signals/"), timeout=timeout, context=context)
@@ -189,19 +247,55 @@ def run_smoke(
             "production signal list includes registered-only signals: "
             + ", ".join(str(item) for item in registered_only[:5]),
         )
+    else:
+        materialized_count = int(ready.get("materialized_signal_count") or 0)
+        _require(
+            len(signal_items) >= materialized_count,
+            "signal catalog is smaller than the materialized signal inventory",
+        )
+        invalid_states = [
+            item.get("id")
+            for item in signal_items
+            if item.get("materialization_state") not in {"materialized", "registered_only"}
+        ]
+        _require(not invalid_states, "signal catalog contains invalid materialization states")
+        fabricated_confidence = [
+            item.get("id")
+            for item in signal_items
+            if item.get("materialization_state") == "registered_only"
+            and item.get("confidence_index") is not None
+        ]
+        _require(
+            not fabricated_confidence,
+            "registered-only signals contain fabricated confidence values",
+        )
 
-    case_id, entity_id = _case_and_entity_checks(base_url, timeout=timeout, context=context)
+    case_id, entity_id = _case_and_entity_checks(
+        base_url,
+        signal_items=signal_items,
+        timeout=timeout,
+        context=context,
+    )
+    prioritized_case_id = _anomaly_checks(
+        base_url,
+        timeout=timeout,
+        context=context,
+    )
 
     if not skip_frontend:
         html = _text_request(_url(base_url, "/"), timeout=timeout, context=context)
         _require("<html" in html.lower(), "frontend root did not return HTML")
-        _require("/assets/" in html or "type=\"module\"" in html, "frontend shell has no asset entry")
+        _require(
+            "/assets/" in html or "type=\"module\"" in html,
+            "frontend shell has no asset entry",
+        )
 
     return {
         "base_url": base_url,
         "signal_count": len(signal_items),
         "last_signal_run_id": signals.get("last_run_id"),
         "case_id": case_id,
+        "prioritized_case_id": prioritized_case_id,
         "entity_id": entity_id,
         "loaded_sources": stats.get("loaded_sources"),
         "lake_ops_run_id": operations.get("run_id"),

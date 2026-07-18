@@ -47,6 +47,7 @@ export interface SignalSummary {
   lastSeen?: string | null;
   materialized?: boolean;
   materializationState?: "materialized" | "registered_only";
+  sourcesRequired?: string[];
 }
 
 export interface SignalDetail {
@@ -68,6 +69,20 @@ export interface SignalDetail {
     identity: number;
     traceability: number;
     corroboration: number;
+    entityId?: string;
+    entityKey?: string;
+    scopeKey?: string | null;
+    observedAt?: string | null;
+    evidenceItems?: {
+      itemId: string;
+      sourceId?: string | null;
+      recordId?: string | null;
+      url?: string | null;
+      label?: string | null;
+      observedAt?: string | null;
+      identityMatchType?: string | null;
+      selector?: string | null;
+    }[];
   }[];
 }
 

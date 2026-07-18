@@ -21,6 +21,7 @@ LAKE_REALITY_ARGS = $(if $(DATASET),--dataset $(DATASET),) \
 	clean-data \
 	lint type-check format \
 	test test-api test-etl test-frontend check \
+	mvp-check \
 	lake-init lake-reality lake-compact curated-contracts api-smoke backend-ready \
 	lake-backup lake-backup-verify lake-backup-restore \
 	prod-smoke \
@@ -83,6 +84,14 @@ test-frontend:
 test: test-api test-etl test-frontend
 
 check: lint type-check test
+
+mvp-check: check
+	cd frontend && VITE_ALLOW_FIXTURES=false npm run build
+	python3 scripts/check_doc_links.py
+	DOMAIN=coacc.example.com JWT_SECRET_KEY=0123456789abcdef0123456789abcdef \
+		docker compose -f infra/docker/docker-compose.prod.yml config >/dev/null
+	$(MAKE) api-smoke
+	git diff --check
 
 # ---------------------------------------------------------------------------
 # Lake / ingest (post-Wave-4 architecture)

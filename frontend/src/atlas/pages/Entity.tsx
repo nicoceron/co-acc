@@ -1,4 +1,4 @@
-import { ArrowLeft, FileText, Network } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileText, Network } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 import type { EntityDetail } from "@/api/client";
@@ -230,6 +230,19 @@ export function EntityPage() {
                   <strong>{bundle.title}</strong>
                   <span>{bundle.relation_summary || bundle.description || bundle.reference || bundle.bundle_type}</span>
                   <span>{bundle.source || bundle.document_kinds.join(" · ") || `${bundle.document_count} docs`}</span>
+                  {bundle.documents.map((document) => (
+                    <span key={document.id}>
+                      {document.url ? (
+                        <a href={document.url} target="_blank" rel="noreferrer">
+                          {document.title} <ExternalLink size={12} />
+                        </a>
+                      ) : document.title}
+                      {" · "}{document.source || "fuente no atribuida"}
+                      {" · "}{document.uploaded_at?.slice(0, 10) || "fecha no disponible"}
+                      {" · "}{document.identity_match_type || "enlace no especificado"}
+                      {" · "}{document.row_selector || document.file_selector || "selector no disponible"}
+                    </span>
+                  ))}
                 </div>
               </article>
             ))}
@@ -255,7 +268,13 @@ export function EntityPage() {
                   <span className="co-mono">{signal.signal_id}</span>
                 </div>
                 <h3>{signal.title}</h3>
-                <p>{signal.evidence_count} evidencias · score {signal.score.toFixed(2)}</p>
+                <p>
+                  confianza {signal.confidence_index.toFixed(1)}% · riesgo {signal.score.toFixed(2)}
+                  {" · "}{signal.evidence_count} evidencias
+                </p>
+                <span className="co-row-sub">
+                  {signal.last_seen_at?.slice(0, 10) || "fecha no disponible"}
+                </span>
               </Link>
             ))}
           </div>

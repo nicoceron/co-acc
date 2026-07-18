@@ -57,6 +57,15 @@ def _clean_identifier(raw: str) -> str:
     return re.sub(r"[.\-/]", "", raw)
 
 
+def _display_identifier(raw: str) -> str:
+    value = raw.strip()
+    if ":" in value:
+        prefix, suffix = value.split(":", 1)
+        if prefix in {"doc", "company", "buyer", "person"}:
+            value = suffix
+    return _clean_identifier(value)
+
+
 def _is_pep(properties: dict[str, Any]) -> bool:
     role = str(properties.get("role", "")).lower()
     return any(keyword in role for keyword in PEP_ROLES)
@@ -286,7 +295,11 @@ async def get_entity_anomaly_scores(
         if lake_entity is not None:
             labels = [lake_entity.entity_label] if lake_entity.entity_label else []
             enforce_person_access_policy(labels)
-        return EntityAnomalyScoresResponse(entity_id=entity_id, total=total, scores=scores)
+        return EntityAnomalyScoresResponse(
+            entity_id=_display_identifier(entity_id),
+            total=total,
+            scores=scores,
+        )
 
     if session is None:
         raise HTTPException(status_code=404, detail="Entity not found")
@@ -295,7 +308,11 @@ async def get_entity_anomaly_scores(
     if record is None:
         raise HTTPException(status_code=404, detail="Entity not found")
     enforce_person_access_policy(record["entity_labels"])
-    return EntityAnomalyScoresResponse(entity_id=entity_id, total=total, scores=scores)
+    return EntityAnomalyScoresResponse(
+        entity_id=_display_identifier(entity_id),
+        total=total,
+        scores=scores,
+    )
 
 
 @router.post("/{entity_id}/signals/refresh", response_model=EntitySignalsResponse)

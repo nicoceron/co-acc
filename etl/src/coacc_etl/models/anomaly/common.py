@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import shutil
+import subprocess
 import uuid
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, cast
@@ -26,6 +28,7 @@ FEATURE_NAMES = (
     "single_bidder",
 )
 LABEL_COLUMN = "prior_sanction_supplier"
+SUPPLIER_HOLDOUT_PREFIXES = ("0", "1", "2")
 
 _RUN_ID_SAFE = re.compile(r"[^A-Za-z0-9_.=-]+")
 
@@ -69,6 +72,45 @@ def current_manifest_path() -> Path:
 def feature_schema_hash() -> str:
     payload = json.dumps(FEATURE_NAMES, separators=(",", ":"), sort_keys=True)
     return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def artifact_tree_hash(path: Path) -> str:
+    digest = hashlib.sha256()
+    files = sorted(item for item in path.rglob("*") if item.is_file())
+    for item in files:
+        digest.update(str(item.relative_to(path)).encode("utf-8"))
+        with item.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+    return "sha256:" + digest.hexdigest()
+
+
+def code_state() -> tuple[str, bool]:
+    override = os.environ.get("COACC_CODE_COMMIT", "").strip()
+    try:
+        root = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        commit = override or subprocess.run(
+            ["git", "-C", root, "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        dirty = bool(
+            subprocess.run(
+                ["git", "-C", root, "status", "--porcelain"],
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return override or "unknown", True
+    return commit or "unknown", dirty
 
 
 def replace_dir(tmp: Path, out: Path) -> None:

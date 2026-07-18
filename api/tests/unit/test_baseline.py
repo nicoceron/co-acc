@@ -187,7 +187,7 @@ async def test_baseline_reads_lake_procurement_awards_when_neo4j_is_connected(
     sector = next(
         item for item in payload["comparisons"] if item["comparison_dimension"] == "sector"
     )
-    assert sector["company_id"] == "company:9001234568"
+    assert sector["company_id"] == "9001234568"
     assert sector["company_name"] == "Proveedor Baseline SAS"
     assert sector["company_document_id"] == "9001234568"
     assert sector["comparison_key"] == "Salud"

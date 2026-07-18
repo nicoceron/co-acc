@@ -25,6 +25,7 @@ from coacc.models.signal import (
     SignalListItem,
 )
 from coacc.services import dependency_registry, lakehouse_query, lakehouse_signal_service
+from coacc.services.lakehouse_entity_service import resolvable_lake_company_identifiers
 from coacc.services.neo4j_service import execute_query, execute_query_single
 from coacc.services.signal_registry import (
     get_signal_definition,
@@ -1173,9 +1174,17 @@ async def get_signal_samples(
             logger.exception("Failed to load Neo4j signal samples; using curated samples only")
     if len(hits) < limit:
         existing_hit_ids = {hit.hit_id for hit in hits}
-        lake_samples = lakehouse_signal_service.materialized_signal_samples(
+        lake_candidates = lakehouse_signal_service.materialized_signal_samples(
             canonical_signal_id,
-            limit - len(hits),
+            max(limit - len(hits), (limit - len(hits)) * 25),
+        )
+        resolvable = resolvable_lake_company_identifiers(
+            [hit.entity_key for hit in lake_candidates]
+        )
+        lake_samples = (
+            [hit for hit in lake_candidates if hit.entity_key in resolvable]
+            if resolvable is not None
+            else lake_candidates
         )
         fallback_samples = (
             _curated_signal_samples(canonical_signal_id, limit - len(hits))

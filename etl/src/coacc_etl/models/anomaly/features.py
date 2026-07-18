@@ -10,6 +10,7 @@ from coacc_etl.lakehouse import reader
 from coacc_etl.lakehouse.paths import lake_root
 from coacc_etl.models.anomaly.common import (
     AnomalyModelError,
+    artifact_tree_hash,
     clean_run_id,
     curated_partition,
     feature_schema_hash,
@@ -31,6 +32,7 @@ class AnomalyFeatureBuildResult:
     rows: int
     manifest_path: str
     built_at: str
+    snapshot_hash: str
 
 
 def _table_glob(table: str) -> str:
@@ -312,6 +314,7 @@ def build_anomaly_features(run_id: str | None = None) -> AnomalyFeatureBuildResu
         con.close()
     if rows == 0:
         raise AnomalyModelError("anomaly feature builder produced zero rows")
+    snapshot_hash = artifact_tree_hash(feature_path)
 
     manifest_path = lake_root() / "meta" / "anomaly_features" / f"{safe_run_id}.json"
     write_json(
@@ -322,6 +325,7 @@ def build_anomaly_features(run_id: str | None = None) -> AnomalyFeatureBuildResu
             "feature_path": str(feature_path),
             "rows": rows,
             "feature_schema_hash": feature_schema_hash(),
+            "data_snapshot_hash": snapshot_hash,
             "sources": [
                 "fct_procurement_contract_awards",
                 "signal_feature_procurement_sanctioned_supplier_awarded",
@@ -339,4 +343,5 @@ def build_anomaly_features(run_id: str | None = None) -> AnomalyFeatureBuildResu
         rows=rows,
         manifest_path=str(manifest_path),
         built_at=built_at,
+        snapshot_hash=snapshot_hash,
     )

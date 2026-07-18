@@ -113,5 +113,6 @@ API summaries, entity details, signal hits, evidence bundles, and chart data.
 It must not fetch raw source datasets or depend on fixture fallback when
 `VITE_ALLOW_FIXTURES=false`.
 
-Keep `COACC_SIGNALS_REQUIRE_MATERIALIZED=true` for production until additional
-signal materializers are implemented and verified.
+Keep `COACC_SIGNALS_REQUIRE_MATERIALIZED=false` for the contest MVP. Definitions
+without hit parquet must remain visible as `registered_only` with no confidence
+or evidence value.

@@ -14,12 +14,8 @@ cd etl && COACC_LAKE_ROOT=../lake uv run coacc-etl model train anomaly
 This command:
 
 - builds `lake/curated/anomaly_features/run_id=<run>/part-00000.parquet`
-- trains an Isolation Forest model from a deterministic bounded sample
-- trains a supervised `HistGradientBoostingClassifier` top-up when
-  sanctioned-supplier weak labels have both positive and negative examples
+- trains one Isolation Forest from a deterministic, supplier-disjoint bounded sample
 - writes `lake/models/anomaly/<run>/iforest.joblib`
-- writes `lake/models/anomaly/<run>/supervised_hgb.joblib` when the top-up is
-  enabled
 - scores every feature row in batches to
   `lake/curated/anomaly_scores/run_id=<run>/`
 - writes `lake/models/anomaly/<run>/metrics.json`
@@ -78,12 +74,12 @@ cd etl && COACC_LAKE_ROOT=../lake uv run coacc-etl model promote anomaly <run-id
 
 ## Current Scope
 
-The current model combines an unsupervised Isolation Forest baseline with a
-supervised histogram-gradient-boosting top-up. It uses the curated contract
-award fact table plus PACO-backed sanctioned-supplier signal features for weak
-labels and evaluation. `prior_sanction_supplier` is retained in feature and
-score parquet for auditability, but it is excluded from the model input feature
-tuple to avoid label leakage.
+The MVP model is one unsupervised Isolation Forest. It uses the curated contract
+award fact table plus PACO-backed sanctioned-supplier signal features only for
+weak-label evaluation. `prior_sanction_supplier` is retained in feature and
+score parquet for auditability, but it is excluded from the model input tuple.
+The deterministic holdout hashes `entity_uid`, so complete suppliers are kept
+out of the training sample when canonical identity is available.
 
 `single_bidder` is derived from `secop_offers` / `wi7w-2nvm` when that raw
 source exists in the lake. The builder counts distinct effective offers by
@@ -92,18 +88,11 @@ offers data keep the flag false. Score consumers should treat
 `score_confidence=low` as a cold-start flag for suppliers with fewer than five
 prior contracts.
 
-## Local Smoke
+The metrics manifest records evaluated rows, weak-label positives, base rate,
+precision at 100 and 1,000, average precision, ROC AUC, the random-ranking
+expectation, and the supplier-disjoint holdout metrics. These are prioritization
+diagnostics, not validation of corruption detection.
 
-On 2026-06-01, the local command:
-
-```bash
-cd etl && COACC_LAKE_ROOT=../lake uv run coacc-etl model train anomaly \
-  --run-id phase13-supervised-smoke-20260601 \
-  --max-training-rows 200000 \
-  --batch-size 250000
-```
-
-trained on 200,000 sampled feature rows and scored 5,442,058 contracts. The
-label-derived evaluation found 12,376 sanctioned-supplier positives,
-`precision_at_100=0.68`, and `holdout_precision_at_100=0.67` across 1,019,896
-holdout-scored rows. This clears the Phase 13 supervised precision target.
+The frozen contest run is `mvp-iforest-20260713` (seed 42, 5,000 training rows,
+5,442,058 scored rows). Its exact metrics and claim limitations are recorded in
+the [model card](../ai/anomaly_model.md).

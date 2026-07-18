@@ -41,6 +41,20 @@ def _score_glob(run_id: str) -> str:
     return str(_score_partition(run_id) / "*.parquet")
 
 
+def _feature_glob(run: LakeAnomalyRun) -> str | None:
+    if not run.feature_run_id:
+        return None
+    partition = (
+        lakehouse_query.lake_root()
+        / "curated"
+        / "anomaly_features"
+        / f"run_id={run.feature_run_id}"
+    )
+    if not partition.exists() or not any(partition.glob("*.parquet")):
+        return None
+    return str(partition / "*.parquet")
+
+
 def anomaly_case_id(contract_id: str) -> str:
     token = base64.urlsafe_b64encode(contract_id.encode("utf-8")).decode("ascii").rstrip("=")
     return f"{ANOMALY_CASE_PREFIX}{token}"
@@ -115,7 +129,7 @@ def current_anomaly_run() -> LakeAnomalyRun | None:
 
 
 def _deduped_scores_sql(run: LakeAnomalyRun) -> str:
-    return f"""
+    scores_sql = f"""
         SELECT *
         FROM (
             SELECT
@@ -131,6 +145,39 @@ def _deduped_scores_sql(run: LakeAnomalyRun) -> str:
             WHERE contract_id IS NOT NULL
         )
         WHERE __score_rank = 1
+    """
+    feature_glob = _feature_glob(run)
+    if feature_glob is None:
+        return scores_sql
+    return f"""
+        WITH scores AS ({scores_sql}),
+        features AS (
+            SELECT *
+            FROM (
+                SELECT
+                    *,
+                    row_number() OVER (
+                        PARTITION BY contract_id
+                        ORDER BY built_at DESC NULLS LAST, contract_id
+                    ) AS __feature_rank
+                FROM read_parquet({_sql_string(feature_glob)})
+                WHERE contract_id IS NOT NULL
+            )
+            WHERE __feature_rank = 1
+        )
+        SELECT
+            scores.*,
+            features.contract_reference,
+            features.supplier_name,
+            features.supplier_nit_base AS supplier_document_id,
+            features.buyer_name,
+            features.buyer_document_id,
+            features.contract_value,
+            features.signing_date,
+            features.source_id,
+            features.process_url AS feature_process_url
+        FROM scores
+        LEFT JOIN features USING (contract_id)
     """
 
 
@@ -154,15 +201,42 @@ def _optional_str(value: object) -> str | None:
     return text or None
 
 
+def _supplier_document_id(row: dict[str, Any]) -> str | None:
+    explicit = _optional_str(row.get("supplier_document_id"))
+    if explicit:
+        return explicit
+    entity_uid = _optional_str(row.get("entity_uid"))
+    if entity_uid and ":" in entity_uid:
+        candidate = entity_uid.split(":", 1)[1].strip()
+        if candidate.isdigit():
+            return candidate
+    return None
+
+
 def _score_from_row(row: dict[str, Any], run: LakeAnomalyRun) -> CaseAnomalyScore:
     return CaseAnomalyScore(
         contract_id=str(row["contract_id"]),
+        contract_reference=_optional_str(row.get("contract_reference")),
         entity_uid=str(row.get("entity_uid") or ""),
+        supplier_name=_optional_str(row.get("supplier_name")),
+        supplier_document_id=_supplier_document_id(row),
+        buyer_name=_optional_str(row.get("buyer_name")),
+        buyer_document_id=_optional_str(row.get("buyer_document_id")),
+        contract_value=(
+            float(row["contract_value"])
+            if row.get("contract_value") is not None
+            else None
+        ),
+        signing_date=_optional_str(row.get("signing_date")),
+        source_id=_optional_str(row.get("source_id")),
         score=float(row.get("score") or 0.0),
         score_confidence=str(row.get("score_confidence") or "unknown"),
         top_features=_normalize_list(row.get("top_features")),
         prior_sanction_supplier=bool(row.get("prior_sanction_supplier", False)),
-        process_url=_optional_str(row.get("process_url")),
+        process_url=(
+            _optional_str(row.get("process_url"))
+            or _optional_str(row.get("feature_process_url"))
+        ),
         score_run_id=str(row.get("run_id") or run.score_run_id),
         model_run_id=_optional_str(row.get("model_run_id")) or run.model_run_id,
         feature_run_id=_optional_str(row.get("feature_run_id")) or run.feature_run_id,

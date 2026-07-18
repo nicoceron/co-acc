@@ -37,7 +37,7 @@ Never commit `.env`.
 | `COACC_PROD_SMOKE_SKIP` | `false` | Skip production smoke and fall back to `/health` only. |
 | `COACC_PROD_SMOKE_SKIP_FRONTEND` | `false` | Skip frontend root HTML smoke. |
 | `COACC_PROD_SMOKE_REQUIRE_OPS` | `true` | Require healthy `/api/v1/meta/operations` in production smoke. |
-| `COACC_PROD_SMOKE_REQUIRE_MATERIALIZED_ONLY` | `true` | Require the signal list to expose only materialized signals in production smoke. |
+| `COACC_PROD_SMOKE_REQUIRE_MATERIALIZED_ONLY` | `false` | Legacy compatibility check. The MVP keeps this false so registered-only definitions remain visible. |
 
 ## External APIs
 
@@ -53,6 +53,7 @@ Never commit `.env`.
 
 | Variable | Default | Purpose |
 |---|---:|---|
+| `NEO4J_ENABLED` | `true` locally, `false` in production compose | Disable all Neo4j connection attempts for the lake-only MVP launch path. |
 | `NEO4J_REQUIRED` | `false` | When `true`, API startup fails if Neo4j is unavailable. When `false`, lake-backed health, meta, signal, search, entity, context, baseline, and public graph routes can still run; legacy Cypher-only routes remain graph-dependent. |
 | `API_PORT` | `8000` | Host port for the API service in dev compose and the local Vite proxy target. |
 | `FRONTEND_PORT` | `3000` | Host port for the frontend service in dev compose. Use `3100` when another local dev server already owns `3000`. |
@@ -65,12 +66,12 @@ Never commit `.env`.
 | `COACC_REQUIRE_LAKE_ASSETS` | `false` | When `true`, `/ready` fails if required lake, registry, catalog, contract, or materialized signal-run assets are missing. Production compose sets this to `true`. |
 | `COACC_READY_MIN_LOADED_SOURCES` | `0` | Optional minimum loaded source count for `/ready`. Production compose defaults this to `1` so an empty mounted lake is not considered ready. |
 | `COACC_READY_MAX_LAKE_OPS_AGE_HOURS` | `0` locally, `48` in production compose | When greater than zero, `/ready` requires `lake/meta/operations/latest.json` to show a successful lake ops run newer than this age. |
-| `COACC_SIGNALS_REQUIRE_MATERIALIZED` | `false` locally, `true` in production compose | When `true`, public `/api/v1/signals/` responses hide registered-only signals and expose only signals backed by the latest lake/graph materialization. |
+| `COACC_SIGNALS_REQUIRE_MATERIALIZED` | `false` | Must remain false for the MVP so the public catalog exposes every registered definition. |
 
 `/health` is a liveness endpoint. `/ready` is the production readiness
 endpoint; it reports config, catalog, contract, lake directory, latest
-materialized signal run, materialized parquet, recent lake ops status when
-configured, and Neo4j availability checks.
+materialized signal run, evidence parquet, promoted pure Isolation Forest,
+artifact ages, recent lake ops status when configured, and optional Neo4j state.
 In `dev`, `test`, and `local` environments missing lake assets are warnings
 unless `COACC_REQUIRE_LAKE_ASSETS=true`. In production, readiness is strict.
 

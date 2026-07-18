@@ -78,6 +78,10 @@ class EvidenceTrailDocument(BaseModel):
     extension: str | None = None
     uploaded_at: str | None = None
     source: str | None = None
+    record_id: str | None = None
+    identity_match_type: str | None = None
+    row_selector: str | None = None
+    file_selector: str | None = None
 
 
 class EvidenceTrailParty(BaseModel):

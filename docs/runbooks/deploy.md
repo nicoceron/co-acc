@@ -11,7 +11,6 @@ On the production host:
 ```bash
 DOMAIN=coacc.example.com \
 JWT_SECRET_KEY=replace-with-prod-secret \
-NEO4J_PASSWORD=replace-with-prod-secret \
 infra/scripts/deploy.sh
 ```
 
@@ -23,6 +22,8 @@ The script checks:
 - `/api/v1/meta/stats`
 - `/api/v1/public/meta`
 - `/api/v1/signals/`
+- the complete signal catalog, including honest `registered_only` states
+- the promoted pure Isolation Forest run
 - one lake-backed case, entity, entity-signal, and case-detail path
 - frontend root HTML
 
@@ -54,7 +55,7 @@ python3 scripts/production_smoke.py --base-url http://localhost:8000 --skip-fron
 | `COACC_PROD_SMOKE_SKIP` | `false` | Skip production smoke and fall back to `/health` only. Use only during emergency recovery. |
 | `COACC_PROD_SMOKE_SKIP_FRONTEND` | `false` | Skip root HTML check. |
 | `COACC_PROD_SMOKE_REQUIRE_OPS` | `true` | Require `/api/v1/meta/operations` to be healthy. |
-| `COACC_PROD_SMOKE_REQUIRE_MATERIALIZED_ONLY` | `true` | Require the signal catalog to expose only materialized signals. |
+| `COACC_PROD_SMOKE_REQUIRE_MATERIALIZED_ONLY` | `false` | Legacy compatibility check. Keep false for the complete MVP catalog. |
 
 ## Failure
 
@@ -63,6 +64,5 @@ nonzero. The most common failure modes are:
 
 - `/ready` fails because the durable lake or config mounts are missing.
 - `lake/meta/operations/latest.json` is missing, failed, or stale.
-- `COACC_SIGNALS_REQUIRE_MATERIALIZED=true` is not set while registered-only
-  signals are exposed.
+- the promoted Isolation Forest or complete signal catalog is missing.
 - The frontend proxy route is not serving `/`.

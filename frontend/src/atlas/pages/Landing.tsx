@@ -1,61 +1,15 @@
-import { ArrowRight, Database, FileText, Network, Search } from "lucide-react";
+import { ArrowRight, Database, Gauge, Search, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
-import { AtlasMap, BarChart } from "../components/visuals";
-import { DataStatus, EmptyState, Eyebrow, Frame, MetricTile, MiniBar, Pill, Rule, Sparkline } from "../components/ui";
-import { atlasFixture, type FeedItem } from "../data/prototype";
-import { formatNumber, toPercent } from "../lib/format";
+import { DataStatus, Eyebrow, Frame, MetricTile, Pill, Rule } from "../components/ui";
 import { useAtlasOverview } from "../lib/useAtlasData";
 
-function FeedTicker({ feed }: { feed: FeedItem[] }) {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    if (!feed.length) return undefined;
-    const timer = window.setInterval(() => setIndex((value) => (value + 1) % feed.length), 2400);
-    return () => window.clearInterval(timer);
-  }, [feed.length]);
-
-  const item = feed[index] ?? feed[0];
-  if (!item) {
-    return (
-      <div className="co-feed-ticker">
-        <span>lake</span>
-        <em>live</em>
-        <strong>Sin hits materializados</strong>
-        <span>esperando corrida de senales</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="co-feed-ticker" key={`${item.signal}-${index}`}>
-      <span>{item.t}</span>
-      <em>{item.signal}</em>
-      <strong>{item.entity}</strong>
-      <span>{item.note}</span>
-    </div>
-  );
-}
-
-function Pillar({
-  icon,
-  n,
-  title,
-  body,
-}: {
-  icon: ReactNode;
-  n: string;
-  title: string;
-  body: string;
-}) {
+function Pillar({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
   return (
     <article className="co-pillar">
       <span>{icon}</span>
       <div>
-        <em>{n}</em>
         <h3>{title}</h3>
         <p>{body}</p>
       </div>
@@ -63,190 +17,109 @@ function Pillar({
   );
 }
 
+function displayDate(value?: string | null): string {
+  if (!value) return "no disponible";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value.slice(0, 10);
+  return new Intl.DateTimeFormat("es-CO", {
+    dateStyle: "medium",
+    timeZone: "America/Bogota",
+  }).format(parsed);
+}
+
 export function Landing() {
   const { data, status } = useAtlasOverview();
-  const fixtureMode = status === "fixture";
-  const sectorBars = useMemo(() => {
-    return data.sectors
-      .map((sector) => ({
-        label: sector.label,
-        value: sector.hits,
-        display: `${formatNumber(sector.hits)} hits`,
-        color: sector.accent,
-      }))
-      .sort((a, b) => b.value - a.value);
-  }, [data.sectors]);
+  const materialized = data.signals.filter((signal) => signal.materialized).length;
 
   return (
     <main>
       <section className="co-container co-hero">
         <div className="co-hero__copy">
-          <Rule accent>Atlas abierto · Colombia · {data.metrics.sources} fuentes</Rule>
-          <h1>
-            Los datos publicos de Colombia, cartografiados.
-          </h1>
+          <Rule accent>Contratación pública · Colombia · datos abiertos</Rule>
+          <h1>Riesgos documentales que cualquiera puede verificar.</h1>
           <p>
-            Un atlas vivo de registros oficiales cruzados en un grafo de identidad:
-            contratacion, sanciones, declaraciones, regalias y evidencia documental.
+            co/acc cruza registros públicos, muestra patrones de riesgo con su evidencia y
+            prioriza contratos inusuales para revisión humana.
           </p>
           <div className="co-action-row">
-            <Link className="co-button co-button--primary" to="/app">
-              Abrir observatorio
+            <Link className="co-button co-button--primary" to="/app/patterns">
+              Ver patrones
               <ArrowRight size={16} />
             </Link>
-            <Link className="co-button" to="/casos">Ver casos</Link>
-            <Pill tone="accent">AGPL v3</Pill>
-          </div>
-          <Frame className="co-live-strip">
-            <Pill tone="accent">senal en vivo</Pill>
-            <FeedTicker feed={data.feed} />
-            <Link className="co-button co-button--ghost" to="/app">ver todo</Link>
-          </Frame>
-        </div>
-
-        <Frame coord="MAPA · L-01" className="co-hero__map">
-          <div className="co-frame-title">
-            <div>
-              <h2>Hits por departamento</h2>
-              <span>ultimas 24h · severidad cartografica</span>
-            </div>
+            <Link className="co-button" to="/app/signals">Ver señales</Link>
             <DataStatus status={status} />
           </div>
-          <AtlasMap departamentos={data.departamentos} height={460} />
-          <div className="co-legend">
-            <span><i className="low" /> bajo</span>
-            <span><i className="medium" /> medio</span>
-            <span><i className="high" /> alto</span>
-            <span><i className="critical" /> critico</span>
+        </div>
+
+        <Frame coord="ALCANCE · MVP-01" className="co-hero__map">
+          <Eyebrow accent>Problema y respuesta</Eyebrow>
+          <h2>Los registros oficiales están fragmentados.</h2>
+          <p>
+            El lago de datos normaliza fuentes ya operativas y materializa cruces
+            reproducibles. Cada hit conserva su fuente, fecha, selector y calidad de enlace.
+          </p>
+          <div className="co-spec-list">
+            <span><strong>definiciones</strong>{data.signals.length || "—"}</span>
+            <span><strong>materializadas</strong>{materialized || "—"}</span>
+            <span><strong>fuentes reportadas</strong>{data.metrics.sources || "—"}</span>
           </div>
         </Frame>
       </section>
 
       <section className="co-container co-metrics-band">
-        <Rule>Indicadores del grafo</Rule>
-        <div className="co-metrics-grid">
-          <MetricTile
-            label="Registros indexados"
-            value={data.metrics.records}
-            sub={fixtureMode ? "+184k esta semana" : "documentos en lago"}
-            spark={data.seriesHits}
-          />
-          <MetricTile
-            label="Nodos en grafo"
-            value={data.metrics.nodes}
-            sub="personas, empresas, contratos"
-            spark={data.seriesHits.map((value) => value * 0.7)}
-          />
-          <MetricTile
-            label="Senales activas"
-            value={data.metrics.signals}
-            sub="todas · confianza indexada"
-            spark={data.seriesHits.map((value, index) => value * 0.5 + index)}
-          />
-          <MetricTile label="Fuentes operativas" value={data.metrics.sources} sub="watermark y cobertura" spark={data.seriesSourcesOk} />
+        <Rule>Estado de actualización</Rule>
+        <div className="co-metrics-grid co-metrics-grid--compact">
+          <MetricTile label="datos" value={displayDate(data.refreshes.data)} sub="última operación del lago" />
+          <MetricTile label="señales" value={displayDate(data.refreshes.signals)} sub="última materialización" />
+          <MetricTile label="modelo" value={displayDate(data.refreshes.model)} sub="último scoring por lotes" />
+          <MetricTile label="estado" value={status} sub="sin sustitución por fixtures" />
         </div>
       </section>
 
       <section className="co-container co-two-col">
         <div>
-          <Eyebrow accent>Que es</Eyebrow>
-          <h2>Un grafo de evidencia. No un oraculo.</h2>
+          <Eyebrow accent>Recorrido mínimo</Eyebrow>
+          <h2>De la señal a la fuente oficial.</h2>
+          <p className="co-muted">
+            Confianza documental y fuerza de riesgo son conceptos distintos. Ninguno prueba
+            corrupción ni reemplaza una investigación.
+          </p>
         </div>
         <div className="co-pillars">
           <Pillar
             icon={<Database size={19} />}
-            n="01"
-            title="Lago abierto"
-            body="Fuentes oficiales normalizadas en un lago columnar particionado por fecha y fuente."
+            title="Catálogo completo"
+            body="Todas las definiciones registradas aparecen, incluso cuando aún no tienen hits."
           />
           <Pillar
-            icon={<Network size={19} />}
-            n="02"
-            title="Identidad enlazada"
-            body="Personas, empresas, contratos, sanciones y declaraciones unidos por un grafo versionado."
+            icon={<Gauge size={19} />}
+            title="Confianza explicada"
+            body="Identidad, trazabilidad y corroboración forman un índice documental de 0 a 100."
           />
           <Pillar
             icon={<Search size={19} />}
-            n="03"
-            title="Senales reproducibles"
-            body="Patrones materializados con evidencia, score, fuente y fecha de observacion."
+            title="Evidencia verificable"
+            body="Empresas, contratos, fechas, identificadores y enlaces oficiales permanecen unidos."
           />
           <Pillar
-            icon={<FileText size={19} />}
-            n="04"
-            title="Public safe"
-            body="La superficie publica conserva contexto documental y reduce exposicion innecesaria."
+            icon={<ShieldCheck size={19} />}
+            title="Señales, no acusaciones"
+            body="El resultado prioriza revisión; no determina culpabilidad ni legalidad."
           />
-        </div>
-      </section>
-
-      <section className="co-container co-two-col">
-        <div>
-          <Eyebrow accent>Sectores</Eyebrow>
-          <h2>Cobertura por sector.</h2>
-          <p className="co-muted">Distribucion de senales materializadas por sector y entidades asociadas.</p>
-          <Link className="co-button" to="/sectores">
-            Explorar sectores
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-        <Frame coord="SECTORES · S-01">
-          <BarChart items={sectorBars} />
-        </Frame>
-      </section>
-
-      <section className="co-container co-two-col">
-        <div>
-          <Eyebrow accent>Fuentes</Eyebrow>
-          <h2>Registros oficiales, cruzados.</h2>
-          <p className="co-muted">Watermark, hash documental y cobertura operativa por fuente.</p>
-        </div>
-        <div className="co-table-wrap">
-          <table className="co-table">
-            <thead>
-              <tr>
-                <th>codigo</th>
-                <th>fuente</th>
-                <th>descripcion</th>
-                <th>cobertura</th>
-                <th>estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.sources.map((source) => (
-                <tr key={source.code}>
-                  <td className="co-mono">{source.code}</td>
-                  <td>{source.name}</td>
-                  <td>{source.desc}</td>
-                  <td>
-                    <div className="co-coverage">
-                      <MiniBar value={source.cov} color={source.cov > 0.75 ? "var(--coacc-moss)" : source.cov > 0.6 ? "var(--coacc-accent)" : "var(--coacc-coral)"} />
-                      <span>{toPercent(source.cov)}</span>
-                    </div>
-                  </td>
-                  <td className="co-num">{source.rows}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!data.sources.length ? (
-            <EmptyState title="Sin fuentes cargadas" body="La API no entrego fuentes operativas para esta vista." />
-          ) : null}
         </div>
       </section>
 
       <section className="co-container">
-        <Frame coord="CTA · Z-99" className="co-cta">
+        <Frame coord="NAVEGACIÓN · MVP-02" className="co-cta">
           <div>
-            <h2>Empieza por una entidad.</h2>
-            <p>Busca un NIT, una razon social o una persona y abre contratos, sanciones, senales y evidencia documental.</p>
+            <h2>Explora los datos vivos.</h2>
+            <p>La aplicación no muestra métricas de demostración cuando la API no responde.</p>
           </div>
           <div className="co-action-row">
-            <Link className="co-button co-button--primary" to="/app/search">
-              Buscar en el grafo
-              <Search size={16} />
-            </Link>
-            <Sparkline data={fixtureMode ? atlasFixture.seriesHits : data.seriesHits} width={140} />
+            <Link className="co-button" to="/app/search">Buscar empresa o NIT</Link>
+            <Link className="co-button" to="/priorizados">Contratos priorizados</Link>
+            <Link className="co-button" to="/metodologia">Metodología</Link>
+            <Pill tone="accent">contexto documental, no acusación</Pill>
           </div>
         </Frame>
       </section>

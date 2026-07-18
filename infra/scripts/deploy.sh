@@ -90,7 +90,7 @@ if [ "$DRY_RUN" = false ]; then
     if [ "${COACC_PROD_SMOKE_REQUIRE_OPS:-true}" != "true" ]; then
       SMOKE_ARGS+=("--no-require-ops")
     fi
-    if [ "${COACC_PROD_SMOKE_REQUIRE_MATERIALIZED_ONLY:-true}" != "true" ]; then
+    if [ "${COACC_PROD_SMOKE_REQUIRE_MATERIALIZED_ONLY:-false}" != "true" ]; then
       SMOKE_ARGS+=("--no-require-materialized-only")
     fi
     if [ "${COACC_PROD_SMOKE_SKIP:-false}" = "true" ]; then

@@ -19,36 +19,13 @@ services:
       - api
       - frontend
 
-  neo4j:
-    image: neo4j:5-community
-    restart: unless-stopped
-    environment:
-      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?NEO4J_PASSWORD is required}
-      NEO4J_PLUGINS: '["apoc"]'
-      NEO4J_server_memory_heap_initial__size: ${NEO4J_HEAP_INITIAL:-512m}
-      NEO4J_server_memory_heap_max__size: ${NEO4J_HEAP_MAX:-1G}
-      NEO4J_server_memory_pagecache_size: ${NEO4J_PAGECACHE:-512m}
-    volumes:
-      - neo4j-data:/data
-      - ../neo4j/import:/var/lib/neo4j/import
-      - ../neo4j/init.cypher:/var/lib/neo4j/init.cypher
-    networks:
-      - coacc
-    healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "${NEO4J_PASSWORD:?NEO4J_PASSWORD is required}", "RETURN 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   api:
     build: ../../api
     restart: unless-stopped
     environment:
       APP_ENV: ${APP_ENV:-production}
-      NEO4J_URI: bolt://neo4j:7687
-      NEO4J_USER: neo4j
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD:?NEO4J_PASSWORD is required}
-      NEO4J_REQUIRED: ${NEO4J_REQUIRED:-false}
+      NEO4J_ENABLED: "false"
+      NEO4J_REQUIRED: "false"
       COACC_CONFIG_DIR: /app/config
       COACC_DATASET_CATALOG_DIR: /app/docs/datasets
       COACC_DATASET_CONTRACT_DIR: /app/etl/datasets
@@ -57,7 +34,9 @@ services:
       COACC_REQUIRE_LAKE_ASSETS: "true"
       COACC_READY_MIN_LOADED_SOURCES: ${COACC_READY_MIN_LOADED_SOURCES:-1}
       COACC_READY_MAX_LAKE_OPS_AGE_HOURS: ${COACC_READY_MAX_LAKE_OPS_AGE_HOURS:-48}
-      COACC_SIGNALS_REQUIRE_MATERIALIZED: ${COACC_SIGNALS_REQUIRE_MATERIALIZED:-true}
+      COACC_SIGNALS_REQUIRE_MATERIALIZED: "false"
+      PUBLIC_MODE: "true"
+      PUBLIC_ALLOW_ENTITY_LOOKUP: "true"
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
       INVITE_CODE: ${INVITE_CODE:-}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://${DOMAIN:?DOMAIN is required}}
@@ -71,8 +50,6 @@ services:
       - ${COACC_HOST_LAKE_ROOT:-../../lake}:/app/lake:ro
     networks:
       - coacc
-    depends_on:
-      - neo4j
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')"]
       interval: 30s
@@ -133,6 +110,5 @@ networks:
     driver: bridge
 
 volumes:
-  neo4j-data:
   caddy-data:
   caddy-config:
